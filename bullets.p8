@@ -4,6 +4,66 @@ __lua__
 typ_plyr=0
 typ_blt=1
 
+function collide(o1,o2)
+ local hit=o1.x>=o2.x and o1.x<o2.x+o2.w
+ hit=hit and o1.y>=o2.y and o1.y<o2.y+o2.h
+ local hit2=o2.x>=o1.x and o2.x<o1.x+o1.w
+ hit2=hit2 and o2.y>=o1.y and o2.y<o1.y+o1.h
+ return hit or hit2
+end
+
+function get_hitbox_flags(x,y,w,h)
+ local f=0
+ local upd=function(x,y)
+  f=bor(f,fget(mget(flr(x/8),flr(y/8))))
+ end
+ upd(x,y)
+ upd(x,y+h)
+ upd(x+w,y+h)
+ upd(x+w,y)
+ return f
+end
+
+function get_colliders(o,typ)
+ local res={}
+ for o_ in all(objs) do
+  if o!=o_ and o_.typ==typ and collide(o,o_) then
+   add(res,o_)
+  end 
+ end
+ return res
+end
+
+objs={}
+
+function _init()
+ p1=player_ctr(32,32,0)
+ add(objs,p1)
+ p2=player_ctr(8,8,1)		
+ add(objs,p2)
+end
+
+function _update()
+ foreach(objs,function(obj)
+  obj.update(obj)
+ end)
+end
+
+function _draw()
+ cls()
+ map(0,0,0,0)
+ dbg_draw()
+ print("p1 "..tostr(p1.score),0,0)
+ print("p2 "..tostr(p2.score),0,8)
+ print("")
+ foreach(objs,function(obj)
+  obj.draw(obj)
+ end)
+end
+
+function dbg_draw()
+end
+-->8
 st_idle=0
 st_walking=1
 
@@ -12,10 +72,11 @@ function player_ctr(x,y,idx)
  typ=typ_plyr,
  x=x,y=y,
  idx=idx,
- w=7,h=7,
+ w=6,h=7,
  spr=0,
  flp_x=false,
  spd=2,
+ score=10,
  -- 0: idle, 1: walking
  state=st_idle,
 
@@ -46,7 +107,9 @@ function player_ctr(x,y,idx)
  
  if btnp(5,idx) then
   -- create a new bullet and add it to the objects of the game
-  add(objs,blt_ctr(this.x,this.y))
+  local nx=1
+  if (this.flp_x) nx=-1
+  add(objs,blt_ctr(this.x,this.y,nx))
   sfx(0)
  end
  
@@ -60,70 +123,33 @@ function player_ctr(x,y,idx)
 }
 end
 
-function collide(o1,o2)
- local hit=true
- hit=band(hit,o1.x>=o2.x and o1.x<=o2.x+o2.w)
- hit=band(hit,o1.y>=o2.y and oy.y<=o2.y+o2.h)
- local hit2=true
- hit2=band(hit2,o2.x>=o1.x and o2.x<=o1.x+o1.w)
- hit2=band(hit2,o2.y>=o1.y and o2.y<=o1.y+o1.h)
- return bor(hit,hit2) 
-end
-
-function get_hitbox_flags(x,y,w,h)
- local f=0
- local upd=function(x,y)
-  f=bor(f,fget(mget(flr(x/8),flr(y/8))))
- end
- upd(x,y)
- upd(x,y+h)
- upd(x+w,y+h)
- upd(x+w,y)
- return f
-end
-
-blt_ctr=function(x,y)
+-->8
+function blt_ctr(x,y,dx)
  local obj={
   typ=typ_blt,
-  x=x,y=y,
+  dx=dx,
+  x=x+(dx+1)/2*8-2,y=y,
   w=3,h=2,
   spr=16,
   update=function(this)
- this.x+=1
+ this.x+=this.dx
+ 
 end,
   draw=function(this)
   spr(this.spr,this.x,this.y)
+ for o in all(get_colliders(this,typ_plyr)) do
+  this.spr=17
+  o.score-=1
+ end
 end
 }
  return obj
 end
 
-objs={}
+-->8
+-- bullet collisions
+-- explosion with coroutine
 
-function _init()
- p1=player_ctr(32,32,0)
- add(objs,p1)
- p2=player_ctr(8,8,1)		
- add(objs,p2)
-end
-
-function _update()
- foreach(objs,function(obj)
-  obj.update(obj)
- end)
-end
-
-function _draw()
- cls()
- map(0,0,0,0)
- dbg_draw()
- foreach(objs,function(obj)
-  obj.draw(obj)
- end)
-end
-
-function dbg_draw()
-end
 __gfx__
 00000000055555000000000005555500055555500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000055ffff500555550055ffff5055ffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -137,9 +163,9 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00099000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-009aa900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00099000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+09900000066000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+9aa900006cc600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+09900000066000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 dddddddd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 dddddddd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
