@@ -2,14 +2,18 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 function _init()
+ printh(mget(3,3))
+ printh(mget(2,2))
  start=get_tile(17)
- printh(start)
+ local s_idx=vec_idx(start)
  goal=get_tile(16)
  
  frontier={}
- insert(frontier,start)
+ insert(frontier,start,0)
  came_from={}
- came_from[vec_idx(start)]="none"
+ came_from[s_idx]="none"
+ cost_so_far={}
+ cost_so_far[s_idx]=0
  
  while #frontier>0 do
   current=popend(frontier)
@@ -20,8 +24,12 @@ function _init()
   local neighbours=get_neighbours(current)
   for next in all(neighbours) do
    local idx=vec_idx(next)
-   if came_from[idx]==nil then
-    insert(frontier,next)
+
+   local new_cost=cost_so_far[vec_idx(current)]
+   if cost_so_far[idx]==nil or new_cost<cost_so_far[idx] then
+    cost_so_far[idx]=new_cost
+    local prio=new_cost+heuristic(goal,next)
+    insert(frontier,next,prio)
     came_from[idx]=current    
    end
    if idx!=vec_idx(start) and idx!=vec_idx(goal) then
@@ -33,7 +41,6 @@ function _init()
  current=came_from[vec_idx(goal)]
  path={}
  local c_idx=vec_idx(current)
- local s_idx=vec_idx(start)
  while c_idx!=s_idx do
   add(path,current)
   current=came_from[c_idx]
@@ -77,14 +84,30 @@ end
 function popend(t)
  local res=t[#t]
  del(t,res)
- return res
+ return res[1]
 end
 
-function insert(t,val)
- for i=(#t+1),2,-1 do
-  t[i]=t[i-1]
+-- manhattan distance
+function heuristic(a,b)
+ return abs(a[1]-b[1])+abs(a[2]-b[2])
+end
+
+function insert(t,val,p)
+ if #t>1 then
+  add(t,{})
+  for i=(#t),2,-1 do
+   local next=t[i-1]
+   if p<next[2] then
+    t[i]={val,p}
+    return
+   else
+    t[i]=next
+   end
+  end
+  t[1]={val,p}
+ else
+  add(t,{val,p})
  end
- t[1]=val
 end
 
 function reverse(t)
