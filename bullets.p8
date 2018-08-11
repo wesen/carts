@@ -4,12 +4,26 @@ __lua__
 typ_plyr=0
 typ_blt=1
 
+function print_o(name,o1,y)
+   print(name.." x "..tostr(o1.x).." y "..tostr(o1.y).." w "..tostr(o1.w).." h "..tostr(o1.h),0,y)
+end
+
 function collide(o1,o2)
- local hit=o1.x>=o2.x and o1.x<o2.x+o2.w
- hit=hit and o1.y>=o2.y and o1.y<o2.y+o2.h
- local hit2=o2.x>=o1.x and o2.x<o1.x+o1.w
- hit2=hit2 and o2.y>=o1.y and o2.y<o1.y+o1.h
- return hit or hit2
+ local hit=o1.x>=o2.x and o1.x<(o2.x+o2.w-1)
+ local h1=hit
+ hit=hit or o2.x>=o1.x and o2.x<(o1.x+o1.w-1)
+ local h2=o2.x>=o1.x and o2.x<(o1.x+o1.w-1)
+ local hit2=o1.y>=o2.y and o1.y<(o2.y+o2.h-1)
+ hit2=hit2 or o2.y>=o1.y and o2.y<(o1.y+o1.h-1)
+--[[if o2==p1 and o1.typ==typ_blt then
+   print_o("o1",o1,16)
+   print_o("o2",o2,24)
+   print("hit "..tostr(hit).." hit2 "..tostr(hit2),0,32)
+   print("h1 "..tostr(h1),0,40)
+   print("h2 "..tostr(h2),0,48)
+   if (hit and hit2) x=0+nil
+ end]]
+ return hit and hit2
 end
 
 function get_hitbox_flags(x,y,w,h)
@@ -72,7 +86,7 @@ function player_ctr(x,y,idx)
  typ=typ_plyr,
  x=x,y=y,
  idx=idx,
- w=6,h=7,
+ w=7,h=8,
  spr=0,
  flp_x=false,
  spd=2,
@@ -81,6 +95,7 @@ function player_ctr(x,y,idx)
  state=st_idle,
 
  draw=function(this)
+ if (this==p1) get_colliders(p1,typ_plyr)
  this.spr=(this.spr+1)%16
  spr(this.state*2+1+this.spr/8,this.x,this.y,1,1,this.flp_x,false)
  end,
@@ -114,7 +129,7 @@ function player_ctr(x,y,idx)
  end
  
  f=get_hitbox_flags(this.x,this.y,7,7)
- if band(f,1)==1 then
+ if count(get_colliders(this,typ_plyr))>0 or band(f,1)==1 then
   this.x=px
   this.y=py
  end
@@ -129,16 +144,16 @@ function blt_ctr(x,y,dx)
   typ=typ_blt,
   dx=dx,
   x=x+(dx+1)/2*8-2,y=y,
-  w=3,h=2,
+  w=4,h=3,
   spr=16,
   update=function(this)
  this.x+=this.dx
- 
 end,
   draw=function(this)
   spr(this.spr,this.x,this.y)
  for o in all(get_colliders(this,typ_plyr)) do
   this.spr=17
+  del(objs,this)
   o.score-=1
  end
 end
