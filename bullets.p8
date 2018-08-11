@@ -1,52 +1,59 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
+typ_plyr=0
+typ_blt=1
+
+st_idle=0
+st_walking=1
+
 function player_ctr(x,y,idx)
  return {
- pos={x=x,y=y},
+ typ=typ_plyr,
+ x=x,y=y,
  idx=idx,
  w=7,h=7,
  spr=0,
  flp_x=false,
  spd=2,
  -- 0: idle, 1: walking
- state=0,
+ state=st_idle,
 
  draw=function(this)
  this.spr=(this.spr+1)%16
- spr(this.state*2+1+this.spr/8,this.pos.x,this.pos.y,1,1,this.flp_x,false)
+ spr(this.state*2+1+this.spr/8,this.x,this.y,1,1,this.flp_x,false)
  end,
 
  update=function(this)
- this.state=1
+ this.state=st_walking
  local px,py
- px=this.pos.x
- py=this.pos.y
+ px=this.x
+ py=this.y
  
  if btn(0,idx) then
-  this.pos.x-=this.spd
+  this.x-=this.spd
   this.flp_x=true
  elseif btn(1,idx) then
-  this.pos.x+=this.spd
+  this.x+=this.spd
   this.flp_x=false
  elseif btn(2,idx) then
-  this.pos.y-=this.spd
+  this.y-=this.spd
  elseif btn(3,idx) then
-  this.pos.y+=this.spd
+  this.y+=this.spd
  else
-  this.state=0
+  this.state=st_idle
  end
  
  if btnp(5,idx) then
   -- create a new bullet and add it to the objects of the game
-  add(objs,blt_ctr(this.pos.x,this.pos.y))
+  add(objs,blt_ctr(this.x,this.y))
   sfx(0)
  end
  
- f=get_hitbox_flags(this.pos.x,this.pos.y,7,7)
+ f=get_hitbox_flags(this.x,this.y,7,7)
  if band(f,1)==1 then
-  this.pos.x=px
-  this.pos.y=py
+  this.x=px
+  this.y=py
  end
   
  end
@@ -55,11 +62,11 @@ end
 
 function collide(o1,o2)
  local hit=true
- hit=band(hit,o1.pos.x>=o2.pos.x and o1.pos.x<=o2.pos.x+o2.w)
- hit=band(hit,o1.pos.y>=o2.pos.y and oy.pos.y<=o2.pos.y+o2.h)
+ hit=band(hit,o1.x>=o2.x and o1.x<=o2.x+o2.w)
+ hit=band(hit,o1.y>=o2.y and oy.y<=o2.y+o2.h)
  local hit2=true
- hit2=band(hit2,o2.pos.x>=o1.pos.x and o2.pos.x<=o1.pos.x+o1.w)
- hit2=band(hit2,o2.pos.y>=o1.pos.y and o2.pos.y<=o1.pos.y+o1.h)
+ hit2=band(hit2,o2.x>=o1.x and o2.x<=o1.x+o1.w)
+ hit2=band(hit2,o2.y>=o1.y and o2.y<=o1.y+o1.h)
  return bor(hit,hit2) 
 end
 
@@ -77,14 +84,15 @@ end
 
 blt_ctr=function(x,y)
  local obj={
-  pos={x=x,y=y},
+  typ=typ_blt,
+  x=x,y=y,
   w=3,h=2,
   spr=16,
   update=function(this)
- this.pos.x+=1
+ this.x+=1
 end,
   draw=function(this)
-  spr(this.spr,this.pos.x,this.pos.y)
+  spr(this.spr,this.x,this.y)
 end
 }
  return obj
@@ -115,12 +123,6 @@ function _draw()
 end
 
 function dbg_draw()
- print("x "..tostr(p1.pos.x).." y "..tostr(p1.pos.y),0,0)
- print("spr "..tostr(p1.spr).." "..tostr(p1.spr/32),0,8)
- local m,f
- m=mget(ceil(p1.pos.x/8),flr(p1.pos.y/8))
- f=fget(m)
- print("m "..tostr(m).." f "..tostr(f),0,16)
 end
 __gfx__
 00000000055555000000000005555500055555500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
