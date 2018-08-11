@@ -1,81 +1,105 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
-p1={
- pos={x=32,y=32},
+function player_ctr(x,y,idx)
+ return {
+ pos={x=x,y=y},
+ idx=idx,
+ w=7,h=7,
  spr=0,
  flp_x=false,
  spd=2,
  -- 0: idle, 1: walking
  state=0,
 
- update=function(this)
- p1.state=1
- local px,py
- px=p1.pos.x
- py=p1.pos.y
- 
- if btn(0) then
-  p1.pos.x-=p1.spd
-  p1.flp_x=true
- elseif btn(1) then
-  p1.pos.x+=p1.spd
-  p1.flp_x=false
- elseif btn(2) then
-  p1.pos.y-=p1.spd
- elseif btn(3) then
-  p1.pos.y+=p1.spd
- else
-  p1.state=0
- end
+ draw=function(this)
+ this.spr=(this.spr+1)%16
+ spr(this.state*2+1+this.spr/8,this.pos.x,this.pos.y,1,1,this.flp_x,false)
+ end,
 
- local x=p1.pos.x/8
- local y=p1.pos.y/8,f
- f=fget(mget(ceil(x),ceil(y)))
- f=bor(f,fget(mget(flr(x),ceil(y))))
- f=bor(f,fget(mget(flr(x),flr(y))))
- f=bor(f,fget(mget(ceil(x),flr(y))))
+ update=function(this)
+ this.state=1
+ local px,py
+ px=this.pos.x
+ py=this.pos.y
+ 
+ if btn(0,idx) then
+  this.pos.x-=this.spd
+  this.flp_x=true
+ elseif btn(1,idx) then
+  this.pos.x+=this.spd
+  this.flp_x=false
+ elseif btn(2,idx) then
+  this.pos.y-=this.spd
+ elseif btn(3,idx) then
+  this.pos.y+=this.spd
+ else
+  this.state=0
+ end
+ 
+ if btnp(5,idx) then
+  -- create a new bullet and add it to the objects of the game
+  add(objs,blt_ctr(this.pos.x,this.pos.y))
+  sfx(0)
+ end
+ 
+ f=get_hitbox_flags(this.pos.x,this.pos.y,7,7)
  if band(f,1)==1 then
-  p1.pos.x=px
-  p1.pos.y=py
+  this.pos.x=px
+  this.pos.y=py
  end
   
  end
 }
+end
 
-get_hitbox_flags=function(x1,y1,x2,y2)
+function collide(o1,o2)
+ local hit=true
+ hit=band(hit,o1.pos.x>=o2.pos.x and o1.pos.x<=o2.pos.x+o2.w)
+ hit=band(hit,o1.pos.y>=o2.pos.y and oy.pos.y<=o2.pos.y+o2.h)
+ local hit2=true
+ hit2=band(hit2,o2.pos.x>=o1.pos.x and o2.pos.x<=o1.pos.x+o1.w)
+ hit2=band(hit2,o2.pos.y>=o1.pos.y and o2.pos.y<=o1.pos.y+o1.h)
+ return bor(hit,hit2) 
+end
+
+function get_hitbox_flags(x,y,w,h)
  local f=0
  local upd=function(x,y)
   f=bor(f,fget(mget(flr(x/8),flr(y/8))))
  end
- upd(x1,y1)
- upd(x1,y2)
- upd(x2,y2)
- upd(x2,y1)
+ upd(x,y)
+ upd(x,y+h)
+ upd(x+w,y+h)
+ upd(x+w,y)
  return f
 end
 
 blt_ctr=function(x,y)
- local obj={}
- obj.pos={x=x,y=y}
- obj.spr=16
- obj.update=function(this)
-  -- move the bullet to the right
-  this.pos.x+=1
- end
- obj.hitbox={x=2,y=2,w=4,h=3}
- 
+ local obj={
+  pos={x=x,y=y},
+  w=3,h=2,
+  spr=16,
+  update=function(this)
+ this.pos.x+=1
+end,
+  draw=function(this)
+  spr(this.spr,this.pos.x,this.pos.y)
+end
+}
  return obj
 end
 
 objs={}
+
+function _init()
+ p1=player_ctr(32,32,0)
+ add(objs,p1)
+ p2=player_ctr(8,8,1)		
+ add(objs,p2)
+end
+
 function _update()
- p1.update()
- if btnp(5,0) then
-  -- create a new bullet and add it to the objects of the game
-  add(objs,blt_ctr(p1.pos.x,p1.pos.y))
-  sfx(0)
- end
  foreach(objs,function(obj)
   obj.update(obj)
  end)
@@ -85,11 +109,8 @@ function _draw()
  cls()
  map(0,0,0,0)
  dbg_draw()
- p1.spr=(p1.spr+1)%16
- spr(p1.state*2+1+p1.spr/8,p1.pos.x,p1.pos.y,1,1,p1.flp_x,false)
-
  foreach(objs,function(obj)
-  spr(obj.spr,obj.pos.x,obj.pos.y)
+  obj.draw(obj)
  end)
 end
 
