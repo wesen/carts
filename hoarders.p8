@@ -157,11 +157,24 @@ end,
  local flags=get_hitbox_flags(this.x,this.y,this.w,this.h)
  f=band(flags,this.blocking_flags)
  
- if count(get_colliders(this,typ_plyr))>0 
-    or f!=0 
+ local is_blocked=f!=0 
     or this.x>(15*8)
     or this.y>(15*8)
-    or this.x<0 then
+    or this.x<0
+
+	for c in all(get_colliders(this)) do
+	 if c!=this and
+	    c.typ==typ_plyr then
+	    is_blocked=true
+	    break
+	 end
+	 if c.typ==typ_rub and not c.just_created then
+	    is_blocked=true
+	    break
+	 end
+	end
+
+ if is_blocked then
   this.x=px
   this.y=py
  end  
@@ -246,13 +259,13 @@ function dirty_tile(p)
  local v=get_front_tile(p)
  local tile=mget(v[1],v[2])
  printh("hold_t "..tostr(p.hold_t))
- obj=get_obj(v[1],v[2])
+ obj=get_obj(v[1]*8,v[2]*8)
  if obj!=nil and obj.dirty!=nil then
   obj.dirty(obj,p)
  end
  
 	if tile==0 then
-	 local rub=rubbish_ctr(v[1],v[2])
+	 local rub=rubbish_ctr(v[1]*8,v[2]*8)
 	 sfx(1)
 	 rub.life=1
 	 add(objs,rub)
@@ -266,7 +279,7 @@ function clean_dirt(this,p)
  this.life-=1
  if this.life<=0 then
   del(objs,this)
-  mset(this.x,this.y,0)
+  mset(flr(this.x/8),flr(this.y/8),0)
  end
 end
 
@@ -285,7 +298,10 @@ function rubbish_ctr(x,y)
   life=4,
   just_created=true,
   update=function(this)
-  mset(x,y,16+(4-this.life))
+  mset(flr(this.x/8),
+       flr(this.y/8),
+       16+(4-this.life))
+  if (not collide(p2, this)) this.just_created=false
 end,
   clean=clean_dirt,
   dirty=dirty_dirt
@@ -298,7 +314,9 @@ function dirt_ctr(x,y)
   x=x,y=y,w=8,h=8,
   life=4,
   update=function(this)
-  mset(x,y,20+(4-this.life))
+  mset(flr(this.x/8),
+       flr(this.y/8),
+       20+(4-this.life))
 end,
   clean=clean_dirt,
   dirty=dirty_dirt
@@ -316,11 +334,11 @@ end
 function create_rubbish()
  for i=1,20 do
   local pos=get_random_pos()
-  local rub=rubbish_ctr(pos[1],pos[2])
+  local rub=rubbish_ctr(pos[1]*8,pos[2]*8)
   rub.update(rub)
   add(objs,rub)
   pos=get_random_pos()
-  rub=dirt_ctr(pos[1],pos[2])
+  rub=dirt_ctr(pos[1]*8,pos[2]*8)
   add(objs,rub)
  end
 end
@@ -420,10 +438,10 @@ function get_hitbox_flags(x,y,w,h)
  return f
 end
 
-function get_colliders(o,typ)
+function get_colliders(o)
  local res={}
  for o_ in all(objs) do
-  if o!=o_ and o_.typ==typ and collide(o,o_) then
+  if o!=o_ and collide(o,o_) then
    add(res,o_)
   end 
  end
@@ -502,7 +520,7 @@ e555555ee555555ef555555ff555555f0ff555500ff5555005555ff005555ff0e555555ee555555e
 00444400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00900900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
-0000000000000000000000000000000003030303060606060000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000002020202060606060000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
