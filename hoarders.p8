@@ -75,6 +75,7 @@ end
 
 function _init()
  srand(0)
+ add(objs,psystem)
  set_state(stat_game)
 end
 
@@ -144,21 +145,31 @@ end,
  local px,py
  px=this.x
  py=this.y
+ local partx=px+4
+ local party=py+4
  
  if btn(0,idx) then
   this.x-=this.spd
   this.dir=dir_left
+  party+=rnd(8)-4
  elseif btn(1,idx) then
   this.x+=this.spd
   this.dir=dir_right
+  party+=rnd(8)-4
  elseif btn(2,idx) then
   this.y-=this.spd
   this.dir=dir_up
+  partx+=rnd(8)-4
  elseif btn(3,idx) then
   this.y+=this.spd
   this.dir=dir_down
+  partx+=rnd(8)-4
  else
   this.state=st_idle
+ end
+ 
+ if this.state!=st_idle then
+  create_part(partx,party,0,0,5,7)
  end
  
  if is_player_blocked(this,this.x,this.y) then
@@ -398,6 +409,9 @@ end
 -- ❎ end condition
 -- ❎ test coroutines
 -- ❎ put down dirt on same tile
+-- ❎ refactor collision system
+-- ❎ slightly better sprites
+-- walk particles
 -- fade on transitions
 -- leave dirt trails
 -- ❎ starting screen
@@ -522,6 +536,39 @@ function fade_to_state(state)
  end
  set_state(state)
 end
+-->8
+-- particles
+parts={}
+
+function create_part(x,y,dx,dy,maxt,col)
+ add(parts,{
+  x=x,y=y,dx=dx,dy=dy,t=0,col=col,
+  maxt=maxt,mass=0.5+rnd(1)
+ })
+end
+
+function update_parts(this)
+ for p in all(parts) do
+  p.t+=1
+  if (p.t>=p.maxt) del(parts,p)
+  p.x+=p.dx+(rnd(1)-0.5)
+  p.y+=p.dy+(rnd(1)-0.5)
+  p.mass*=0.9
+ end
+end
+
+function draw_parts(this)
+ for p in all(parts) do
+  circfill(p.x,p.y,p.mass,p.col)
+ end
+end
+
+psystem={
+ update=update_parts,
+ draw=draw_parts
+}
+
+
 __gfx__
 000000000555550000000000055555000555555005555500000000000000000088888888eeeeeeee000000005555555555555555555555555555555500000000
 0000000055ffff500555550055ffff5055ffff0055ffff50000000000000000080000008eeeeeeee000000004444444454444444444444444444444500000000
