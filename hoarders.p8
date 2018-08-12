@@ -403,7 +403,8 @@ end
 -- ❎ put down dirt on same tile
 -- ❎ refactor collision system
 -- ❎ slightly better sprites
--- walk particles
+-- ❎ walk particles
+-- ❎ creation particles
 -- fade on transitions
 -- leave dirt trails
 -- ❎ starting screen
