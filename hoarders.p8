@@ -110,6 +110,7 @@ function player_ctr(x,y,idx)
  hold_t=0,
 
  draw=function(this)
+ -- playe rpalette
  if this.is_cleaner then
   pal()
  else
@@ -117,8 +118,15 @@ function player_ctr(x,y,idx)
   pal(2,9)
   pal(5,6)
  end
+ 
+ -- debug draw
  local v=get_front_tile(this)
  spr(8,v[1]*8,v[2]*8)
+ 
+	for t in all(get_player_tiles(this)) do
+	 spr(9,t.mx*8,t.my*8)
+	end
+ 
  this.spr=(this.spr+1)%16
  spr(this.state*8+48+this.spr/8+this.dir*2,this.x,this.y)
 end,
@@ -163,17 +171,12 @@ end,
     or this.x<0
 
 	for c in all(get_colliders(this)) do
-	 if c!=this and
-	    c.typ==typ_plyr then
-	    is_blocked=true
-	    break
-	 end
-	 if c.typ==typ_rub and not c.just_created then
+	 if c.typ==typ_plyr then
 	    is_blocked=true
 	    break
 	 end
 	end
-
+	
  if is_blocked then
   this.x=px
   this.y=py
@@ -229,6 +232,7 @@ function clean_tile(p)
   my=my2
   tile=mget(mx2,my2)
  end
+ 
  if band(flags,flg_dirt)==flg_dirt then
   -- printh("mx "..tostr(mx).." my "..tostr(my))
   -- printh("tile in front "..tostr(tile))
@@ -238,6 +242,47 @@ function clean_tile(p)
   end
   -- printh("obj "..tostr(obj))
  end
+end
+
+function get_cleaner_front_tile(p)
+ local mx=flr((p.x+4)/8)
+ local my=flr((p.y+4)/8)
+ -- in case there is nothing in the tile in front of us
+ -- but we still hit another hitbox
+ local mx2=flr(p.x/8)
+ local my2=flr(p.y/8)
+ local x=p.x
+ local y=p.y
+ if p.dir==dir_up then
+  my-=1
+  my2-=1
+  y-=1
+  if (mx==mx2) mx2=mx+1  
+ elseif p.dir==dir_down then
+  my+=1
+  my2+=1
+  y+=1
+  if (mx==mx2) mx2=mx+1  
+ elseif p.dir==dir_left then
+  mx-=1
+  mx2-=1
+  x-=1
+  if (my==my2) my2=my+1
+ elseif p.dir==dir_right then
+  mx+=1
+  mx2+=1
+  x+=1
+  if (my==my2) my2=my+1
+ end
+ local flags=get_hitbox_flags(x,y,p.w,p.h)
+ local tile=mget(mx,my)
+ 
+ if tile==0 then
+  mx=mx2
+  my=my2
+ end
+ 
+ return {mx,my}
 end
 
 function get_front_tile(p)
@@ -277,6 +322,20 @@ tiles={}
 
 function v_idx(mx,my)
  return my*16+mx
+end
+
+function get_player_tiles(p)
+ local res={}
+ local x1,y1,x2,y2
+ x1=flr(p.x/8)
+ x2=flr((p.x+7)/8)
+ y1=flr(p.y/8)
+ y2=flr((p.y+7)/8)
+ add(res,tiles[v_idx(x1,y1)])
+ add(res,tiles[v_idx(x1,y2)])
+ add(res,tiles[v_idx(x2,y2)])
+ add(res,tiles[v_idx(x2,y1)])
+ return remove_nil(remove_duplicates(res))
 end
 
 function clean_dirt(this,p)
@@ -401,6 +460,25 @@ function add_cr(cr)
  add(crs,cr)
 end
 
+function remove_duplicates(v)
+ local res={}
+ local res2={}
+ for i in all(v) do
+  res[i]=i
+ end
+ for k,v in pairs(res) do
+  add(res2,k)
+ end
+ return res2
+end
+
+function remove_nil(v)
+ local res={}
+ for i in all(v) do
+  if (i!=nil) add(res,i)
+ end
+ return res 
+end
 objs={}
 function get_obj(x,y)
  for obj in all(objs) do
@@ -424,19 +502,9 @@ end
 function collide(o1,o2)
  if (o1.x==nil or o2.x==nil) return false
  local hit=o1.x>=o2.x and o1.x<=(o2.x+o2.w-1)
- local h1=hit
  hit=hit or o2.x>=o1.x and o2.x<=(o1.x+o1.w-1)
- local h2=o2.x>=o1.x and o2.x<=(o1.x+o1.w-1)
  local hit2=o1.y>=o2.y and o1.y<=(o2.y+o2.h-1)
  hit2=hit2 or o2.y>=o1.y and o2.y<=(o1.y+o1.h-1)
- if o1==p1 and o2==p2 then
-   print_o("o1",o1,16)
-   print_o("o2",o2,24)
-   print("hit "..tostr(hit).." hit2 "..tostr(hit2),0,32)
-   print("h1 "..tostr(h1),0,40)
-   print("h2 "..tostr(h2),0,48)
---   if (hit and hit2) x=0+nil
- end
  return hit and hit2
 end
 
@@ -493,14 +561,14 @@ function fade_to_state(state)
  set_state(state)
 end
 __gfx__
-00000000055555000000000005555500055555500555550000000000000000008888888800000000000000000000000000000000000000000000000000000000
-0000000055ffff500555550055ffff5055ffff0055ffff5000000000000000008000000800000000000000000000000000000000000000000000000000000000
-0070070059ff1f0055ffff5059ff1f0059ff1f0059ff1f0000000000000000008000000800000000000000000000000000000000000000000000000000000000
-000770005ffffff059ff1f005ffffff00ffffff05ffffff000000000000000008000000800000000000000000000000000000000000000000000000000000000
-00077000052fff005ffffff0052fff000522ff00052fff0000000000000000008000000800000000000000000000000000000000000000000000000000000000
-0070070000d22000052fff0000d2200000ddd00000d2200000000000000000008000000800000000000000000000000000000000000000000000000000000000
-0000000000ddd00000d2200000ddd00000d0060000ddd00000000000000000008000000800000000000000000000000000000000000000000000000000000000
-00000000006006000060060000600600006000000060060000000000000000008888888800000000000000000000000000000000000000000000000000000000
+000000000555550000000000055555000555555005555500000000000000000088888888eeeeeeee000000000000000000000000000000000000000000000000
+0000000055ffff500555550055ffff5055ffff0055ffff50000000000000000080000008e000000e000000000000000000000000000000000000000000000000
+0070070059ff1f0055ffff5059ff1f0059ff1f0059ff1f00000000000000000080000008e000000e000000000000000000000000000000000000000000000000
+000770005ffffff059ff1f005ffffff00ffffff05ffffff0000000000000000080000008e000000e000000000000000000000000000000000000000000000000
+00077000052fff005ffffff0052fff000522ff00052fff00000000000000000080000008e000000e000000000000000000000000000000000000000000000000
+0070070000d22000052fff0000d2200000ddd00000d22000000000000000000080000008e000000e000000000000000000000000000000000000000000000000
+0000000000ddd00000d2200000ddd00000d0060000ddd000000000000000000080000008e000000e000000000000000000000000000000000000000000000000
+000000000060060000600600006006000060000000600600000000000000000088888888eeeeeeee000000000000000000000000000000000000000000000000
 07070707070007000000070000000700070707070700070000000700000007000000000000000000000000000000000000000000000000000000000000000000
 70000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00099007000990070000000000000000000cc007000cc00700000000000000000000000000000000000000000000000000000000000000000000000000000000
