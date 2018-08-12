@@ -9,12 +9,28 @@ typ_dirt=3
 flg_dirt=2
 shake=0
 
+crs={}
+function run_crs()
+ for cr in all(crs) do
+  assert(coresume(cr))
+  if (costatus(cr)=="dead") del(crs,cr) 
+ end
+end
+
+function switch_start()
+ for i=1,10 do
+  yield()
+  printh(i)
+ end
+ set_state(stat_game)
+end
+
 stat_start={
  draw=function()
  print("hoarders!!",0,0)
  end,
  update=function()
- if (btnp(5)) set_state(stat_game)
+ if (btnp(5)) add(crs,cocreate(switch_start))
 end
 }
 stat_game={
@@ -64,10 +80,11 @@ end
 
 function _init()
  srand(0)
- set_state(stat_game)
+ set_state(stat_start)
 end
 
 function _update()
+ run_crs()
  if (game_state.update!=nil) game_state.update()
 end
 
