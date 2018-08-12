@@ -120,8 +120,13 @@ function player_ctr(x,y,idx)
  end
  
  -- debug draw
- local v=get_front_tile(this)
- spr(8,v[1]*8,v[2]*8)
+ if this.is_cleaner then
+  local v=get_cleaner_front_tile(this)
+  spr(8,v[1]*8,v[2]*8)
+ else
+  local v=get_front_tile(this)
+  spr(8,v[1]*8,v[2]*8)
+ end
  
 	for t in all(get_player_tiles(this)) do
 	 spr(9,t.mx*8,t.my*8)
@@ -195,52 +200,14 @@ function set_cleaner(p,is_cleaner)
 end
 
 function clean_tile(p)
- local mx=flr((p.x+4)/8)
- local my=flr((p.y+4)/8)
- -- in case there is nothing in the tile in front of us
- -- but we still hit another hitbox
- local mx2=flr(p.x/8)
- local my2=flr(p.y/8)
- local x=p.x
- local y=p.y
- if p.dir==dir_up then
-  my-=1
-  my2-=1
-  y-=1
-  if (mx==mx2) mx2=mx+1  
- elseif p.dir==dir_down then
-  my+=1
-  my2+=1
-  y+=1
-  if (mx==mx2) mx2=mx+1  
- elseif p.dir==dir_left then
-  mx-=1
-  mx2-=1
-  x-=1
-  if (my==my2) my2=my+1
- elseif p.dir==dir_right then
-  mx+=1
-  mx2+=1
-  x+=1
-  if (my==my2) my2=my+1
- end
  local flags=get_hitbox_flags(x,y,p.w,p.h)
- local tile=mget(mx,my)
- 
- if tile==0 then
-  mx=mx2
-  my=my2
-  tile=mget(mx2,my2)
- end
+ local v=get_cleaner_front_tile(p)
  
  if band(flags,flg_dirt)==flg_dirt then
-  -- printh("mx "..tostr(mx).." my "..tostr(my))
-  -- printh("tile in front "..tostr(tile))
-  local obj=get_obj(mx,my)
+  local obj=tiles[m_idx(v[1],v[2])]
   if obj!=nil and obj.clean!=nil then
    obj.clean(obj,p)
   end
-  -- printh("obj "..tostr(obj))
  end
 end
 
