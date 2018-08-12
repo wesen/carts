@@ -8,69 +8,29 @@ typ_dirt=3
 
 flg_dirt=2
 
-objs={}
-
-function get_obj(x,y)
- for obj in all(objs) do
-  if (obj.x==x and obj.y==y) return obj
- end
+stat_start={
+ draw=function()
+ print("hoarders!!",0,0)
+ end,
+ update=function()
+ if (btnp(5)) set_state(stat_game)
 end
-
-function del_obj(obj)
- if (obj.delete) obj.delete(obj)
- del(objs,obj)
-end
-
-function map_idx(x,y)
- return x*16+y
-end
-
-function print_o(name,o1,y)
-   print(name.." x "..tostr(o1.x).." y "..tostr(o1.y).." w "..tostr(o1.w).." h "..tostr(o1.h),0,y)
-end
-
-function collide(o1,o2)
- local hit=o1.x>=o2.x and o1.x<=(o2.x+o2.w-1)
- local h1=hit
- hit=hit or o2.x>=o1.x and o2.x<=(o1.x+o1.w-1)
- local h2=o2.x>=o1.x and o2.x<=(o1.x+o1.w-1)
- local hit2=o1.y>=o2.y and o1.y<=(o2.y+o2.h-1)
- hit2=hit2 or o2.y>=o1.y and o2.y<=(o1.y+o1.h-1)
- if o1==p1 and o2==p2 then
-   print_o("o1",o1,16)
-   print_o("o2",o2,24)
-   print("hit "..tostr(hit).." hit2 "..tostr(hit2),0,32)
-   print("h1 "..tostr(h1),0,40)
-   print("h2 "..tostr(h2),0,48)
---   if (hit and hit2) x=0+nil
- end
- return hit and hit2
-end
-
-function get_hitbox_flags(x,y,w,h)
- local f=0
- local upd=function(x,y)
-  f=bor(f,fget(mget(flr(x/8),flr(y/8))))
- end
- upd(x,y)
- upd(x,y+h-1)
- upd(x+w-1,y+h-1)
- upd(x+w-1,y)
- return f
-end
-
-function get_colliders(o,typ)
- local res={}
- for o_ in all(objs) do
-  if o!=o_ and o_.typ==typ and collide(o,o_) then
-   add(res,o_)
-  end 
- end
- return res
-end
-
-function _init()
- srand(0)
+}
+stat_game={
+ draw=function()
+ map(0,0,0,0)
+ dbg_draw()
+ foreach(objs,function(obj)
+  if (obj.draw) obj.draw(obj)
+ end)
+end,
+ update=function()
+ if (is_house_full()) set_state(stat_gameover)
+ foreach(objs,function(obj)
+  if (obj.update) obj.update(obj)
+ end)
+end,
+ enter=function()
  p1=player_ctr(4*8,13*8,0)
  add(objs,p1)
  p2=player_ctr(8*8,13*8,1)		
@@ -80,27 +40,37 @@ function _init()
  
  create_rubbish()
 end
+}
+stat_gameover={
+ draw=function()
+ print("game over!!",0,0)
+ end,
+ update=function()
+ if (btnp(5)) set_state(stat_start)
+ end,
+ enter=function()
+ end
+}
+game_state=stat_start
+
+function set_state(state)
+ if (game_state.leave!=nil) game_state.leave()
+ game_state=state
+ if (game_state.enter!=nil) game_state.enter()
+end
+
+function _init()
+ srand(0)
+ set_state(stat_start)
+end
 
 function _update()
- foreach(objs,function(obj)
-  if (obj.update) obj.update(obj)
- end)
+ if (game_state.update!=nil) game_state.update()
 end
 
 function _draw()
  cls()
- map(0,0,0,0)
- dbg_draw()
- draw_state()
- foreach(objs,function(obj)
-  if (obj.draw) obj.draw(obj)
- end)
-end
-
-function draw_state()
- print("p1 "..tostr(p1.score),0,0)
- print("p2 "..tostr(p2.score),96,0)
- print("")
+ if (game_state.draw!=nil) game_state.draw()
 end
 
 function dbg_draw()
@@ -170,8 +140,7 @@ end,
   else
    dirty_tile(this)
   end
- end
- 
+ end 
  
  local flags=get_hitbox_flags(this.x,this.y,this.w,this.h)
  f=band(flags,this.blocking_flags)
@@ -324,14 +293,14 @@ end
 
 function get_random_pos()
  while true do
-  local x=flr(rnd(12)+2)
-  local y=flr(rnd(8)+2)
+  local x=flr(rnd(14)+1)
+  local y=flr(rnd(9)+2)
   if (mget(x,y)==0) return {x,y}
  end
 end
 
 function create_rubbish()
- for i=1,8 do
+ for i=1,107 do
   local pos=get_random_pos()
   local rub=rubbish_ctr(pos[1],pos[2])
   rub.update(rub)
@@ -340,6 +309,17 @@ function create_rubbish()
   rub=dirt_ctr(pos[1],pos[2])
   add(objs,rub)
  end
+ sfx(0)
+end
+
+function is_house_full()
+ for x=1,15 do
+  for y=2,10 do
+   printh(""..tostr(x)..","..tostr(y).."="..mget(x,y))
+   if (mget(x,y)==0) return false
+  end
+ end
+ return true 
 end
 -->8
 -- ❎ player movement
@@ -351,9 +331,9 @@ end
 -- ❎ player roles
 -- ❎ cleanup items
 -- ❎ cleanup speed
--- score
--- end condition
--- starting screen
+-- ❎ end condition
+-- leave dirt trails
+-- ❎ starting screen
 -- sound fx
 -- animals spawning
 -- inventory
@@ -362,6 +342,68 @@ end
 -- better animation
 -- better sprites
 -- music
+-->8
+objs={}
+function get_obj(x,y)
+ for obj in all(objs) do
+  if (obj.x==x and obj.y==y) return obj
+ end
+end
+
+function del_obj(obj)
+ if (obj.delete) obj.delete(obj)
+ del(objs,obj)
+end
+
+function map_idx(x,y)
+ return x*16+y
+end
+
+function print_o(name,o1,y)
+   print(name.." x "..tostr(o1.x).." y "..tostr(o1.y).." w "..tostr(o1.w).." h "..tostr(o1.h),0,y)
+end
+
+function collide(o1,o2)
+ local hit=o1.x>=o2.x and o1.x<=(o2.x+o2.w-1)
+ local h1=hit
+ hit=hit or o2.x>=o1.x and o2.x<=(o1.x+o1.w-1)
+ local h2=o2.x>=o1.x and o2.x<=(o1.x+o1.w-1)
+ local hit2=o1.y>=o2.y and o1.y<=(o2.y+o2.h-1)
+ hit2=hit2 or o2.y>=o1.y and o2.y<=(o1.y+o1.h-1)
+ if o1==p1 and o2==p2 then
+   print_o("o1",o1,16)
+   print_o("o2",o2,24)
+   print("hit "..tostr(hit).." hit2 "..tostr(hit2),0,32)
+   print("h1 "..tostr(h1),0,40)
+   print("h2 "..tostr(h2),0,48)
+--   if (hit and hit2) x=0+nil
+ end
+ return hit and hit2
+end
+
+function get_hitbox_flags(x,y,w,h)
+ local f=0
+ local upd=function(x,y)
+  f=bor(f,fget(mget(flr(x/8),flr(y/8))))
+ end
+ upd(x,y)
+ upd(x,y+h-1)
+ upd(x+w-1,y+h-1)
+ upd(x+w-1,y)
+ return f
+end
+
+function get_colliders(o,typ)
+ local res={}
+ for o_ in all(objs) do
+  if o!=o_ and o_.typ==typ and collide(o,o_) then
+   add(res,o_)
+  end 
+ end
+ return res
+end
+
+
 __gfx__
 00000000055555000000000005555500055555500555550000000000000000008888888800000000000000000000000000000000000000000000000000000000
 0000000055ffff500555550055ffff5055ffff0055ffff5000000000000000008000000800000000000000000000000000000000000000000000000000000000
