@@ -6,6 +6,25 @@ typ_blt=1
 typ_rub=2
 typ_dirt=3
 
+flg_dirt=2
+
+objs={}
+
+function get_obj(x,y)
+ for obj in all(objs) do
+  if (obj.x==x and obj.y==y) return obj
+ end
+end
+
+function del_obj(obj)
+ if (obj.delete) obj.delete(obj)
+ del(objs,obj)
+end
+
+function map_idx(x,y)
+ return x*16+y
+end
+
 function print_o(name,o1,y)
    print(name.." x "..tostr(o1.x).." y "..tostr(o1.y).." w "..tostr(o1.w).." h "..tostr(o1.h),0,y)
 end
@@ -49,8 +68,6 @@ function get_colliders(o,typ)
  end
  return res
 end
-
-objs={}
 
 function _init()
  srand(0)
@@ -144,11 +161,7 @@ end,
  end
  
  if btnp(5,idx) then
-  if this.is_cleaner then
-   clean_item(this)
-  else
-   drop_item(this)
-  end
+  interact_tile(this)
  end
  
  local flags=get_hitbox_flags(this.x,this.y,this.w,this.h)
@@ -176,8 +189,52 @@ function set_cleaner(p,is_cleaner)
 end
 
 function interact_tile(p)
- local mx=flr(p.x/8)
- local my=flr(p.y/8)
+ local mx=flr((p.x+4)/8)
+ local my=flr((p.y+4)/8)
+ -- in case there is nothing in the tile in front of us
+ -- but we still hit another hitbox
+ local mx2=flr(p.x/8)
+ local my2=flr(p.y/8)
+ local x=p.x
+ local y=p.y
+ if p.dir==dir_up then
+  my-=1
+  my2-=1
+  y-=1
+  if (mx==mx2) mx2=mx+1  
+ elseif p.dir==dir_down then
+  my+=1
+  my2+=1
+  y+=1
+  if (mx==mx2) mx2=mx+1  
+ elseif p.dir==dir_left then
+  mx-=1
+  mx2-=1
+  x-=1
+  if (my==my2) my2=my+1
+ elseif p.dir==dir_right then
+  mx+=1
+  mx2+=1
+  x+=1
+  if (my==my2) my2=my+1
+ end
+ local flags=get_hitbox_flags(x,y,p.w,p.h)
+ local tile=mget(mx,my)
+ 
+ if p.is_cleaner then
+	 if tile==0 then
+	  mx=mx2
+	  my=my2
+	  tile=mget(mx2,my2)
+	 end
+	 if band(flags,flg_dirt)==flg_dirt then
+   printh("mx "..tostr(mx).." my "..tostr(my))
+   printh("tile in front "..tostr(tile))
+   local obj=get_obj(mx,my)
+   printh("obj "..tostr(obj))
+   obj.clean(obj,p)
+	 end
+ end
 end
 
 -->8
@@ -187,6 +244,10 @@ function rubbish_ctr(x,y)
   x=x,y=y,w=8,h=8,
   update=function(this)
   mset(x,y,16)
+end,
+  clean=function(this,p)
+  mset(x,y,0)
+  del(objs,this)
 end}
 end
 
@@ -196,6 +257,10 @@ function dirt_ctr(x,y)
   x=x,y=y,w=8,h=8,
   update=function(this)
   mset(x,y,17)
+end,
+  clean=function(this,p)
+  mset(x,y,0)
+  del(objs,this)
 end}
 end
 
