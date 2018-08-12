@@ -7,6 +7,7 @@ typ_rub=2
 typ_dirt=3
 
 flg_dirt=2
+shake=0
 
 stat_start={
  draw=function()
@@ -18,6 +19,7 @@ end
 }
 stat_game={
  draw=function()
+ doshake()
  map(0,0,0,0)
  dbg_draw()
  foreach(objs,function(obj)
@@ -39,6 +41,7 @@ end,
  set_cleaner(p2,false)
  
  create_rubbish()
+ shake=0.5
 end
 }
 stat_gameover={
@@ -61,7 +64,7 @@ end
 
 function _init()
  srand(0)
- set_state(stat_start)
+ set_state(stat_game)
 end
 
 function _update()
@@ -208,7 +211,9 @@ function clean_tile(p)
   -- printh("mx "..tostr(mx).." my "..tostr(my))
   -- printh("tile in front "..tostr(tile))
   local obj=get_obj(mx,my)
-  if (obj!=nil and obj.clean!=nil) obj.clean(obj,p)
+  if obj!=nil and obj.clean!=nil then
+   obj.clean(obj,p)
+  end
   -- printh("obj "..tostr(obj))
  end
 end
@@ -239,16 +244,37 @@ function dirty_tile(p)
  local tile=mget(v[1],v[2])
  printh("hold_t "..tostr(p.hold_t))
  obj=get_obj(v[1],v[2])
- if (obj!=nil and obj.dirty!=nil) obj.dirty(obj,p)
+ if obj!=nil and obj.dirty!=nil then
+  obj.dirty(obj,p)
+ end
  
 	if tile==0 then
 	 local rub=rubbish_ctr(v[1],v[2])
+	 sfx(1)
 	 rub.life=1
 	 add(objs,rub)
 	end
 end
 
 -->8
+function clean_dirt(this,p)
+ sfx(0)
+ shake+=0.1
+ this.life-=1
+ if this.life<=0 then
+  del(objs,this)
+  mset(this.x,this.y,0)
+ end
+end
+
+function dirty_dirt(this,p)
+ if this.life<4 then
+  sfx(2)
+  shake+=0.1
+  this.life+=1
+ end
+end
+
 function rubbish_ctr(x,y)
  return {
   typ=typ_rub,
@@ -257,16 +283,8 @@ function rubbish_ctr(x,y)
   update=function(this)
   mset(x,y,16+(4-this.life))
 end,
-  clean=function(this,p)
-  this.life-=1
-  if this.life<=0 then
-   del(objs,this)
-   mset(x,y,0)
-  end
-end,
-  dirty=function(this,p)
-  if (this.life<4) this.life+=1
-end
+  clean=clean_dirt,
+  dirty=dirty_dirt
   }
 end
 
@@ -278,16 +296,8 @@ function dirt_ctr(x,y)
   update=function(this)
   mset(x,y,20+(4-this.life))
 end,
-  clean=function(this,p)
-  this.life-=1
-  if this.life<=0 then
-   del(objs,this)
-   mset(x,y,0)
-  end
-end,
-  dirty=function(this,p)
-  if (this.life<4) this.life+=1
-end
+  clean=clean_dirt,
+  dirty=dirty_dirt
   }
 end
 
@@ -300,7 +310,7 @@ function get_random_pos()
 end
 
 function create_rubbish()
- for i=1,107 do
+ for i=1,20 do
   local pos=get_random_pos()
   local rub=rubbish_ctr(pos[1],pos[2])
   rub.update(rub)
@@ -309,13 +319,11 @@ function create_rubbish()
   rub=dirt_ctr(pos[1],pos[2])
   add(objs,rub)
  end
- sfx(0)
 end
 
 function is_house_full()
  for x=1,15 do
   for y=2,10 do
-   printh(""..tostr(x)..","..tostr(y).."="..mget(x,y))
    if (mget(x,y)==0) return false
   end
  end
@@ -404,6 +412,15 @@ function get_colliders(o,typ)
 end
 
 
+-->8
+function doshake()
+ local shakex=(16-rnd(32))*shake
+ local shakey=(16-rnd(32))*shake
+ 
+ shake*=0.9
+ if (shake<0.1) shake=0
+ camera(shakex,shakey)
+end
 __gfx__
 00000000055555000000000005555500055555500555550000000000000000008888888800000000000000000000000000000000000000000000000000000000
 0000000055ffff500555550055ffff5055ffff0055ffff5000000000000000008000000800000000000000000000000000000000000000000000000000000000
@@ -462,3 +479,5 @@ __map__
 2020200000202000002020200000202000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 0001000019050190501905019050190501a0501b0501c0501d0502005023050280502d05031050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00020000236502565023650206401e6301b6401b63020630236201e6101d6101c6201861013610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0001000012630116300f6200e6200e6100e6100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
