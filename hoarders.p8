@@ -47,7 +47,7 @@ end,
  p1=player_ctr(4*8,13*8,0)
  add(objs,p1)
  p2=player_ctr(8*8,13*8,1)		
--- add(objs,p2)
+ add(objs,p2)
  set_cleaner(p1,true)
  set_cleaner(p2,false)
  
@@ -128,7 +128,6 @@ end,
  debug_draw=function(this)
  if this.is_cleaner then
   local obj=get_cleaner_front_tile(this)
-  printh("cleaner front tile "..tostr(obj))
   if (obj!=nil) spr(8,obj.mx*8,obj.my*8)
  else
   local v=get_front_tile(this)
@@ -141,7 +140,6 @@ end,
 end,
 
  update=function(this)
- printh("--")
  this.state=st_walking
  local px,py
  px=this.x
@@ -164,7 +162,6 @@ end,
  end
  
  if is_player_blocked(this,this.x,this.y) then
-  printh("player blocked at "..tostr(this.x)..","..tostr(this.y))
   this.x=px
   this.y=py
  end  
@@ -249,11 +246,7 @@ function get_cleaner_front_tile(p)
  local tile=tiles[v_idx(mx,my)]
  
  if (tile==nil) tile=tiles[v_idx(mx2,my2)]
- printh("front tile "..tostr(tile))
- printh("p "..tostr(p.x)..","..tostr(p.y))
- printh("after "..tostr(x)..","..tostr(y))
  if (not is_player_blocked(p)) tile=nil
- printh("is player blocked "..tostr(x)..","..tostr(y)..":"..tostr(is_player_blocked(p,x,y)))
  p.x=px
  p.y=py
  return tile
