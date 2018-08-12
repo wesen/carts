@@ -273,13 +273,20 @@ function dirty_tile(p)
 end
 
 -->8
+tiles={}
+
+function v_idx(mx,my)
+ return my*16+mx
+end
+
 function clean_dirt(this,p)
  sfx(0)
  shake+=0.1
  this.life-=1
  if this.life<=0 then
   del(objs,this)
-  mset(flr(this.x/8),flr(this.y/8),0)
+  del(tiles,this)
+  mset(this.mx,this.my,0)
  end
 end
 
@@ -291,36 +298,42 @@ function dirty_dirt(this,p)
  end
 end
 
-function rubbish_ctr(x,y)
- return {
-  typ=typ_rub,
-  x=x,y=y,w=8,h=8,
-  life=4,
-  just_created=true,
-  update=function(this)
-  mset(flr(this.x/8),
-       flr(this.y/8),
-       16+(4-this.life))
-  if (not collide(p2, this)) this.just_created=false
-end,
-  clean=clean_dirt,
-  dirty=dirty_dirt
-  }
+function update_rubbish(this)
+ mset(this.mx,
+      this.my,
+      16+(4-this.life))
 end
 
-function dirt_ctr(x,y)
- return {
-  typ=typ_dirt,
-  x=x,y=y,w=8,h=8,
+function update_dirt(this)
+ mset(this.mx,this.my,
+      20+(4-this.life))
+end
+
+function rubbish_ctr(mx,my)
+ local res={
+  typ=typ_rub,
+  mx=mx,my=my,
   life=4,
-  update=function(this)
-  mset(flr(this.x/8),
-       flr(this.y/8),
-       20+(4-this.life))
-end,
+  just_created=true,
+  update=update_rubbish,
   clean=clean_dirt,
   dirty=dirty_dirt
   }
+  tiles[v_idx(mx,my)]=res  
+  return res
+end
+
+function dirt_ctr(mx,my)
+ local res={
+  typ=typ_dirt,
+  mx=mx,my=my,
+  life=4,
+  update=update_dirt,
+  clean=clean_dirt,
+  dirty=dirty_dirt
+  }
+  tiles[v_idx(mx,my)]=res
+  return res
 end
 
 function get_random_pos()
@@ -334,11 +347,11 @@ end
 function create_rubbish()
  for i=1,20 do
   local pos=get_random_pos()
-  local rub=rubbish_ctr(pos[1]*8,pos[2]*8)
+  local rub=rubbish_ctr(pos[1],pos[2])
   rub.update(rub)
   add(objs,rub)
   pos=get_random_pos()
-  rub=dirt_ctr(pos[1]*8,pos[2]*8)
+  rub=dirt_ctr(pos[1],pos[2])
   add(objs,rub)
  end
 end
@@ -363,7 +376,7 @@ end
 -- ❎ cleanup speed
 -- ❎ end condition
 -- ❎ test coroutines
--- put down dirt on same tile
+-- ❎ put down dirt on same tile
 -- fade on transitions
 -- leave dirt trails
 -- ❎ starting screen
@@ -409,6 +422,7 @@ function print_o(name,o1,y)
 end
 
 function collide(o1,o2)
+ if (o1.x==nil or o2.x==nil) return false
  local hit=o1.x>=o2.x and o1.x<=(o2.x+o2.w-1)
  local h1=hit
  hit=hit or o2.x>=o1.x and o2.x<=(o1.x+o1.w-1)
@@ -441,13 +455,12 @@ end
 function get_colliders(o)
  local res={}
  for o_ in all(objs) do
-  if o!=o_ and collide(o,o_) then
+  if o!=o_ and o.x!=nil and collide(o,o_) then
    add(res,o_)
   end 
  end
  return res
 end
-
 
 -->8
 function doshake()
