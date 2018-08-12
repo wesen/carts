@@ -121,8 +121,8 @@ function player_ctr(x,y,idx)
  
  -- debug draw
  if this.is_cleaner then
-  local v=get_cleaner_front_tile(this)
-  spr(8,v[1]*8,v[2]*8)
+  local obj=get_cleaner_front_tile(this)
+  if (obj!=nil) spr(8,obj.mx*8,obj.my*8)
  else
   local v=get_front_tile(this)
   spr(8,v[1]*8,v[2]*8)
@@ -167,27 +167,32 @@ end,
   end
  end 
  
- local flags=get_hitbox_flags(this.x,this.y,this.w,this.h)
- f=band(flags,this.blocking_flags)
- 
- local is_blocked=f!=0 
-    or this.x>(15*8)
-    or this.y>(15*8)
-    or this.x<0
-
-	for c in all(get_colliders(this)) do
-	 if c.typ==typ_plyr then
-	    is_blocked=true
-	    break
-	 end
-	end
-	
- if is_blocked then
+ if is_player_blocked(this,this.x,this.y) then
   this.x=px
   this.y=py
  end  
 end
 }
+end
+
+function is_player_blocked(p,x,y)
+ local flags=get_hitbox_flags(x,y,8,8)
+ if (band(flags,p.blocking_flags)!=0) return true
+ 
+ for t in all(get_player_tiles(p)) do
+  if (t.typ==typ_dirt and p.is_cleaner) return true
+  if (not t.just_created) return true
+ end
+ 
+ if (x>(15*8) or y>(15*8) or x<0) return true
+
+	for c in all(get_colliders(p)) do
+	 if c.typ==typ_plyr then
+	    return true
+	 end
+	end
+	
+	return false
 end
 
 function set_cleaner(p,is_cleaner)
@@ -200,14 +205,10 @@ function set_cleaner(p,is_cleaner)
 end
 
 function clean_tile(p)
- local flags=get_hitbox_flags(x,y,p.w,p.h)
- local v=get_cleaner_front_tile(p)
+ local obj=get_cleaner_front_tile(p)
  
- if band(flags,flg_dirt)==flg_dirt then
-  local obj=tiles[m_idx(v[1],v[2])]
-  if obj!=nil and obj.clean!=nil then
-   obj.clean(obj,p)
-  end
+ if obj!=nil and obj.clean!=nil then
+  obj.clean(obj,p)
  end
 end
 
@@ -241,15 +242,11 @@ function get_cleaner_front_tile(p)
   x+=1
   if (my==my2) my2=my+1
  end
- local flags=get_hitbox_flags(x,y,p.w,p.h)
- local tile=mget(mx,my)
+ local tile=tiles[v_idx(mx,my)]
  
- if tile==0 then
-  mx=mx2
-  my=my2
- end
- 
- return {mx,my}
+ if (tile==nil) tile=tiles[v_idx(mx2,my2)]
+ -- you have to actively push against the tile
+ if (is_player_blocked(p,x,y)) return tile
 end
 
 function get_front_tile(p)
@@ -270,7 +267,6 @@ end
 function dirty_tile(p)
  local v=get_front_tile(p)
  local tile=mget(v[1],v[2])
- printh("hold_t "..tostr(p.hold_t))
  obj=get_obj(v[1]*8,v[2]*8)
  if obj!=nil and obj.dirty!=nil then
   obj.dirty(obj,p)
@@ -311,8 +307,7 @@ function clean_dirt(this,p)
  this.life-=1
  if this.life<=0 then
   del(objs,this)
-  del(tiles,this)
-  mset(this.mx,this.my,0)
+  tiles[v_idx(this.mx,this.my)]=nil
  end
 end
 
@@ -324,15 +319,12 @@ function dirty_dirt(this,p)
  end
 end
 
-function update_rubbish(this)
- mset(this.mx,
-      this.my,
-      16+(4-this.life))
+function draw_rubbish(this)
+ spr(16+(4-this.life),this.mx*8,this.my*8)
 end
 
-function update_dirt(this)
- mset(this.mx,this.my,
-      20+(4-this.life))
+function draw_dirt(this)
+ spr(20+(4-this.life),this.mx*8,this.my*8)
 end
 
 function rubbish_ctr(mx,my)
@@ -341,7 +333,7 @@ function rubbish_ctr(mx,my)
   mx=mx,my=my,
   life=4,
   just_created=true,
-  update=update_rubbish,
+  draw=draw_rubbish,
   clean=clean_dirt,
   dirty=dirty_dirt
   }
@@ -354,7 +346,7 @@ function dirt_ctr(mx,my)
   typ=typ_dirt,
   mx=mx,my=my,
   life=4,
-  update=update_dirt,
+  draw=draw_dirt,
   clean=clean_dirt,
   dirty=dirty_dirt
   }
@@ -366,7 +358,7 @@ function get_random_pos()
  while true do
   local x=flr(rnd(14)+1)
   local y=flr(rnd(9)+2)
-  if (mget(x,y)==0) return {x,y}
+  if (tiles[v_idx(x,y)]==nil) return {x,y}
  end
 end
 
@@ -374,7 +366,7 @@ function create_rubbish()
  for i=1,20 do
   local pos=get_random_pos()
   local rub=rubbish_ctr(pos[1],pos[2])
-  rub.update(rub)
+  rub.just_created=false
   add(objs,rub)
   pos=get_random_pos()
   rub=dirt_ctr(pos[1],pos[2])
