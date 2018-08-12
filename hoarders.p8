@@ -228,24 +228,18 @@ function clean_tile(p)
 end
 
 function get_front_tile(p)
- local mx=flr((p.x)/8)
- local my=flr((p.y)/8)
+ local mx=p.x+4
+ local my=p.y+4
  if p.dir==dir_up then
-  my-=1
-  mx=flr((p.x+4)/8)
+  my-=8
  elseif p.dir==dir_down then
-  if ((p.y%8)>=1) my+=1
-  my+=1
-  mx=flr((p.x+4)/8)
+  my+=4
  elseif p.dir==dir_left then
-  mx-=1
-  my=flr((p.y+4)/8)
+  mx-=8
  elseif p.dir==dir_right then
-  if ((p.x%8)>=1) mx+=1
-  mx+=1
-  my=flr((p.y+4)/8)
+  mx+=4
  end
- return {mx,my}
+ return {flr(mx/8),flr(my/8)}
 end
 
 function dirty_tile(p)
