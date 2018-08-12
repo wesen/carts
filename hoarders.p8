@@ -125,6 +125,7 @@ function player_ctr(x,y,idx)
  spd=1,
  score=10,
  state=st_idle,
+ hold_t=0,
 
  draw=function(this)
  if this.is_cleaner then
@@ -163,12 +164,14 @@ end,
  end
  
  if btnp(5,idx) then
+  this.hold_t=0
   if this.is_cleaner then
    clean_tile(this)
   else
    dirty_tile(this)
   end
  end
+ 
  
  local flags=get_hitbox_flags(this.x,this.y,this.w,this.h)
  f=band(flags,this.blocking_flags)
@@ -236,7 +239,7 @@ function clean_tile(p)
   -- printh("mx "..tostr(mx).." my "..tostr(my))
   -- printh("tile in front "..tostr(tile))
   local obj=get_obj(mx,my)
-  if (obj!=nil) obj.clean(obj,p)
+  if (obj!=nil and obj.clean!=nil) obj.clean(obj,p)
   -- printh("obj "..tostr(obj))
  end
 end
@@ -246,14 +249,18 @@ function get_front_tile(p)
  local my=flr((p.y)/8)
  if p.dir==dir_up then
   my-=1
+  mx=flr((p.x+4)/8)
  elseif p.dir==dir_down then
   if ((p.y%8)>=1) my+=1
   my+=1
+  mx=flr((p.x+4)/8)
  elseif p.dir==dir_left then
   mx-=1
+  my=flr((p.y+4)/8)
  elseif p.dir==dir_right then
   if ((p.x%8)>=1) mx+=1
   mx+=1
+  my=flr((p.y+4)/8)
  end
  return {mx,my}
 end
@@ -261,9 +268,13 @@ end
 function dirty_tile(p)
  local v=get_front_tile(p)
  local tile=mget(v[1],v[2])
+ printh("hold_t "..tostr(p.hold_t))
+ obj=get_obj(v[1],v[2])
+ if (obj!=nil and obj.dirty!=nil) obj.dirty(obj,p)
  
 	if tile==0 then
 	 local rub=rubbish_ctr(v[1],v[2])
+	 rub.life=1
 	 add(objs,rub)
 	end
 end
@@ -283,7 +294,11 @@ end,
    del(objs,this)
    mset(x,y,0)
   end
-end}
+end,
+  dirty=function(this,p)
+  if (this.life<4) this.life+=1
+end
+  }
 end
 
 function dirt_ctr(x,y)
@@ -300,7 +315,11 @@ end,
    del(objs,this)
    mset(x,y,0)
   end
-end}
+end,
+  dirty=function(this,p)
+  if (this.life<4) this.life+=1
+end
+  }
 end
 
 function get_random_pos()
@@ -331,7 +350,7 @@ end
 -- ❎ interact items
 -- ❎ player roles
 -- ❎ cleanup items
--- cleanup speed
+-- ❎ cleanup speed
 -- score
 -- end condition
 -- starting screen
