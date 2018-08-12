@@ -33,9 +33,12 @@ stat_game={
  foreach(objs,function(obj)
   if (obj.draw) obj.draw(obj)
  end)
+ p1.draw(p1)
+ p2.draw(p2)
  for obj in all(objs) do
   if (obj.debug_draw) obj.debug_draw(obj)
  end
+ draw_parts()
 end,
  update=function()
  if (is_house_full()) set_state(stat_gameover)
@@ -158,7 +161,7 @@ end,
  end
  
  if this.state!=st_idle then
-  create_part(partx,party,0,0,5,7,1+rnd(1))
+  create_part(partx,party,0,0,5,{7},1+rnd(1))
  end
  
  if is_player_blocked(this,this.x,this.y) then
@@ -184,7 +187,7 @@ function is_player_blocked(p)
  
  for t in all(get_player_tiles(p)) do
   if (t.typ==typ_dirt and p.is_cleaner) return true
-  if (not t.just_created) return true
+  if (not t.just_created and t.typ==typ_rub) return true
  end
  
  if (p.x>(15*8) or p.y>(15*8) or p.x<0) return true
@@ -274,10 +277,10 @@ function dirty_tile(p)
   tile.dirty(tile,p)
  end
  
-	if tile==nil then
+	if tile==nil and fget(mget(v[1],v[2]))==0 then
 	 local rub=rubbish_ctr(v[1],v[2])
 	 sfx(1)
-  create_sparks(v[1]*8+4,v[2]*8+4,9)
+  create_sparks(v[1]*8+4,v[2]*8+4,{7,10,9})
 	 rub.life=1
 	 add(objs,rub)
 	end
@@ -309,7 +312,7 @@ function clean_dirt(this,p)
  shake+=0.1
  this.life-=1
  create_sparks(this.mx*8+4,
-   this.my*8+4,12)
+   this.my*8+4,{13,12,7})
  if this.life<=0 then
   del(objs,this)
   tiles[v_idx(this.mx,this.my)]=nil
@@ -318,7 +321,7 @@ end
 
 function dirty_dirt(this,p)
  if this.life<4 then
-  create_sparks(this.mx*8+4,this.my*8+4,9)
+  create_sparks(this.mx*8+4,this.my*8+4,{7,10,9})
   sfx(2)
   shake+=0.1
   this.life+=1
@@ -333,12 +336,24 @@ function draw_dirt(this)
  spr(20+(4-this.life),this.mx*8,this.my*8)
 end
 
+function update_rubbish(this)
+ -- mark tiles with noone on them as unwalkable
+ for tile in all(get_player_tiles(p1)) do
+  if (tile==this) return
+ end
+ for tile in all(get_player_tiles(p2)) do
+  if (tile==this) return
+ end
+ this.just_created=false 
+end
+
 function rubbish_ctr(mx,my)
  local res={
   typ=typ_rub,
   mx=mx,my=my,
   life=4,
   just_created=true,
+  update=update_rubbish,
   draw=draw_rubbish,
   clean=clean_dirt,
   dirty=dirty_dirt
@@ -405,6 +420,7 @@ end
 -- ❎ slightly better sprites
 -- ❎ walk particles
 -- ❎ creation particles
+-- color cycle on particles
 -- fade on transitions
 -- leave dirt trails
 -- ❎ starting screen
@@ -533,10 +549,10 @@ end
 -- particles
 parts={}
 
-function create_part(x,y,dx,dy,maxt,col,
- mass)
+function create_part(
+   x,y,dx,dy,maxt,cols,mass)
  add(parts,{
-  x=x,y=y,dx=dx,dy=dy,t=0,col=col,
+  x=x,y=y,dx=dx,dy=dy,t=0,cols=cols,
   maxt=maxt,mass=mass
  })
 end
@@ -551,24 +567,24 @@ function update_parts(this)
  end
 end
 
-function create_sparks(x,y,col)
+function create_sparks(x,y,cols)
  for i=1,4 do
   create_part(
     x,y,
     rnd(2)-1,rnd(2)-1,
-    10,col,1+rnd(2))
+    10,cols,1+rnd(2))
  end
 end
 
 function draw_parts(this)
  for p in all(parts) do
-  circfill(p.x,p.y,p.mass,p.col)
+  local col=p.cols[1+flr(p.t/p.maxt*#p.cols)]
+  circfill(p.x,p.y,p.mass,col)
  end
 end
 
 psystem={
- update=update_parts,
- draw=draw_parts
+ update=update_parts
 }
 
 
