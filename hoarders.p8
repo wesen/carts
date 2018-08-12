@@ -33,6 +33,9 @@ stat_game={
  foreach(objs,function(obj)
   if (obj.draw) obj.draw(obj)
  end)
+ for obj in all(objs) do
+  if (obj.debug_draw) obj.debug_draw(obj)
+ end
 end,
  update=function()
  if (is_house_full()) set_state(stat_gameover)
@@ -44,7 +47,7 @@ end,
  p1=player_ctr(4*8,13*8,0)
  add(objs,p1)
  p2=player_ctr(8*8,13*8,1)		
- add(objs,p2)
+-- add(objs,p2)
  set_cleaner(p1,true)
  set_cleaner(p2,false)
  
@@ -110,7 +113,7 @@ function player_ctr(x,y,idx)
  hold_t=0,
 
  draw=function(this)
- -- playe rpalette
+ -- player palette
  if this.is_cleaner then
   pal()
  else
@@ -119,9 +122,13 @@ function player_ctr(x,y,idx)
   pal(5,6)
  end
  
- -- debug draw
+ this.spr=(this.spr+1)%16
+ spr(this.state*8+48+this.spr/8+this.dir*2,this.x,this.y)
+end,
+ debug_draw=function(this)
  if this.is_cleaner then
   local obj=get_cleaner_front_tile(this)
+  printh("cleaner front tile "..tostr(obj))
   if (obj!=nil) spr(8,obj.mx*8,obj.my*8)
  else
   local v=get_front_tile(this)
@@ -131,12 +138,10 @@ function player_ctr(x,y,idx)
 	for t in all(get_player_tiles(this)) do
 	 spr(9,t.mx*8,t.my*8)
 	end
- 
- this.spr=(this.spr+1)%16
- spr(this.state*8+48+this.spr/8+this.dir*2,this.x,this.y)
 end,
 
  update=function(this)
+ printh("--")
  this.state=st_walking
  local px,py
  px=this.x
@@ -158,6 +163,12 @@ end,
   this.state=st_idle
  end
  
+ if is_player_blocked(this,this.x,this.y) then
+  printh("player blocked at "..tostr(this.x)..","..tostr(this.y))
+  this.x=px
+  this.y=py
+ end  
+ 
  if btnp(5,idx) then
   this.hold_t=0
   if this.is_cleaner then
@@ -165,18 +176,13 @@ end,
   else
    dirty_tile(this)
   end
- end 
- 
- if is_player_blocked(this,this.x,this.y) then
-  this.x=px
-  this.y=py
  end  
 end
 }
 end
 
-function is_player_blocked(p,x,y)
- local flags=get_hitbox_flags(x,y,8,8)
+function is_player_blocked(p)
+ local flags=get_hitbox_flags(p.x,p.y,8,8)
  if (band(flags,p.blocking_flags)!=0) return true
  
  for t in all(get_player_tiles(p)) do
@@ -184,7 +190,7 @@ function is_player_blocked(p,x,y)
   if (not t.just_created) return true
  end
  
- if (x>(15*8) or y>(15*8) or x<0) return true
+ if (p.x>(15*8) or p.y>(15*8) or p.x<0) return true
 
 	for c in all(get_colliders(p)) do
 	 if c.typ==typ_plyr then
@@ -215,38 +221,42 @@ end
 function get_cleaner_front_tile(p)
  local mx=flr((p.x+4)/8)
  local my=flr((p.y+4)/8)
- -- in case there is nothing in the tile in front of us
- -- but we still hit another hitbox
  local mx2=flr(p.x/8)
  local my2=flr(p.y/8)
- local x=p.x
- local y=p.y
+ local px=p.x
+ local py=p.y
  if p.dir==dir_up then
   my-=1
   my2-=1
-  y-=1
+  p.y-=1
   if (mx==mx2) mx2=mx+1  
  elseif p.dir==dir_down then
   my+=1
   my2+=1
-  y+=1
+  p.y+=1
   if (mx==mx2) mx2=mx+1  
  elseif p.dir==dir_left then
   mx-=1
   mx2-=1
-  x-=1
+  p.x-=1
   if (my==my2) my2=my+1
  elseif p.dir==dir_right then
   mx+=1
   mx2+=1
-  x+=1
+  p.x+=1
   if (my==my2) my2=my+1
  end
  local tile=tiles[v_idx(mx,my)]
  
  if (tile==nil) tile=tiles[v_idx(mx2,my2)]
- -- you have to actively push against the tile
- if (is_player_blocked(p,x,y)) return tile
+ printh("front tile "..tostr(tile))
+ printh("p "..tostr(p.x)..","..tostr(p.y))
+ printh("after "..tostr(x)..","..tostr(y))
+ if (not is_player_blocked(p)) tile=nil
+ printh("is player blocked "..tostr(x)..","..tostr(y)..":"..tostr(is_player_blocked(p,x,y)))
+ p.x=px
+ p.y=py
+ return tile
 end
 
 function get_front_tile(p)
@@ -358,7 +368,7 @@ function get_random_pos()
  while true do
   local x=flr(rnd(14)+1)
   local y=flr(rnd(9)+2)
-  if (tiles[v_idx(x,y)]==nil) return {x,y}
+  if (mget(x,y)==0 and tiles[v_idx(x,y)]==nil) return {x,y}
  end
 end
 
@@ -521,12 +531,12 @@ function fade_to_state(state)
 end
 __gfx__
 000000000555550000000000055555000555555005555500000000000000000088888888eeeeeeee000000000000000000000000000000000000000000000000
-0000000055ffff500555550055ffff5055ffff0055ffff50000000000000000080000008e000000e000000000000000000000000000000000000000000000000
-0070070059ff1f0055ffff5059ff1f0059ff1f0059ff1f00000000000000000080000008e000000e000000000000000000000000000000000000000000000000
-000770005ffffff059ff1f005ffffff00ffffff05ffffff0000000000000000080000008e000000e000000000000000000000000000000000000000000000000
-00077000052fff005ffffff0052fff000522ff00052fff00000000000000000080000008e000000e000000000000000000000000000000000000000000000000
-0070070000d22000052fff0000d2200000ddd00000d22000000000000000000080000008e000000e000000000000000000000000000000000000000000000000
-0000000000ddd00000d2200000ddd00000d0060000ddd000000000000000000080000008e000000e000000000000000000000000000000000000000000000000
+0000000055ffff500555550055ffff5055ffff0055ffff50000000000000000080000008eeeeeeee000000000000000000000000000000000000000000000000
+0070070059ff1f0055ffff5059ff1f0059ff1f0059ff1f00000000000000000080000008ee0000ee000000000000000000000000000000000000000000000000
+000770005ffffff059ff1f005ffffff00ffffff05ffffff0000000000000000080000008ee0000ee000000000000000000000000000000000000000000000000
+00077000052fff005ffffff0052fff000522ff00052fff00000000000000000080000008ee0000ee000000000000000000000000000000000000000000000000
+0070070000d22000052fff0000d2200000ddd00000d22000000000000000000080000008ee0000ee000000000000000000000000000000000000000000000000
+0000000000ddd00000d2200000ddd00000d0060000ddd000000000000000000080000008eeeeeeee000000000000000000000000000000000000000000000000
 000000000060060000600600006006000060000000600600000000000000000088888888eeeeeeee000000000000000000000000000000000000000000000000
 07070707070007000000070000000700070707070700070000000700000007000000000000000000000000000000000000000000000000000000000000000000
 70000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
