@@ -269,15 +269,15 @@ end
 
 function dirty_tile(p)
  local v=get_front_tile(p)
- local tile=mget(v[1],v[2])
- obj=get_obj(v[1]*8,v[2]*8)
- if obj!=nil and obj.dirty!=nil then
-  obj.dirty(obj,p)
+ local tile=tiles[v_idx(v[1],v[2])]
+ if tile!=nil and tile.dirty!=nil then
+  tile.dirty(tile,p)
  end
  
-	if tile==0 then
-	 local rub=rubbish_ctr(v[1]*8,v[2]*8)
+	if tile==nil then
+	 local rub=rubbish_ctr(v[1],v[2])
 	 sfx(1)
+  create_sparks(v[1]*8+4,v[2]*8+4,9)
 	 rub.life=1
 	 add(objs,rub)
 	end
@@ -308,12 +308,8 @@ function clean_dirt(this,p)
  sfx(0)
  shake+=0.1
  this.life-=1
- for i=1,4 do
-  create_part(
-    this.mx*8+4,this.my*8+4,
-    rnd(2)-1,rnd(2)-1,
-    10,12,1+rnd(2))
- end
+ create_sparks(this.mx*8+4,
+   this.my*8+4,12)
  if this.life<=0 then
   del(objs,this)
   tiles[v_idx(this.mx,this.my)]=nil
@@ -322,6 +318,7 @@ end
 
 function dirty_dirt(this,p)
  if this.life<4 then
+  create_sparks(this.mx*8+4,this.my*8+4,9)
   sfx(2)
   shake+=0.1
   this.life+=1
@@ -550,6 +547,15 @@ function update_parts(this)
   p.x+=p.dx+(rnd(1)-0.5)
   p.y+=p.dy+(rnd(1)-0.5)
   p.mass*=0.85
+ end
+end
+
+function create_sparks(x,y,col)
+ for i=1,4 do
+  create_part(
+    x,y,
+    rnd(2)-1,rnd(2)-1,
+    10,col,1+rnd(2))
  end
 end
 
