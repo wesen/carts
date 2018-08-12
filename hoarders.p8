@@ -170,13 +170,16 @@ end,
  end  
  
  if btnp(5,idx) then
-  this.hold_t=0
   if this.is_cleaner then
    clean_tile(this)
   else
    dirty_tile(this)
   end
  end  
+ if btnp(4,idx) then
+  clean_tile(this)
+ end  
+ 
 end
 }
 end
@@ -420,7 +423,8 @@ end
 -- ❎ slightly better sprites
 -- ❎ walk particles
 -- ❎ creation particles
--- color cycle on particles
+-- ❎ color cycle on particles
+-- allow hoarder to destroy rubbish
 -- fade on transitions
 -- leave dirt trails
 -- ❎ starting screen
