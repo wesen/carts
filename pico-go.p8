@@ -6,12 +6,18 @@ __lua__
 function class (init)
   local c = {}
   c.__index = c
+  c._ctr=init
   function c.init (...)
     local self = setmetatable({},c)
-    init(self,...)
+    c._ctr(self,...)
     return self
   end
   return c
+end
+
+function subclass(parent,init)
+ local c=class(init)
+ return setmetatable(c,parent)
 end
 
 -- misc helpers
@@ -303,7 +309,7 @@ function class_board:draw()
 end
 
 -->8
--- player
+-- player and enemies
 
 -- arrows
 arrow_animation_speed=0.1
@@ -369,23 +375,24 @@ arrows:add(class_arrow.init(dir_right))
 arrows:add(class_arrow.init(dir_up))
 arrows:add(class_arrow.init(dir_down))
 
--- player
-class_player=class(function(self)
- self.node=board.start_node
+-- mover
+class_mover=class(function(self,node,start_spr)
+ self.node=node
  self.spr=mget(self.node.x,self.node.y)
+ self.start_spr=start_spr
  self.is_moving=false
  self.has_finished_turn=false
  -- draw offsets
  self.x=0
  self.y=0
- self.direction=mget(self.node.x,self.node.y)-player_spr
+ self.direction=mget(self.node.x,self.node.y)-self.start_spr
 end)
 
-function class_player:move(i)
+function class_mover:move(i)
  local direction=directions[i]
  local node=board:get_node_in_direction(self.node,direction)
  if node!=nil then
-  add_cr(function()
+  local cr=add_cr(function()
    self.is_moving=true
    self.direction=i-1
    wait_for_cr(move_to(self,direction[1]*16,direction[2]*16,1,outexpo))
@@ -393,9 +400,26 @@ function class_player:move(i)
    self.y=0   
    self.node=node
    self.is_moving=false
-   self.has_finished_turn=true
   end) 
  end
+end
+
+function class_mover:draw()
+ spr(self.start_spr+self.direction,self.node.x*8+round(self.x),self.node.y*8+round(self.y))
+end
+
+-- player
+class_player=subclass(class_mover,
+function(self)
+ class_mover._ctr(self,board.start_node,player_spr)
+end)
+
+function class_player:move(i)
+ printh("player move")
+ local cr=class_mover.move(self,i)
+ if (cr==nil) return
+ wait_for_cr(cr)
+ self.has_finished_turn=true
 end
 
 function class_player:update()
@@ -409,10 +433,7 @@ function class_player:update()
  end
 end
 
-function class_player:draw()
- spr(player_spr+self.direction,self.node.x*8+round(self.x),self.node.y*8+round(self.y))
-end
-
+-- enemies
 
 -->8
 -- todo
