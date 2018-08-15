@@ -334,6 +334,8 @@ function class_player:move(i)
 end
 
 function class_player:update()
+ if (not game.initialized) return
+ 
  for i=1,5 do
   if btnp(i-1) and not self.is_moving then
    self:move(i)
@@ -358,7 +360,7 @@ x draw graph animations
 x player movement
 x player movement animation
 x player rotation
-- don't move while initializing
+x don't move while initializing
 - player arrows
 x goal node
 - win condition
@@ -368,16 +370,31 @@ x goal node
 - background sprites
 ]]
 -->8
+-- game
+class_game=class(function (self)
+ self.initialized=false
+end)
+
+function class_game:update()
+ self.initialized=false
+ for k,n in pairs(board.nodes) do
+  if (not n.initialized) return
+ end
+ self.initialized=true
+end
+-->8
 -- main functions
 
 board=class_board.init()
 player=class_player.init()
+game=class_game.init()
 
 function _init()
 end
 
 function _update() 
  tick_crs()
+ game:update()
  player:update()
 end
 
