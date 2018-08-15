@@ -71,6 +71,7 @@ function add_cr(f)
 end
 
 function wait_for_cr(cr)
+ if (cr==nil) return
  while costatus(cr)!='dead' do
   yield()
  end
@@ -176,10 +177,19 @@ end
 
 -- constants
 dir_left={-1,0}
+i_dir_left=0
 dir_right={1,0}
+i_dir_right=1
 dir_up={0,-1}
+i_dir_up=2
 dir_down={0,1}
+i_dir_down=3
 directions={dir_left,dir_right,dir_up,dir_down}
+directions_180={i_dir_right,i_dir_left,i_dir_down,i_dir_up}
+
+function rotate_180(direction)
+ return directions_180[direction+1]
+end
 
 player_spr=64
 sentry_spr=80
@@ -457,15 +467,22 @@ function(self,node)
 end)
 
 function class_enemy:do_turn()
- local front_node=board:get_node_in_direction(self.node,directions[self.direction+1])
- if front_node==player.node then
-  printh("player dead")
- end
--- if self.start_spr==patroling_spr then
--- elseif self.start_spr==sentry_spr then
--- end
- printh("enemy finished turn "..tostr(self.start_spr))
- self.has_finished_turn=true
+ return add_cr(function()
+  local front_node=board:get_node_in_direction(self.node,directions[self.direction+1])
+  if front_node==player.node then
+   printh("player dead")
+  end
+  if self.start_spr==patroling_spr then
+   if front_node!=nil then
+    wait_for_cr(class_mover.move(self,self.direction+1))    
+    if not board:has_link(self.node,directions[self.direction+1]) then
+     self.direction=rotate_180(self.direction)
+    end
+   end
+  elseif self.start_spr==sentry_spr then
+  end
+  self.has_finished_turn=true
+ end)
 end
 
 function class_enemy:draw()
@@ -489,9 +506,10 @@ x goal node
 x win condition
 x turns
 x enemies
-- enemy movement
-- sense player
-- player death
+x enemy movement
+x sense player
+- clean up direction handling
+- player death ends game
 - start screen
 - end screen
 - death animation player
@@ -549,7 +567,7 @@ function class_game:start_game_loop()
    printh("enemy turn")
    self.turn=turn_enemy
    for enemy in all(enemies.objs) do
-    enemy:do_turn()
+   enemy:do_turn()
    end
    while not enemies:are_enemies_done() do
     yield()
@@ -649,4 +667,4 @@ __map__
 0000030000000300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000010201020102010201000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000003000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000010252020102040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000010201020102040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
