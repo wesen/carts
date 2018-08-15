@@ -266,6 +266,9 @@ class_board=class(function(self)
     if band(f,4)==4 then
      self.start_node=n
     end
+    if band(f,8)==8 then
+     enemies:add(class_enemy.init(n))     
+    end
    elseif m==2 or m==3 then
     local l=class_link.init(x,y,m==3)
     self.links[v]=l
@@ -376,10 +379,10 @@ arrows:add(class_arrow.init(dir_up))
 arrows:add(class_arrow.init(dir_down))
 
 -- mover
-class_mover=class(function(self,node,start_spr)
+class_mover=class(function(self,node)
  self.node=node
  self.spr=mget(self.node.x,self.node.y)
- self.start_spr=start_spr
+ self.start_spr=self.spr-(self.spr%4)
  self.is_moving=false
  self.has_finished_turn=false
  -- draw offsets
@@ -399,8 +402,11 @@ function class_mover:move(i)
    self.x=0
    self.y=0   
    self.node=node
+   printh("finished moving")
    self.is_moving=false
   end) 
+  printh("cr "..tostr(cr))
+  return cr
  end
 end
 
@@ -411,19 +417,22 @@ end
 -- player
 class_player=subclass(class_mover,
 function(self)
- class_mover._ctr(self,board.start_node,player_spr)
+ class_mover._ctr(self,board.start_node)
 end)
 
 function class_player:move(i)
- printh("player move")
- local cr=class_mover.move(self,i)
- if (cr==nil) return
- wait_for_cr(cr)
- self.has_finished_turn=true
+ return add_cr(function()
+  local cr=class_mover.move(self,i)
+  if (cr==nil) return
+  wait_for_cr(cr)
+  self.has_finished_turn=true
+ end)
 end
 
 function class_player:update()
  if (not game.initialized) return
+ if (game.turn!=turn_player) return
+ if (self.has_finished_turn) return
  
  for i=1,5 do
   if btnp(i-1) and not self.is_moving then
@@ -434,6 +443,25 @@ function class_player:update()
 end
 
 -- enemies
+enemies=objs.init("enemies")
+
+function enemies:are_enemies_done()
+ for enemy in all(self.objs) do
+  if (not enemy.has_finished_turn) return false
+ end
+ 
+ return true
+end
+
+class_enemy=subclass(class_mover,
+function(self,node)
+ class_mover._ctr(self,node)
+end)
+
+function class_enemy:do_turn()
+ printh("enemy move "..tostr(self.start_spr))
+ self.has_finished_turn=true
+end
 
 -->8
 -- todo
@@ -510,7 +538,12 @@ function class_game:start_game_loop()
    
    printh("enemy turn")
    self.turn=turn_enemy
-   yield()
+   for enemy in all(enemies.objs) do
+    enemy:do_turn()
+   end
+   while not enemies:are_enemies_done() do
+    yield()
+   end
   end
   
   if self:is_win() then
@@ -597,7 +630,7 @@ d0000000000000000000000000000000000000000000000000000000000000000000000000000000
 0005ee0000ee500000eeee000f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00fee000000eef000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
-0001000003000000000000000000000001010101010000000000000000000000000000000000000000000000000000000000000000000000000000000000000005050505000000000000000000000000010101010000000000000000000000000101010100000000000000000000000000000000000000000000000000000000
+0001000003000000000000000000000001010101010000000000000000000000000000000000000000000000000000000000000000000000000000000000000005050505000000000000000000000000090909090000000000000000000000000909090900000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
