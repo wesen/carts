@@ -339,7 +339,7 @@ end
 
 function clean_dirt(this,p)
  sfx(0)
- shake+=0.1
+ shake=mid(0,shake+0.1,0.4)
  this.life-=1
  create_sparks(this.mx*8+4,
    this.my*8+4,{13,12,7})
