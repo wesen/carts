@@ -1,35 +1,50 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
--- this is possible in standard lua (try it here: [http://www.lua.org/cgi-bin/demo](http://www.lua.org/cgi-bin/demo))
-
--- class helper (include this once, use it for all your classes)
 function class (init)
   local c = {}
   c.__index = c
+  c._ctr=init
   function c.init (...)
     local self = setmetatable({},c)
-    init(self,...)
+    c._ctr(self,...)
     return self
   end
   return c
 end
--- end class helper
 
--- actual class definition
-local someclass = class(function (self, name)
-  self.name = name
+function subclass(parent,init)
+ local c=class(init)
+ return setmetatable(c,parent)
+end
+
+someclass=class(function (self, name)
+  self.name=name
 end)
 
-function someclass:setname (name)
-  self.name = name
+function someclass:foobar()
+ print("foobar "..tostr(self.name))
 end
--- end class definition
 
-local otherclass = class(function (self, name)
-  self.name=name
+otherclass=subclass(someclass,
+function (self, blop)
+  someclass._ctr(self,"foobar")
+  self.blop=blop
+end)
 
-local someclassinstance = someclass.init("monkey")
-print(someclassinstance.name) -- "monkey"
-someclassinstance:setname("banana")
-print(someclassinstance.name) -- "banana"
+function otherclass:testtest()
+ print("otherclass "..tostr(self.blop))
+end
+
+function otherclass:foobar()
+ print("other foobar"..tostr(self.blop))
+ someclass.foobar(self)
+end
+
+o1=someclass.init("hello")
+o2=otherclass.init(23)
+
+o1:foobar()
+o2:foobar()
+o2:testtest()
+
