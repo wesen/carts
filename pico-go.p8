@@ -463,6 +463,10 @@ function class_enemy:do_turn()
  self.has_finished_turn=true
 end
 
+function class_enemy:draw()
+ if (self.node.initialized) class_mover.draw(self)
+end
+
 -->8
 -- todo
 
@@ -570,6 +574,7 @@ end
 function _draw()
  cls()
  board:draw()
+ enemies:draw()
  player:draw()
  arrows:draw()
 end
