@@ -15,6 +15,13 @@ function class (init)
 end
 
 -- misc helpers
+function round(x)
+ if (x%1)<0.5 then
+  return flr(x)
+ else
+  return ceil(x)
+ end
+end
 
 --
 local objs=class(function(self,name)
@@ -171,14 +178,6 @@ directions={dir_left,dir_right,dir_up,dir_down}
 player_spr=64
 sentry_spr=80
 patroling_spr=96
-
-function round(x)
- if (x%1)<0.5 then
-  return flr(x)
- else
-  return ceil(x)
- end
-end
 
 function v_idx(x,y) 
  return y*16+x
@@ -375,6 +374,7 @@ class_player=class(function(self)
  self.node=board.start_node
  self.spr=mget(self.node.x,self.node.y)
  self.is_moving=false
+ self.has_finished_turn=false
  -- draw offsets
  self.x=0
  self.y=0
@@ -393,6 +393,7 @@ function class_player:move(i)
    self.y=0   
    self.node=node
    self.is_moving=false
+   self.has_finished_turn=true
   end) 
  end
 end
@@ -427,16 +428,26 @@ x player rotation
 x don't move while initializing
 x player arrows
 x goal node
-- win condition
+x win condition
+x turns
+- enemies
+- enemy movement
+- player death
 - start screen
 - end screen
-- enemies
+- death animation player
+- death animation enemies
 - background sprites
+- levels
 ]]
 -->8
 -- game
+turn_player=0
+turn_enemy=1
+
 class_game=class(function (self)
  self.initialized=false
+ self.turn=turn_player
 end)
 
 function class_game:is_initialized()
@@ -448,13 +459,43 @@ function class_game:is_initialized()
  return true 
 end
 
-function class_game:update()
- self:is_initialized()
- if self.initialized and not player.is_moving then
-  arrows:show()
- else
-  arrows:hide()
- end
+function class_game:is_win()
+ return player.node==board.goal
+end
+
+function class_game:is_lose()
+ return false
+end
+
+function class_game:start_game_loop()
+ add_cr(function()
+  while not self:is_initialized() do
+   yield()
+  end
+  
+  while (not self:is_win() or self:is_lose()) do
+   printh("player turn")
+   self.turn=turn_player
+   player.has_finished_turn=false
+   
+   while not player.has_finished_turn do
+    if not player.is_moving then
+     arrows:show()
+    else
+     arrows:hide()
+    end
+    yield()
+   end
+   
+   printh("enemy turn")
+   self.turn=turn_enemy
+   yield()
+  end
+  
+  if self:is_win() then
+   printh("won")
+  end
+ end)
 end
 -->8
 -- main functions
@@ -464,11 +505,11 @@ player=class_player.init()
 game=class_game.init()
 
 function _init()
+ game:start_game_loop()
 end
 
 function _update() 
  tick_crs()
- game:update()
  player:update()
 end
 
