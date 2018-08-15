@@ -482,6 +482,7 @@ function(self,node)
 end)
 
 function class_enemy:do_turn()
+ self.has_finished_turn=false
  return add_cr(function()
   local front_node=board:get_node_in_direction(self.node,directions[self.direction])
   if front_node==player.node then
@@ -490,7 +491,8 @@ function class_enemy:do_turn()
   end
   if self.start_spr==patroling_spr then
    if front_node!=nil then
-    wait_for_cr(class_mover.move(self,self.direction))    
+    wait_for_cr(class_mover.move(self,self.direction))
+    printh("enemy move finished")
     if not board:has_link(self.node,directions[self.direction]) then
      self.direction=rotate_180(self.direction)
     end
@@ -525,10 +527,10 @@ x enemies
 x enemy movement
 x sense player
 x clean up direction handling
+x death animation player
 - player death ends game
 - start screen
 - end screen
-- death animation player
 - death animation enemies
 - background sprites
 - levels
@@ -571,19 +573,20 @@ function class_game:start_game_loop()
    self.turn=turn_player
    player.has_finished_turn=false
    
+   arrows:show()
    while not player.has_finished_turn do
-    if not player.is_moving then
-     arrows:show()
-    else
+    if player.is_moving then
      arrows:hide()
     end
     yield()
    end
    
+   arrows:hide()
+   
    printh("enemy turn")
    self.turn=turn_enemy
    for enemy in all(enemies.objs) do
-   enemy:do_turn()
+    enemy:do_turn()
    end
    while not enemies:are_enemies_done() do
     yield()
@@ -592,6 +595,8 @@ function class_game:start_game_loop()
   
   if self:is_win() then
    printh("won")
+  elseif self:is_lose() then
+   printh("lost")
   end
  end)
 end
