@@ -77,6 +77,19 @@ function wait_for_cr(cr)
  end
 end
 
+function wait_for_crs(crs)
+ local all_done=false
+ while not all_done do
+  all_done=true
+  for cr in all(crs) do
+   if costatus(cr)!='dead' then
+    all_done=false
+    break
+   end
+  end
+ end
+end
+
 function run_sub_cr(f)
  wait_for_cr(add_cr(f))
 end
@@ -458,8 +471,10 @@ end
 
 function class_player:draw()
  if self.is_dead then
+  local v=directions[self.death_direction]
   spr(dead_player_spr,
-      (self.node.x+1)*8,(self.node.y-1)*8)
+      (self.node.x+v[1])*8,
+      (self.node.y+v[2])*8)
  else
   class_mover.draw(self)
  end
@@ -486,19 +501,29 @@ function class_enemy:do_turn()
  return add_cr(function()
   local front_node=board:get_node_in_direction(self.node,directions[self.direction])
   if front_node==player.node then
-   player:die()
+   local d=self.direction
    printh("player dead")
-  end
-  if self.start_spr==patroling_spr then
-   if front_node!=nil then
-    wait_for_cr(class_mover.move(self,self.direction))
-    printh("enemy move finished")
-    if not board:has_link(self.node,directions[self.direction]) then
-     self.direction=rotate_180(self.direction)
+   -- concurrently
+   wait_for_crs({
+   add_cr(function()
+    wait_for(0.2)
+    player:die(d)
+   end),
+   class_mover.move(self,self.direction)
+   })
+  else
+   if self.start_spr==patroling_spr then
+    if front_node!=nil then
+     wait_for_cr(class_mover.move(self,self.direction))
+     printh("enemy move finished")
+     if not board:has_link(self.node,directions[self.direction]) then
+      self.direction=rotate_180(self.direction)
+     end
     end
+   elseif self.start_spr==sentry_spr then
    end
-  elseif self.start_spr==sentry_spr then
   end
+  
   self.has_finished_turn=true
  end)
 end
@@ -528,10 +553,11 @@ x enemy movement
 x sense player
 x clean up direction handling
 x death animation player
-- player death ends game
+x put dead player in direction of blow
+x player death ends game
+- death animation enemies
 - start screen
 - end screen
-- death animation enemies
 - background sprites
 - levels
 ]]
@@ -568,7 +594,7 @@ function class_game:start_game_loop()
    yield()
   end
   
-  while (not self:is_win() or self:is_lose()) do
+  while not (self:is_win() or self:is_lose()) do
    printh("player turn")
    self.turn=turn_player
    player.has_finished_turn=false
@@ -583,6 +609,8 @@ function class_game:start_game_loop()
    
    arrows:hide()
    
+   if (self:is_win()) break
+   
    printh("enemy turn")
    self.turn=turn_enemy
    for enemy in all(enemies.objs) do
@@ -591,6 +619,7 @@ function class_game:start_game_loop()
    while not enemies:are_enemies_done() do
     yield()
    end
+   printh("finished enemy turns")
   end
   
   if self:is_win() then
