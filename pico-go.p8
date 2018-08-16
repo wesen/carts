@@ -766,7 +766,7 @@ x add helper variables to skip states
 x display reload icon on game screen
 x fix starting node of metalevel
 x loop game around
-- add finish game screen
+x add finish game screen
 - chose to enter level
 - only allow completed levels
 x display level name on card
@@ -804,6 +804,7 @@ state_start_screen=0
 state_load_level=1
 state_play=2
 state_end_screen=3
+state_finish_game=4
 
 -- debug flags
 dbg_skip_start=false
@@ -841,65 +842,75 @@ end
 function class_game:play_game_loop()
  
  return add_cr(function()
-::restart::
-  self.current_level=dbg_start_level
-
-  if not dbg_skip_start then
-   self.state=state_start_screen
+  while true do
+   self.current_level=dbg_start_level
+ 
+   if not dbg_skip_start then
+    self.state=state_start_screen
+    wait_for_cr(fade(true))  
+    pal()
+    while not (btnp(4) or btnp(5)) do
+   	 yield()
+   	end
+   	printh("start game")
+   	blink()
+   	wait_for_cr(fade())
+   end 	
+ 
+   while true do
+    if not dbg_skip_metalevel then
+     self.is_metalevel=true
+     wait_for_cr(self:play_game_level(meta_level))
+     if self:is_win() then
+      wait_for_cr(fade())
+      break
+     end
+     wait_for(1)
+     blink()
+     wait_for_cr(fade())
+     printh("faded")
+     printh("fade back in next level")
+    else
+     self.current_level=dbg_start_level
+    end
+    
+    
+    self.is_metalevel=false
+    wait_for_cr(self:play_game_level(levels[self.current_level]))
+  	 wait_for(1)
+    blink()
+ 	  wait_for_cr(fade())  
+ 
+ 	  if self:is_win() then
+     printh("won")
+     self.state=state_end_screen
+     pal()
+  	  wait_for_crs({animate_card()})
+  	  while not (btnp(4) or btnp(5)) do
+  	   yield()
+  	  end
+  	  card.visible=false
+  	  wait_for_cr(fade())
+  
+     self.current_level=min(self.current_level+1,#levels+1)
+     printh("current level is now "..tostr(self.current_level))
+    elseif self:is_lose() then
+     printh("lost")
+     wait_for(.5)
+    end
+   end
+   
+   printh("finished game")
+   self.state=state_finish_game
+   
    wait_for_cr(fade(true))  
    pal()
    while not (btnp(4) or btnp(5)) do
   	 yield()
   	end
-  	printh("start game")
   	blink()
   	wait_for_cr(fade())
-  end 	
-
-  while true do
-   if not dbg_skip_metalevel then
-    self.is_metalevel=true
-    wait_for_cr(self:play_game_level(meta_level))
-    if self:is_win() then
-     break
-    end
-    wait_for(1)
-    blink()
-    wait_for_cr(fade())
-    printh("faded")
-    printh("fade back in next level")
-   else
-    self.current_level=dbg_start_level
-   end
-   
-   
-   self.is_metalevel=false
-   wait_for_cr(self:play_game_level(levels[self.current_level]))
- 	 wait_for(1)
-   blink()
-	  wait_for_cr(fade())  
-
-	  if self:is_win() then
-    printh("won")
-    self.state=state_end_screen
-    pal()
- 	  wait_for_crs({animate_card()})
- 	  while not (btnp(4) or btnp(5)) do
- 	   yield()
- 	  end
- 	  card.visible=false
- 	  wait_for_cr(fade())
- 
-    self.current_level=min(self.current_level+1,#levels+1)
-    printh("current level is now "..tostr(self.current_level))
-   elseif self:is_lose() then
-    printh("lost")
-    wait_for(.5)
-   end
   end
-  
-  printh("restarting")
-  goto restart  
  end)
 end
 
@@ -1012,6 +1023,8 @@ function class_game:draw()
  camera(shakex,shakey)
  if self.state==state_start_screen and not is_blink then
   print("picoman go",32,32)
+ elseif self.state==state_finish_game and not is_blink then
+  print("you won",32,32)
  elseif self.state==state_end_screen then
   -- do screen fade
   draw_card()
