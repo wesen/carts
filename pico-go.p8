@@ -566,11 +566,8 @@ function class_player:move(i)
  end)
 end
 
+-- only called in the correct states
 function class_player:update()
- if (not game.initialized) return
- if (game.turn!=turn_player) return
- if (self.has_finished_turn) return
- 
  for i=1,5 do
   if btnp(i-1) and not self.is_moving then
    self:move(i)
@@ -685,19 +682,24 @@ levels={
  bbox(v2(1,15),v2(11,23))
 }
 
+state_start_screen=0
+state_load_level=1
+state_play=2
+state_end_screen=3
+
 board=class_board.init(levels[1])
 
 class_game=class(function (self)
- self.initialized=false
+ self.state=state_start_screen
  self.turn=turn_player
 end)
 
-function class_game:is_initialized()
- if (self.initialized) return true
+function class_game:is_level_loaded()
+ if (self.state==state_play) return true
  for k,n in pairs(board.nodes) do
   if (not n.initialized) return false
  end
- self.initialized=true
+ self.state=state_play
  self.turn=turn_player
  return true 
 end
@@ -716,23 +718,44 @@ function class_game:play_game_loop()
  return add_cr(function()
   while true do
    wait_for_cr(self:play_game_level(level))
+
+	  if self:is_win() then
+    printh("won")
+   elseif self:is_lose() then
+    printh("lost")
+   end
+    
    level=(level%2+1)
   end
  end)
+end
+
+function class_game:update()
+ if (self.state==state_play and self.turn==turn_player) player:update()
+end
+
+function class_game:draw()
+ print("state: "..tostr(self.state),0,96,7)
+ board:draw()
+ enemies:draw()
+ player:draw()
+ arrows:draw()
 end
 
 function class_game:play_game_level(level)
  self.initialized=false
  player:destroy()
  board:destroy()
+
+ self.state=state_load_level
  
  board=class_board.init(levels[level])
  player=class_player.init()
- 
+  
  printh("playing level "..tostr(level))
 
  return add_cr(function()
-  while not self:is_initialized() do
+  while not self:is_level_loaded() do
    yield()
   end
   
@@ -763,13 +786,7 @@ function class_game:play_game_level(level)
    end
   end
   
-  if self:is_win() then
-   printh("won")
-  elseif self:is_lose() then
-   printh("lost")
-  end
-  
-  self.initialized=false
+  self.state=state_end_screen
  end)
 end
 -->8
@@ -793,16 +810,13 @@ function _update()
  lasttime=t
 
  tick_crs()
- player:update()
+ game:update()
  particles:update() 
 end
 
 function _draw()
  cls()
- board:draw()
- enemies:draw()
- player:draw()
- arrows:draw()
+ game:draw()
  particles:draw() 
 end
 -->8
