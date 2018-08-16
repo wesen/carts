@@ -10,7 +10,11 @@ function class (init)
   function c.init (...)
     local self = setmetatable({},c)
     c._ctr(self,...)
+    self.destroyed=false
     return self
+  end
+  c.destroy=function(self)
+   self.destroyed=true
   end
   return c
 end
@@ -40,6 +44,13 @@ end
 
 function objs:del(obj)
  del(self.objs,obj)
+ obj:destroy()
+end
+
+function objs:clear()
+ for o in all(self.objs) do
+  self:del(o)
+ end
 end
 
 function objs:update()
@@ -165,7 +176,7 @@ function animate(obj,sprs,d,loop,cb)
     obj.spr=s
     wait_for(d)
    end
-  until not loop
+  until (not loop) or obj.destroyed
   cb()
  end)
 end
@@ -324,7 +335,6 @@ end
 class_board=class(function(self,bbox)
  printh("init "..tostr(bbox.aa))
  self.nodes={}
- self.enemies={}
  self.links={}
  self.bbox=bbox
  for mx=bbox.aa.x,bbox.bb.x do
@@ -357,6 +367,19 @@ class_board=class(function(self,bbox)
  
  self.start_node:initialize()
 end)
+
+function class_board:destroy()
+ for n in all(self.nodes) do
+  n:destroy()
+ end
+ enemies:clear()
+ for l in all(self.links) do
+  l:destroy()
+ end
+ self.nodes={}
+ self.links={}
+ self.destroyed=true
+end
 
 function class_board:get_spr(node)
  return mget(self.bbox.aa.x+node.x,self.bbox.aa.y+node.y)
@@ -638,6 +661,7 @@ x enemy death
 x enemy death smoke
 x goal arrows
 x handle multiple game levels
+x chain levels
 - screen shake on death and level
 - end level cards
 - select level metalevel
@@ -674,6 +698,7 @@ function class_game:is_initialized()
   if (not n.initialized) return false
  end
  self.initialized=true
+ self.turn=turn_player
  return true 
 end
 
@@ -685,11 +710,28 @@ function class_game:is_lose()
  return player.is_dead
 end
 
+function class_game:play_game_loop()
+ local level=1
+ 
+ return add_cr(function()
+  while true do
+   wait_for_cr(self:play_game_level(level))
+   level=(level%2+1)
+  end
+ end)
+end
+
 function class_game:play_game_level(level)
+ self.initialized=false
+ player:destroy()
+ board:destroy()
+ 
  board=class_board.init(levels[level])
  player=class_player.init()
+ 
+ printh("playing level "..tostr(level))
 
- add_cr(function()
+ return add_cr(function()
   while not self:is_initialized() do
    yield()
   end
@@ -719,7 +761,6 @@ function class_game:play_game_level(level)
    while not enemies:are_enemies_done() do
     yield()
    end
-   printh("finished enemy turns")
   end
   
   if self:is_win() then
@@ -728,7 +769,7 @@ function class_game:play_game_level(level)
    printh("lost")
   end
   
-  self.is_initialized=false
+  self.initialized=false
  end)
 end
 -->8
@@ -743,7 +784,7 @@ lasttime=time()
 dt=0
 
 function _init()
- game:play_game_level(2)
+ game:play_game_loop()
 end
 
 function _update() 
