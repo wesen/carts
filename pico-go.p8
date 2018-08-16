@@ -280,6 +280,8 @@ arrow_spr=5
 card_spr=7
 marker_spr=48
 
+shake=0
+
 function v_idx(x,y) 
  return y*16+x
 end
@@ -558,6 +560,7 @@ end
 function class_mover:die(direction)
  return add_cr(function()
   make_explosion(v2(self.node.x*8+4,self.node.y*8+4))
+  shake=.2
   wait_for(0.2)
   self.is_dead=true
   self.death_direction=direction
@@ -689,8 +692,9 @@ x load levels automatically
 - define background tile for level
 x start screen
 x end screen
+- start screen gfx
 - more enemies
-- screen shake on death and level
+x screen shake on death and level
 - select level metalevel
 - sound fx
 - music
@@ -775,7 +779,7 @@ function class_game:play_game_loop()
 	  if self:is_win() then
     printh("won")
     self.state=state_end_screen
- 	  wait_for_cr(animate_card())
+ 	  wait_for_crs({animate_card()})
  	  while not (btnp(4) or btnp(5)) do
  	   yield()
  	  end
@@ -842,19 +846,33 @@ function class_game:update()
  if (self.state==state_play and self.turn==turn_player) player:update()
 end
 
+-- shake
+shakex=0
+shakey=0
+
+function doshake()
+ shakex=(8-rnd(16))*shake
+ shakey=(8-rnd(16))*shake
+ 
+ shake*=0.9
+ if (shake<0.1) shake=0
+end
+
 function draw_board()
  local w=64-board.bbox:w()*8/2
  local h=64-board.bbox:h()*8/2
- camera(-w,-h)
+ camera(-w+shakex,-h+shakey)
  board:draw()
  enemies:draw()
  player:draw()
  arrows:draw()
  particles:draw() 
- camera(0,0)
+ camera(shakex,shakey)
 end
 
 function class_game:draw()
+ doshake()
+ camera(shakex,shakey)
  if self.state==state_start_screen then
   print("picoman go",32,32)
  elseif self.state==state_end_screen then
@@ -987,8 +1005,26 @@ function draw_card()
  spr(card_spr,x1+w/2-4,y1+62)
 end
 
+-- fade
+dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,14}
 
-
+function fade_to_state(state)
+ for i=1,10 do
+  local p=flr(mid(0,i/10,1)*100)
+ 
+  for j=1,15 do
+   local kmax=(p+(j*1.46))/22
+   local col=j
+   for k=1,kmax do
+    col=dpal[col]
+   end
+   pal(j,col)
+  end
+  
+  yield()
+ end
+ set_state(state)
+end
 __gfx__
 00000000909090900000000000090000999999990000000000ddd000008888003333333300000000000000000000000000000000000000000000000000000000
 000000000000000900000000000900009000000900000000000d0000088888803333333300000000000000000000000000000000000000000000000000000000
