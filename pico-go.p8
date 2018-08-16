@@ -658,7 +658,9 @@ function class_player:update()
    break
   end
  end
- if (btnp(4)) game:restart_level()
+ if btnp(4) then
+  game:restart_level()
+ end
 end
 
 -- enemies
@@ -754,8 +756,10 @@ x end screen
 x screen shake on death and level
 x draw screen fade on end level cards
 x select level metalevel
-- restart level button
-- remember meta level position
+x restart level button
+x remember meta level position
+x add helper variables to skip states
+- display reload icon on game screen
 - add finish game screen
 - display level ame
 - define background tile for level
@@ -789,6 +793,12 @@ state_load_level=1
 state_play=2
 state_end_screen=3
 
+dbg_skip_start=true
+dbg_skip_metalevel=true
+dbg_auto_win=true
+dbg_start_level=1
+dbg_skip_init_animation=true
+
 class_game=class(function (self)
  self.state=state_start_screen
  self.turn=turn_player
@@ -817,20 +827,26 @@ function class_game:play_game_loop()
  self.current_level=nil
  
  return add_cr(function()
-  self.state=state_start_screen
-  wait_for_cr(fade(true))  
-  pal()
-  while not (btnp(4) or btnp(5)) do
- 	 yield()
- 	end
- 	printh("start game")
- 	wait_for_cr(fade())
+  if not dbg_skip_start then
+   self.state=state_start_screen
+   wait_for_cr(fade(true))  
+   pal()
+   while not (btnp(4) or btnp(5)) do
+  	 yield()
+  	end
+  	printh("start game")
+  	wait_for_cr(fade())
+  end
  	
 
   while true do
-   self.is_metalevel=true
-   wait_for_cr(self:play_game_level(meta_level))
-   wait_for_cr(fade())  
+   if not dbg_skip_metalevel then
+    self.is_metalevel=true
+    wait_for_cr(self:play_game_level(meta_level))
+    wait_for_cr(fade())  
+   else
+    self.current_level=dbg_start_level
+   end
    
    self.is_metalevel=false
    wait_for_cr(self:play_game_level(levels[self.current_level]))
@@ -858,12 +874,13 @@ function class_game:play_game_loop()
 end
 
 function class_game:restart_level()
- self.request_restart=true
+ if (not self.is_metalevel) self.request_restart=true
 end
 
 function class_game:play_game_level(level)
 
  return add_cr(function()
+::again::
   self.initialized=false
   self.request_restart=false
   if (player) player:destroy()
@@ -895,12 +912,15 @@ function class_game:play_game_level(level)
    player.has_finished_turn=false
    
    arrows:show()
-   while not player.has_finished_turn do
+   while not player.has_finished_turn and not self.request_restart do
     if player.is_moving then
      arrows:hide()
     end
     yield()
    end
+   
+   if (self.request_restart) goto again
+   if (dbg_auto_win) player.node=board.goal
    
    arrows:hide()
    printh("finished player turn")   
@@ -912,7 +932,6 @@ function class_game:play_game_level(level)
     break               
    end
    
---   if self.request_restart() goto
    
    if (self:is_win()) break
    
