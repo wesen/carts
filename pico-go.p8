@@ -764,12 +764,16 @@ x restart level button
 x remember meta level position
 x add helper variables to skip states
 x display reload icon on game screen
+x fix starting node of metalevel
+x loop game around
 - add finish game screen
+- chose to enter level
+- only allow completed levels
 x display level name on card
-- display level name on metalevel
+x display level name on metalevel
+- no kills / all kills status
 - define background tile for level
 - start screen gfx
-- no kills / all kills status
 - count turns
 - dedicated victim to kill at goal
 - briefcases
@@ -835,9 +839,11 @@ function class_game:is_lose()
 end
 
 function class_game:play_game_loop()
- self.current_level=nil
  
  return add_cr(function()
+::restart::
+  self.current_level=dbg_start_level
+
   if not dbg_skip_start then
    self.state=state_start_screen
    wait_for_cr(fade(true))  
@@ -854,6 +860,9 @@ function class_game:play_game_loop()
    if not dbg_skip_metalevel then
     self.is_metalevel=true
     wait_for_cr(self:play_game_level(meta_level))
+    if self:is_win() then
+     break
+    end
     wait_for(1)
     blink()
     wait_for_cr(fade())
@@ -862,6 +871,7 @@ function class_game:play_game_loop()
    else
     self.current_level=dbg_start_level
    end
+   
    
    self.is_metalevel=false
    wait_for_cr(self:play_game_level(levels[self.current_level]))
@@ -880,13 +890,16 @@ function class_game:play_game_loop()
  	  card.visible=false
  	  wait_for_cr(fade())
  
-    self.current_level=(self.current_level%#levels+1)
+    self.current_level=min(self.current_level+1,#levels+1)
+    printh("current level is now "..tostr(self.current_level))
    elseif self:is_lose() then
     printh("lost")
     wait_for(.5)
    end
-    
   end
+  
+  printh("restarting")
+  goto restart  
  end)
 end
 
@@ -1008,7 +1021,7 @@ function class_game:draw()
    print("🅾️",100,12,6)
   else
    if player!=nil and player.node.level!=nil and not is_blink then
-    print("level "..tostr(player.node.level+1),10,10)
+    print("level "..tostr(player.node.level+1),52,80)
    end
   end
   draw_board()
