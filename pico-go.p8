@@ -317,6 +317,7 @@ function class_node:str()
  return "n:"..tostr(self.x)..","..tostr(self.y)
 end
 
+-- xxx this should be a cr
 function class_node:initialize()
  if (self.initialized) return
  local sprs={16,17,18,19}
@@ -414,7 +415,7 @@ class_board=class(function(self,bbox)
      self.goal=n
      n.is_goal=true
     end
-    if self.is_metalevel and not n.is_goal then
+    if band(f,128)==128 then
      n.level=mget(self.bbox.aa.x+n.x,self.bbox.aa.y+n.y)-marker_spr
      if n.level+2==game.current_level then
       self.start_node=n
@@ -498,9 +499,11 @@ function class_board:draw()
    local col=n.level
    if (n.level==0) col=6
    pal(6,col)
+   spr(n.spr,n.x*8,n.y*8)
+   pal(6,6)
+  else
+   spr(n.spr,n.x*8,n.y*8)
   end
-  spr(n.spr,n.x*8,n.y*8)
-  pal(6,6)
  end
  for v,l in pairs(self.links) do  
   local flip_v=not (l.is_v and l.flip_spr)
@@ -513,7 +516,7 @@ end
 -- player and enemies
 
 -- arrows
-arrow_animation_speed=0.1
+arrow_animation_speed=0.3
 
 class_arrow=class(function(self,direction)
  self.visible=false
@@ -607,6 +610,7 @@ function class_mover:move(i)
 end
 
 function class_mover:draw()
+ if (is_blink) return
  if self.is_dead then
   local v=death_directions[self.death_direction]
   spr(self.start_spr+5,
@@ -761,7 +765,8 @@ x remember meta level position
 x add helper variables to skip states
 x display reload icon on game screen
 - add finish game screen
-- display level ame
+x display level name on card
+- display level name on metalevel
 - define background tile for level
 - start screen gfx
 - no kills / all kills status
@@ -785,8 +790,11 @@ x display reload icon on game screen
 ]]
 -->8
 -- game
+
+-- constants and globals
 turn_player=0
 turn_enemy=1
+is_blink=false
 
 state_start_screen=0
 state_load_level=1
@@ -794,13 +802,14 @@ state_play=2
 state_end_screen=3
 
 -- debug flags
-dbg_skip_start=true
-dbg_skip_metalevel=true
-dbg_auto_win=true
+dbg_skip_start=false
+dbg_skip_metalevel=false
+dbg_auto_win=false
 dbg_start_level=1
-dbg_skip_init_animation=true
+init_animation_speed=0
 dbg_draw=false
 
+-- game
 class_game=class(function (self)
  self.state=state_start_screen
  self.turn=turn_player
@@ -837,22 +846,28 @@ function class_game:play_game_loop()
   	 yield()
   	end
   	printh("start game")
+  	blink()
   	wait_for_cr(fade())
-  end
- 	
+  end 	
 
   while true do
    if not dbg_skip_metalevel then
     self.is_metalevel=true
     wait_for_cr(self:play_game_level(meta_level))
-    wait_for_cr(fade())  
+    wait_for(1)
+    blink()
+    wait_for_cr(fade())
+    printh("faded")
+    printh("fade back in next level")
    else
     self.current_level=dbg_start_level
    end
    
    self.is_metalevel=false
    wait_for_cr(self:play_game_level(levels[self.current_level]))
-   wait_for_cr(fade())  
+ 	 wait_for(1)
+   blink()
+	  wait_for_cr(fade())  
 
 	  if self:is_win() then
     printh("won")
@@ -889,9 +904,9 @@ function class_game:play_game_level(level)
   if (board) board:destroy()
  
   self.state=state_load_level
-  
   board=class_board.init(level)
   player=class_player.init()
+
   -- hack for metalevel start position
   if player.spr<64 then
    player.spr=65
@@ -966,21 +981,23 @@ function doshake()
 end
 
 function draw_board()
- local w=64-board.bbox:w()*8/2
- local h=64-board.bbox:h()*8/2
- camera(-w+shakex,-h+shakey)
- board:draw()
- enemies:draw()
- player:draw()
- arrows:draw()
- particles:draw() 
- camera(shakex,shakey)
+ if board!=nil then
+  local w=64-board.bbox:w()*8/2
+  local h=64-board.bbox:h()*8/2
+  camera(-w+shakex,-h+shakey)
+  board:draw()
+  enemies:draw()
+  player:draw()
+  arrows:draw()
+  particles:draw() 
+  camera(shakex,shakey)
+ end
 end
 
 function class_game:draw()
  doshake()
  camera(shakex,shakey)
- if self.state==state_start_screen then
+ if self.state==state_start_screen and not is_blink then
   print("picoman go",32,32)
  elseif self.state==state_end_screen then
   -- do screen fade
@@ -989,6 +1006,10 @@ function class_game:draw()
   if not self.is_metalevel then
    spr(40,110,10)
    print("🅾️",100,12,6)
+  else
+   if player!=nil and player.node.level!=nil and not is_blink then
+    print("level "..tostr(player.node.level+1),10,10)
+   end
   end
   draw_board()
  end
@@ -1015,7 +1036,7 @@ function _init()
  game:play_game_loop()
 end
 
-function _update() 
+function _update60()
  local t=time()
  dt=t-lasttime
  lasttime=t
@@ -1112,8 +1133,8 @@ function draw_card()
  rectfill(x1+3,y1+2,
           x1+20,y1+10,7)
           
- print("level",x1+5,y1+45,0)
- print("complete",x1+5,y1+52,0)
+ print("level "..tostr(game.current_level),x1+11,y1+45,0)
+ print("complete",x1+11,y1+52,0)
  circfill(x1+w/2,y1+27,12,6)
  spr(card_spr,x1+w/2-4,y1+62)
 end
@@ -1132,15 +1153,27 @@ function fade(fade_in)
     local kmax=(p+(j*1.46))/22
     local col=j
     for k=1,kmax do
+     if (col==0) break
      col=dpal[col]
     end
-    pal(j,col)
+    pal(j,col,1)
    end
    
-   yield()
+   wait_for(0.1)
   end
-  printh("finished fade")
  end)
+end
+
+function blink()
+ local blink_speed=0.2
+ is_blink=true
+ wait_for(blink_speed)
+ is_blink=false
+ wait_for(blink_speed)
+ is_blink=true
+ wait_for(blink_speed)
+ is_blink=false
+ wait_for(.2)
 end
 __gfx__
 00000000909090900000000000090000999999990000000000ddd000008888003333333300000000505050500000000000000000000000000000000000000000
