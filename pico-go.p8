@@ -688,13 +688,13 @@ x death animation enemies
 x background sprites
 x end level cards
 x load levels automatically
-- draw screen fade on end level cards
-- define background tile for level
 x start screen
 x end screen
+x screen shake on death and level
+x draw screen fade on end level cards
+- define background tile for level
 - start screen gfx
 - more enemies
-x screen shake on death and level
 - select level metalevel
 - sound fx
 - music
@@ -768,27 +768,34 @@ function class_game:play_game_loop()
  
  return add_cr(function()
   self.state=state_start_screen
+  wait_for_cr(fade(true))  
+  pal()
   while not (btnp(4) or btnp(5)) do
  	 yield()
  	end
  	printh("start game")
+ 	wait_for_cr(fade())
+ 	
 
   while true do
    wait_for_cr(self:play_game_level(level))
+   wait_for_cr(fade())  
 
 	  if self:is_win() then
     printh("won")
     self.state=state_end_screen
+    pal()
  	  wait_for_crs({animate_card()})
  	  while not (btnp(4) or btnp(5)) do
  	   yield()
  	  end
  	  card.visible=false
+ 	  wait_for_cr(fade())
  
     level=(level%#levels+1)
    elseif self:is_lose() then
     printh("lost")
-    wait_for(2)
+    wait_for(.5)
    end
     
   end
@@ -804,6 +811,8 @@ function class_game:play_game_level(level)
  
  board=class_board.init(levels[level])
  player=class_player.init()
+ 
+ wait_for_cr(fade(true))
   
  printh("playing level "..tostr(level))
 
@@ -1008,22 +1017,26 @@ end
 -- fade
 dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,14}
 
-function fade_to_state(state)
- for i=1,10 do
-  local p=flr(mid(0,i/10,1)*100)
- 
-  for j=1,15 do
-   local kmax=(p+(j*1.46))/22
-   local col=j
-   for k=1,kmax do
-    col=dpal[col]
-   end
-   pal(j,col)
-  end
+function fade(fade_in)
+ return add_cr(function()
+  for i=1,10 do
+   local i_=i
+   if (fade_in==true) i_=10-i
+   local p=flr(mid(0,i_/10,1)*100)
   
-  yield()
- end
- set_state(state)
+   for j=1,15 do
+    local kmax=(p+(j*1.46))/22
+    local col=j
+    for k=1,kmax do
+     col=dpal[col]
+    end
+    pal(j,col)
+   end
+   
+   yield()
+  end
+  printh("finished fade")
+ end)
 end
 __gfx__
 00000000909090900000000000090000999999990000000000ddd000008888003333333300000000000000000000000000000000000000000000000000000000
