@@ -658,10 +658,11 @@ function(self)
 end)
 
 function class_player:move(i)
+ local cr=class_mover.move(self,i)
+ if (cr==nil) return
+ 
  return add_cr(function()
-  sfx(move_sfx)
-  local cr=class_mover.move(self,i)
-  if (cr==nil) return
+  sfx(move_sfx)  
   local crs={cr}
   local enemies=board:get_enemies_in_direction(self.node,directions[i])
   for enemy in all(enemies) do
@@ -681,10 +682,14 @@ function class_player:do_turn()
   while true do
    for i=1,4 do
     if btnp(i-1) then
+     printh("button pressed")
      local cr=self:move(i)
+     printh("move cr "..tostr(cr))
      if cr!=nil then
       wait_for_cr(cr)
       return
+     else 
+      yield()
      end
     end
    end
@@ -802,7 +807,7 @@ x add sfx for finish level
 x add move sfx
 x refactor metalevel into separate game loop
 x don't hang when trying to reload metalevel
-- don't hang when moving in wrong direction
+x don't hang when moving in wrong direction
 - add death sfx
 - add kill sfx
 x player can't move if goal reached
