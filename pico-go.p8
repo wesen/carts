@@ -770,6 +770,9 @@ x fix starting node of metalevel
 x loop game around
 x add finish game screen
 x don't enter invalid level in metalevel
+x add sfx for finish level
+- refactor metalevel into separate game loop
+- use bebop lines instead of sfx
 - chose to enter level
 - only allow completed levels
 x display level name on card
@@ -810,8 +813,8 @@ state_end_screen=3
 state_finish_game=4
 
 -- debug flags
-dbg_skip_start=false
-dbg_skip_metalevel=false
+dbg_skip_start=true
+dbg_skip_metalevel=true
 dbg_auto_win=false
 dbg_start_level=2
 init_animation_speed=0
@@ -1000,11 +1003,18 @@ function class_game:play_game_level(level)
 	    self.current_level=level
   	  printh("selected level "..tostr(self.current_level))
  	   -- here we need to handle a x input
-   	 break
+   	 return
    	end
    end   
    
-   if (self:is_win()) break
+   if self:is_win() then
+    music(-1,400)
+    if not self.is_metalevel then
+     sfx(5)
+    end
+    return
+   end
+  
    
    printh("enemy turn")
    self.turn=turn_enemy
@@ -1487,6 +1497,7 @@ __sfx__
 0110000018034180301803018030180301802018020180101d0341d0301d0301d0301d0201d0201d0301d0101a0341a0301a0301a0301a0201a0201a0201a0100000000000000000000000000000000000000000
 011000001b0541b0501b0501b0401b0301b0301b0201b02022054220502204022040220402204022030220301d0541d0501d0401d0401d0401d0301d0301d0300000000000000000000000000000000000000000
 010600000000016055180551b0551f055220552405527055270002e04222022220152e0002e000000002e0002e0002e0050000000000000000000000000000000000000000000000000000000000000000000000
+0104000028545295451f5452a5451b5452b545165452c545115452d5450f5452e5450d5452e5450c545305450c545315450f5453154517545335451f5453454525545375452c545385453054539545345453a545
 __music__
 03 01424344
 03 01020344
