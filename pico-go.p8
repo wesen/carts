@@ -278,9 +278,9 @@ metalevel_bbox=bbox(v2(112,0),v2(125,3))
 
 -- debug flags
 dbg_skip_start=true
-dbg_skip_metalevel=false
+dbg_skip_metalevel=true
 dbg_auto_win=false
-dbg_start_level=4
+dbg_start_level=1
 dbg_draw=false
 
 -- constants
@@ -410,10 +410,20 @@ end
 -- levels
 class_level=class(function(self,bbox,number)
  self.bbox=bbox
- self.min_turns=nil
  self.enemies=0
  self.number=number
  self.is_metalevel=number==0
+ self.has_briefcase=false
+ 
+ -- current game status
+ self.enemies_killed=0
+ self.turns=0
+
+ -- score items
+ self.max_enemies_killed=0
+ self.has_achieved_no_kill=false
+ self.min_turns=20000
+ self.has_taken_briefcase=false
 end)
 
 function class_level:str()
@@ -488,7 +498,7 @@ class_board=class(function(self,level)
   end
  end
  
- self.level.enemies=#enemies.objs
+ level.enemies=#enemies.objs
  self.start_node:initialize()
 end)
 
