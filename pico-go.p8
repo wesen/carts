@@ -869,7 +869,8 @@ function class_game:play_start_screen()
   while not (btnp(4) or btnp(5)) do
  	 yield()
  	end
- 	sfx(0)
+  music(-1,200)
+ 	sfx(4)
  	printh("start game")
  	blink()
  	wait_for_cr(fade())
@@ -885,6 +886,7 @@ function class_game:play_metalevel()
    wait_for_cr(fade())
    return true
   end
+  music(-1,300)
   sfx(4)
   wait_for(1)
   blink()
