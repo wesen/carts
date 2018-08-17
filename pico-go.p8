@@ -842,10 +842,12 @@ x draw plants
 x don't kill enemies multiple times
 x hiding in plants
 x sentry
+x display briefcase on level
 - briefcases
 - add hide in plant sfx
 - add crossing sfx
 - add kill sfx
+- better fx for hiding and briefcase
 x multiple enemies on one spot
 x player can't move if goal reached
 - use bebop lines instead of sfx
