@@ -408,20 +408,34 @@ function class_link:initialize(flip_spr,cb)
 end
 
 -- levels
+class_level=class(function(self,bbox,number)
+ self.bbox=bbox
+ self.min_turns=nil
+ self.enemies=0
+ self.number=number
+ self.is_metalevel=number==0
+end)
+
+function class_level:str()
+ return "l"..tostr(self.number)..self.bbox:str()
+end
+
 levels={}
-meta_level=bbox(v2(112,0),v2(123,3))
+meta_level=class_level.init(
+  bbox(v2(112,0),v2(123,3)),
+  0)
 
 function load_levels()
  for mx=0,128 do
   for my=0,128 do
-   if not meta_level:is_inside(v2(mx,my)) then
+   if not meta_level.bbox:is_inside(v2(mx,my)) then
     local m=mget(mx,my)
     if band(fget(m),128)==128 then
-     local level=m-marker_spr+1
-     if levels[level]==nil then
-      levels[level]=bbox(v2(mx,my),nil)
+     local number=m-marker_spr+1
+     if levels[number]==nil then
+      levels[number]=class_level.init(bbox(v2(mx,my),nil),number)
      else
-      local l=levels[level]
+      local l=levels[number].bbox
       if (mx>l.aa.x) or (my>l.aa.y) then
        l.bb=v2(mx,my+1)
        l.aa.x+=1
@@ -429,7 +443,7 @@ function load_levels()
        l.bb=v2(l.aa.x,l.aa.y+1)
        l.aa=v2(mx+1,my)
       end
-       printh("result "..l:str())
+      printh("result "..levels[number]:str())
      end
     end
    end
@@ -440,12 +454,13 @@ end
 
 
 --board
-class_board=class(function(self,bbox)
+class_board=class(function(self,level)
  self.nodes={}
- self.is_metalevel=bbox==meta_level
+ self.is_metalevel=level==meta_level
  self.links={}
- self.bbox=bbox
- printh("load level "..bbox:str())
+ self.level=level
+ local bbox=level.bbox
+ self.level.enemies=0
  for mx=bbox.aa.x,bbox.bb.x-1 do
   for my=bbox.aa.y,bbox.bb.y-1 do
    local m=mget(mx,my)
@@ -462,7 +477,6 @@ class_board=class(function(self,bbox)
     if n.level!=nil then
      if n.level==game.current_level then
       self.start_node=n
-      printh("set start node to "..n:str())
      end
     end
     if (n.enemy!=nil) enemies:add(class_enemy.init(n,m))
@@ -474,6 +488,7 @@ class_board=class(function(self,bbox)
   end
  end
  
+ self.level.enemies=#enemies.objs
  self.start_node:initialize()
 end)
 
@@ -491,7 +506,8 @@ function class_board:destroy()
 end
 
 function class_board:get_spr(node)
- return mget(self.bbox.aa.x+node.x,self.bbox.aa.y+node.y)
+ return mget(self.level.bbox.aa.x+node.x,
+             self.level.bbox.aa.y+node.y)
 end
 
 function class_board:has_link(node,direction)
@@ -525,8 +541,11 @@ function class_board:get_neighbors(x,y)
 end
 
 function class_board:draw()
- map(self.bbox.aa.x,self.bbox.aa.y,
-     0,0,self.bbox:w(),self.bbox:h())
+ map(self.level.bbox.aa.x,
+     self.level.bbox.aa.y,
+     0,0,
+     self.level.bbox:w(),
+     self.level.bbox:h())
  palt(0,false)
  for v,n in pairs(self.nodes) do
   spr(background_spr,n.x*8,n.y*8)
@@ -674,7 +693,9 @@ end
 -- player
 class_player=subclass(class_mover,
 function(self)
- class_mover._ctr(self,board.start_node,board:get_spr(board.start_node))
+ class_mover._ctr(self,
+    board.start_node,
+    board:get_spr(board.start_node))
 end)
 
 function class_player:move(i)
@@ -860,6 +881,7 @@ x sentry
 x display briefcase on level
 x briefcases
 x dedicated victim to kill at goal
+- add level class
 - keep track of scores
 - display score on level card
 - add hide in plant sfx
@@ -1178,8 +1200,8 @@ end
 
 function draw_board()
  if board!=nil then
-  local w=64-board.bbox:w()*8/2
-  local h=64-board.bbox:h()*8/2
+  local w=64-board.level.bbox:w()*8/2
+  local h=64-board.level.bbox:h()*8/2
   camera(-w+shakex,-h+shakey)
   board:draw()
   ecnts={}
