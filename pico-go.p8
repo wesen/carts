@@ -1,6 +1,38 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
+-- helpers, config, constants
+arrow_animation_speed=0.3
+init_animation_speed=0.1
+
+start_screen_music=0
+start_screen_sfx=4
+metalevel_music=0
+metalevel_sfx=4
+level_music=1
+level_sfx=5
+music_fade_duration=300
+move_sfx=6
+death_sfx=7
+kill_sfx=8
+
+-- debug flags
+dbg_skip_start=true
+dbg_skip_metalevel=true
+dbg_auto_win=false
+dbg_start_level=2
+dbg_draw=false
+
+-- constants
+player_spr=64
+dead_player_spr=69
+sentry_spr=80
+patroling_spr=96
+arrow_spr=5
+card_spr=7
+marker_spr=48
+background_spr=9
+
 --helpers
 
 function class (init)
@@ -282,15 +314,6 @@ function rotate_180(direction)
  return directions_180[direction]
 end
 
-player_spr=64
-dead_player_spr=69
-sentry_spr=80
-patroling_spr=96
-arrow_spr=5
-card_spr=7
-marker_spr=48
-background_spr=9
-
 shake=0
 
 function v_idx(x,y) 
@@ -300,9 +323,6 @@ end
 function idx_v(v)
  return {v%16,flr(v/16)}
 end
-
--- globals
-init_animation_speed=0.01
 
 -- node
 class_node=class(function(self,x,y)
@@ -518,8 +538,6 @@ end
 -- player and enemies
 
 -- arrows
-arrow_animation_speed=0.3
-
 class_arrow=class(function(self,direction)
  self.visible=false
  self.offset=0
@@ -641,6 +659,7 @@ end)
 
 function class_player:move(i)
  return add_cr(function()
+  sfx(move_sfx)
   local cr=class_mover.move(self,i)
   if (cr==nil) return
   local crs={cr}
@@ -771,6 +790,10 @@ x loop game around
 x add finish game screen
 x don't enter invalid level in metalevel
 x add sfx for finish level
+- add move sfx
+- add death sfx
+- add kill sfx
+- player can't move if goal reached
 - refactor metalevel into separate game loop
 - use bebop lines instead of sfx
 - chose to enter level
@@ -812,13 +835,6 @@ state_play=2
 state_end_screen=3
 state_finish_game=4
 
--- debug flags
-dbg_skip_start=true
-dbg_skip_metalevel=true
-dbg_auto_win=false
-dbg_start_level=2
-init_animation_speed=0
-dbg_draw=false
 
 -- game
 class_game=class(function (self)
@@ -867,13 +883,13 @@ function class_game:play_start_screen()
  if not dbg_skip_start then
   self.state=state_start_screen
   wait_for_cr(fade(true))  
-  music(1)
+  music(start_screen_music,music_fade_duration)
   pal()
   while not (btnp(4) or btnp(5)) do
  	 yield()
  	end
-  music(-1,200)
- 	sfx(4)
+  music(-1,music_fade_duration)
+ 	sfx(start_screen_sfx)
  	printh("start game")
  	blink()
  	wait_for_cr(fade())
@@ -882,15 +898,15 @@ end
 
 function class_game:play_metalevel()
  if not dbg_skip_metalevel then
-  music(0)
+  music(metalevel_music,music_fade_duration)
   self.is_metalevel=true
   wait_for_cr(self:play_game_level(meta_level))
   if self:is_win() then
    wait_for_cr(fade())
    return true
   end
-  music(-1,300)
-  sfx(4)
+  music(-1,music_fade_duration)
+  sfx(metalevel_sfx)
   wait_for(1)
   blink()
   wait_for_cr(fade())
@@ -905,7 +921,7 @@ end
 function class_game:play_normal_level()
  ::again::
  self.is_metalevel=false
- music(1)
+ music(level_music,music_fade_duration)
  wait_for_cr(self:play_game_level(levels[self.current_level]))
  wait_for(1)
  blink()
@@ -1008,13 +1024,13 @@ function class_game:play_game_level(level)
    end   
    
    if self:is_win() then
-    music(-1,400)
+    printh("win level")
+    music(-1,music_fade_duration)
     if not self.is_metalevel then
-     sfx(5)
+     sfx(level_sfx)
     end
-    return
+    break
    end
-  
    
    printh("enemy turn")
    self.turn=turn_enemy
@@ -1498,6 +1514,7 @@ __sfx__
 011000001b0541b0501b0501b0401b0301b0301b0201b02022054220502204022040220402204022030220301d0541d0501d0401d0401d0401d0301d0301d0300000000000000000000000000000000000000000
 010600000000016055180551b0551f055220552405527055270002e04222022220152e0002e000000002e0002e0002e0050000000000000000000000000000000000000000000000000000000000000000000000
 0104000028545295451f5452a5451b5452b545165452c545115452d5450f5452e5450d5452e5450c545305450c545315450f5453154517545335451f5453454525545375452c545385453054539545345453a545
+010200000961009610096100961009620376103761037610366100661005610056100461006610076100761000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
 03 01424344
 03 01020344
