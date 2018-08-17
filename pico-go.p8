@@ -3,7 +3,7 @@ version 16
 __lua__
 -- helpers, config, constants
 arrow_animation_speed=0.3
-init_animation_speed=0.1
+init_animation_speed=0
 
 start_screen_music=0
 start_screen_sfx=4
@@ -733,6 +733,7 @@ function class_enemy:do_turn()
    wait_for_crs({
    add_cr(function()
     wait_for(0.2)
+    sfx(death_sfx)
     wait_for_cr(player:die(d))
    end),
    class_mover.move(self,self.direction)
@@ -808,12 +809,11 @@ x add move sfx
 x refactor metalevel into separate game loop
 x don't hang when trying to reload metalevel
 x don't hang when moving in wrong direction
-- add death sfx
+x add death sfx
 - add kill sfx
+- multiple enemies on one spot
 x player can't move if goal reached
 - use bebop lines instead of sfx
-- chose to enter level
-- only allow completed levels
 x display level name on card
 x display level name on metalevel
 - no kills / all kills status
@@ -825,8 +825,9 @@ x display level name on metalevel
 - hiding in plants
 - more enemies
   - walker
-  - multiple enemies on one spot
   - enemy distractions
+- chose to enter level
+- only allow completed levels
 
 - tutorial mode?
 - sound fx
@@ -939,6 +940,7 @@ function class_game:play_normal_level()
  self.is_metalevel=false
  music(level_music,music_fade_duration)
  wait_for_cr(self:play_game_level(levels[self.current_level]))
+ music(-1,music_fade_duration)
  wait_for(1)
  blink()
  wait_for_cr(fade())  
@@ -1555,6 +1557,7 @@ __sfx__
 010600000000016055180551b0551f055220552405527055270002e04222022220152e0002e000000002e0002e0002e0050000000000000000000000000000000000000000000000000000000000000000000000
 0104000028545295451f5452a5451b5452b545165452c545115452d5450f5452e5450d5452e5450c545305450c545315450f5453154517545335451f5453454525545375452c545385453054539545345453a545
 010200000961009610096100961009620376103761037610366100661005610056100461006610076100761000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010200001a250032501d250102502225006250252501425029250082502b650256500f6501065011650116501165011650116500f6500d650156500f6300d630166151360014600126000e600006000060000200
 __music__
 03 01424344
 03 01020344
