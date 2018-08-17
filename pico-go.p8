@@ -1182,9 +1182,9 @@ function class_game:draw()
   if not self.is_metalevel then
    spr(40,110,10)
    print("🅾️",100,12,6)
---[[   if player!=nil and player.has_briefcase then
+   if player!=nil and player.has_briefcase then
     spr(briefcase_spr,100,20) 
-   end]]
+   end
   else
    if player!=nil and player.node.level!=nil and not is_blink then
     print("level "..tostr(player.node.level+1),52,80)
