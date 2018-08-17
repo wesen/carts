@@ -416,10 +416,11 @@ class_board=class(function(self,bbox)
      n.is_goal=true
     end
     if band(f,128)==128 then
-     n.level=mget(self.bbox.aa.x+n.x,self.bbox.aa.y+n.y)-marker_spr
-     if n.level+2==game.current_level then
+     n.level=mget(self.bbox.aa.x+n.x,self.bbox.aa.y+n.y)-marker_spr+1
+     printh("set node "..n:str().." to level "..tostr(n.level))
+     if n.level==game.current_level then
       self.start_node=n
-      printh("set node to "..v2(n.x,n.y):str())
+      printh("set start node to "..n:str())
      end
     end
     if band(f,8)==8 then
@@ -497,7 +498,7 @@ function class_board:draw()
  for v,n in pairs(self.nodes) do
   if self.is_metalevel and n!=board.start_node and n!=board.goal then
    local col=n.level
-   printh("drawing node "..n:str().." level "..tostr(n.level))
+--   printh("drawing node "..n:str().." level "..tostr(n.level))
    if (n.level==nil) col=6
    pal(6,col)
    spr(n.spr,n.x*8,n.y*8)
@@ -768,6 +769,7 @@ x display reload icon on game screen
 x fix starting node of metalevel
 x loop game around
 x add finish game screen
+x don't enter invalid level in metalevel
 - chose to enter level
 - only allow completed levels
 x display level name on card
@@ -990,11 +992,14 @@ function class_game:play_game_level(level)
    printh("finished player turn")   
    if self.is_metalevel then
     self.meta_position=v2(player.node.x,player.node.y)
-    self.current_level=mget(player.node.x+meta_level.aa.x,
-                            player.node.y+meta_level.aa.y)-marker_spr+1
-    printh("selected level "..tostr(self.current_level))
-    -- here we need to handle a x input
-    break               
+    local level=player.node.level
+    printh("level: "..tostr(level))
+    if level<=16 then
+	    self.current_level=level
+  	  printh("selected level "..tostr(self.current_level))
+ 	   -- here we need to handle a x input
+   	 break
+   	end
    end   
    
    if (self:is_win()) break
