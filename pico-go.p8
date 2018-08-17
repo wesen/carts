@@ -673,10 +673,12 @@ function class_player:move(i)
   local crs={cr}
   local enemies=board:get_enemies_in_direction(self.node,directions[i])
   for enemy in all(enemies) do
-   add(crs,add_cr(function()
-    wait_for(0.2)
-    wait_for_cr(enemy:die(i))
-   end))
+   if not enemy.is_dead then
+    add(crs,add_cr(function()
+     wait_for(0.2)
+     wait_for_cr(enemy:die(i))
+    end))
+   end
   end
   wait_for_crs(crs)
   self.has_finished_turn=true
@@ -707,6 +709,14 @@ function class_player:do_turn()
    end
   end
  end)
+end
+
+function class_player:draw()
+ if self.node.is_plant then
+  espr(24,self.node.x*8+round(self.x),self.node.y*8+round(self.y),true) 
+ else
+  class_mover.draw(self)
+ end
 end
 
 -- enemies
@@ -1074,6 +1084,10 @@ function class_game:play_game_level(level)
      arrows:hide()
     end
     yield()
+   end
+   
+   if player.node.is_plant then
+    make_explosion(v2(player.node.x*8,player.node.y*8),10)
    end
    
    if (self.request_restart) goto again
