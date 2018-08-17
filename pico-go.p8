@@ -688,7 +688,7 @@ function class_player:do_turn()
      end
     end
    end
-   if btnp(4) then
+   if btnp(4) and not game.is_metalevel then
     printh("restarting level")
     game:restart_level()
     return
@@ -799,11 +799,13 @@ x loop game around
 x add finish game screen
 x don't enter invalid level in metalevel
 x add sfx for finish level
-- add move sfx
+x add move sfx
+x refactor metalevel into separate game loop
+x don't hang when trying to reload metalevel
+- don't hang when moving in wrong direction
 - add death sfx
 - add kill sfx
 x player can't move if goal reached
-- refactor metalevel into separate game loop
 - use bebop lines instead of sfx
 - chose to enter level
 - only allow completed levels
@@ -909,7 +911,7 @@ function class_game:play_metalevel()
  if not dbg_skip_metalevel then
   music(metalevel_music,music_fade_duration)
   self.is_metalevel=true
-  wait_for_cr(self:play_game_level(meta_level))
+  wait_for_cr(self:play_game_metalevel())
   if self:is_win() then
    wait_for_cr(fade())
    return true
@@ -973,35 +975,76 @@ function class_game:restart_level()
  if (not self.is_metalevel) self.request_restart=true
 end
 
-function class_game:play_game_level(level)
+function class_game:load_level(level)
+ self.initialized=false
+ self.request_restart=false
+ if (player) player:destroy()
+ if (board) board:destroy()
 
+ self.state=state_load_level
+ board=class_board.init(level)
+ player=class_player.init()
+
+ -- hack for metalevel start position
+ if player.spr<64 then
+  player.spr=65
+  player.start_spr=64
+  player.direction=i_dir_right
+ end
+ 
+ wait_for_cr(fade(true))
+  
+ printh("playing level "..tostr(level))
+
+ while not self:is_level_loaded() do
+  yield()
+ end
+ printh("level is loaded")
+end
+
+function class_game:play_game_metalevel()
  return add_cr(function()
 ::again::
-  self.initialized=false
-  self.request_restart=false
-  if (player) player:destroy()
-  if (board) board:destroy()
- 
-  self.state=state_load_level
-  board=class_board.init(level)
-  player=class_player.init()
-
-  -- hack for metalevel start position
-  if player.spr<64 then
-   player.spr=65
-   player.start_spr=64
-   player.direction=i_dir_right
-  end
-  
-  wait_for_cr(fade(true))
+  self:load_level(meta_level)
+  while not (self:is_win() or self:is_lose()) do
+   printh("player turn")
+   self.turn=turn_player
+   player.has_finished_turn=false
    
-  printh("playing level "..tostr(level))
-
-  while not self:is_level_loaded() do
-   yield()
+   arrows:show()
+   wait_for_cr(player:do_turn())
+   while not player.has_finished_turn and not self.request_restart do
+    if player.is_moving then
+     arrows:hide()
+    end
+    yield()
+   end
+   
+   arrows:hide()
+   printh("finished player turn")   
+   self.meta_position=v2(player.node.x,player.node.y)
+   local level=player.node.level
+   printh("level: "..tostr(level))
+   if level<=16 then
+    self.current_level=level
+ 	  printh("selected level "..tostr(self.current_level))
+	   -- here we need to handle a x input
+  	 return
+  	end
+   
+   if self:is_win() then
+    printh("win level")
+    music(-1,music_fade_duration)
+    break
+   end
   end
-  printh("level is loaded")
-  
+ end)
+end
+
+function class_game:play_game_level(level)
+ return add_cr(function()
+::again::
+  self:load_level(level)
   while not (self:is_win() or self:is_lose()) do
    printh("player turn")
    self.turn=turn_player
@@ -1021,24 +1064,11 @@ function class_game:play_game_level(level)
    
    arrows:hide()
    printh("finished player turn")   
-   if self.is_metalevel then
-    self.meta_position=v2(player.node.x,player.node.y)
-    local level=player.node.level
-    printh("level: "..tostr(level))
-    if level<=16 then
-	    self.current_level=level
-  	  printh("selected level "..tostr(self.current_level))
- 	   -- here we need to handle a x input
-   	 return
-   	end
-   end   
-   
+
    if self:is_win() then
     printh("win level")
     music(-1,music_fade_duration)
-    if not self.is_metalevel then
-     sfx(level_sfx)
-    end
+    sfx(level_sfx)
     break
    end
    
