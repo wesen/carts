@@ -329,12 +329,28 @@ function idx_v(v)
 end
 
 -- node
-class_node=class(function(self,x,y)
+class_node=class(function(self,x,y,m,f)
  self.x=x
  self.y=y
  self.spr=15
  self.is_goal=false
+ self.is_start=false
+ self.enemy=nil
  self.initialized=false
+ self.level=nil
+
+ if band(f,4)==4 then
+  self.is_start=true
+ end
+ if band(f,2)==2 then
+  self.is_goal=true
+ end
+ if band(f,128)==128 then
+  self.level=mget(self.bbox.aa.x+n.x,self.bbox.aa.y+n.y)-marker_spr+1
+ end
+ if band(f,8)==8 then
+  self.enemy=m
+ end
 end)
 
 function class_node:str()
@@ -407,9 +423,6 @@ function load_levels()
    end
   end
  end
--- levels[1]=bbox(v2(0,0),v2(6,5))
--- levels[2]=bbox(v2(1,15),v2(12,24))
--- levels[3]=bbox(v2(1,15),v2(12,24))
  printh("found "..tostr(#levels).." levels")
 end
 
@@ -430,26 +443,17 @@ class_board=class(function(self,bbox)
    local v=v_idx(x,y)
    if band(f,1)==1 then
     -- node
-    local n=class_node.init(x,y)
+    local n=class_node.init(x,y,m,f)
     self.nodes[v]=n
-    if band(f,4)==4 then
-     if (self.start_node==nil) self.start_node=n
-    end
-    if band(f,2)==2 then
-     self.goal=n
-     n.is_goal=true
-    end
-    if band(f,128)==128 then
-     n.level=mget(self.bbox.aa.x+n.x,self.bbox.aa.y+n.y)-marker_spr+1
-     printh("set node "..n:str().." to level "..tostr(n.level))
+    if (n.is_start and self.start_node==nil) self.start_node=n
+    if (n.is_goal) self.goal=n
+    if n.level!=nil then
      if n.level==game.current_level then
       self.start_node=n
       printh("set start node to "..n:str())
      end
     end
-    if band(f,8)==8 then
-     enemies:add(class_enemy.init(n,m))
-    end
+    if (n.enemy!=nil) enemies:add(class_enemy.init(n,m))
    elseif band(f,16)==16 then
     self.links[v]=class_link.init(x,y,false)
    elseif band(f,32)==32 then
@@ -639,9 +643,9 @@ function class_mover:draw()
   local v=death_directions[self.death_direction]
   espr(self.start_spr+5,
       (self.node.x+v[1])*8,
-      (self.node.y+v[2])*8)
+      (self.node.y+v[2])*8,false)
  else
-  espr(self.start_spr+self.direction-1,self.node.x*8+round(self.x),self.node.y*8+round(self.y))
+  espr(self.start_spr+self.direction-1,self.node.x*8+round(self.x),self.node.y*8+round(self.y),true)
  end
 end
 
@@ -814,6 +818,8 @@ x refactor metalevel into separate game loop
 x don't hang when trying to reload metalevel
 x don't hang when moving in wrong direction
 x add death sfx
+x refactor node initialization
+- hiding in plants
 - add kill sfx
 x multiple enemies on one spot
 x player can't move if goal reached
@@ -826,7 +832,6 @@ x display level name on metalevel
 - count turns
 - dedicated victim to kill at goal
 - briefcases
-- hiding in plants
 - more enemies
   - walker
   - enemy distractions
@@ -1326,14 +1331,14 @@ eoffs={
 ecnts={}
 eexplosions={}
 
-function espr(s,x,y)
+function espr(s,x,y,do_explosion)
  local v=v2_idx(x,y)
  local ecnt=ecnts[v]
  if ecnt==nil then
   spr(s,x,y)
   ecnts[v]=1
  else
-  if eexplosions[v]==nil and x%8==0 and y%8==0 then
+  if do_explosion and eexplosions[v]==nil and x%8==0 and y%8==0 then
    eexplosions[v]=true
    make_explosion(v2(x+4,y+4),10)
   end
@@ -1569,7 +1574,7 @@ __label__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 __gff__
-0001102003000000000000000000000001010101030101010100000000000000101010102020202000000000000000008181818181818181818181818181818105050505000400000500000000000000090909090008000000000000000000000909090900080000090000000000000009090909000800000000000000000000
+0001102003000000000000000000000001010101030101010101000000000000101010102020202000000000000000008181818181818181818181818181818105050505000400000500000000000000090909090008000000000000000000000909090900080000090000000000000009090909000800000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 3008080808080a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a0a0a0a0a0a0a0a0a0a0a0000000000
