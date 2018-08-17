@@ -18,7 +18,7 @@ kill_sfx=8
 
 -- debug flags
 dbg_skip_start=true
-dbg_skip_metalevel=true
+dbg_skip_metalevel=false
 dbg_auto_win=false
 dbg_start_level=2
 dbg_draw=false
@@ -676,16 +676,25 @@ function class_player:move(i)
 end
 
 -- only called in the correct states
-function class_player:update()
- for i=1,5 do
-  if btnp(i-1) and not self.is_moving then
-   self:move(i)
-   break
+function class_player:do_turn()
+ return add_cr(function()
+  while true do
+   for i=1,4 do
+    if btnp(i-1) then
+     local cr=self:move(i)
+     if cr!=nil then
+      wait_for_cr(cr)
+      return
+     end
+    end
+   end
+   if btnp(4) then
+    printh("restarting level")
+    game:restart_level()
+    return
+   end
   end
- end
- if btnp(4) then
-  game:restart_level()
- end
+ end)
 end
 
 -- enemies
@@ -793,7 +802,7 @@ x add sfx for finish level
 - add move sfx
 - add death sfx
 - add kill sfx
-- player can't move if goal reached
+x player can't move if goal reached
 - refactor metalevel into separate game loop
 - use bebop lines instead of sfx
 - chose to enter level
@@ -818,7 +827,7 @@ x display level name on metalevel
 - levels
 
 -- refactoring
-- refactor player update to cr
+x refactor player update to cr
 - refactor to use v2
 ]]
 -->8
@@ -999,6 +1008,7 @@ function class_game:play_game_level(level)
    player.has_finished_turn=false
    
    arrows:show()
+   wait_for_cr(player:do_turn())
    while not player.has_finished_turn and not self.request_restart do
     if player.is_moving then
      arrows:hide()
@@ -1044,10 +1054,6 @@ function class_game:play_game_level(level)
  end)
 end
 
-function class_game:update()
- if (self.state==state_play and self.turn==turn_player) player:update()
-end
-
 -- shake
 shakex=0
 shakey=0
@@ -1068,7 +1074,7 @@ function draw_board()
   board:draw()
   enemies:draw()
   player:draw()
-  arrows:draw()
+  if (not player.is_moving) arrows:draw()
   particles:draw() 
   camera(shakex,shakey)
  end
@@ -1124,7 +1130,6 @@ function _update60()
  lasttime=t
 
  tick_crs()
- game:update()
  particles:update() 
 end
 
