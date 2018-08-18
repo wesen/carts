@@ -296,8 +296,8 @@ arrow_animation_speed=0.3
 init_animation_speed=0.05
 init_link_animation_speed=0.02
 
--- init_animation_speed=0
--- init_link_animation_speed=0
+init_animation_speed=0
+init_link_animation_speed=0
 
 start_screen_music=0
 start_screen_sfx=4
@@ -313,10 +313,10 @@ kill_sfx=8
 metalevel_bbox=bbox(v2(112,0),v2(125,7))
 
 -- debug flags
-dbg_skip_start=false
-dbg_skip_metalevel=false
+dbg_skip_start=true
+dbg_skip_metalevel=true
 dbg_auto_win=false
-dbg_start_level=5
+dbg_start_level=15
 dbg_draw=false
 
 -- constants
