@@ -620,7 +620,7 @@ class_arrow=class(function(self,direction)
 end)
 
 function class_arrow:draw()
- if self.visible then
+ if self.visible and game.turn==turn_player then
   if self.direction==dir_left then
    spr(arrow_spr,
        (player.node.x-1)*8-self.offset,
@@ -648,15 +648,18 @@ end
 arrows=objs.init("arrows")
 
 function arrows:hide()
+ printh("arrows hide")
  foreach(self.objs,function(arr)
   arr.visible=false
+  arr.offset=1
  end)
 end
 
 function arrows:show()
+ printh("arrows show")
  foreach(self.objs,function(arr)
   if not arr.visible then
-   arr.offset=0
+   arr.offset=1
    arr.visible=true
   end
  end)
@@ -926,9 +929,9 @@ x no kills / all kills status
 x count turns
 x display level stats in metalevel
 x fix fading of level info
-- chose to enter level
+x chose to enter level
+? arrow animation blinks
 - fix broken metalevel animation
-- arrow animation blinks
 - enemy distractions
   - compute path to noise
 - add hide in plant sfx
