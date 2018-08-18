@@ -677,10 +677,11 @@ end
 -- player and enemies
 
 -- arrows
-class_arrows=class(function(self,pos,directions)
+class_arrows=class(function(self,pos,directions,is_rock)
  self.pos=pos
  self.offset=0
  self.directions=directions
+ self.is_rock=is_rock
 
  add_cr(function() 
   while not self.destroyed do
@@ -691,29 +692,39 @@ class_arrows=class(function(self,pos,directions)
 end)
 
 function class_arrows:draw()
+ local f1=not self.is_rock
+ local f2=self.is_rock
+ local off=self.offset
+ local off2=0
+ if self.is_rock then
+  off=-self.offset-6
+  off2=1
+  pal(13,10)
+ end
  for direction in all(self.directions) do
   if direction==dir_left then
    spr(arrow_spr,
-       (self.pos.x-1)*8-self.offset,
-        self.pos.y*8,
-       1,1,true,false)
+       (self.pos.x-1)*8-off,
+        self.pos.y*8-off2,
+       1,1,f1,f2)
   elseif direction==dir_right then
    spr(arrow_spr,
-       (self.pos.x+1)*8+self.offset,
-        self.pos.y*8,
-       1,1,false,false)
+       (self.pos.x+1)*8+off,
+        self.pos.y*8-off2,
+       1,1,f2,f2)
   elseif direction==dir_up then
    spr(arrow_spr+1,
-       self.pos.x*8,
-       (self.pos.y-1)*8-self.offset,
-       1,1,false,true)
+       self.pos.x*8-off2,
+       (self.pos.y-1)*8-off,
+       1,1,f2,f1)
   else
    spr(arrow_spr+1,
-       self.pos.x*8,
-       (self.pos.y+1)*8+self.offset,
-       1,1,false,false)
+       self.pos.x*8-off2,
+       (self.pos.y+1)*8+off,
+       1,1,f2,f2)
   end
  end
+ pal(13,13)
 end
 
 arrows=objs.init("arrows")
@@ -819,7 +830,7 @@ function class_player:add_rock_arrows()
    if (node!=nil) then
     local arr=class_arrows.init(
        v2(node.x,node.y),
-       directions)
+       directions,true)
     arrows:add(arr)
 	  end
   end
@@ -829,6 +840,7 @@ function class_player:throw_rock(i_dir)
  local node=board:get_node_in_direction(self.node,directions[i_dir],true)
  if (node!=nil) then
   return add_cr(function()
+   make_explosion(v2(node.x*8,node.y*8),20) 
    for enemy in all(enemies.objs) do
     -- check if in range
     if abs(node.x-enemy.node.x)<=2 and abs(node.y-enemy.node.y)<=2 then
@@ -1006,7 +1018,9 @@ function class_enemy:do_turn()
 end
 
 function class_enemy:draw()
- if (self.node.initialized) class_mover.draw(self)
+ if self.node.initialized then
+  class_mover.draw(self)
+ end
 end
 
 -->8
@@ -1092,6 +1106,9 @@ x arrows are broken
   x handle player turn on rock
   x handle rock throw
   x compute path to noise
+  x reverse arrows for rock
+  x smoke on landing rock
+  - draw expanding rectangle
   - show status of following enemies
 - better fx when crossing paths
 - add hide in plant sfx
