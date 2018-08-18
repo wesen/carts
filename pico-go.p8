@@ -1005,27 +1005,26 @@ function class_enemy:do_turn()
    })
   else
    if #self.follow_path>0 then
-     local next=popend(self.follow_path)
-     local i_dir=get_i_dir(self.node,next)
-     printh("enemy at "..self.node:str().." should be moving to "..next:str())
-     wait_for_cr(class_mover.move(self,i_dir))
-     printh("enemy move finished")
-     -- turn enemy into next direction
-     local n=#self.follow_path
-     if n>0 then
-      next=self.follow_path[#self.follow_path]
-      i_dir=get_i_dir(self.node,next)
-      self.direction=i_dir
-     end
+    local next=popend(self.follow_path)
+    local i_dir=get_i_dir(self.node,next)
+    wait_for_cr(class_mover.move(self,i_dir))
+    -- turn enemy into next direction
+    local n=#self.follow_path
+    if n>0 then
+     next=self.follow_path[#self.follow_path]
+     i_dir=get_i_dir(self.node,next)
+     self.direction=i_dir
+    end
    elseif self.start_spr==patroling_spr then
     if front_node!=nil then
      wait_for_cr(class_mover.move(self,self.direction))
-     printh("enemy move finished")
-     if not board:has_link(self.node,directions[self.direction]) then
-      self.direction=rotate_180(self.direction)
-     end
     end
-   elseif self.start_spr==sentry_spr then
+   end
+  end
+  
+  -- after move
+  if self.start_spr==patroling_spr then
+   if not board:has_link(self.node,directions[self.direction]) then
     self.direction=rotate_180(self.direction)
    end
   end
@@ -1116,7 +1115,7 @@ x return to metalevel from level
 x fix broken metalevel animation
 x refactor drawing of arrows
 x arrows are broken
-- enemy distractions
+x enemy distractions
   x draw rock
   x make rock selection menu
   x handle player turn on rock
@@ -1128,7 +1127,12 @@ x arrows are broken
   x show status of following enemies
   x add surprise particles on enemies
 x levels
-- handle special cases
+x handle special cases
+x enemy stuck on level 10
+- faster animation speed for metalevel
+- turn counter doesnt reset correctly
+
+- only allow completed levels
 - more levels (more boxes)
 - add hide in plant sfx
 - add crossing sfx
@@ -1138,7 +1142,6 @@ x levels
 - use bebop lines instead of sfx
 - define background tile for level
 - start screen gfx
-- only allow completed levels
 - animate badges on level card
 
 - tutorial mode?
