@@ -271,6 +271,9 @@ arrow_animation_speed=0.3
 init_animation_speed=0.15
 init_link_animation_speed=0.05
 
+init_animation_speed=0
+init_link_animation_speed=0
+
 start_screen_music=0
 start_screen_sfx=4
 metalevel_music=0
@@ -767,24 +770,33 @@ function class_player:do_turn()
      local cr=self:move(i)
      if cr!=nil then
       wait_for_cr(cr)
-      return
+      goto end_
      else 
       yield()
      end
     end
    end
-   if btnp(5) and game.is_metalevel then
-    printh("select level")
-    game.level_selected=true
-    self.has_finished_turn=true
-    return
-   end
-   if btnp(4) and not game.is_metalevel then
-    printh("restarting level")
-    game:restart_level()
-    return
+   if game.is_metalevel then
+    if btnp(5) then
+     printh("select level")
+     game.request_level_selection=true
+     break
+    end
+   else
+    if btnp(4) then
+     printh("restarting level")
+     game.request_restart=true
+     break
+    end
+    if btnp(5) then
+     printh("exit to metalevel")
+     game.request_exit_to_metalevel=true
+     break
+    end
    end
   end
+  ::end_::
+  self.has_finished_turn=true
  end)
 end
 
@@ -937,7 +949,7 @@ x display level stats in metalevel
 x fix fading of level info
 x chose to enter level
 ? arrow animation blinks
-- return to metalevel from level
+x return to metalevel from level
 x fix broken metalevel animation
 - enemy distractions
   - compute path to noise
@@ -1098,13 +1110,10 @@ function class_game:play_finish_game()
 	wait_for_cr(fade())
 end
 
-function class_game:restart_level()
- if (not self.is_metalevel) self.request_restart=true
-end
-
 function class_game:load_level(level)
  self.initialized=false
  self.request_restart=false
+ self.request_exit_to_metalevel=false
  if (player) player:destroy()
  if (board) board:destroy()
 
@@ -1133,7 +1142,7 @@ function class_game:play_game_metalevel()
  return add_cr(function()
 ::again::
   self:load_level(meta_level)
-  self.level_selected=false
+  self.request_level_selection=false
   while not (self:is_win() or self:is_lose()) do
    printh("player turn")
    self.turn=turn_player
@@ -1141,20 +1150,11 @@ function class_game:play_game_metalevel()
    
    arrows:show()
    wait_for_cr(player:do_turn())
-   printh("player did turn "..tostr(player.has_finished_turn))
-   while not player.has_finished_turn and not self.request_restart do
-    if player.is_moving then
-     arrows:hide()
-    end
-    yield()
-   end
    
    arrows:hide()
-   printh("finished player turn")   
    self.meta_position=v2(player.node.x,player.node.y)
    local level=player.node.level
-   printh("level: "..tostr(level))
-   if self.level_selected and level<=16 then
+   if self.request_level_selection and level<=16 then
     self.current_level=level
  	  printh("selected level "..tostr(self.current_level))
  	  return
@@ -1179,14 +1179,10 @@ function class_game:play_game_level(level)
    player.has_finished_turn=false
    
    arrows:show()
+   printh("wait for player "..tostr(level.turns))
    wait_for_cr(player:do_turn())
    level.turns+=1
-   while not player.has_finished_turn and not self.request_restart do
-    if player.is_moving then
-     arrows:hide()
-    end
-    yield()
-   end
+   printh("player finished turn")
    
    if player.node.is_plant then
     make_explosion(v2(player.node.x*8,player.node.y*8),10)
@@ -1200,6 +1196,7 @@ function class_game:play_game_level(level)
     player.node.spr=19
    end
    
+   if (self.request_exit_to_metalevel) return
    if (self.request_restart) goto again
    if (dbg_auto_win) player.node=board.goal
    
@@ -1280,8 +1277,7 @@ function class_game:draw()
   draw_card()
  elseif self.state==state_load_level or self.state==state_play then
   if not self.is_metalevel then
-   spr(40,110,10)
-   print("🅾️",100,12,6)
+   print("🅾️ restart ❎ exit",32,12,6)
    if player!=nil and player.has_briefcase then
     spr(briefcase_spr,100,20) 
    end
