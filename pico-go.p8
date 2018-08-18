@@ -1131,8 +1131,8 @@ x enemy distractions
 x levels
 x handle special cases
 x enemy stuck on level 10
-- faster animation speed for metalevel
-- turn counter doesnt reset correctly
+x faster animation speed for metalevel
+x turn counter doesnt reset correctly
 
 - only allow completed levels
 - more levels (more boxes)
@@ -1323,6 +1323,8 @@ function class_game:load_level(level)
  while not self:is_level_loaded() do
   yield()
  end
+ level.turns=0
+ level.enemies_killed=0
  printh("level is loaded")
 end
 
@@ -1475,13 +1477,15 @@ function class_game:draw()
      local x1=48
      if level.has_finished then
     	 bspr(card_spr,x1-21,y1,8)
-      if level.max_enemies_killed==level.enemies then
-       bspr(all_kill_spr,
-            x1-9,y1,8)
-      end
-      if level.has_achieved_no_kill then
-       bspr(no_kill_spr,
-            x1+3,y1,8)
+    	 if level.enemies>0 then
+       if level.max_enemies_killed==level.enemies then
+        bspr(all_kill_spr,
+             x1-9,y1,8)
+       end
+       if level.has_achieved_no_kill then
+        bspr(no_kill_spr,
+             x1+3,y1,8)
+       end
       end
       if level.has_taken_briefcase then
        bspr(card_spr,
@@ -1631,13 +1635,15 @@ function draw_card()
 
  bspr(card_spr,
        x1+w/2-21,y1+62,8)
- if level.max_enemies_killed==level.enemies then
-  bspr(all_kill_spr,
-       x1+w/2-9,y1+62,8)
- end
- if level.has_achieved_no_kill then
-  bspr(no_kill_spr,
-       x1+w/2+3,y1+62,8)
+ if level.enemies>0 then
+  if level.max_enemies_killed==level.enemies then
+   bspr(all_kill_spr,
+        x1+w/2-9,y1+62,8)
+  end
+  if level.has_achieved_no_kill then
+   bspr(no_kill_spr,
+        x1+w/2+3,y1+62,8)
+  end
  end
  if level.has_taken_briefcase then
   bspr(card_spr,
