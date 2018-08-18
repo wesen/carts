@@ -268,7 +268,8 @@ end
 -->8
 -- board, config, constants
 arrow_animation_speed=0.3
-init_animation_speed=0
+init_animation_speed=0.15
+init_link_animation_speed=0.05
 
 start_screen_music=0
 start_screen_sfx=4
@@ -347,7 +348,7 @@ end
 class_node=class(function(self,x,y,m,f)
  self.x=x
  self.y=y
- self.spr=15
+ self.spr=nil
  self.is_goal=false
  self.is_start=false
  self.enemy=nil
@@ -404,7 +405,7 @@ class_link=class(function(self,x,y,is_v)
  self.x=x
  self.y=y
  self.is_v=is_v
- self.spr=15
+ self.spr=nil
  self.initialized=false
 end)
 
@@ -414,7 +415,7 @@ function class_link:initialize(flip_spr,cb)
  self.flip_spr=flip_spr
  local sprs={32,33,34,35}
  if (self.is_v) sprs={36,37,38,39}
- animate(self,sprs,init_animation_speed,false,cb)
+ animate(self,sprs,init_link_animation_speed,false,cb)
 end
 
 -- levels
@@ -436,12 +437,14 @@ class_level=class(function(self,bbox,number)
  self.min_turns=20000
  self.has_taken_briefcase=false
 
+--[[
  self.has_finished=true 
  self.min_turns=23
  self.max_enemies_killed=self.enemies
  self.has_briefcase=true
  self.has_taken_briefcase=true
  self.has_achieved_no_kill=true
+ ]]
 end)
 
 function class_level:str()
@@ -584,21 +587,24 @@ function class_board:draw()
  end
  palt()
  for v,n in pairs(self.nodes) do
-  if self.is_metalevel and n!=board.start_node and n!=board.goal then
-   local col=n.level
---   printh("drawing node "..n:str().." level "..tostr(n.level))
-   if (n.level==nil) col=6
-   pal(6,col)
-   spr(n.spr,n.x*8,n.y*8)
-   pal(6,6)
-  else
-   spr(n.spr,n.x*8,n.y*8)
+  if n.spr!=nil then
+   if self.is_metalevel and n!=board.start_node and n!=board.goal then
+    local col=n.level
+    if (n.level==nil) col=6
+    pal(6,col)
+    spr(n.spr,n.x*8,n.y*8)
+    pal(6,6)
+   else
+    spr(n.spr,n.x*8,n.y*8)
+   end
   end
  end
  for v,l in pairs(self.links) do  
-  local flip_v=not (l.is_v and l.flip_spr)
-  local flip_h=(not l.is_v) and l.flip_spr
-  spr(l.spr,l.x*8,l.y*8,1,1,flip_h,flip_v)
+  if l.spr!=nil then
+   local flip_v=not (l.is_v and l.flip_spr)
+   local flip_h=(not l.is_v) and l.flip_spr
+   spr(l.spr,l.x*8,l.y*8,1,1,flip_h,flip_v)
+  end
  end
 end
 
@@ -931,7 +937,8 @@ x display level stats in metalevel
 x fix fading of level info
 x chose to enter level
 ? arrow animation blinks
-- fix broken metalevel animation
+- return to metalevel from level
+x fix broken metalevel animation
 - enemy distractions
   - compute path to noise
 - add hide in plant sfx
@@ -1041,8 +1048,8 @@ function class_game:play_metalevel()
   sfx(metalevel_sfx)
   wait_for(1)
   blink()
-  self.is_metalevel=false
   wait_for_cr(fade())
+  self.is_metalevel=false
  else
   self.current_level=dbg_start_level
  end
@@ -1555,10 +1562,10 @@ end
 __gfx__
 00000000909090900000000000090000999999990000000000ddd000008888003333333300000000505050500000000033333333777377377333333333333333
 000000000000000900000000000900009000000900000000000d0000087777803333333300050000050505050000000033333337000770707311133333333333
-0070070090000000000000000009000090000009d0000000000000008777777833333333000000005050505000000000333333337707707071fee13333333333
-0007700000000009000000000009000090000009dd00000000000000877777783333333300000000050505050000000033333337000737073315ee1333333333
-0007700090000000999999990009000090000009d00000000000000087777778333333330000000050505050000000000000333707737070731aee1000000000
-0070070000000009000000000009000090000009000000000000000087777778333333330000050005050505000000000000000700077070701aee1ddf000000
+0000000090000000000000000009000090000009d0000000000000008777777833333333000000005050505000000000333333337707707071fee13333333333
+0000000000000009000000000009000090000009dd00000000000000877777783333333300000000050505050000000033333337000737073315ee1333333333
+0000000090000000999999990009000090000009d00000000000000087777778333333330000000050505050000000000000333707737070731aee1000000000
+0000000000000009000000000009000090000009000000000000000087777778333333330000050005050505000000000000000700077070701aee1ddf000000
 00000000900000000000000000090000900000090000000000000000087777803333333305000000505050500000000000000003777337373015ee1d50000000
 000000000909090900000000000900009999999900000000000000000088880033333333000000000505050500000000000000dd5000000001fee1dd41110000
 0000000000000000000000000000000000000000000000000000000000000000000bff00000b00000000000000000000000000dd40000000001110dd1ddf1000
