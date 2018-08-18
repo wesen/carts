@@ -311,8 +311,8 @@ kill_sfx=8
 metalevel_bbox=bbox(v2(112,0),v2(125,3))
 
 -- debug flags
-dbg_skip_start=true
-dbg_skip_metalevel=true
+dbg_skip_start=false
+dbg_skip_metalevel=false
 dbg_auto_win=false
 dbg_start_level=5
 dbg_draw=false
@@ -763,13 +763,13 @@ end
 function class_mover:draw()
  if (is_blink) return
  local c=nil
- if (#self.follow_path>0) c="?"
  if self.is_dead then
   local v=death_directions[self.death_direction]  
   espr(self.start_spr+5,
       (self.node.x+v[1])*8,
-      (self.node.y+v[2])*8,c,false)
+      (self.node.y+v[2])*8,nil,false)
  else
+  if (#self.follow_path>0) c="?"
   espr(self.start_spr+self.direction-1,self.node.x*8+round(self.x),self.node.y*8+round(self.y),c,true)
  end
 end
@@ -864,6 +864,7 @@ function class_player:throw_rock(i_dir)
       printh(n:str())
      end     
      enemy.follow_path=path
+     make_explosion(v2(enemy.node.x*8,enemy.node.y*8),2)
      local next=path[#path]
      local i_dir=get_i_dir(enemy.node,next)
      printh("i_dir frm "..enemy.node:str().." to "..next:str().." -> "..tostr(i_dir))
@@ -880,8 +881,9 @@ end
 -- only called in the correct states
 function class_player:do_turn()
  return add_cr(function()
+  local rock_thrown=false
 ::again::
-  if self.node.is_rock then
+  if self.node.is_rock and not rock_thrown then
    self.node.spr=node_spr
    self:add_rock_arrows()
    printh("on rock")
@@ -892,9 +894,10 @@ function class_player:do_turn()
   while true do
    for i=1,4 do
     if btnp(i-1) then
-     if self.node.is_rock then
+     if self.node.is_rock and not rock_thrown then
       local cr=self:throw_rock(i)
       if cr!=nil then
+       rock_thrown=true
        arrows:clear()
        wait_for_cr(cr)
        goto again
@@ -907,7 +910,7 @@ function class_player:do_turn()
        arrows:clear()
        wait_for_cr(cr)
        -- pick up rock
-       if self.node.is_rock then
+       if self.node.is_rock and not rock_thrown then
         goto again
        else        
         goto end_
@@ -1123,6 +1126,7 @@ x arrows are broken
   x smoke on landing rock
   x draw expanding rectangle
   x show status of following enemies
+  - add surprise particles on enemies
 - better fx when crossing paths
 - add hide in plant sfx
 - add crossing sfx
@@ -1435,7 +1439,8 @@ function class_game:draw()
  doshake()
  camera(shakex,shakey)
  if self.state==state_start_screen and not is_blink then
-  print("picoman go",32,32)
+  print("picoman go",32,32,7)
+  print("press ❎ or 🅾️ to start",32,40,7)
  elseif self.state==state_finish_game and not is_blink then
   print("you won",32,32)
  elseif self.state==state_end_screen then
