@@ -618,69 +618,46 @@ end
 -- player and enemies
 
 -- arrows
-class_arrow=class(function(self,direction)
- self.visible=false
+class_arrows=class(function(self,pos,directions)
+ self.pos=pos
  self.offset=0
- self.direction=direction
- 
+ self.directions=directions
+
  add_cr(function() 
-  while true do
+  while not self.destroyed do
    wait_for(arrow_animation_speed)
    self.offset=(self.offset+1)%3
   end
- end)
+ end) 
 end)
 
-function class_arrow:draw()
- if self.visible and game.turn==turn_player then
-  if self.direction==dir_left then
+function class_arrows:draw()
+ for direction in all(self.directions) do
+  if direction==dir_left then
    spr(arrow_spr,
-       (player.node.x-1)*8-self.offset,
-       player.node.y*8,
+       (self.pos.x-1)*8-self.offset,
+        self.pos.y*8,
        1,1,true,false)
-  elseif self.direction==dir_right then
+  elseif direction==dir_right then
    spr(arrow_spr,
-       (player.node.x+1)*8+self.offset,
-       player.node.y*8,
+       (self.pos.x+1)*8+self.offset,
+        self.pos.y*8,
        1,1,false,false)
-  elseif self.direction==dir_up then
+  elseif direction==dir_up then
    spr(arrow_spr+1,
-       player.node.x*8,
-       (player.node.y-1)*8-self.offset,
+       self.pos.x*8,
+       (self.pos.y-1)*8-self.offset,
        1,1,false,true)
   else
    spr(arrow_spr+1,
-       player.node.x*8,
-       (player.node.y+1)*8+self.offset,
+       self.pos.x*8,
+       (self.pos.y+1)*8+self.offset,
        1,1,false,false)
   end
- end  
+ end
 end
 
 arrows=objs.init("arrows")
-
-function arrows:hide()
- printh("arrows hide")
- foreach(self.objs,function(arr)
-  arr.visible=false
-  arr.offset=1
- end)
-end
-
-function arrows:show()
- printh("arrows show")
- foreach(self.objs,function(arr)
-  if not arr.visible then
-   arr.offset=1
-   arr.visible=true
-  end
- end)
-end
-
-arrows:add(class_arrow.init(dir_left))
-arrows:add(class_arrow.init(dir_right))
-arrows:add(class_arrow.init(dir_up))
-arrows:add(class_arrow.init(dir_down))
 
 -- mover
 class_mover=class(function(self,node,map_spr)
@@ -767,11 +744,17 @@ end
 -- only called in the correct states
 function class_player:do_turn()
  return add_cr(function()
+  local player_arrows=class_arrows.init(
+     v2(player.node.x,player.node.y),
+     directions)
+  arrows:add(player_arrows)
+  
   while true do
    for i=1,4 do
     if btnp(i-1) then
      local cr=self:move(i)
      if cr!=nil then
+      arrows:del(player_arrows)
       wait_for_cr(cr)
       goto end_
      else 
@@ -779,6 +762,7 @@ function class_player:do_turn()
      end
     end
    end
+   
    if game.is_metalevel then
     if btnp(5) then
      printh("select level")
@@ -799,6 +783,7 @@ function class_player:do_turn()
    end
   end
   ::end_::
+  arrows:del(player_arrows)
   self.has_finished_turn=true
  end)
 end
@@ -954,6 +939,7 @@ x chose to enter level
 ? arrow animation blinks
 x return to metalevel from level
 x fix broken metalevel animation
+x refactor drawing of arrows
 - arrows are broken
 - enemy distractions
   x draw rock
@@ -1155,10 +1141,8 @@ function class_game:play_game_metalevel()
    self.turn=turn_player
    player.has_finished_turn=false
    
-   arrows:show()
    wait_for_cr(player:do_turn())
    
-   arrows:hide()
    self.meta_position=v2(player.node.x,player.node.y)
    local level=player.node.level
    if self.request_level_selection and level<=16 then
@@ -1185,8 +1169,8 @@ function class_game:play_game_level(level)
    self.turn=turn_player
    player.has_finished_turn=false
    
-   arrows:show()
    wait_for_cr(player:do_turn())
+   
    level.turns+=1
    
    if player.node.is_plant then
@@ -1205,7 +1189,6 @@ function class_game:play_game_level(level)
    if (self.request_restart) goto again
    if (dbg_auto_win) player.node=board.goal
    
-   arrows:hide()
    printh("finished player turn")   
 
    if self:is_win() then
@@ -1264,7 +1247,7 @@ function draw_board()
   ecnts={}
   player:draw()
   enemies:draw()
-  if (not player.is_moving) arrows:draw()
+  arrows:draw()
   particles:draw() 
   camera(shakex,shakey)
  end
