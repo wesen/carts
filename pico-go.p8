@@ -1126,12 +1126,13 @@ x arrows are broken
   x smoke on landing rock
   x draw expanding rectangle
   x show status of following enemies
-  - add surprise particles on enemies
-- better fx when crossing paths
+  x add surprise particles on enemies
+- levels
 - add hide in plant sfx
 - add crossing sfx
 - add kill sfx
-- better fx for hiding and briefcase
+- add rock sfx
+- better gfx for hiding, rock, crossing, briefcase
 - use bebop lines instead of sfx
 - define background tile for level
 - start screen gfx
@@ -1139,9 +1140,7 @@ x arrows are broken
 - animate badges on level card
 
 - tutorial mode?
-- sound fx
 - music
-- levels
 
 -- refactoring
 x refactor player update to cr
