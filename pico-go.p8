@@ -954,6 +954,7 @@ x chose to enter level
 ? arrow animation blinks
 x return to metalevel from level
 x fix broken metalevel animation
+- arrows are broken
 - enemy distractions
   x draw rock
   - make rock selection menu
