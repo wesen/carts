@@ -289,9 +289,9 @@ metalevel_bbox=bbox(v2(112,0),v2(125,3))
 
 -- debug flags
 dbg_skip_start=true
-dbg_skip_metalevel=false
+dbg_skip_metalevel=true
 dbg_auto_win=false
-dbg_start_level=1
+dbg_start_level=4
 dbg_draw=false
 
 -- constants
@@ -360,6 +360,7 @@ class_node=class(function(self,x,y,m,f)
  self.is_plant=false
  self.is_briefcase=false
  self.is_victim=false
+ self.is_rock=false
 
  if (band(f,4)==4) self.is_start=true
  if (band(f,2)==2) self.is_goal=true
@@ -368,6 +369,7 @@ class_node=class(function(self,x,y,m,f)
  if (m==plant_spr) self.is_plant=true
  if (m==briefcase_spr) self.is_briefcase=true
  if (m==victim_spr) self.is_victim=true
+ if (m==rock_spr) self.is_rock=true
 end)
 
 function class_node:str()
@@ -384,6 +386,7 @@ function class_node:initialize()
  local sprs={16,17,18,19}
  if (self.is_plant) sprs={plant_spr}
  if (self.is_briefcase) sprs={briefcase_spr}
+ if (self.is_rock) sprs={rock_spr}
  if (self.is_goal) sprs[4]=20
 
  self.initialized=true
@@ -952,6 +955,9 @@ x chose to enter level
 x return to metalevel from level
 x fix broken metalevel animation
 - enemy distractions
+  x draw rock
+  - make rock selection menu
+  - handle rock throw
   - compute path to noise
 - add hide in plant sfx
 - add crossing sfx
@@ -1174,15 +1180,13 @@ function class_game:play_game_level(level)
 ::again::
   self:load_level(level)
   while not (self:is_win() or self:is_lose()) do
-   printh("player turn")
+   printh("player turn "..tostr(level.turns))
    self.turn=turn_player
    player.has_finished_turn=false
    
    arrows:show()
-   printh("wait for player "..tostr(level.turns))
    wait_for_cr(player:do_turn())
    level.turns+=1
-   printh("player finished turn")
    
    if player.node.is_plant then
     make_explosion(v2(player.node.x*8,player.node.y*8),10)
