@@ -295,7 +295,22 @@ function check_flag(f,flag)
  return band(f,flag)==flag
 end
 
-
+function get_most_frequent(l)
+ local cnts={}
+ for i in all(l) do
+  if (cnts[i]==nil) cnts[i]=0
+  cnts[i]+=1
+ end
+ local max_cnt=0
+ local max_elt=nil
+ for i,cnt in pairs(cnts) do
+  if cnt>max_cnt then
+   max_elt=i
+   max_cnt=cnt
+  end
+ end
+ return max_elt
+end
 -->8
 -- board, config, constants
 arrow_animation_speed=0.3
