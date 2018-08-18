@@ -67,13 +67,14 @@ end
 
 -- coroutines
 crs={}
+draw_crs={}
 
-function tick_crs()
- for cr in all(crs) do
+function tick_crs(_crs)
+ for cr in all(_crs) do
   if costatus(cr)!='dead' then
    coresume(cr)
   else
-   del(crs, cr)
+   del(_crs, cr)
   end
  end
 end
@@ -81,6 +82,12 @@ end
 function add_cr(f)
  local cr=cocreate(f)
  add(crs,cr)
+ return cr
+end
+
+function add_draw_cr(f)
+ local cr=cocreate(f)
+ add(draw_crs,cr)
  return cr
 end
 
@@ -748,9 +755,7 @@ function class_player:do_turn()
   while true do
    for i=1,4 do
     if btnp(i-1) then
-     printh("button pressed")
      local cr=self:move(i)
-     printh("move cr "..tostr(cr))
      if cr!=nil then
       wait_for_cr(cr)
       return
@@ -758,6 +763,12 @@ function class_player:do_turn()
       yield()
      end
     end
+   end
+   if btnp(5) and game.is_metalevel then
+    printh("select level")
+    game.level_selected=true
+    self.has_finished_turn=true
+    return
    end
    if btnp(4) and not game.is_metalevel then
     printh("restarting level")
@@ -914,6 +925,10 @@ x display level name on metalevel
 x no kills / all kills status
 x count turns
 x display level stats in metalevel
+x fix fading of level info
+- chose to enter level
+- fix broken metalevel animation
+- arrow animation blinks
 - enemy distractions
   - compute path to noise
 - add hide in plant sfx
@@ -923,7 +938,6 @@ x display level stats in metalevel
 - use bebop lines instead of sfx
 - define background tile for level
 - start screen gfx
-- chose to enter level
 - only allow completed levels
 - animate badges on level card
 
@@ -1024,9 +1038,8 @@ function class_game:play_metalevel()
   sfx(metalevel_sfx)
   wait_for(1)
   blink()
+  self.is_metalevel=false
   wait_for_cr(fade())
-  printh("faded")
-  printh("fade back in next level")
  else
   self.current_level=dbg_start_level
  end
@@ -1110,6 +1123,7 @@ function class_game:play_game_metalevel()
  return add_cr(function()
 ::again::
   self:load_level(meta_level)
+  self.level_selected=false
   while not (self:is_win() or self:is_lose()) do
    printh("player turn")
    self.turn=turn_player
@@ -1117,6 +1131,7 @@ function class_game:play_game_metalevel()
    
    arrows:show()
    wait_for_cr(player:do_turn())
+   printh("player did turn "..tostr(player.has_finished_turn))
    while not player.has_finished_turn and not self.request_restart do
     if player.is_moving then
      arrows:hide()
@@ -1129,11 +1144,10 @@ function class_game:play_game_metalevel()
    self.meta_position=v2(player.node.x,player.node.y)
    local level=player.node.level
    printh("level: "..tostr(level))
-   if level<=16 then
+   if self.level_selected and level<=16 then
     self.current_level=level
  	  printh("selected level "..tostr(self.current_level))
-	   -- here we need to handle a x input
-  	 return
+ 	  return
   	end
    
    if self:is_win() then
@@ -1262,7 +1276,7 @@ function class_game:draw()
     spr(briefcase_spr,100,20) 
    end
   else
-   if player!=nil and not is_blink then
+   if player!=nil then
     local level=levels[player.node.level]
     if level!=nil then
      local s="level "..tostr(level.number).." - ❎ start"
@@ -1270,8 +1284,7 @@ function class_game:draw()
      local x1=48
      local y1=90
      if level.has_finished then
-    	 bspr(card_spr,
-           x1-21,y1,8)
+    	 bspr(card_spr,x1-21,y1,8)
       if level.max_enemies_killed==level.enemies then
        bspr(all_kill_spr,
             x1-9,y1,8)
@@ -1325,13 +1338,14 @@ function _update60()
  dt=t-lasttime
  lasttime=t
 
- tick_crs()
+ tick_crs(crs)
  particles:update() 
 end
 
 function _draw()
  cls()
  game:draw()
+ tick_crs(draw_crs)
 end
 -->8
 -- gfx
@@ -1445,13 +1459,19 @@ end
 
 -- fade
 dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,14}
+is_fading=false
 
 function fade(fade_in)
- return add_cr(function()
+ return add_draw_cr(function()
+  is_fading=true
   for i=1,10 do
    local i_=i
+   local time_elapsed=0
+   
    if (fade_in==true) i_=10-i
    local p=flr(mid(0,i_/10,1)*100)
+  
+   while time_elapsed<0.1 do
   
    for j=1,15 do
     local kmax=(p+(j*1.46))/22
@@ -1463,8 +1483,11 @@ function fade(fade_in)
     pal(j,col,1)
    end
    
-   wait_for(0.1)
+    time_elapsed+=dt
+    yield()
+   end
   end
+  is_fading=false
  end)
 end
 
@@ -1515,12 +1538,14 @@ function espr(s,x,y,do_explosion)
 end
 
 function bspr(s,x,y,col)
- palbg(col)
- spr(s,x-1,y)
- spr(s,x+1,y)
- spr(s,x,y-1)
- spr(s,x,y+1)
- pal()
+ if not is_fading or true then
+  palbg(col)
+  spr(s,x-1,y)
+  spr(s,x+1,y)
+  spr(s,x,y-1)
+  spr(s,x,y+1)
+  pal()
+ end
  spr(s,x,y)
 end
 
