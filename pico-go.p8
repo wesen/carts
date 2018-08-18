@@ -744,9 +744,15 @@ end
 -- only called in the correct states
 function class_player:do_turn()
  return add_cr(function()
+  local arr_directions={}
+  for direction in all(directions) do
+   local node=board:get_node_in_direction(self.node,direction)
+   if (node!=nil) add(arr_directions,direction)
+  end
+  
   local player_arrows=class_arrows.init(
      v2(player.node.x,player.node.y),
-     directions)
+     arr_directions)
   arrows:add(player_arrows)
   
   while true do
@@ -940,7 +946,7 @@ x chose to enter level
 x return to metalevel from level
 x fix broken metalevel animation
 x refactor drawing of arrows
-- arrows are broken
+x arrows are broken
 - enemy distractions
   x draw rock
   - make rock selection menu
