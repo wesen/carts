@@ -339,12 +339,12 @@ lose_sfx=2
 metalevel_bbox=bbox(v2(112,0),v2(125,7))
 
 -- debug flags
-dbg_skip_start=true
+dbg_skip_start=false
 dbg_skip_metalevel=false
 dbg_auto_win=false
-dbg_start_level=8
+dbg_start_level=0
 dbg_draw=false
-disable_music=true
+disable_music=false
 
 -- constants
 flag_node=0x01
@@ -594,6 +594,7 @@ class_board=class(function(self,level)
     self.nodes[v]=n
     if (n.is_start and self.start_node==nil) self.start_node=n
     if (n.is_goal) self.goal=n
+    if (n.is_goal and self.is_metalevel) n.level=16
     if (n.is_briefcase) level.has_briefcase=true
     if n.level!=nil then
      if n.level==game.current_level then
@@ -766,7 +767,6 @@ function class_board:draw()
    end
   end
  end
- printh("--")
  for v,l in pairs(self.links) do  
   if l.spr!=nil then
    local flip_v=not (l.is_v and l.flip_spr)
@@ -1288,7 +1288,7 @@ x add sfx when exiting to metalevel
 x player loses metalevel direction
 x draw player on top of dead enemies
 x left link resets to dark gray when returning to metalevel
-- final cleanup
+x final cleanup
 
 ---
 
@@ -1592,8 +1592,14 @@ function draw_board()
   camera(-w+shakex,-h+shakey)
   board:draw()
   ecnts={}
-  enemies:draw()
-  player:draw()
+  if player.node.is_plant then
+   -- player is hidden in background
+   player:draw()
+   enemies:draw()
+  else
+   enemies:draw()
+   player:draw()
+  end
   arrows:draw()
   particles:draw() 
   camera(shakex,shakey)
