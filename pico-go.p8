@@ -339,10 +339,10 @@ lose_sfx=2
 metalevel_bbox=bbox(v2(112,0),v2(125,7))
 
 -- debug flags
-dbg_skip_start=false
+dbg_skip_start=true
 dbg_skip_metalevel=false
 dbg_auto_win=false
-dbg_start_level=5
+dbg_start_level=8
 dbg_draw=false
 disable_music=false
 
@@ -1271,7 +1271,8 @@ x start screen gfx
 x make lose sfx
 x fix fade in / fade out
 x add sfx when exiting to metalevel
-- draw player on top of dead enemies
+- player loses metalevel direction
+x draw player on top of dead enemies
 - final cleanup
 
 ---
@@ -1571,8 +1572,8 @@ function draw_board()
   camera(-w+shakex,-h+shakey)
   board:draw()
   ecnts={}
-  player:draw()
   enemies:draw()
+  player:draw()
   arrows:draw()
   particles:draw() 
   camera(shakex,shakey)
