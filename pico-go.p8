@@ -339,9 +339,9 @@ metalevel_bbox=bbox(v2(112,0),v2(125,7))
 
 -- debug flags
 dbg_skip_start=true
-dbg_skip_metalevel=false
+dbg_skip_metalevel=true
 dbg_auto_win=false
-dbg_start_level=12
+dbg_start_level=15
 dbg_draw=false
 disable_music=true
 
@@ -1271,12 +1271,12 @@ x add briefcase sfx
 x add kill sfx
 x add rock sfx
 x better gfx for hiding, rock, crossing, briefcase
-- death sfx when killing victim
+x only allow completed levels
+x potential rock bug seen on level 13
+x death sfx when killing victim
 - animate badges on level card
 - show names of achievements on level card
-x only allow completed levels
 - add surprise particles
-- potential rock bug seen on level 13
 - start screen gfx
 
 ---
@@ -1528,6 +1528,7 @@ function class_game:play_game_level(level)
     sfx(level_sfx)
     if player.node.is_victim then
      make_explosion(v2(player.node.x*8+4,player.node.y*8+4),40)
+     sfx(death_sfx)
      shake=.2
      wait_for(0.2)
     end
