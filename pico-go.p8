@@ -342,6 +342,7 @@ dbg_skip_metalevel=true
 dbg_auto_win=false
 dbg_start_level=12
 dbg_draw=false
+disable_music=true
 
 -- constants
 flag_node=0x01
@@ -1305,7 +1306,7 @@ function class_game:play_game_loop()
   while true do
    printh("start music")
    music(-1)
---   music(start_screen_music,0b1110)
+   if (not disable_music) music(start_screen_music,0b1110)
    self:play_start_screen()
  
    while true do
@@ -1324,12 +1325,10 @@ function class_game:play_start_screen()
  if not dbg_skip_start then
   self.state=state_start_screen
   wait_for_cr(fade(true))  
-  -- music(start_screen_music,music_fade_duration)
   pal()
   while not (btnp(4) or btnp(5)) do
  	 yield()
  	end
---  music(-1,music_fade_duration)
  	sfx(start_screen_sfx)
  	printh("start game")
  	blink()
@@ -1339,7 +1338,6 @@ end
 
 function class_game:play_metalevel()
  if not dbg_skip_metalevel then
---  music(metalevel_music,music_fade_duration)
 
   local t1=init_animation_speed
   local t2=init_link_animation_speed
@@ -1354,7 +1352,6 @@ function class_game:play_metalevel()
    wait_for_cr(fade())
    return true
   end
---  music(-1,music_fade_duration)
   sfx(metalevel_sfx)
   wait_for(1)
   blink()
@@ -1369,9 +1366,7 @@ end
 function class_game:play_normal_level()
  ::again::
  self.is_metalevel=false
--- music(level_music,music_fade_duration)
  wait_for_cr(self:play_game_level(levels[self.current_level]))
--- music(-1,music_fade_duration)
  wait_for(1)
  blink()
  wait_for_cr(fade())  
@@ -1460,7 +1455,6 @@ function class_game:play_game_metalevel()
    
    if self:is_win() then
     printh("win level")
---    music(-1,music_fade_duration)
     break
    end
   end
@@ -1502,7 +1496,6 @@ function class_game:play_game_level(level)
     level.has_finished=true
     
     printh("win level")
---    music(-1,music_fade_duration)
     sfx(level_sfx)
     if player.node.is_victim then
      make_explosion(v2(player.node.x*8+4,player.node.y*8+4),40)
