@@ -1812,17 +1812,29 @@ function draw_card()
  print(tostr(level.turns),
        x1+w/2-#s*2+1,y1+21,0)
  print("turns",x1+w/2-9,y1+28,0)
+ local i=0
+ local print_=function(s)
+  print(s, x1, y1+i*7+78,7)
+  i+=1
+ end
 
  bspr(card_spr,
        x1+w/2-21,y1+62,8)
+ if board.goal.is_victim then
+  print_("target eliminated")
+ else
+  print_("goal reached")  
+ end
  if level.enemies>0 then
   if level.max_enemies_killed==level.enemies then
    bspr(all_kill_spr,
         x1+w/2-9,y1+62,8)
+   print_("all enemies killed")  
   end
   if level.has_achieved_no_kill then
    bspr(no_kill_spr,
         x1+w/2+3,y1+62,8)
+   print_("no kills")  
   end
  end
  if level.has_taken_briefcase then
@@ -1830,6 +1842,7 @@ function draw_card()
        x1+w/2+15,y1+62,8)
   bspr(briefcase_spr,
        x1+w/2+15,y1+62,7)
+  print_("briefcase found")  
  end
 end
 
