@@ -344,7 +344,7 @@ dbg_skip_metalevel=false
 dbg_auto_win=false
 dbg_start_level=8
 dbg_draw=false
-disable_music=false
+disable_music=true
 
 -- constants
 flag_node=0x01
@@ -472,10 +472,10 @@ function class_node:initialize()
    local f=function()
     n:initialize()
    end
-   if (n.x < self.x) board.links[v_idx(self.x-1,self.y)]:initialize(true,f,self.level)
-   if (n.x > self.x) board.links[v_idx(self.x+1,self.y)]:initialize(false,f,self.level)
-   if (n.y < self.y) board.links[v_idx(self.x,self.y-1)]:initialize(false,f,self.level)
-   if (n.y > self.y) board.links[v_idx(self.x,self.y+1)]:initialize(true,f,self.level)
+   if (n.x < self.x) board.links[v_idx(self.x-1,self.y)]:initialize(true,f)
+   if (n.x > self.x) board.links[v_idx(self.x+1,self.y)]:initialize(false,f)
+   if (n.y < self.y) board.links[v_idx(self.x,self.y-1)]:initialize(false,f)
+   if (n.y > self.y) board.links[v_idx(self.x,self.y+1)]:initialize(true,f)
    if (self.is_goal and not self.is_victim) self.anim_cr=animate(self,goal_animation,0.1,true)
    if (self.is_goal and self.is_victim) self.anim_cr=animate(self,victim_animation,0.4,true)
   end
@@ -671,6 +671,15 @@ function class_board:get_node_in_direction(node,direction,ignore_links)
  end
 end
 
+function class_board:get_link_neighbors(l)
+ local res={}
+ for dir_ in all(directions) do
+  local v=v_idx(l.x+dir_[1],l.y+dir_[2])
+  if (board.nodes[v]!=nil) add(res,board.nodes[v])
+ end
+ return res
+end
+
 function class_board:get_enemies_in_direction(node,direction)
  local node=self:get_node_in_direction(node,direction)
  local res={}
@@ -757,11 +766,16 @@ function class_board:draw()
    end
   end
  end
+ printh("--")
  for v,l in pairs(self.links) do  
   if l.spr!=nil then
    local flip_v=not (l.is_v and l.flip_spr)
    local flip_h=(not l.is_v) and l.flip_spr
-   if l.level!=nil and l.level>(game.max_level) then
+   local l_level=0
+   for n in all(board:get_link_neighbors(l)) do
+    if (n.level!=nil and n.level>l_level) l_level=n.level
+   end
+   if l_level>(game.max_level+1) then
     l.col=5
    end
    pal(10,l.col)
@@ -1273,6 +1287,7 @@ x fix fade in / fade out
 x add sfx when exiting to metalevel
 x player loses metalevel direction
 x draw player on top of dead enemies
+x left link resets to dark gray when returning to metalevel
 - final cleanup
 
 ---
@@ -1372,6 +1387,7 @@ function class_game:play_game_loop()
    while true do   
     if (self:play_metalevel()) break
     game.player_direction=player.direction
+    printh("player direction is now "..tostr(player.direction))
     self:play_normal_level() 
    end
    
