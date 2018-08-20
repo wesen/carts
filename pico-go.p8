@@ -1275,7 +1275,7 @@ x only allow completed levels
 x potential rock bug seen on level 13
 x death sfx when killing victim
 x make bass notes not so loud
-- winning gfx
+x winning gfx
 - animate badges on level card
 - show names of achievements on level card
 - add surprise particles
@@ -1334,6 +1334,7 @@ function class_game:play_game_loop()
  
  return add_cr(function()
   while true do
+   game.max_level=dbg_start_level
    printh("start music")
    music(-1)
    if (not disable_music) music(start_screen_music,0b1110)
@@ -1587,15 +1588,19 @@ function class_game:draw()
  camera(shakex,shakey)
  if self.state==state_start_screen and not is_blink then
   map(14,57,25,30,13,4)
-  if (bg_blink) print("❎/🅾️ to start",40,70,7)
+  if (bg_blink) bstr("❎/🅾️ to start",40,70,0,6)
  elseif self.state==state_finish_game and not is_blink then
-  print("you won",32,32)
+  map(14,57,25,30,13,4)
+  spr(43,26,70)
+  if bg_blink then
+   bstr("target eliminated",38,70,7,8)
+  end
  elseif self.state==state_end_screen then
   -- do screen fade
   draw_card()
  elseif self.state==state_load_level or self.state==state_play then
   if not self.is_metalevel then
-   print("🅾️ restart ❎ exit",32,12,6)
+   print("🅾️ restart ❎ exit",32,12,5)
    if player!=nil and player.has_briefcase then
     spr(briefcase_spr,100,20) 
    end
