@@ -981,6 +981,7 @@ function class_player:throw_rock(i_dir)
     if abs(node.x-enemy.node.x)<=2 and abs(node.y-enemy.node.y)<=2 then
      found_enemies=true
      path=board:get_path(enemy.node,node)
+     enemy._follow_path=path
      local next=path[#path]
      local i_dir=get_i_dir(enemy.node,next)
      add_cr(function ()
@@ -988,7 +989,7 @@ function class_player:throw_rock(i_dir)
       enemy.y-=3
       wait_for(0.2)
       enemy.y+=3 
-      enemy.follow_path=path    
+      enemy.follow_path=enemy._follow_path    
       enemy.direction=i_dir
 --      make_explosion(v2(enemy.node.x*8,enemy.node.y*8),2)     
      end)
@@ -1274,6 +1275,8 @@ x better gfx for hiding, rock, crossing, briefcase
 - animate badges on level card
 - show names of achievements on level card
 x only allow completed levels
+- add surprise particles
+- potential rock bug seen on level 13
 - start screen gfx
 
 ---
