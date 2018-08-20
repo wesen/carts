@@ -329,7 +329,10 @@ level_sfx=5
 music_fade_duration=300
 move_sfx=6
 death_sfx=7
-kill_sfx=8
+surprise_sfx=8
+plant_sfx=20
+rock_sfx=9
+briefcase_sfx=21
 
 metalevel_bbox=bbox(v2(112,0),v2(125,7))
 
@@ -337,7 +340,7 @@ metalevel_bbox=bbox(v2(112,0),v2(125,7))
 dbg_skip_start=true
 dbg_skip_metalevel=true
 dbg_auto_win=false
-dbg_start_level=5
+dbg_start_level=12
 dbg_draw=false
 
 -- constants
@@ -829,6 +832,15 @@ function class_mover:move(i)
   local cr=add_cr(function()
    self.is_moving=true
    self.direction=i
+   if self==player and node.is_plant then
+    add_cr(function ()
+     wait_for(0.8)
+     make_smoke(v2(node.x*8+4,node.y*8+4),10)
+     sfx(plant_sfx)
+     wait_for(0.2)
+    end)
+   end
+   
    wait_for_cr(move_to(self,direction[1]*16,direction[2]*16,1,outexpo))
    self.x=0
    self.y=0   
@@ -879,8 +891,10 @@ function class_player:move(i)
   sfx(move_sfx)  
   local crs={cr}
   local enemies=board:get_enemies_in_direction(self.node,directions[i])
+  local enemies_killed=false
   for enemy in all(enemies) do
    if not enemy.is_dead then
+    enemies_killed=true
     add(crs,add_cr(function()
      board.level.enemies_killed+=1
      wait_for(0.2)
@@ -888,6 +902,7 @@ function class_player:move(i)
     end))
    end
   end
+  if (enemies_killed) sfx(death_sfx)
   wait_for_crs(crs)
   self.has_finished_turn=true
  end)
@@ -921,9 +936,9 @@ end
 function class_player:throw_rock(i_dir)
  local node=board:get_node_in_direction(self.node,directions[i_dir],true)
  if (node!=nil) then
-  sfx(9)
+  sfx(rock_sfx)
   return add_cr(function()
-   make_explosion(v2(node.x*8,node.y*8),20) 
+   make_smoke(v2(node.x*8,node.y*8),20) 
    add_draw_cr(function ()
     local w=64-board.level.bbox:w()*8/2
     local h=64-board.level.bbox:h()*8/2
@@ -950,7 +965,7 @@ function class_player:throw_rock(i_dir)
       enemy.y+=3 
       enemy.follow_path=path    
       enemy.direction=i_dir
-      make_explosion(v2(enemy.node.x*8,enemy.node.y*8),2)     
+--      make_explosion(v2(enemy.node.x*8,enemy.node.y*8),2)     
      end)
     end
    end
@@ -958,7 +973,7 @@ function class_player:throw_rock(i_dir)
    if found_enemies then
     add_cr(function()
      wait_for(1)
-     sfx(8)
+     sfx(surprise_sfx)
     end)
    end
     
@@ -1225,15 +1240,15 @@ x nice gfx
 x define background tile for level
 x music
 x refactor player update to cr
+x add hide in plant sfx
+x add briefcase sfx
+x add kill sfx
+x add rock sfx
+x better gfx for hiding, rock, crossing, briefcase
 
 - animate badges on level card
 - show names of achievements on level card
 - only allow completed levels
-- add hide in plant sfx
-- add crossing sfx
-- add kill sfx
-x add rock sfx
-- better gfx for hiding, rock, crossing, briefcase
 - start screen gfx
 
 ---
@@ -1465,12 +1480,9 @@ function class_game:play_game_level(level)
    
    level.turns+=1
    
-   if player.node.is_plant then
-    make_explosion(v2(player.node.x*8,player.node.y*8),10)
-   end
-   
    if player.node.is_briefcase then
     make_explosion(v2(player.node.x*8,player.node.y*8),10)
+    sfx(briefcase_sfx)
     player.has_briefcase=true
     level.has_taken_briefcase=true
     player.node.is_briefcase=false
@@ -1639,7 +1651,8 @@ end
 -->8
 -- gfx
 
-smoke_cols={5,6,7,7,10,8}
+gun_cols={5,6,7,7,10,10,8}
+smoke_cols={5,6,6,7}
 
 class_prtcl=class(function(self,pos,d,size)
  self.pos=pos
@@ -1650,6 +1663,7 @@ class_prtcl=class(function(self,pos,d,size)
  self.col=7
  self.life=1
  self.dlife=.5/self.size
+ self.cols=smoke_cols
 end)
 
 function class_prtcl:draw()
@@ -1669,8 +1683,8 @@ function class_prtcl:update()
  end
  self.pos+=(self.d*dt)
  self.d*=self.dd
- local idx=ceil(self.life*#smoke_cols)
- self.col=smoke_cols[idx]
+ local idx=ceil(self.life*#self.cols)
+ self.col=self.cols[idx]
 end
 
 function angle2vec(angle)
@@ -1683,6 +1697,7 @@ function make_explosion(pos,cnt)
   d*=v2(rnd(30)+20,rnd(30)+20)
   d*=v2(2,2)
   local p=class_prtcl.init(pos,d,1+rnd(4))
+  p.cols=smoke_cols
   particles:add(p)
  end
  for i=1,cnt/4 do
@@ -1690,6 +1705,17 @@ function make_explosion(pos,cnt)
   d*=v2(rnd(10)+20,rnd(10)+20)
   d*=v2(2,2)
   local p=class_prtcl.init(pos,d,2+rnd(5))
+  p.cols=gun_cols
+  particles:add(p)
+ end
+end
+
+function make_smoke(pos,cnt)
+ for i=1,cnt do
+  local d=angle2vec(rnd(.5))
+  d*=v2(rnd(10)+20,rnd(10)+20)
+  d*=v2(3,3)
+  local p=class_prtcl.init(pos,d,1+rnd(4))
   particles:add(p)
  end
 end
@@ -1819,7 +1845,7 @@ function espr(s,x,y,c,do_explosion)
  else
   if do_explosion and eexplosions[v]==nil and x%8==0 and y%8==0 then
    eexplosions[v]=true
-   make_explosion(v2(x+4,y+4),10)
+--   make_explosion(v2(x+4,y+4),3)
   end
   
   local off=eoffs[ecnt]
@@ -2158,8 +2184,8 @@ __sfx__
 01280000110401b0242102424034210341b024110401b0242102424034210341b024130401a0241f024220341f0341a02413040160241a0241f0341a034160240000000000000000000000000000000000000000
 0128000011040180241d024210341d034180240e0401a0241e024210341e0341a0240c0401b0241f024240341f0341b0240c0401b0241f024240341f0341b0240000000000000000000000000000000000000000
 012800000f040180241b0241f0341b0341802413040190241c024220341c0341902411040180241d024210341d03418024110401b0241d024210341d0341b0240000000000000000000000000000000000000000
-011400000c0001d0002100024000210001d0000c0001c0002200024000220001c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-01140000110001d0002100024000210001d000110001d0002100024000210001d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010300003561435610356203362031620316150b000070000700021000210001f0001d0001b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010600000000016055180551b0551f055220552405527055270002e0002e000000002e0002e0002e0050000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 01140000110001b0002100024000210001b000110001b0002100024000210001b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 01140000110001a0002200026000220001a000110001a0002200026000220001a0001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 01140000110001b0002100024000210001b000110001b0002100024000210001b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
