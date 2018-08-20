@@ -1271,7 +1271,7 @@ x start screen gfx
 x make lose sfx
 x fix fade in / fade out
 x add sfx when exiting to metalevel
-- player loses metalevel direction
+x player loses metalevel direction
 x draw player on top of dead enemies
 - final cleanup
 
@@ -1308,6 +1308,7 @@ class_game=class(function (self)
  self.turn=turn_player
  self.is_metalevel=false
  self.max_level=dbg_start_level
+ self.player_direction=i_dir_right
 end)
 
 function class_game:is_level_loaded()
@@ -1338,7 +1339,7 @@ function class_game:load_level(level)
  self.state=state_load_level
  board=class_board.init(level)
  player=class_player.init()
-
+ 
  -- hack for metalevel start position
  if player.spr<64 then
   player.spr=65
@@ -1346,6 +1347,8 @@ function class_game:load_level(level)
   player.direction=i_dir_right
  end
 
+ if (game.is_metalevel) player.direction=game.player_direction
+ 
  wait_for_cr(fade(true))
  
  printh("playing level "..tostr(level))
@@ -1366,8 +1369,9 @@ function class_game:play_game_loop()
    if (not disable_music) music(start_screen_music,0b1110)
    self:play_start_screen()
  
-   while true do
+   while true do   
     if (self:play_metalevel()) break
+    game.player_direction=player.direction
     self:play_normal_level() 
    end
    
