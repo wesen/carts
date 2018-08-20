@@ -1942,14 +1942,12 @@ function espr(s,x,y,c,do_explosion)
 end
 
 function bspr(s,x,y,col)
- if not is_fading or true then
-  palbg(col)
-  spr(s,x-1,y)
-  spr(s,x+1,y)
-  spr(s,x,y-1)
-  spr(s,x,y+1)
-  pal()
- end
+ palbg(col)
+ spr(s,x-1,y)
+ spr(s,x+1,y)
+ spr(s,x,y-1)
+ spr(s,x,y+1)
+ pal()
  spr(s,x,y)
 end
 
