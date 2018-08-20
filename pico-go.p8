@@ -963,15 +963,14 @@ function class_player:throw_rock(i_dir)
  if (node!=nil) then
   sfx(rock_sfx)
   return add_cr(function()
-   make_smoke(v2(node.x*8,node.y*8),20) 
    add_draw_cr(function ()
     local w=64-board.level.bbox:w()*8/2
     local h=64-board.level.bbox:h()*8/2
     local cx=(node.x)*8+w+4
     local cy=(node.y)*8+h+4
-    wait_for(0.5)
+    make_smoke(v2(node.x*8,node.y*8),20)
     for i=1,20 do
-     rect(cx-i,cy-i,cx+i,cy+i,7)
+     rect(cx-i,cy-i,cx+i,cy+i,6)
      wait_for(0.02)
     end    
    end)
@@ -987,11 +986,11 @@ function class_player:throw_rock(i_dir)
      add_cr(function ()
       wait_for(1)
       enemy.y-=3
+      make_surprise(v2(enemy.node.x*8,enemy.node.y*8),5)
       wait_for(0.2)
       enemy.y+=3 
       enemy.follow_path=enemy._follow_path    
       enemy.direction=i_dir
---      make_explosion(v2(enemy.node.x*8,enemy.node.y*8),2)     
      end)
     end
    end
@@ -1270,7 +1269,7 @@ x death sfx when killing victim
 x make bass notes not so loud
 x winning gfx
 - animate badges on level card
-- add surprise particles
+x add surprise particles
 x start screen gfx
 
 ---
@@ -1280,6 +1279,7 @@ x start screen gfx
 - more levels (more boxes)
 
 -- refactoring
+- refactor particle engine
 - node initialization to cr
 - refactor to use v2
 ]]
@@ -1685,6 +1685,7 @@ end
 
 gun_cols={5,6,7,7,10,10,8}
 smoke_cols={5,6,6,7}
+surprise_cols={9,10,10,10}
 
 class_prtcl=class(function(self,pos,d,size)
  self.pos=pos
@@ -1743,11 +1744,32 @@ function make_explosion(pos,cnt)
 end
 
 function make_smoke(pos,cnt)
+ local w=5
+ local off=pos+v2(-w,4)
+ local dx=w*2/cnt
  for i=1,cnt do
   local d=angle2vec(rnd(.5))
-  d*=v2(rnd(10)+20,rnd(10)+20)
+  d*=v2(rnd(10)+10,rnd(10)+10)
   d*=v2(3,3)
-  local p=class_prtcl.init(pos,d,1+rnd(4))
+  off.x+=dx
+  local p=class_prtcl.init(off,d,1+rnd(4))
+  p.dlife=0.02+rnd(0.2)
+  particles:add(p)
+ end
+end
+
+function make_surprise(pos,cnt)
+  local w=5
+ local off=pos+v2(-w,0)
+ local dx=w*2/cnt
+ for i=1,cnt do
+  local d=angle2vec(rnd(.5))
+  d*=v2(rnd(5)+5,rnd(5)+5)
+  d*=v2(3,3)
+  off.x+=dx
+  local p=class_prtcl.init(off,d,1+rnd(4))
+  p.cols=surprise_cols
+  p.dlife=0.03+rnd(0.2)
   particles:add(p)
  end
 end
