@@ -333,12 +333,13 @@ surprise_sfx=8
 plant_sfx=20
 rock_sfx=9
 briefcase_sfx=21
+nope_sfx=22
 
 metalevel_bbox=bbox(v2(112,0),v2(125,7))
 
 -- debug flags
 dbg_skip_start=true
-dbg_skip_metalevel=true
+dbg_skip_metalevel=false
 dbg_auto_win=false
 dbg_start_level=12
 dbg_draw=false
@@ -470,10 +471,10 @@ function class_node:initialize()
    local f=function()
     n:initialize()
    end
-   if (n.x < self.x) board.links[v_idx(self.x-1,self.y)]:initialize(true,f)
-   if (n.x > self.x) board.links[v_idx(self.x+1,self.y)]:initialize(false,f)
-   if (n.y < self.y) board.links[v_idx(self.x,self.y-1)]:initialize(false,f)
-   if (n.y > self.y) board.links[v_idx(self.x,self.y+1)]:initialize(true,f)
+   if (n.x < self.x) board.links[v_idx(self.x-1,self.y)]:initialize(true,f,self.level)
+   if (n.x > self.x) board.links[v_idx(self.x+1,self.y)]:initialize(false,f,self.level)
+   if (n.y < self.y) board.links[v_idx(self.x,self.y-1)]:initialize(false,f,self.level)
+   if (n.y > self.y) board.links[v_idx(self.x,self.y+1)]:initialize(true,f,self.level)
    if (self.is_goal and not self.is_victim) self.anim_cr=animate(self,goal_animation,0.1,true)
    if (self.is_goal and self.is_victim) self.anim_cr=animate(self,victim_animation,0.4,true)
   end
@@ -490,8 +491,9 @@ class_link=class(function(self,x,y,is_v)
  self.initialized=false
 end)
 
-function class_link:initialize(flip_spr,cb)
+function class_link:initialize(flip_spr,cb,level)
  if (self.initialized) return
+ self.level=level
  self.initialized=true
  self.flip_spr=flip_spr
  local sprs={32,33,34,35}
@@ -728,9 +730,18 @@ function class_board:draw()
  palt()
  for v,n in pairs(self.nodes) do
   if n.spr!=nil then
-   if self.is_metalevel and n!=board.start_node and n!=board.goal then
+   if self.is_metalevel 
+      and n!=board.start_node 
+      and n!=board.goal then
     local col=n.level
-    if (n.level==nil) col=6
+    if n.level==nil then
+     col=6
+    elseif n.level>(game.max_level+1) then
+     col=5
+    else
+     col=7
+    end
+
     pal(10,col)
     spr(n.spr,n.x*8,n.y*8)
     pal(10,10)
@@ -749,8 +760,12 @@ function class_board:draw()
   if l.spr!=nil then
    local flip_v=not (l.is_v and l.flip_spr)
    local flip_h=(not l.is_v) and l.flip_spr
+   if l.level!=nil and l.level>(game.max_level) then
+    l.col=5
+   end
    pal(10,l.col)
-   spr(l.spr,l.x*8,l.y*8,1,1,flip_h,flip_v)
+   spr(l.spr,l.x*8,l.y*8,
+       1,1,flip_h,flip_v)
    pal(10,10)
   end
  end
@@ -833,14 +848,6 @@ function class_mover:move(i)
   local cr=add_cr(function()
    self.is_moving=true
    self.direction=i
-   if self==player and node.is_plant then
-    add_cr(function ()
-     wait_for(0.8)
-     make_smoke(v2(node.x*8+4,node.y*8+4),10)
-     sfx(plant_sfx)
-     wait_for(0.2)
-    end)
-   end
    
    wait_for_cr(move_to(self,direction[1]*16,direction[2]*16,1,outexpo))
    self.x=0
@@ -885,6 +892,23 @@ function(self)
 end)
 
 function class_player:move(i)
+ local direction=directions[i]
+ local node=board:get_node_in_direction(self.node,direction)
+ if (node==nil) return
+
+ if node.is_plant then
+  add_cr(function ()
+   wait_for(0.8)
+   make_smoke(v2(node.x*8+4,node.y*8+4),10)
+   sfx(plant_sfx)
+   wait_for(0.2)
+  end)
+ elseif node.level!=nil and node.level>(game.max_level+1) then
+  printh("nope")
+  sfx(nope_sfx)
+  return
+ end
+
  local cr=class_mover.move(self,i)
  if (cr==nil) return
  
@@ -1246,10 +1270,10 @@ x add briefcase sfx
 x add kill sfx
 x add rock sfx
 x better gfx for hiding, rock, crossing, briefcase
-
+- death sfx when killing victim
 - animate badges on level card
 - show names of achievements on level card
-- only allow completed levels
+x only allow completed levels
 - start screen gfx
 
 ---
@@ -1280,6 +1304,7 @@ class_game=class(function (self)
  self.state=state_start_screen
  self.turn=turn_player
  self.is_metalevel=false
+ self.max_level=dbg_start_level
 end)
 
 function class_game:is_level_loaded()
@@ -1381,6 +1406,7 @@ function class_game:play_normal_level()
   end
   card.visible=false
   wait_for_cr(fade())
+  game.max_level=max(game.max_level,self.current_level)
 
   printh("current level is now "..tostr(self.current_level))
  elseif self:is_lose() then
@@ -2179,7 +2205,7 @@ __sfx__
 012800000f040180241b0241f0341b0341802413040190241c024220341c0341902411040180241d024210341d03418024110401b0241d024210341d0341b0240000000000000000000000000000000000000000
 010300003561435610356203362031620316150b000070000700021000210001f0001d0001b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 010600000000016055180551b0551f055220552405527055270002e0002e000000002e0002e0002e0050000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-01140000110001b0002100024000210001b000110001b0002100024000210001b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000100000915009150091500915009150091500915009150091500911009100091000910000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 01140000110001a0002200026000220001a000110001a0002200026000220001a0001100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 01140000110001b0002100024000210001b000110001b0002100024000210001b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 01140000130001a0001f000220001f0001a00013000160001a0001f0001a000160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
