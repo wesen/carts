@@ -334,14 +334,15 @@ plant_sfx=20
 rock_sfx=9
 briefcase_sfx=21
 nope_sfx=22
+lose_sfx=2
 
 metalevel_bbox=bbox(v2(112,0),v2(125,7))
 
 -- debug flags
-dbg_skip_start=true
-dbg_skip_metalevel=true
+dbg_skip_start=false
+dbg_skip_metalevel=false
 dbg_auto_win=false
-dbg_start_level=6
+dbg_start_level=15
 dbg_draw=false
 disable_music=true
 
@@ -903,7 +904,8 @@ function class_player:move(i)
    sfx(plant_sfx)
    wait_for(0.2)
   end)
- elseif node.level!=nil and node.level>(game.max_level+1) then
+ elseif node.level!=nil 
+    and node.level>(game.max_level+1) then
   printh("nope")
   sfx(nope_sfx)
   return
@@ -1268,17 +1270,21 @@ x potential rock bug seen on level 13
 x death sfx when killing victim
 x make bass notes not so loud
 x winning gfx
-- animate badges on level card
 x add surprise particles
 x start screen gfx
+x make lose sfx
+x fix fade in / fade out
+- final cleanup
 
 ---
 
+? animate badges on level card
 ? show names of achievements on level card
 - tutorial mode?
 - more levels (more boxes)
 
 -- refactoring
+- better way of sequencing animations
 - refactor particle engine
 - node initialization to cr
 - refactor to use v2
@@ -1323,8 +1329,37 @@ function class_game:is_lose()
  return player.is_dead
 end
 
-function class_game:play_game_loop()
+function class_game:load_level(level)
+ self.initialized=false
+ self.request_restart=false
+ self.request_exit_to_metalevel=false
+ if (player) player:destroy()
+ if (board) board:destroy()
+
+ self.state=state_load_level
+ board=class_board.init(level)
+ player=class_player.init()
+
+ -- hack for metalevel start position
+ if player.spr<64 then
+  player.spr=65
+  player.start_spr=64
+  player.direction=i_dir_right
+ end
+
+ wait_for_cr(fade(true))
  
+ printh("playing level "..tostr(level))
+
+ while not self:is_level_loaded() do
+  yield()
+ end
+ level.turns=0
+ level.enemies_killed=0
+ printh("level is loaded")
+end
+
+function class_game:play_game_loop()
  return add_cr(function()
   while true do
    game.max_level=dbg_start_level
@@ -1362,7 +1397,6 @@ end
 
 function class_game:play_metalevel()
  if not dbg_skip_metalevel then
-
   local t1=init_animation_speed
   local t2=init_link_animation_speed
   init_animation_speed=0
@@ -1392,6 +1426,7 @@ function class_game:play_normal_level()
  self.is_metalevel=false
  wait_for_cr(self:play_game_level(levels[self.current_level]))
  wait_for(1)
+ if (self:is_lose()) sfx(lose_sfx)
  blink()
  wait_for_cr(fade())  
 
@@ -1399,6 +1434,7 @@ function class_game:play_normal_level()
   printh("won")
   self.state=state_end_screen
   pal()
+  wait_for_cr(fade(true))
   wait_for_crs({animate_card()})
   while not (btnp(4) or btnp(5)) do
    yield()
@@ -1419,6 +1455,7 @@ function class_game:play_finish_game()
  printh("finished game")
  self.state=state_finish_game
  
+ sfx(level_sfx)
  wait_for_cr(fade(true))  
  pal()
  while not (btnp(4) or btnp(5)) do
@@ -1428,39 +1465,9 @@ function class_game:play_finish_game()
 	wait_for_cr(fade())
 end
 
-function class_game:load_level(level)
- self.initialized=false
- self.request_restart=false
- self.request_exit_to_metalevel=false
- if (player) player:destroy()
- if (board) board:destroy()
-
- self.state=state_load_level
- board=class_board.init(level)
- player=class_player.init()
-
- -- hack for metalevel start position
- if player.spr<64 then
-  player.spr=65
-  player.start_spr=64
-  player.direction=i_dir_right
- end
- 
- wait_for_cr(fade(true))
-  
- printh("playing level "..tostr(level))
-
- while not self:is_level_loaded() do
-  yield()
- end
- level.turns=0
- level.enemies_killed=0
- printh("level is loaded")
-end
 
 function class_game:play_game_metalevel()
  return add_cr(function()
-::again::
   self:load_level(meta_level)
   self.request_level_selection=false
   while not (self:is_win() or self:is_lose()) do
@@ -1534,7 +1541,6 @@ function class_game:play_game_level(level)
 
    -- reset movement explosions
    eexplosions={}
-   printh("clear explosions")
    
    printh("enemy turn")
    self.turn=turn_enemy
@@ -1584,9 +1590,8 @@ function class_game:draw()
   if (bg_blink) bstr("❎/🅾️ to start",40,70,0,6)
  elseif self.state==state_finish_game and not is_blink then
   map(14,57,25,30,13,4)
-  spr(43,26,70)
   if bg_blink then
-   bstr("target eliminated",38,70,7,8)
+   bstr("mission accomplished",25,70,7,8)
   end
  elseif self.state==state_end_screen then
   -- do screen fade
