@@ -1657,6 +1657,7 @@ game=class_game.init()
 lasttime=time()
 dt=0
 
+is_screen_dark=false
 bg_blink=false
 
 function _init()
@@ -1682,7 +1683,9 @@ end
 
 function _draw()
  cls()
- game:draw()
+ if not is_screen_dark then
+  game:draw()
+ end
  tick_crs(draw_crs)
 end
 -->8
@@ -1853,29 +1856,38 @@ is_fading=false
 function fade(fade_in)
  return add_draw_cr(function()
   is_fading=true
+  is_screen_dark=false
+  local p=0
   for i=1,10 do
    local i_=i
    local time_elapsed=0
    
    if (fade_in==true) i_=10-i
-   local p=flr(mid(0,i_/10,1)*100)
+   p=flr(mid(0,i_/10,1)*100)
   
    while time_elapsed<0.1 do
-  
-   for j=1,15 do
-    local kmax=(p+(j*1.46))/22
-    local col=j
-    for k=1,kmax do
-     if (col==0) break
-     col=dpal[col]
+    for j=1,15 do
+     local kmax=(p+(j*1.46))/22
+     local col=j
+     for k=1,kmax do
+      if (col==0) break
+      col=dpal[col]
+     end
+     pal(j,col,1)
     end
-    pal(j,col,1)
-   end
-   
+    
+    if not fade_in and p==100 then
+     -- this needs to be set before the final yield
+     -- draw will continue to be called even if we are
+     -- in a coresumed cr, if i understand this correctly
+     is_screen_dark=true
+    end  
+    
     time_elapsed+=dt
     yield()
    end
   end
+
   is_fading=false
  end)
 end
@@ -1951,25 +1963,6 @@ function bstr(s,x,y,c1,c2)
 	end
 	print(s,x+1,y+1,c2)
 end
-
---[[
-function bstr(s,x,y,col)
- if not is_fading or true then
-  palbg(col)
-  print(s,x-1,y)
-  print(s,x+1,y)
-  print(s,x,y-1)
-  print(s,x,y+1)
-  print(s,x-1,y+1)
-  print(s,x+1,y-1)
-  print(s,x+1,y-1)
-  print(s,x-1,y+1)
-  print()
-  pal()
- end
- print(s,x,y)
-end]]
-
 __gfx__
 00000000000e00000000000000000000000000000000000000ddd000008888003333333300000000505050507777777677d6d77677d6d7767777777606666660
 00000000000e000000000000000000000000000000000000000d0000087777803333333300005000050505057777777677d6d77677d6d7767777777666dddd66
