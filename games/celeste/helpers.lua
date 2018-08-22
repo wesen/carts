@@ -16,3 +16,10 @@ end
 function maybe()
     return rnd(1)<0.5
 end
+
+-- this is used to block out sound effects on important sfx
+function psfx(num)
+    if sfx_timer<=0 then
+        sfx(num)
+    end
+end

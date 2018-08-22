@@ -8,20 +8,24 @@ k_down=3
 k_jump=4
 k_dash=5
 
--- first, drawing of the current room
--- draw terrain
--- draw player
--- draw player hair
--- animate player
--- move player
--- draw hair
+-- x first, drawing of the current room
+-- x draw terrain
+-- x draw player
+-- x draw player hair
+-- x animate player
+-- x move player
+-- x draw hair
 -- jump
+-- dash
+-- smoke
 -- kill player
 
 max_djump=1
 frames=0
 seconds=0
 minutes=0
+
+sfx_timer=0
 
 -- levels
 room={x=0,y=0}
@@ -32,10 +36,23 @@ player={
         this.spr_off=0
         this.djump=max_djump
 
+        -- jump
+        this.p_jump=false
+        this.jbuffer=0
+
         create_hair(this)
     end,
     update=function(this)
-		local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
+        local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
+
+        -- is this the jump transition
+        local jump=btn(k_jump) and not this.p_jump
+        this.p_jump=btn(k_jump)
+        if (jump) then
+            this.jbuffer=4
+        elseif this.jbuffer>0 then
+            this.jbuffer-=1
+        end
 
         local maxrun=1
         local accel=0.6
@@ -52,6 +69,14 @@ player={
             this.flip.x=(this.spd.x<0)
         end
 
+        -- jump
+        if this.jbuffer>0 then
+            psfx(1)
+            this.jbuffer=0
+            this.spd.y=-2
+        end
+
+        -- animation
         this.spr_off+=0.25
 		if (this.spd.x==0) or (not btn(k_left) and not btn(k_right)) then
 			this.spr=1

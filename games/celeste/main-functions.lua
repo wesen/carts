@@ -12,6 +12,10 @@ function _update()
         end
     end
 
+    if sfx_timer>0 then
+        sfx_timer-=1
+    end
+
     move(_player,_player.spd.x,_player.spd.y)
     _player.type.update(_player)
 end
@@ -26,10 +30,11 @@ function _draw()
     -- renders only layer 4 (only bg, used for title screen too)
     map(room.x*16,room.y*16,0,0,16,16,4)
 
+    -- draw terrain (everything except -4)
+	local off=-4
+    map(room.x*16,room.y * 16,off,0,16,16,2)
+
     -- draw player
     _player.type.draw(_player)
 
-    -- draw terrain (everything except -4)
-	local off=-4
-	map(room.x*16,room.y * 16,off,0,16,16,2)
 end

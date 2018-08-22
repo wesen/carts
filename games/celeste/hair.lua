@@ -17,6 +17,7 @@ function draw_hair(obj,facing)
 
     foreach(obj.hair,function(h)
         -- trailing previous hair
+        -- change this from 1.5 to 10 to show slow trailing hair
         h.x+=(last.x-h.x)/1.5
         h.y+=(last.y+0.5-h.y)/1.5
         circfill(h.x,h.y,h.size,8)

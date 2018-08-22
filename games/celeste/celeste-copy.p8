@@ -11,20 +11,24 @@ k_down=3
 k_jump=4
 k_dash=5
 
--- first, drawing of the current room
--- draw terrain
--- draw player
--- draw player hair
--- animate player
--- move player
--- draw hair
+-- x first, drawing of the current room
+-- x draw terrain
+-- x draw player
+-- x draw player hair
+-- x animate player
+-- x move player
+-- x draw hair
 -- jump
+-- dash
+-- smoke
 -- kill player
 
 max_djump=1
 frames=0
 seconds=0
 minutes=0
+
+sfx_timer=0
 
 -- levels
 room={x=0,y=0}
@@ -35,10 +39,23 @@ player={
         this.spr_off=0
         this.djump=max_djump
 
+        -- jump
+        this.p_jump=false
+        this.jbuffer=0
+
         create_hair(this)
     end,
     update=function(this)
-		local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
+        local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
+
+        -- is this the jump transition
+        local jump=btn(k_jump) and not this.p_jump
+        this.p_jump=btn(k_jump)
+        if (jump) then
+            this.jbuffer=4
+        elseif this.jbuffer>0 then
+            this.jbuffer-=1
+        end
 
         local maxrun=1
         local accel=0.6
@@ -55,6 +72,14 @@ player={
             this.flip.x=(this.spd.x<0)
         end
 
+        -- jump
+        if this.jbuffer>0 then
+            psfx(1)
+            this.jbuffer=0
+            this.spd.y=-2
+        end
+
+        -- animation
         this.spr_off+=0.25
 		if (this.spd.x==0) or (not btn(k_left) and not btn(k_right)) then
 			this.spr=1
@@ -95,6 +120,7 @@ function draw_hair(obj,facing)
 
     foreach(obj.hair,function(h)
         -- trailing previous hair
+        -- change this from 1.5 to 10 to show slow trailing hair
         h.x+=(last.x-h.x)/1.5
         h.y+=(last.y+0.5-h.y)/1.5
         circfill(h.x,h.y,h.size,8)
@@ -203,12 +229,13 @@ function _draw()
     -- renders only layer 4 (only bg, used for title screen too)
     map(room.x*16,room.y*16,0,0,16,16,4)
 
+    -- draw terrain (everything except -4)
+	local off=-4
+    map(room.x*16,room.y * 16,off,0,16,16,2)
+
     -- draw player
     _player.type.draw(_player)
 
-    -- draw terrain (everything except -4)
-	local off=-4
-	map(room.x*16,room.y * 16,off,0,16,16,2)
 end
 
 
@@ -228,6 +255,12 @@ end
 
 function maybe()
     return rnd(1)<0.5
+end
+
+function psfx(num)
+    if sfx_timer<=0 then
+        sfx(num)
+    end
 end
 
 
