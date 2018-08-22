@@ -19,8 +19,11 @@ k_dash=5
 -- x move player
 -- x draw hair
 -- jump
+-- solidity checks
 -- dash
 -- smoke
+-- ice
+-- spikes
 -- kill player
 
 max_djump=1
@@ -42,11 +45,14 @@ player={
         -- jump
         this.p_jump=false
         this.jbuffer=0
+        this.was_on_ground=false
 
         create_hair(this)
     end,
     update=function(this)
         local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
+
+        local on_ground=this.y>=12*8
 
         -- is this the jump transition
         local jump=btn(k_jump) and not this.p_jump
@@ -61,6 +67,10 @@ player={
         local accel=0.6
         local deccel=0.15
 
+        if not on_ground then
+            accel=0.4
+        end
+
         if abs(this.spd.x) > maxrun then
             this.spd.x=appr(this.spd.x,sign(this.spd.x)*maxrun,deccel)
         else
@@ -72,6 +82,15 @@ player={
             this.flip.x=(this.spd.x<0)
         end
 
+        -- gravity
+        local maxfall=2
+        local gravity=0.21
+
+        -- accelerate fall when getting slower
+        if abs(this.spd.y)<=0.15 then
+            gravity*=0.5
+        end
+
         -- jump
         if this.jbuffer>0 then
             psfx(1)
@@ -79,14 +98,22 @@ player={
             this.spd.y=-2
         end
 
+        if not on_ground then
+            this.spd.y=appr(this.spd.y,maxfall,gravity)
+        end
+
         -- animation
         this.spr_off+=0.25
-		if (this.spd.x==0) or (not btn(k_left) and not btn(k_right)) then
+        if not on_ground then
+            this.spr=3
+		elseif (this.spd.x==0) or (not btn(k_left) and not btn(k_right)) then
 			this.spr=1
 		else
 			this.spr=1+this.spr_off%4
-		end
-    end,
+        end
+
+        this.was_on_ground=on_ground
+end,
     draw=function(this)
         if this.x<-1 or this.x>121 then
             this.x=clamp(this.x,-1,121)
@@ -215,6 +242,10 @@ function _update()
         end
     end
 
+    if sfx_timer>0 then
+        sfx_timer-=1
+    end
+
     move(_player,_player.spd.x,_player.spd.y)
     _player.type.update(_player)
 end
@@ -257,6 +288,7 @@ function maybe()
     return rnd(1)<0.5
 end
 
+-- this is used to block out sound effects on important sfx
 function psfx(num)
     if sfx_timer<=0 then
         sfx(num)
