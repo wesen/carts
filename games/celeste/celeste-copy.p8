@@ -4,6 +4,9 @@ __lua__
 -- ~celeste~
 -- matt thorson + noel berry
 
+-- first, drawing of the current room
+-- draw terrain
+
 -- levels
 room={x=0,y=0}
 flg_solid=0
@@ -41,8 +44,12 @@ function _draw()
     local bg_col=0
     rectfill(0,0,128,128,bg_col)
 
-    -- renders only layer 4
+    -- renders only layer 4 (only bg, used for title screen too)
     map(room.x*16,room.y*16,0,0,16,16,4)
+
+    -- draw terrain (everything except -4)
+	local off=-4
+	map(room.x*16,room.y * 16,off,0,16,16,2)
 end
 
 -- helpers
