@@ -6,9 +6,30 @@ __lua__
 
 -- first, drawing of the current room
 -- draw terrain
+-- draw player
+-- draw player hair
+-- animate player
+-- move player
 
 -- levels
 room={x=0,y=0}
+
+-- player
+player={
+    init=function(this)
+    end,
+    update=function(this)
+    end,
+    draw=function(this)
+        if this.x<-1 or this.x>121 then
+            this.x=clamp(this.x,-1,121)
+        end
+
+        spr(this.spr,this.x,this.y,1,1,this.flip.x,this.flip.y)
+    end
+}
+
+-- helper functions
 flg_solid=0
 flg_ice=4
 
@@ -36,7 +57,22 @@ function tile_flag_at(x,y,w,h,flag)
     return false
 end
 
+_player={
+    type=player,
+    x=1*8,
+    y=12*8,
+    flip={x=false,y=false},
+    spr=1
+}
+
 -- main functions
+function _init()
+end
+
+function _update()
+    _player.type.update(_player)
+end
+
 function _draw()
     pal()
 
@@ -46,6 +82,9 @@ function _draw()
 
     -- renders only layer 4 (only bg, used for title screen too)
     map(room.x*16,room.y*16,0,0,16,16,4)
+
+    -- draw player
+    _player.type.draw(_player)
 
     -- draw terrain (everything except -4)
 	local off=-4
