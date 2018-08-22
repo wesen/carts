@@ -21,6 +21,11 @@ k_dash=5
 -- jump
 -- kill player
 
+max_djump=1
+frames=0
+seconds=0
+minutes=0
+
 -- levels
 room={x=0,y=0}
 
@@ -28,6 +33,7 @@ room={x=0,y=0}
 player={
     init=function(this)
         this.spr_off=0
+        this.djump=max_djump
 
         create_hair(this)
     end,
@@ -43,7 +49,7 @@ player={
         else
             this.spd.x=appr(this.spd.x,input*maxrun,accel)
         end
-        
+
         --facing
         if this.spd.x!=0 then
             this.flip.x=(this.spd.x<0)
@@ -62,7 +68,11 @@ player={
 			this.spd.x=0
         end
 
+        this.djump=1
+        set_hair_color(this.djump)
+        draw_hair(this,this.flip.x and -1 or 1)
         spr(this.spr,this.x,this.y,1,1,this.flip.x,this.flip.y)
+        unset_hair_color()
     end
 }
 
@@ -79,10 +89,12 @@ end
 
 function draw_hair(obj,facing)
     local last={
-        x=obj.x+4-facing*2
+        x=obj.x+4-facing*2,
         y=obj.y+(btn(k_down) and 4 or 3)
     }
+
     foreach(obj.hair,function(h)
+        -- trailing previous hair
         h.x+=(last.x-h.x)/1.5
         h.y+=(last.y+0.5-h.y)/1.5
         circfill(h.x,h.y,h.size,8)
@@ -94,7 +106,8 @@ function unset_hair_color()
     pal(8,8)
 end
 
-function move(obj,ox,oy) 
+
+function move(obj,ox,oy)
     local amount
 
     -- compute fractional moves
@@ -168,6 +181,14 @@ function _init()
 end
 
 function _update()
+    frames=((frames+1%30))
+    if frames==0 then
+        seconds=(seconds+1)%60
+        if seconds==0 then
+            minutes+=1
+        end
+    end
+
     move(_player,_player.spd.x,_player.spd.y)
     _player.type.update(_player)
 end
@@ -190,6 +211,7 @@ function _draw()
 	map(room.x*16,room.y * 16,off,0,16,16,2)
 end
 
+
 -- helpers
 function clamp(val,a,b)
     return max(a,min(b,val))
@@ -207,6 +229,7 @@ end
 function maybe()
     return rnd(1)<0.5
 end
+
 
 __gfx__
 000000000000000000000000088888800000000000000000000000000000000000aaaaa0000aaa000000a0000007707770077700000060000000600000060000
