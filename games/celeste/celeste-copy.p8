@@ -17,6 +17,7 @@ k_dash=5
 -- draw player hair
 -- animate player
 -- move player
+-- draw hair
 -- jump
 -- kill player
 
@@ -28,6 +29,7 @@ player={
     init=function(this)
         this.spr_off=0
 
+        create_hair(this)
     end,
     update=function(this)
 		local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
@@ -63,6 +65,34 @@ player={
         spr(this.spr,this.x,this.y,1,1,this.flip.x,this.flip.y)
     end
 }
+
+function create_hair(obj)
+    obj.hair={}
+    for i=0,4 do
+        add(obj.hair,{x=obj.x,y=obj.y,size=max(1,min(2,3-i))})
+    end
+end
+
+function set_hair_color(djump)
+    pal(8,(djump==1 and 8 or djump==2 and (7+flr((frames/3)%2)*4) or 12))
+end
+
+function draw_hair(obj,facing)
+    local last={
+        x=obj.x+4-facing*2
+        y=obj.y+(btn(k_down) and 4 or 3)
+    }
+    foreach(obj.hair,function(h)
+        h.x+=(last.x-h.x)/1.5
+        h.y+=(last.y+0.5-h.y)/1.5
+        circfill(h.x,h.y,h.size,8)
+        last=h
+    end)
+end
+
+function unset_hair_color()
+    pal(8,8)
+end
 
 function move(obj,ox,oy) 
     local amount
@@ -107,7 +137,7 @@ function ice_at(x,y,w,h)
 end
 
 function tile_at(x,y)
-    -- WSN why 16? because rooms are 16x16
+    -- wsn why 16? because rooms are 16x16
     return mget(room.x*16+x,room.y*16+y)
 end
 
