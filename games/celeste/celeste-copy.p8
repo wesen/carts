@@ -17,8 +17,11 @@ room={x=0,y=0}
 -- player
 player={
     init=function(this)
+        this.spr_off=0
     end,
     update=function(this)
+        this.spr_off+=0.25
+        this.spr=1+this.spr_off%4
     end,
     draw=function(this)
         if this.x<-1 or this.x>121 then
@@ -67,6 +70,7 @@ _player={
 
 -- main functions
 function _init()
+    _player.type.init(_player)
 end
 
 function _update()
