@@ -23,8 +23,11 @@ k_dash=5
 -- x dash
 -- x camera shake and freeze
 -- x wall slide
--- walljumps
--- title screen
+-- x walljumps
+-- x title screen
+-- flash bg
+-- clouds
+-- particles
 -- spawn player
 -- platforms
 -- ice
@@ -32,6 +35,7 @@ k_dash=5
 -- kill player
 -- fall floor
 -- fake wall
+-- music
 
 max_djump=1
 frames=0
@@ -43,11 +47,18 @@ shake=0
 freeze=0
 
 sfx_timer=0
+music_timer=0
+
+start_game=false
+start_game_flash=0
 
 -- levels
 room={x=0,y=0}
 types={}
 
+--#include title
+--#include room
+--#include game
 --#include player
 --#include hair
 --#include smoke

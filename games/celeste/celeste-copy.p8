@@ -26,8 +26,11 @@ k_dash=5
 -- x dash
 -- x camera shake and freeze
 -- x wall slide
--- walljumps
--- title screen
+-- x walljumps
+-- x title screen
+-- flash bg
+-- clouds
+-- particles
 -- spawn player
 -- platforms
 -- ice
@@ -35,6 +38,7 @@ k_dash=5
 -- kill player
 -- fall floor
 -- fake wall
+-- music
 
 max_djump=1
 frames=0
@@ -46,11 +50,94 @@ shake=0
 freeze=0
 
 sfx_timer=0
+music_timer=0
+
+start_game=false
+start_game_flash=0
 
 -- levels
 room={x=0,y=0}
 types={}
 
+function title_screen()
+    frames=0
+    seconds=0
+    minutes=0
+    start_game=false
+    start_game_flash=0
+    max_djump=1
+    load_room(7,3)
+end
+
+room_title={
+    init=function(this)
+        this.delay=5
+    end,
+    draw=function(this)
+        this.delay-=1
+        if this.delay<-30 then
+            destroy_object(this)
+        elseif this.delay<0 then
+            rectfill(24,58,104,70,0)
+            if room.x==3 and room.y==1 then
+                print("old side",48,62,7)
+            elseif level_index()==30 then
+                print("summit",52,62,7)
+            else
+                local level=(1+level_index())*100
+                print(level.." m",52+(level<1000 and 2 or 0),62,7)
+            end
+
+            draw_time(4,4)
+        end
+    end
+}
+
+function draw_time(x,y)
+    local s=seconds
+    local m=minutes%60
+    local h=flr(minutes/60)
+
+    rectfill(x,y,x+32,y+6,0)
+    print((h<10 and "0"..h or h)..":"..(m<10 and "0"..m or m)..":"..(s<10 and "0"..s or s),x+1,y+1,7)
+end
+function level_index()
+    return room.x%8+room.y*8
+end
+
+function is_title()
+    return level_index()==31
+end
+
+function load_room(x,y)
+    foreach(objects,destroy_object)
+
+    room.x=x
+    room.y=y
+
+    for tx=0,15 do
+        for ty=0,15 do
+            local tile=mget(room.x*16+tx,room.y*16+ty)
+            foreach(types,function(type)
+                if type.tile==tile then
+                    init_object(type,tx*8,ty*8)
+                end
+            end)
+        end
+    end
+
+    if not is_title() then
+        init_object(room_title,0,0)
+    end
+end
+function begin_game()
+    frames=0
+    seconds=0
+    minutes=0
+    music_timer=0
+    start_game=false
+    load_room(0,0)
+end
 -- player
 player={
     init=function(this)
@@ -405,7 +492,8 @@ end
 
 -- main functions
 function _init()
-    init_object(player,1*8,12*8)
+    -- init_object(player,1*8,12*8)
+    title_screen()
 end
 
 function _update()
@@ -440,6 +528,21 @@ function _update()
             obj.type.update(obj)
         end
     end)
+
+    -- title screen
+    if is_title() then
+        if not start_game and (btn(k_jump) or btn(k_dash)) then
+            start_game_flash=50
+            start_game=true
+            sfx(38)
+        end
+        if start_game then
+            start_game_flash-=1
+            if start_game_flash<=-30 then
+                begin_game()
+            end
+        end
+    end
 end
 
 function _draw()
@@ -447,8 +550,37 @@ function _draw()
 
     pal()
 
+    -- start game flash and palette fade
+    if start_game then
+        local c=10
+        if start_game_flash>10 then
+            if frames%10<5 then
+                c=7
+            end
+        elseif start_game_flash>5 then
+            c=2
+        elseif start_game_flash>0 then
+            c=1
+        else
+            c=0
+        end
+        if c<10 then
+            pal(6,c)
+            pal(12,c)
+            pal(13,c)
+            pal(5,c)
+            pal(1,c)
+            pal(7,c)
+        end
+    end
+
     -- clear screen
     local bg_col=0
+    if flash_bg then
+        bg_col=frames/5
+    elseif new_bg~=nil then
+        bg_col=2
+    end
     rectfill(0,0,128,128,bg_col)
 
     -- renders only layer 4 (only bg, used for title screen too)
@@ -471,6 +603,13 @@ function _draw()
     rectfill(-5,-5,133,-1,0)
     rectfill(-5,128,133,133,0)
     rectfill(128,-5,133,133,0)
+
+    -- credits
+    if is_title() then
+        print("x+c",58,80,5)
+        print("matt thorson",42,96,5)
+        print("noel berry",46,102,5)
+    end
 end
 
 
