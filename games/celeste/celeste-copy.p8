@@ -28,13 +28,13 @@ k_dash=5
 -- x wall slide
 -- x walljumps
 -- x title screen
--- flash bg
 -- clouds
 -- particles
 -- spawn player
 -- platforms
 -- ice
 -- spikes
+-- flash bg with chests
 -- kill player
 -- fall floor
 -- fake wall
@@ -54,6 +54,8 @@ music_timer=0
 
 start_game=false
 start_game_flash=0
+
+flash_bg=false
 
 -- levels
 room={x=0,y=0}
@@ -138,6 +140,7 @@ function begin_game()
     start_game=false
     load_room(0,0)
 end
+
 -- player
 player={
     init=function(this)
@@ -395,6 +398,7 @@ smoke={
         end
     end
 }
+
 
 objects={}
 

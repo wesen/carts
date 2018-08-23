@@ -841,8 +841,8 @@ big_chest={
 			spr(97,this.x+8,this.y)
 		elseif this.state==1 then
 			this.timer-=1
-		 shake=5
-		 flash_bg=true
+			shake=5
+			flash_bg=true
 			if this.timer<=45 and count(this.particles)<50 then
 				add(this.particles,{
 					x=1+rnd(14),
