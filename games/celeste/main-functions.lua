@@ -16,6 +16,19 @@ function _update()
         sfx_timer-=1
     end
 
+    if freeze>0 then
+        freeze-=1
+        return
+    end
+
+    if shake>0 then
+        shake-=1
+        camera()
+        if shake>0 then
+            camera(-2+rnd(5),-2+rnd(5))
+        end
+    end
+
     foreach(objects,function(obj)
         obj.move(obj.spd.x,obj.spd.y)
         if obj.type.update!=nil then
@@ -25,6 +38,8 @@ function _update()
 end
 
 function _draw()
+    if freeze>0 then return end
+
     pal()
 
     -- clear screen
@@ -46,5 +61,9 @@ function _draw()
     -- draw fg terrain
     map(room.x*16,room.y*16,0,0,16,16,8)
 
-
+    -- draw outside of screen for screenshake
+    rectfill(-5,-5,1,133,0)
+    rectfill(-5,-5,133,-1,0)
+    rectfill(-5,128,133,133,0)
+    rectfill(128,-5,133,133,0)
 end
