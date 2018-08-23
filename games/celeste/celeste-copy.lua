@@ -17,11 +17,15 @@ k_dash=5
 -- x draw hair
 -- jump
 -- solidity checks
+-- objects
+-- platforms
 -- dash
 -- smoke
 -- ice
 -- spikes
 -- kill player
+-- fall floor
+-- fake wall
 
 max_djump=1
 frames=0
@@ -44,12 +48,15 @@ player={
         this.jbuffer=0
         this.was_on_ground=false
 
+        -- solidity checks
+        this.hitbox={x=1,y=3,w=6,h=5}
+
         create_hair(this)
     end,
     update=function(this)
         local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
 
-        local on_ground=this.y>=12*8
+        local on_ground=obj_is_solid(this,0,1)
 
         -- is this the jump transition
         local jump=btn(k_jump) and not this.p_jump
@@ -68,7 +75,7 @@ player={
             accel=0.4
         end
 
-        if abs(this.spd.x) > maxrun then
+        if abs(this.spd.x)>maxrun then
             this.spd.x=appr(this.spd.x,sign(this.spd.x)*maxrun,deccel)
         else
             this.spd.x=appr(this.spd.x,input*maxrun,accel)
@@ -83,7 +90,7 @@ player={
         local maxfall=2
         local gravity=0.21
 
-        -- accelerate fall when getting slower
+        -- slow fall when getting slower
         if abs(this.spd.y)<=0.15 then
             gravity*=0.5
         end
@@ -126,64 +133,7 @@ end,
 }
 
 --#include hair
-
-function move(obj,ox,oy)
-    local amount
-
-    -- compute fractional moves
-    obj.rem.x+=ox
-    amount=flr(obj.rem.x+0.5)
-    obj.rem.x-=amount
-    move_x(obj,amount,0)
-
-    obj.rem.y+=oy
-    amount=flr(obj.rem.y+0.5)
-    obj.rem.y-=amount
-    move_y(obj,amount)
-end
-
-function move_x(obj,amount,start)
-    -- move in small steps to check for solids later on
-    local step=sign(amount)
-    for i=start,abs(amount) do
-        obj.x+=step
-    end
-end
-
-function move_y(obj,amount)
-    local step=sign(amount)
-    for i=0,abs(amount) do
-        obj.y+=step
-    end
-end
-
--- helper functions
-flg_solid=0
-flg_ice=4
-
-function solid_at(x,y,w,h)
-    return tile_flag_at(x,y,w,h,flg_solid)
-end
-
-function ice_at(x,y,w,h)
-    return tile_flag_at(x,y,w,h,flg_ice)
-end
-
-function tile_at(x,y)
-    -- wsn why 16? because rooms are 16x16
-    return mget(room.x*16+x,room.y*16+y)
-end
-
-function tile_flag_at(x,y,w,h,flag)
-    for i=max(0,flr(x/8)),min(15,(x+w-1)/8) do
-        for j=max(0,flr(y/8)),min(15,(y+h-1)/8) do
-            if fget(tile_at(i,j),flag) then
-                return true
-            end
-        end
-    end
-    return false
-end
+--#include objects
 
 _player={
     type=player,

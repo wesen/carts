@@ -16,7 +16,7 @@ function _update()
         sfx_timer-=1
     end
 
-    move(_player,_player.spd.x,_player.spd.y)
+    obj_move(_player,_player.spd.x,_player.spd.y)
     _player.type.update(_player)
 end
 

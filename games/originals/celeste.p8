@@ -39,7 +39,7 @@ end
 function title_screen()
 	got_fruit = {}
 	for i=0,29 do
-		add(got_fruit,false) 
+		add(got_fruit,false)
 	end
 	frames=0
 	deaths=0
@@ -47,7 +47,7 @@ function title_screen()
 	start_game=false
 	start_game_flash=0
 --	music(40,0,7)
-	
+
 	load_room(7,3)
 end
 
@@ -99,9 +99,9 @@ dead_particles = {}
 -- player entity --
 -------------------
 
-player = 
+player =
 {
-	init=function(this) 
+	init=function(this)
 		this.p_jump=false
 		this.p_dash=false
 		this.grace=0
@@ -118,22 +118,22 @@ player =
 	end,
 	update=function(this)
 		if (pause_player) return
-		
+
 		local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
-		
+
 		-- spikes collide
 		if spikes_at(this.x+this.hitbox.x,this.y+this.hitbox.y,this.hitbox.w,this.hitbox.h,this.spd.x,this.spd.y) then
 			kill_player(this)
 		end
-		 
+
 		-- bottom death
 		if this.y>128 then
-			kill_player(this) 
+			kill_player(this)
 		end
 
 		local on_ground=this.is_solid(0,1)
 		local on_ice=this.is_ice(0,1)
-		
+
 		-- smoke particles
 		if on_ground and not this.was_on_ground then
 			init_object(smoke,this.x,this.y+4)
@@ -146,10 +146,10 @@ player =
 		elseif this.jbuffer>0 then
 			this.jbuffer-=1
 		end
-		
+
 		local dash = btn(k_dash) and not this.p_dash
 		this.p_dash = btn(k_dash)
-		
+
 		if on_ground then
 			this.grace=6
 			if this.djump<max_djump then
@@ -165,14 +165,14 @@ player =
 			init_object(smoke,this.x,this.y)
 			this.dash_time-=1
 			this.spd.x=appr(this.spd.x,this.dash_target.x,this.dash_accel.x)
-			this.spd.y=appr(this.spd.y,this.dash_target.y,this.dash_accel.y)  
+			this.spd.y=appr(this.spd.y,this.dash_target.y,this.dash_accel.y)
 		else
 
 			-- move
 			local maxrun=1
 			local accel=0.6
 			local deccel=0.15
-			
+
 			if not on_ground then
 				accel=0.4
 			elseif on_ice then
@@ -181,13 +181,13 @@ player =
 					accel=0.05
 				end
 			end
-		
+
 			if abs(this.spd.x) > maxrun then
 				this.spd.x=appr(this.spd.x,sign(this.spd.x)*maxrun,deccel)
 			else
 				this.spd.x=appr(this.spd.x,input*maxrun,accel)
 			end
-			
+
 			--facing
 			if this.spd.x!=0 then
 				this.flip.x=(this.spd.x<0)
@@ -200,7 +200,7 @@ player =
 			if abs(this.spd.y) <= 0.15 then
 				gravity*=0.5
 			end
-		
+
 			-- wall slide
 			if input!=0 and this.is_solid(input,0) and not this.is_ice(input,0) then
 				maxfall=0.4
@@ -236,14 +236,14 @@ player =
 					end
 				end
 			end
-		
+
 			-- dash
 			local d_full=5
 			local d_half=d_full*0.70710678118
-		
+
 			if this.djump>0 and dash then
 				init_object(smoke,this.x,this.y)
-				this.djump-=1		
+				this.djump-=1
 				this.dash_time=4
 				has_dashed=true
 				this.dash_effect_time=10
@@ -263,7 +263,7 @@ player =
 					this.spd.x=(this.flip.x and -1 or 1)
 					this.spd.y=0
 				end
-		 	
+
 				psfx(3)
 				freeze=2
 				shake=6
@@ -271,23 +271,23 @@ player =
 				this.dash_target.y=2*sign(this.spd.y)
 				this.dash_accel.x=1.5
 				this.dash_accel.y=1.5
-				
+
 				if this.spd.y<0 then
 					this.dash_target.y*=.75
 				end
-				
+
 				if this.spd.y!=0 then
 					this.dash_accel.x*=0.70710678118
 				end
 				if this.spd.x!=0 then
 					this.dash_accel.y*=0.70710678118
-				end	 	 
+				end
 			elseif dash and this.djump<=0 then
 				psfx(9)
 				init_object(smoke,this.x,this.y)
 			end
 		end
-		
+
 		-- animation
 		this.spr_off+=0.25
 		if not on_ground then
@@ -305,26 +305,26 @@ player =
 		else
 			this.spr=1+this.spr_off%4
 		end
-		
+
 		-- next level
 		if this.y<-4 and level_index()<30 then next_room() end
-		
+
 		-- was on the ground
 		this.was_on_ground=on_ground
-		
+
 	end, --<end update loop
-	
+
 	draw=function(this)
-	
+
 		-- clamp in screen
-		if this.x<-1 or this.x>121 then 
+		if this.x<-1 or this.x>121 then
 			this.x=clamp(this.x,-1,121)
 			this.spd.x=0
 		end
-		
+
 		set_hair_color(this.djump)
 		draw_hair(this,this.flip.x and -1 or 1)
-		spr(this.spr,this.x,this.y,1,1,this.flip.x,this.flip.y)		
+		spr(this.spr,this.x,this.y,1,1,this.flip.x,this.flip.y)
 		unset_hair_color()
 	end
 }
@@ -438,19 +438,19 @@ spring = {
 				hit.djump=max_djump
 				this.delay=10
 				init_object(smoke,this.x,this.y)
-				
+
 				-- breakable below us
 				local below=this.collide(fall_floor,0,1)
 				if below~=nil then
 					break_fall_floor(below)
 				end
-				
+
 				psfx(8)
 			end
 		elseif this.delay>0 then
 			this.delay-=1
-			if this.delay<=0 then 
-				this.spr=18 
+			if this.delay<=0 then
+				this.spr=18
 			end
 		end
 		-- begin hiding
@@ -471,13 +471,13 @@ end
 
 balloon = {
 	tile=22,
-	init=function(this) 
+	init=function(this)
 		this.offset=rnd(1)
 		this.start=this.y
 		this.timer=0
 		this.hitbox={x=-1,y=-1,w=10,h=10}
 	end,
-	update=function(this) 
+	update=function(this)
 		if this.spr==22 then
 			this.offset+=0.01
 			this.y=this.start+sin(this.offset)*2
@@ -491,10 +491,10 @@ balloon = {
 			end
 		elseif this.timer>0 then
 			this.timer-=1
-		else 
+		else
 		 psfx(7)
 		 init_object(smoke,this.x,this.y)
-			this.spr=22 
+			this.spr=22
 		end
 	end,
 	draw=function(this)
@@ -584,7 +584,7 @@ smoke={
 fruit={
 	tile=26,
 	if_not_fruit=true,
-	init=function(this) 
+	init=function(this)
 		this.start=this.y
 		this.off=0
 	end,
@@ -607,7 +607,7 @@ add(types,fruit)
 fly_fruit={
 	tile=28,
 	if_not_fruit=true,
-	init=function(this) 
+	init=function(this)
 		this.start=this.y
 		this.fly=false
 		this.step=0.5
@@ -888,7 +888,7 @@ orb={
 			max_djump=2
 			hit.djump=2
 		end
-		
+
 		spr(102,this.x,this.y)
 		local off=frames/30
 		for i=0,7 do
@@ -936,7 +936,7 @@ room_title = {
 		if this.delay<-30 then
 			destroy_object(this)
 		elseif this.delay<0 then
-			
+
 			rectfill(24,58,104,70,0)
 			--rect(26,64-10,102,64+10,7)
 			--print("---",31,64-2,13)
@@ -949,7 +949,7 @@ room_title = {
 				print(level.." m",52+(level<1000 and 2 or 0),62,7)
 			end
 			--print("---",86,64-2,13)
-			
+
 			draw_time(4,4)
 		end
 	end
@@ -978,37 +978,37 @@ function init_object(type,x,y)
 	obj.rem = {x=0,y=0}
 
 	obj.is_solid=function(ox,oy)
-		if oy>0 and not obj.check(platform,ox,0) and obj.check(platform,ox,oy) then
+		--[[if oy>0 and not obj.check(platform,ox,0) and obj.check(platform,ox,oy) then
 			return true
-		end
+		end]]
 		return solid_at(obj.x+obj.hitbox.x+ox,obj.y+obj.hitbox.y+oy,obj.hitbox.w,obj.hitbox.h)
 			or obj.check(fall_floor,ox,oy)
 			or obj.check(fake_wall,ox,oy)
 	end
-	
+
 	obj.is_ice=function(ox,oy)
 		return ice_at(obj.x+obj.hitbox.x+ox,obj.y+obj.hitbox.y+oy,obj.hitbox.w,obj.hitbox.h)
 	end
-	
+
 	obj.collide=function(type,ox,oy)
 		local other
 		for i=1,count(objects) do
 			other=objects[i]
 			if other ~=nil and other.type == type and other != obj and other.collideable and
-				other.x+other.hitbox.x+other.hitbox.w > obj.x+obj.hitbox.x+ox and 
+				other.x+other.hitbox.x+other.hitbox.w > obj.x+obj.hitbox.x+ox and
 				other.y+other.hitbox.y+other.hitbox.h > obj.y+obj.hitbox.y+oy and
-				other.x+other.hitbox.x < obj.x+obj.hitbox.x+obj.hitbox.w+ox and 
+				other.x+other.hitbox.x < obj.x+obj.hitbox.x+obj.hitbox.w+ox and
 				other.y+other.hitbox.y < obj.y+obj.hitbox.y+obj.hitbox.h+oy then
 				return other
 			end
 		end
 		return nil
 	end
-	
+
 	obj.check=function(type,ox,oy)
 		return obj.collide(type,ox,oy) ~=nil
 	end
-	
+
 	obj.move=function(ox,oy)
 		local amount
 		-- [x] get move amount
@@ -1016,14 +1016,14 @@ function init_object(type,x,y)
 		amount = flr(obj.rem.x + 0.5)
 		obj.rem.x -= amount
 		obj.move_x(amount,0)
-		
+
 		-- [y] get move amount
 		obj.rem.y += oy
 		amount = flr(obj.rem.y + 0.5)
 		obj.rem.y -= amount
 		obj.move_y(amount)
 	end
-	
+
 	obj.move_x=function(amount,start)
 		if obj.solids then
 			local step = sign(amount)
@@ -1040,13 +1040,13 @@ function init_object(type,x,y)
 			obj.x += amount
 		end
 	end
-	
+
 	obj.move_y=function(amount)
 		if obj.solids then
 			local step = sign(amount)
 			for i=0,abs(amount) do
 				if not obj.is_solid(0,step) then
-						obj.y += step
+					obj.y += step
 				else
 					obj.spd.y = 0
 					obj.rem.y = 0
@@ -1137,16 +1137,16 @@ function load_room(x,y)
 			elseif tile==12 then
 				init_object(platform,tx*8,ty*8).dir=1
 			else
-				foreach(types, 
-				function(type) 
+				foreach(types,
+				function(type)
 					if type.tile == tile then
-						init_object(type,tx*8,ty*8) 
-					end 
+						init_object(type,tx*8,ty*8)
+					end
 				end)
 			end
 		end
 	end
-	
+
 	if not is_title() then
 		init_object(room_title,0,0)
 	end
@@ -1163,18 +1163,18 @@ function _update()
 			minutes+=1
 		end
 	end
-	
+
 	if music_timer>0 then
 		music_timer-=1
 		if music_timer<=0 then
 			music(10,0,7)
 		end
 	end
-	
+
 	if sfx_timer>0 then
 		sfx_timer-=1
 	end
-	
+
 	-- cancel if freeze
 	if freeze>0 then freeze-=1 return end
 
@@ -1186,7 +1186,7 @@ function _update()
 			camera(-2+rnd(5),-2+rnd(5))
 		end
 	end
-	
+
 	-- restart (soon)
 	if will_restart and delay_restart>0 then
 		delay_restart-=1
@@ -1198,12 +1198,12 @@ function _update()
 
 	-- update each object
 	foreach(objects,function(obj)
-		obj.move(obj.spd.x,obj.spd.y)
-		if obj.type.update~=nil then
-			obj.type.update(obj) 
-		end
+			obj.move(obj.spd.x,obj.spd.y)
+			if obj.type.update~=nil then
+				obj.type.update(obj)
+			end
 	end)
-	
+
 	-- start game
 	if is_title() then
 		if not start_game and (btn(k_jump) or btn(k_dash)) then
@@ -1225,10 +1225,10 @@ end
 -----------------------
 function _draw()
 	if freeze>0 then return end
-	
+
 	-- reset all palette values
 	pal()
-	
+
 	-- start game flash
 	if start_game then
 		local c=10
@@ -1240,7 +1240,7 @@ function _draw()
 			c=2
 		elseif start_game_flash>0 then
 			c=1
-		else 
+		else
 			c=0
 		end
 		if c<10 then
@@ -1287,29 +1287,29 @@ function _draw()
 	-- draw terrain
 	local off=is_title() and -4 or 0
 	map(room.x*16,room.y * 16,off,0,16,16,2)
-	
+
 	-- draw objects
 	foreach(objects, function(o)
 		if o.type~=platform and o.type~=big_chest then
 			draw_object(o)
 		end
 	end)
-	
+
 	-- draw fg terrain
 	map(room.x * 16,room.y * 16,0,0,16,16,8)
-	
+
 	-- particles
 	foreach(particles, function(p)
 		p.x += p.spd
 		p.y += sin(p.off)
 		p.off+= min(0.05,p.spd/32)
 		rectfill(p.x,p.y,p.x+p.s,p.y+p.s,p.c)
-		if p.x>128+4 then 
+		if p.x>128+4 then
 			p.x=-4
 			p.y=rnd(128)
 		end
 	end)
-	
+
 	-- dead particles
 	foreach(dead_particles, function(p)
 		p.x += p.spd.x
@@ -1318,20 +1318,20 @@ function _draw()
 		if p.t <= 0 then del(dead_particles,p) end
 		rectfill(p.x-p.t/5,p.y-p.t/5,p.x+p.t/5,p.y+p.t/5,14+p.t%2)
 	end)
-	
+
 	-- draw outside of the screen for screenshake
 	rectfill(-5,-5,-1,133,0)
 	rectfill(-5,-5,133,-1,0)
 	rectfill(-5,128,133,133,0)
 	rectfill(128,-5,133,133,0)
-	
+
 	-- credits
 	if is_title() then
 		print("x+c",58,80,5)
 		print("matt thorson",42,96,5)
 		print("noel berry",46,102,5)
 	end
-	
+
 	if level_index()==30 then
 		local p
 		for i=1,count(objects) do
@@ -1360,7 +1360,7 @@ function draw_time(x,y)
 	local s=seconds
 	local m=minutes%60
 	local h=flr(minutes/60)
-	
+
 	rectfill(x,y,x+32,y+6,0)
 	print((h<10 and "0"..h or h)..":"..(m<10 and "0"..m or m)..":"..(s<10 and "0"..s or s),x+1,y+1,7)
 end
@@ -1373,8 +1373,8 @@ function clamp(val,a,b)
 end
 
 function appr(val,target,amount)
- return val > target 
- 	and max(val - amount, target) 
+ return val > target
+ 	and max(val - amount, target)
  	or min(val + amount, target)
 end
 
