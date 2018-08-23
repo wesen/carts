@@ -19,6 +19,7 @@ k_dash=5
 -- x solidity checks
 -- x objects
 -- multijumps
+-- walljumps
 -- spawn player
 -- platforms
 -- dash
@@ -48,10 +49,12 @@ player={
         -- jump
         this.p_jump=false
         this.jbuffer=0
+        this.grace=0
         this.was_on_ground=false
 
         -- solidity checks
         this.hitbox={x=1,y=3,w=6,h=5}
+
 
         create_hair(this)
     end,
@@ -67,6 +70,12 @@ player={
             this.jbuffer=4
         elseif this.jbuffer>0 then
             this.jbuffer-=1
+        end
+
+        if on_ground then
+            this.grace=6
+        elseif this.grace>0 then
+            this.grace-=1
         end
 
         local maxrun=1
@@ -99,9 +108,12 @@ player={
 
         -- jump
         if this.jbuffer>0 then
-            psfx(1)
-            this.jbuffer=0
-            this.spd.y=-2
+            if this.grace>0 then
+                psfx(1)
+                this.jbuffer=0
+                this.spd.y=-2
+                this.grace=0
+            end
         end
 
         if not on_ground then
