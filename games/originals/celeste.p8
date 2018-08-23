@@ -1031,6 +1031,7 @@ function init_object(type,x,y)
 				if not obj.is_solid(step,0) then
 					obj.x += step
 				else
+				            printh("obj is solid at "..tostr(obj.x)..","..tostr(obj.y).." step "..tostr(step))
 					obj.spd.x = 0
 					obj.rem.x = 0
 					break

@@ -18,9 +18,11 @@ k_dash=5
 -- x animate player
 -- x move player
 -- x draw hair
--- jump
--- solidity checks
--- objects
+-- x jump
+-- x solidity checks
+-- x objects
+-- multijumps
+-- spawn player
 -- platforms
 -- dash
 -- smoke
@@ -59,7 +61,7 @@ player={
     update=function(this)
         local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
 
-        local on_ground=obj_is_solid(this,0,1)
+        local on_ground=this.is_solid(0,1)
 
         -- is this the jump transition
         local jump=btn(k_jump) and not this.p_jump
@@ -114,9 +116,9 @@ player={
         if not on_ground then
             this.spr=3
 		elseif (this.spd.x==0) or (not btn(k_left) and not btn(k_right)) then
-			this.spr=1
+            this.spr=1
 		else
-			this.spr=1+this.spr_off%4
+            this.spr=1+this.spr_off%4
         end
 
         this.was_on_ground=on_ground
@@ -166,69 +168,95 @@ function unset_hair_color()
     pal(8,8)
 end
 
-function obj_is_solid(obj,ox,oy)
-    return solid_at(obj.x+obj.hitbox.x+ox,
-                    obj.y+obj.hitbox.y+oy,
-                    obj.hitbox.w,obj.hitbox.h)
-end
+objects={}
 
-function obj_move(obj,ox,oy)
-    local amount
-
-    -- compute fractional moves
-    obj.rem.x+=ox
-    amount=flr(obj.rem.x+0.5)
-    obj.rem.x-=amount
-    obj_move_x(obj,amount,0)
-
-    obj.rem.y+=oy
-    amount=flr(obj.rem.y+0.5)
-    obj.rem.y-=amount
-    obj_move_y(obj,amount)
-end
-
-function obj_move_x(obj,amount,start)
-    -- move in small steps to check for solids later on
-    local step=sign(amount)
-    for i=start,abs(amount) do
-        if not obj_is_solid(obj,step,0) then
-            obj.x+=step
-        else
-            obj.spd.x=0
-            obj.rem.x=0
-            break
-        end
+function draw_object(obj)
+    if obj.type.draw~=nil then
+        obj.type.draw(obj)
+    elseif obj.spr>0 then
+        spr(obj.spr,obj.x,obj.y,1,1,obj.flip.x,obj.flip.y)
     end
 end
 
-function obj_move_y(obj,amount)
-    local step=sign(amount)
-    for i=0,abs(amount) do
-        if not obj_is_solid(obj,0,step) then
-            obj.y+=step
-        else
-            obj.spd.y=0
-            obj.rem.y=0
-            break
+function init_object(type,x,y)
+    local obj={}
+    obj.type=type
+    obj.collideable=true
+    obj.solids=true
+
+    obj.spr=type.tile
+    obj.flip={x=false,y=false}
+    obj.x=x
+    obj.y=y
+    obj.hitbox={x=0,y=0,w=8,h=8}
+    obj.spd={x=0,y=0}
+    obj.rem={x=0,y=0}
+
+    obj.is_solid=function(ox,oy)
+        return solid_at(obj.x+obj.hitbox.x+ox,
+                        obj.y+obj.hitbox.y+oy,
+                        obj.hitbox.w,obj.hitbox.h)
+    end
+
+    obj.move=function(ox,oy)
+        local amount
+
+        -- compute fractional moves
+        obj.rem.x+=ox
+        amount=flr(obj.rem.x+0.5)
+        obj.rem.x-=amount
+        obj.move_x(amount,0)
+
+        obj.rem.y+=oy
+        amount=flr(obj.rem.y+0.5)
+        obj.rem.y-=amount
+        obj.move_y(amount)
+    end
+
+    obj.move_x=function(amount,start)
+        -- move in small steps to check for solids later on
+        local step=sign(amount)
+        for i=start,abs(amount) do
+            if not obj.is_solid(step,0) then
+                obj.x+=step
+            else
+                obj.spd.x=0
+                obj.rem.x=0
+                break
+            end
         end
     end
+
+    obj.move_y=function(amount)
+        local step=sign(amount)
+        for i=0,abs(amount) do
+            if not obj.is_solid(0,step) then
+                obj.y+=step
+            else
+                obj.spd.y=0
+                obj.rem.y=0
+                break
+            end
+        end
+    end
+
+    add(objects,obj)
+    if obj.type.init~=nil then
+        obj.type.init(obj)
+    end
+
+    return obj
+end
+
+function destroy_object(obj)
+    del(objects,obj)
 end
 
 
-
-_player={
-    type=player,
-    x=1*8,
-    y=12*8,
-    flip={x=false,y=false},
-    spd={x=0,y=0},
-    rem={x=0,y=0},
-    spr=1
-}
 
 -- main functions
 function _init()
-    _player.type.init(_player)
+    init_object(player,1*8,12*8)
 end
 
 function _update()
@@ -244,8 +272,12 @@ function _update()
         sfx_timer-=1
     end
 
-    obj_move(_player,_player.spd.x,_player.spd.y)
-    _player.type.update(_player)
+    foreach(objects,function(obj)
+        obj.move(obj.spd.x,obj.spd.y)
+        if obj.type.update!=nil then
+            obj.type.update(obj)
+        end
+    end)
 end
 
 function _draw()
@@ -258,12 +290,18 @@ function _draw()
     -- renders only layer 4 (only bg, used for title screen too)
     map(room.x*16,room.y*16,0,0,16,16,4)
 
-    -- draw terrain (everything except -4)
-	local off=-4
-    map(room.x*16,room.y * 16,off,0,16,16,2)
+    -- draw terrain
+	local off=0
+    map(room.x*16,room.y*16,off,0,16,16,2)
 
-    -- draw player
-    _player.type.draw(_player)
+    -- draw objects
+    foreach(objects, function(o)
+        draw_object(o)
+    end)
+
+    -- draw fg terrain
+    map(room.x*16,room.y*16,0,0,16,16,8)
+
 
 end
 

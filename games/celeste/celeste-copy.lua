@@ -15,9 +15,11 @@ k_dash=5
 -- x animate player
 -- x move player
 -- x draw hair
--- jump
--- solidity checks
--- objects
+-- x jump
+-- x solidity checks
+-- x objects
+-- multijumps
+-- spawn player
 -- platforms
 -- dash
 -- smoke
@@ -56,7 +58,7 @@ player={
     update=function(this)
         local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
 
-        local on_ground=obj_is_solid(this,0,1)
+        local on_ground=this.is_solid(0,1)
 
         -- is this the jump transition
         local jump=btn(k_jump) and not this.p_jump
@@ -111,9 +113,9 @@ player={
         if not on_ground then
             this.spr=3
 		elseif (this.spd.x==0) or (not btn(k_left) and not btn(k_right)) then
-			this.spr=1
+            this.spr=1
 		else
-			this.spr=1+this.spr_off%4
+            this.spr=1+this.spr_off%4
         end
 
         this.was_on_ground=on_ground
@@ -134,16 +136,6 @@ end,
 
 --#include hair
 --#include objects
-
-_player={
-    type=player,
-    x=1*8,
-    y=12*8,
-    flip={x=false,y=false},
-    spd={x=0,y=0},
-    rem={x=0,y=0},
-    spr=1
-}
 
 --#include main-functions
 --#include helpers

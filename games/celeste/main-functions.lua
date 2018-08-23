@@ -1,6 +1,6 @@
 -- main functions
 function _init()
-    _player.type.init(_player)
+    init_object(player,1*8,12*8)
 end
 
 function _update()
@@ -16,8 +16,12 @@ function _update()
         sfx_timer-=1
     end
 
-    obj_move(_player,_player.spd.x,_player.spd.y)
-    _player.type.update(_player)
+    foreach(objects,function(obj)
+        obj.move(obj.spd.x,obj.spd.y)
+        if obj.type.update!=nil then
+            obj.type.update(obj)
+        end
+    end)
 end
 
 function _draw()
@@ -30,11 +34,17 @@ function _draw()
     -- renders only layer 4 (only bg, used for title screen too)
     map(room.x*16,room.y*16,0,0,16,16,4)
 
-    -- draw terrain (everything except -4)
-	local off=-4
-    map(room.x*16,room.y * 16,off,0,16,16,2)
+    -- draw terrain
+	local off=0
+    map(room.x*16,room.y*16,off,0,16,16,2)
 
-    -- draw player
-    _player.type.draw(_player)
+    -- draw objects
+    foreach(objects, function(o)
+        draw_object(o)
+    end)
+
+    -- draw fg terrain
+    map(room.x*16,room.y*16,0,0,16,16,8)
+
 
 end
