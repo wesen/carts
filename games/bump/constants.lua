@@ -1,0 +1,1 @@
+typ_player=0
