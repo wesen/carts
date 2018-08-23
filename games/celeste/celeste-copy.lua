@@ -20,10 +20,11 @@ k_dash=5
 -- x objects
 -- x multijumps
 -- x smoke
+-- dash
+-- camera shake and freeze
 -- walljumps
 -- spawn player
 -- platforms
--- dash
 -- ice
 -- spikes
 -- kill player
