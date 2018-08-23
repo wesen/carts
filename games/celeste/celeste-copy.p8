@@ -21,12 +21,12 @@ k_dash=5
 -- x jump
 -- x solidity checks
 -- x objects
--- multijumps
+-- x multijumps
+-- x smoke
 -- walljumps
 -- spawn player
 -- platforms
 -- dash
--- smoke
 -- ice
 -- spikes
 -- kill player
@@ -42,6 +42,7 @@ sfx_timer=0
 
 -- levels
 room={x=0,y=0}
+types={}
 
 -- player
 player={
@@ -65,6 +66,10 @@ player={
         local input = btn(k_right) and 1 or (btn(k_left) and -1 or 0)
 
         local on_ground=this.is_solid(0,1)
+
+        if on_ground and not this.was_on_ground then
+            init_object(smoke,this.x,this.y+4)
+        end
 
         -- is this the jump transition
         local jump=btn(k_jump) and not this.p_jump
@@ -116,6 +121,7 @@ player={
                 this.jbuffer=0
                 this.spd.y=-2
                 this.grace=0
+                init_object(smoke,this.x,this.y+4)
             end
         end
 
@@ -180,6 +186,25 @@ function unset_hair_color()
     pal(8,8)
 end
 
+smoke={
+    init=function(this)
+        this.spr=29
+        this.spd.y=-0.1
+        this.spd.x=0.3+rnd(0.2)
+        this.x+=-1+rnd(2)
+        this.y+=-1+rnd(2)
+        this.flip.x=maybe()
+        this.flip.y=maybe()
+        this.solids=false
+    end,
+    update=function(this)
+        this.spr+=0.2
+        if this.spr>=32 then
+            destroy_object(this)
+        end
+    end
+}
+
 objects={}
 
 function draw_object(obj)
@@ -226,29 +251,37 @@ function init_object(type,x,y)
     end
 
     obj.move_x=function(amount,start)
-        -- move in small steps to check for solids later on
-        local step=sign(amount)
-        for i=start,abs(amount) do
-            if not obj.is_solid(step,0) then
-                obj.x+=step
-            else
-                obj.spd.x=0
-                obj.rem.x=0
-                break
+        if obj.solids then
+            -- move in small steps to check for solids later on
+            local step=sign(amount)
+            for i=start,abs(amount) do
+                if not obj.is_solid(step,0) then
+                    obj.x+=step
+                else
+                    obj.spd.x=0
+                    obj.rem.x=0
+                    break
+                end
             end
+        else
+            obj.x+=amount
         end
     end
 
     obj.move_y=function(amount)
-        local step=sign(amount)
-        for i=0,abs(amount) do
-            if not obj.is_solid(0,step) then
-                obj.y+=step
-            else
-                obj.spd.y=0
-                obj.rem.y=0
-                break
+        if obj.solids then
+            local step=sign(amount)
+            for i=0,abs(amount) do
+                if not obj.is_solid(0,step) then
+                    obj.y+=step
+                else
+                    obj.spd.y=0
+                    obj.rem.y=0
+                    break
+                end
             end
+        else
+            obj.y+=amount
         end
     end
 
