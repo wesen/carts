@@ -25,6 +25,7 @@ k_dash=5
 -- x smoke
 -- x dash
 -- x camera shake and freeze
+-- x wall slide
 -- walljumps
 -- title screen
 -- spawn player
@@ -140,6 +141,14 @@ player={
             -- slow fall when getting slower
             if abs(this.spd.y)<=0.15 then
                 gravity*=0.5
+            end
+
+            -- wall slide
+            if input!=0 and this.is_solid(input,0) then
+                maxfall=0.4
+                if rnd(10)<2 then
+                    init_object(smoke,this.x+input*6,this.y)
+                end
             end
 
             -- apply gravity

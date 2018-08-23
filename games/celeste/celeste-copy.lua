@@ -22,6 +22,7 @@ k_dash=5
 -- x smoke
 -- x dash
 -- x camera shake and freeze
+-- x wall slide
 -- walljumps
 -- title screen
 -- spawn player
