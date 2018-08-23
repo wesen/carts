@@ -164,6 +164,16 @@ player={
                     this.spd.y=-2
                     this.grace=0
                     init_object(smoke,this.x,this.y+4)
+                else
+                    -- XXX why -3 ?
+                    local wall_dir=(this.is_solid(-3,0) and -1 or this.is_solid(3,0) and 1 or 0)
+                    if wall_dir!=0 then
+                        psfx(2)
+                        this.jbuffer=0
+                        this.spd.y=-2
+                        this.spd.x=-wall_dir*(maxrun+1)
+                        init_object(smoke,this.x+wall_dir*6,this.y)
+                    end
                 end
             end
 
