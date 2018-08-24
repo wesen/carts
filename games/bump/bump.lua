@@ -31,6 +31,10 @@ function cls_player:update()
         self.flip.x=self.spd.x<0
     end
 
+    if abs(self.spd.x)>0.9 and rnd(1)>0.93 then
+        add(actors,cls_bubble.init(self.pos+v2(0,4),input))
+    end
+
     if input==0 then
         self.spr=1
     else
@@ -39,11 +43,11 @@ function cls_player:update()
 end
 
 function cls_player:draw()
-    printh("flipx "..tostr(self.flip.x))
     spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+
+    print(self.spd:str(),64,64)
 end
 
 player=cls_player.init()
-add(actors,player)
 
 --#include main

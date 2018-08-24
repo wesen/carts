@@ -9,9 +9,9 @@ __lua__
 --linking back to the bbs post
 --for this cart, so that others
 --can learn from it too!
---enjoy! 
+--enjoy!
 --@matthughson
-                
+
 --log
 printh("\n\n-------\n-start-\n-------")
 
@@ -57,12 +57,12 @@ function intersects_box_box(
 	local yd=y1-y2
 	local ys=h1*0.5+h2*0.5
 	if abs(yd)>=ys then return false end
-	
+
 	return true
 end
 
 --check if pushing into side tile and resolve.
---requires self.dx,self.x,self.y, and 
+--requires self.dx,self.x,self.y, and
 --assumes tile flag 0 == solid
 --assumes sprite size of 8x8
 function collide_side(self)
@@ -88,7 +88,7 @@ function collide_side(self)
 end
 
 --check if pushing into floor tile and resolve.
---requires self.dx,self.x,self.y,self.grounded,self.airtime and 
+--requires self.dx,self.x,self.y,self.grounded,self.airtime and
 --assumes tile flag 0 or 1 == solid
 function collide_floor(self)
 	--only check for ground when falling.
@@ -112,7 +112,7 @@ function collide_floor(self)
 end
 
 --check if pushing into roof tile and resolve.
---requires self.dy,self.x,self.y, and 
+--requires self.dy,self.x,self.y, and
 --assumes tile flag 0 == solid
 function collide_roof(self)
 	--check for collision at multiple points along the top
@@ -132,12 +132,12 @@ function m_vec(x,y)
 	{
 		x=x,
 		y=y,
-		
+
   --get the length of the vector
 		get_length=function(self)
 			return sqrt(self.x^2+self.y^2)
 		end,
-		
+
   --get the normal of the vector
 		get_norm=function(self)
 			local l = self:get_length()
@@ -172,7 +172,7 @@ function printo(str,startx,
 	print(str,startx,starty,col)
 end
 
---print string centered with 
+--print string centered with
 --outline.
 function printc(
 	str,x,y,
@@ -202,7 +202,7 @@ function m_player(x,y)
 
 		w=8,
 		h=8,
-		
+
 		max_dx=1,--max x speed
 		max_dy=2,--max y speed
 
@@ -211,7 +211,7 @@ function m_player(x,y)
 		dcc=0.8,--decceleration
 		air_dcc=1,--air decceleration
 		grav=0.15,
-		
+
 		--helper for more complex
 		--button press tracking.
 		--todo: generalize button index.
@@ -247,7 +247,7 @@ function m_player(x,y)
 		grounded=false,--on ground
 
 		airtime=0,--time since grounded
-		
+
 		--animation definitions.
 		--use with set_anim()
 		anims=
@@ -278,7 +278,7 @@ function m_player(x,y)
 		curframe=1,--curent frame of animation.
 		animtick=0,--ticks until next frame should show.
 		flipx=false,--show sprite be flipped.
-		
+
 		--request new animation to play.
 		set_anim=function(self,anim)
 			if(anim==self.curanim)return--early out.
@@ -287,16 +287,16 @@ function m_player(x,y)
 			self.curanim=anim
 			self.curframe=1
 		end,
-		
+
 		--call once per tick.
 		update=function(self)
-	
+
 			--todo: kill enemies.
-			
+
 			--track button presses
 			local bl=btn(0) --left
 			local br=btn(1) --right
-			
+
 			--move left/right
 			if bl==true then
 				self.dx-=self.acc
@@ -313,16 +313,16 @@ function m_player(x,y)
 
 			--limit walk speed
 			self.dx=mid(-self.max_dx,self.dx,self.max_dx)
-			
+
 			--move in x
 			self.x+=self.dx
-			
+
 			--hit walls
 			collide_side(self)
 
 			--jump buttons
 			self.jump_button:update()
-			
+
 			--jump is complex.
 			--we allow jump if:
 			--	on ground
@@ -333,7 +333,7 @@ function m_player(x,y)
 			--multiple frames.
 			if self.jump_button.is_down then
 				--is player on ground recently.
-				--allow for jump right after 
+				--allow for jump right after
 				--walking off ledge.
 				local on_ground=(self.grounded or self.airtime<5)
 				--was btn presses recently?
@@ -354,7 +354,7 @@ function m_player(x,y)
 			else
 				self.jump_hold_time=0
 			end
-			
+
 			--move in y
 			self.dy+=self.grav
 			self.dy=mid(-self.max_dy,self.dy,self.max_dy)
@@ -434,7 +434,7 @@ function m_cam(target)
 	{
 		tar=target,--target to follow.
 		pos=m_vec(target.x,target.y),
-		
+
 		--how far from center of screen target must
 		--be before camera starts following.
 		--allows for movement in center without camera
@@ -445,14 +445,14 @@ function m_cam(target)
 		--the edges of the level.
 		pos_min=m_vec(64,64),
 		pos_max=m_vec(320,64),
-		
+
 		shake_remaining=0,
 		shake_force=0,
 
 		update=function(self)
 
 			self.shake_remaining=max(0,self.shake_remaining-1)
-			
+
 			--follow target outside of
 			--pull range.
 			if self:pull_max_x()<self.tar.x then
@@ -500,7 +500,7 @@ function m_cam(target)
 		pull_min_y=function(self)
 			return self.pos.y-self.pull_threshold
 		end,
-		
+
 		shake=function(self,ticks,force)
 			self.shake_remaining=ticks
 			self.shake_force=force
@@ -541,13 +541,13 @@ end
 function _draw()
 
 	cls(0)
-	
+
 	camera(cam:cam_pos())
-	
+
 	map(0,0,0,0,128,128)
-	
+
 	p1:draw()
-	
+
 	--hud
 	camera(0,0)
 

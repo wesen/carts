@@ -1,22 +1,18 @@
 cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
     cls_actor._ctr(self,pos)
-    self.spd=v2(dir*rnd(0.5),rnd(0.2)-0.1)
-    self.life=5+rnd(2)
-    self.size=rnd(4)+2
+    self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
+    self.life=10
 end)
 
 function cls_bubble:draw()
-    circ(self.pos.x,self.pos.y,self.size,12)
+    local size=4-self.life/3
+    circ(self.pos.x,self.pos.y,size,6)
 end
 
 function cls_bubble:update()
-    self.life-=dt
+    self.life*=0.9
     self:move(self.spd)
-    if (self.life<0) del(actors,self)
-end
-
-function make_bubbles(pos,dir,n)
-    for i=0,n do
-        add(actors,cls_bubble.init(pos,dir))
+    if (self.life<0.1) then
+        del(actors,self)
     end
 end
