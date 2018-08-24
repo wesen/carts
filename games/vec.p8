@@ -35,7 +35,50 @@ function v2mt:str()
  return "["..tostr(self.x)..","..tostr(self.y).."]"
 end
 
-a=v2(1,2)
-b=v2(2,3)
+local bboxvt={}
+bboxvt.__index=bboxvt
 
-print((a+b):str())
+function bbox(aa,bb)
+ return setmetatable({aa=aa,bb=bb},bboxvt)
+end
+
+function bboxvt:w()
+ return self.bb.x-self.aa.x
+end
+
+function bboxvt:h()
+ return self.bb.y-self.aa.y
+end
+
+function bboxvt:is_inside(v)
+ return v.x>=self.aa.x
+    and v.x<=self.bb.x
+    and v.y>=self.aa.y
+    and v.y<=self.bb.y
+end
+
+function bboxvt:collide(other)
+ return other.bb.x > self.aa.x and
+   other.bb.y > self.aa.y and
+   other.aa.x < self.bb.x and
+   other.aa.y < self.bb.y
+end
+
+function bboxvt:str()
+ return self.aa:str().."-"..self.bb:str()
+end
+
+local hitboxvt={}
+hitboxvt.__index=hitboxvt
+
+function hitbox(offset,dim)
+ return setmetatable({offset=offset,dim=dim},hitboxvt)
+end
+
+function hitboxvt:to_bbox_at(v)
+ return bbox(self.offset+v,self.offset+v+self.dim)
+end
+
+function hitboxvt:str()
+ return self.offset:str().."-("..self.dim:str()..")"
+end
