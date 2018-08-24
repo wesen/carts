@@ -39,9 +39,9 @@ k_dash=5
 
 max_djump=1
 frames=0
+
 seconds=0
 minutes=0
-
 shake=0
 -- used to stop the game loop
 freeze=0
