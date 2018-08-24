@@ -25,7 +25,7 @@ function cls_player:update()
     local decel=0.2
 
     if input!=self.prev_input and input!=0 then
-        add(actors,cls_smoke.init(self.pos))
+        add(actors,cls_smoke.init(self.pos,-input))
     end
     self.prev_input=input
 
