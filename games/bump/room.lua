@@ -5,7 +5,11 @@ function room_draw()
 end
 
 function solid_at(bbox)
-    return tile_flag_at(bbox,flg_solid)
+    return bbox.aa.x<0 
+        or bbox.bb.x>128
+        or bbox.aa.y<0
+        or bbox.bb.y>128
+        or tile_flag_at(bbox,flg_solid)
 end
 
 function tile_at(x,y)
