@@ -9,5 +9,7 @@ function _draw()
 end
 
 function _update60()
+    dt=time()-lasttime
+    lasttime=time()
     update_actors()
 end

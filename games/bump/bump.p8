@@ -142,8 +142,29 @@ function update_actors(typ)
     end
 end
 
+cls_bubble=subclass(typ_bubble,cls_actor,function(self,dir)
+    self.spd=v2(dir*rnd(0.5),rnd(0.2)-0.1)
+    self.life=5+rnd(2)
+    self.size=rnd(4)+2
+end)
+
+function cls_bubble:draw()
+    circ(self.pos.x,self.pos.y,self.size,12)
+end
+
+function cls_bubble:update()
+    self.life-=dt
+    self:move(self.spd)
+end
+
+function make_bubbles(n)
+    for i=0,n do
+        add(actors,cls_bubble.init())
+end
 
 frame=0
+dt=0
+lasttime=time()
 
 cls_player=subclass(typ_player,cls_actor,function(self)
     cls_actor._ctr(self,v2(0,6*8))

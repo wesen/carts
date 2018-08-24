@@ -1,7 +1,10 @@
 --#include helpers
 --#include actors
+--#include bubbles
 
 frame=0
+dt=0
+lasttime=time()
 
 cls_player=subclass(typ_player,cls_actor,function(self)
     cls_actor._ctr(self,v2(0,6*8))
