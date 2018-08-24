@@ -4,6 +4,10 @@
 --#include room
 --#include smoke
 
+-- fade bubbles
+-- gravity
+-- downward collision
+
 frame=0
 dt=0
 lasttime=time()
@@ -12,6 +16,7 @@ cls_player=subclass(typ_player,cls_actor,function(self)
     cls_actor._ctr(self,v2(0,6*8))
     self.flip=v2(false,false)
     self.spr=1
+    self.hitbox=hitbox(v2(1,0),v2(6,8))
 
     self.show_smoke=false
     self.prev_input=0
@@ -54,6 +59,12 @@ end
 
 function cls_player:draw()
     spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+    local bbox=self:bbox()
+    local bbox_col=8
+    if self:is_solid(v2(0,0)) then
+        bbox_col=9
+    end
+    rect(bbox.aa.x,bbox.aa.y,bbox.bb.x-1,bbox.bb.y-1,bbox_col)
 
     print(self.spd:str(),64,64)
 end
