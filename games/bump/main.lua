@@ -5,6 +5,7 @@ function _draw()
     frame+=1
 
     cls()
+    room_draw()
     draw_actors()
     player:draw()
 end

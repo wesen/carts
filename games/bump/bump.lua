@@ -1,6 +1,8 @@
 --#include helpers
 --#include actors
 --#include bubbles
+--#include room
+--#include smoke
 
 frame=0
 dt=0
@@ -10,6 +12,9 @@ cls_player=subclass(typ_player,cls_actor,function(self)
     cls_actor._ctr(self,v2(0,6*8))
     self.flip=v2(false,false)
     self.spr=1
+
+    self.show_smoke=false
+    self.prev_input=0
 end)
 
 function cls_player:update()
@@ -18,6 +23,11 @@ function cls_player:update()
     local maxrun=1
     local accel=0.5
     local decel=0.2
+
+    if input!=self.prev_input and input!=0 then
+        add(actors,cls_smoke.init(self.pos))
+    end
+    self.prev_input=input
 
     if abs(self.spd.x)>maxrun then
         self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)

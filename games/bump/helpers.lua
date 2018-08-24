@@ -115,3 +115,8 @@ end
 function round(x)
     return flr(x+0.5)
 end
+
+function maybe(p)
+    if (p==nil) p=0.5
+    return rnd(1)>p
+end

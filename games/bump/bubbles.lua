@@ -6,7 +6,7 @@ end)
 
 function cls_bubble:draw()
     local size=4-self.life/3
-    circ(self.pos.x,self.pos.y,size,6)
+    circ(self.pos.x,self.pos.y,size,1)
 end
 
 function cls_bubble:update()
