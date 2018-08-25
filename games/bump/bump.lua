@@ -8,9 +8,11 @@
 -- fade bubbles
 -- x gravity
 -- x downward collision
--- wall jump
 -- x wall slide
--- add wall slide smoke
+-- x add wall slide smoke
+-- x fall down faster
+-- wall jump
+-- player spawn points
 -- variable jump time
 -- go through right and come back left (?)
 -- add tweaking menu
@@ -93,7 +95,12 @@ function cls_player:update()
     local gravity=0.12
 
     -- slow down at apex
-    if (abs(self.spd.y)<=0.15) gravity*=0.5
+    if abs(self.spd.y)<=0.15 then
+        gravity*=0.5
+    elseif self.spd.y>0 then
+        -- fall down fas2er
+        gravity*=2
+    end
 
     -- wall slide
     local is_wall_sliding=false
