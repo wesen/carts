@@ -1,6 +1,7 @@
 --#include constants
 --#include helpers
 --#include actors
+--#include button
 --#include bubbles
 --#include room
 --#include smoke
@@ -11,9 +12,9 @@
 -- x wall slide
 -- x add wall slide smoke
 -- x fall down faster
--- wall jump
+-- x wall jump
+-- x variable jump time
 -- player spawn points
--- variable jump time
 -- go through right and come back left (?)
 -- add tweaking menu
 -- add ice
@@ -26,15 +27,13 @@ lasttime=time()
 cls_player=subclass(typ_player,cls_actor,function(self)
     cls_actor._ctr(self,v2(0,6*8))
     self.flip=v2(false,false)
+    self.jump_button=cls_button.init(btn_jump)
     self.spr=1
     self.hitbox=hitbox(v2(2,0),v2(4,8))
     self.atk_hitbox=hitbox(v2(1,0),v2(6,4))
 
     self.show_smoke=false
     self.prev_input=0
-    self.prev_jump=false
-    -- allows for a jump to happen for 8 frames after jump button triggered
-    self.jump_interval=0
     -- we consider we are on the ground for 12 frames
     self.on_ground_interval=0
 
@@ -50,13 +49,8 @@ function cls_player:update()
     local input=btn(btn_right) and 1 
        or (btn(btn_left) and -1 
        or 0)
-    local jump=btn(btn_jump) and not self.prev_jump
-    self.prev_jump=btn(btn_jump)
-    if jump then
-        self.jump_interval=8
-    elseif self.jump_interval>0 then
-        self.jump_interval-=1
-    end
+
+    self.jump_button:update()
 
     local maxrun=1
     local accel=0.4
@@ -64,10 +58,11 @@ function cls_player:update()
 
     local on_ground=self:would_collide(v2(0,1))
     if on_ground then
-        self.on_ground_interval=12
+        self.on_ground_interval=ground_grace_interval
     elseif self.on_ground_interval>0 then
         self.on_ground_interval-=1
     end
+    local on_ground_recently=self.on_ground_interval>0
 
     -- smoke when changing directions
     if input!=self.prev_input and input!=0 and on_ground then
@@ -112,22 +107,26 @@ function cls_player:update()
     end
 
     -- jump
-    if self.jump_interval>0 then
-        if self.on_ground_interval>0 then
-            self.jump_interval=0
+    if self.jump_button.is_down then
+        if self.jump_button:is_held() 
+             or (on_ground_recently and self.jump_button:was_recently_pressed()) then
+            if self.jump_button:was_recently_pressed() then
+                self:smoke(spr_ground_smoke,0)
+            end 
             self.on_ground_interval=0
-            self.spd.y=-2
-            self:smoke(spr_ground_smoke,0)
-        else 
+            self.spd.y=-1.0
+            self.jump_button.hold_time+=1
+        elseif self.jump_button:was_just_pressed() then
             -- check for wall jump
             local wall_dir=self:would_collide(v2(-3,0)) and -1 
                           or self:would_collide(v2(3,0)) and 1 
                           or 0
             if wall_dir!=0 then
                 self.jump_interval=0
-                self.spd.y=-2
+                self.spd.y=-1
                 self.spd.x=-wall_dir*(maxrun+1)
                 self:smoke(spr_wall_smoke,-wall_dir*.3)
+                self.jump_button.hold_time+=1
             end
         end
     end
@@ -141,6 +140,8 @@ function cls_player:update()
         self.spr=1
     elseif is_wall_sliding then
         self.spr=4
+    elseif not on_ground then
+        self.spr=3
     else
         self.spr=1+flr(frame/4)%3
     end
