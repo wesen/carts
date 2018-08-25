@@ -8,10 +8,13 @@
 -- fade bubbles
 -- x gravity
 -- x downward collision
+-- wall jump
+-- wall slide
 -- variable jump time
 -- go through right and come back left (?)
 -- add tweaking menu
--- wall jump
+-- add ice
+-- add second player
 
 frame=0
 dt=0
@@ -21,14 +24,15 @@ cls_player=subclass(typ_player,cls_actor,function(self)
     cls_actor._ctr(self,v2(0,6*8))
     self.flip=v2(false,false)
     self.spr=1
-    self.hitbox=hitbox(v2(1,0),v2(6,8))
+    self.hitbox=hitbox(v2(2,0),v2(4,8))
+    self.atk_hitbox=hitbox(v2(1,0),v2(6,4))
 
     self.show_smoke=false
     self.prev_input=0
     self.prev_jump=false
     -- allows for a jump to happen for 8 frames after jump button triggered
     self.jump_interval=0
-    -- we consider we are on the ground for 6 frames
+    -- we consider we are on the ground for 12 frames
     self.on_ground_interval=0
 
     self.was_on_ground=false
@@ -91,6 +95,11 @@ function cls_player:update()
     if (abs(self.spd.y)<=0.15) gravity*=0.5
 
     -- wall slide
+    local is_wall_sliding=false
+    if input!=0 and self:is_solid(v2(input,0)) then
+        is_wall_sliding=true
+        maxfall=0.4
+    end
 
     -- jump
     if self.jump_interval>0 then
@@ -109,6 +118,8 @@ function cls_player:update()
     -- animation
     if input==0 then
         self.spr=1
+    elseif is_wall_sliding then
+        self.spr=4
     else
         self.spr=1+flr(frame/4)%3
     end
@@ -123,9 +134,13 @@ function cls_player:draw()
     if self:is_solid(v2(0,0)) then
         bbox_col=9
     end
-    -- rect(bbox.aa.x,bbox.aa.y,bbox.bb.x-1,bbox.bb.y-1,bbox_col)
 
+    --[[
+    bbox:draw(bbox_col)
+    bbox=self.atk_hitbox:to_bbox_at(self.pos)
+    bbox:draw(12)
     print(self.spd:str(),64,64)
+    ]]
 end
 
 player=cls_player.init()

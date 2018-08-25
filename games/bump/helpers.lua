@@ -81,6 +81,10 @@ function bboxvt:str()
  return self.aa:str().."-"..self.bb:str()
 end
 
+function bboxvt:draw(col)
+    rect(self.aa.x,self.aa.y,self.bb.x-1,self.bb.y-1,col)
+end
+
 function bboxvt:collide(other)
  return other.bb.x > self.aa.x and
    other.bb.y > self.aa.y and
