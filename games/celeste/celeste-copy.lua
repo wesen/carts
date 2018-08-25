@@ -55,7 +55,7 @@ start_game_flash=0
 flash_bg=false
 
 -- levels
-room={x=0,y=0}
+room={x=2,y=0}
 types={}
 
 --#include title
@@ -66,6 +66,7 @@ types={}
 --#include hair
 --#include smoke
 --#include clouds
+--#include spikes
 
 --#include objects
 

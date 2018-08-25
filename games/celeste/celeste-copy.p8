@@ -42,9 +42,9 @@ k_dash=5
 
 max_djump=1
 frames=0
+
 seconds=0
 minutes=0
-
 shake=0
 -- used to stop the game loop
 freeze=0
@@ -398,7 +398,15 @@ smoke={
         end
     end
 }
-
+clouds={}
+for i=0,16 do
+    add(cloudds,{
+    x=rnd(128),
+    y=rnd(128),
+    spr=1+rnd(4),
+    w=32+rnd(32)
+})
+end
 
 objects={}
 
@@ -496,8 +504,8 @@ end
 
 -- main functions
 function _init()
-    -- init_object(player,1*8,12*8)
-    title_screen()
+    init_object(player,1*8,12*8)
+    -- title_screen()
 end
 
 function _update()

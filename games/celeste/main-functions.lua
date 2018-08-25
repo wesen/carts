@@ -1,7 +1,7 @@
 -- main functions
 function _init()
-    -- init_object(player,1*8,12*8)
-    title_screen()
+    init_object(player,1*8,12*8)
+    -- title_screen()
 end
 
 function _update()

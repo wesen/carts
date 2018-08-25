@@ -7,7 +7,7 @@ __lua__
 -- globals --
 -------------
 
-room = { x=0, y=0 }
+room = { x=1, y=1 }
 objects = {}
 types = {}
 freeze=0
