@@ -108,7 +108,7 @@ function cls_player:update()
         is_wall_sliding=true
         maxfall=0.4
         local smoke_dir = self.flip.x and .3 or -.3
-        if (maybe(.1)) self:smoke(spr_full_smoke,smoke_dir)
+        if (maybe(.1)) self:smoke(spr_wall_smoke,smoke_dir)
     end
 
     -- jump
@@ -118,6 +118,17 @@ function cls_player:update()
             self.on_ground_interval=0
             self.spd.y=-2
             self:smoke(spr_ground_smoke,0)
+        else 
+            -- check for wall jump
+            local wall_dir=self:would_collide(v2(-3,0)) and -1 
+                          or self:would_collide(v2(3,0)) and 1 
+                          or 0
+            if wall_dir!=0 then
+                self.jump_interval=0
+                self.spd.y=-2
+                self.spd.x=-wall_dir*(maxrun+1)
+                self:smoke(spr_wall_smoke,-wall_dir*.3)
+            end
         end
     end
 

@@ -1,3 +1,4 @@
+spr_wall_smoke=54
 spr_ground_smoke=51
 spr_full_smoke=48
 
