@@ -1,8 +1,12 @@
 actors={}
+actor_cnt=0
 
 cls_actor=class(typ,function(self,pos)
     self.pos=pos
+    self.id=actor_cnt
+    actor_cnt+=1
     self.spd=v2(0,0)
+    self.is_solid=true
     self.hitbox=hitbox(v2(0,0),v2(8,8))
 end)
 
@@ -17,34 +21,42 @@ function cls_actor:move(o)
 end
 
 function cls_actor:move_x(amount)
-    while abs(amount)>0 do
-        local step=amount
-        if (abs(amount)>1) step=sign(amount)
-        amount-=step
-        if not self:is_solid(v2(step,0)) then
-            self.pos.x+=step
-        else
-            self.spd.x=0
-            break
+    if self.is_solid then
+        while abs(amount)>0 do
+            local step=amount
+            if (abs(amount)>1) step=sign(amount)
+            amount-=step
+            if not self:would_collide(v2(step,0)) then
+                self.pos.x+=step
+            else
+                self.spd.x=0
+                break
+            end
         end
+    else
+        self.pos.x+=amount
     end
 end
 
 function cls_actor:move_y(amount)
-    while abs(amount)>0 do
-        local step=amount
-        if (abs(amount)>1) step=sign(amount)
-        amount-=step
-        if not self:is_solid(v2(0,step)) then
-            self.pos.y+=step
-        else
-            self.spd.y=0
-            break
+    if self.is_solid then
+        while abs(amount)>0 do
+            local step=amount
+            if (abs(amount)>1) step=sign(amount)
+            amount-=step
+            if not self:would_collide(v2(0,step)) then
+                self.pos.y+=step
+            else
+                self.spd.y=0
+                break
+            end
         end
+    else
+        self.pos.y+=amount
     end
 end
 
-function cls_actor:is_solid(offset)
+function cls_actor:would_collide(offset)
     return solid_at(self:bbox(offset))
 end
 

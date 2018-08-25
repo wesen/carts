@@ -122,7 +122,7 @@ end
 
 function maybe(p)
     if (p==nil) p=0.5
-    return rnd(1)>p
+    return rnd(1)<p
 end
 
 function mrnd(x)

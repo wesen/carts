@@ -9,7 +9,8 @@
 -- x gravity
 -- x downward collision
 -- wall jump
--- wall slide
+-- x wall slide
+-- add wall slide smoke
 -- variable jump time
 -- go through right and come back left (?)
 -- add tweaking menu
@@ -38,8 +39,8 @@ cls_player=subclass(typ_player,cls_actor,function(self)
     self.was_on_ground=false
 end)
 
-function cls_player:smoke(dir)
-    add(actors,cls_smoke.init(self.pos,dir))
+function cls_player:smoke(spr,dir)
+    add(actors,cls_smoke.init(self.pos,spr,dir))
 end
 
 function cls_player:update()
@@ -59,7 +60,7 @@ function cls_player:update()
     local accel=0.4
     local decel=0.2
 
-    local on_ground=self:is_solid(v2(0,1))
+    local on_ground=self:would_collide(v2(0,1))
     if on_ground then
         self.on_ground_interval=12
     elseif self.on_ground_interval>0 then
@@ -68,7 +69,7 @@ function cls_player:update()
 
     -- smoke when changing directions
     if input!=self.prev_input and input!=0 and on_ground then
-        self:smoke(-input)
+        self:smoke(spr_ground_smoke,-input)
     end
     self.prev_input=input
 
@@ -96,9 +97,11 @@ function cls_player:update()
 
     -- wall slide
     local is_wall_sliding=false
-    if input!=0 and self:is_solid(v2(input,0)) then
+    if input!=0 and self:would_collide(v2(input,0)) and not on_ground then
         is_wall_sliding=true
         maxfall=0.4
+        local smoke_dir = self.flip.x and .3 or -.3
+        if (maybe(.1)) self:smoke(spr_full_smoke,smoke_dir)
     end
 
     -- jump
@@ -107,7 +110,7 @@ function cls_player:update()
             self.jump_interval=0
             self.on_ground_interval=0
             self.spd.y=-2
-            self:smoke(v2(0,0))
+            self:smoke(spr_ground_smoke,0)
         end
     end
 
@@ -131,7 +134,7 @@ function cls_player:draw()
     spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
     local bbox=self:bbox()
     local bbox_col=8
-    if self:is_solid(v2(0,0)) then
+    if self:would_collide(v2(0,0)) then
         bbox_col=9
     end
 

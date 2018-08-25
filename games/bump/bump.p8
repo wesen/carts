@@ -134,17 +134,21 @@ end
 
 function maybe(p)
     if (p==nil) p=0.5
-    return rnd(1)>p
+    return rnd(1)<p
 end
 
 function mrnd(x)
     return rnd(x*2)-x
 end
 actors={}
+actor_cnt=0
 
 cls_actor=class(typ,function(self,pos)
     self.pos=pos
+    self.id=actor_cnt
+    actor_cnt+=1
     self.spd=v2(0,0)
+    self.is_solid=true
     self.hitbox=hitbox(v2(0,0),v2(8,8))
 end)
 
@@ -159,34 +163,42 @@ function cls_actor:move(o)
 end
 
 function cls_actor:move_x(amount)
-    while abs(amount)>0 do
-        local step=amount
-        if (abs(amount)>1) step=sign(amount)
-        amount-=step
-        if not self:is_solid(v2(step,0)) then
-            self.pos.x+=step
-        else
-            self.spd.x=0
-            break
+    if self.is_solid then
+        while abs(amount)>0 do
+            local step=amount
+            if (abs(amount)>1) step=sign(amount)
+            amount-=step
+            if not self:would_collide(v2(step,0)) then
+                self.pos.x+=step
+            else
+                self.spd.x=0
+                break
+            end
         end
+    else
+        self.pos.x+=amount
     end
 end
 
 function cls_actor:move_y(amount)
-    while abs(amount)>0 do
-        local step=amount
-        if (abs(amount)>1) step=sign(amount)
-        amount-=step
-        if not self:is_solid(v2(0,step)) then
-            self.pos.y+=step
-        else
-            self.spd.y=0
-            break
+    if self.is_solid then
+        while abs(amount)>0 do
+            local step=amount
+            if (abs(amount)>1) step=sign(amount)
+            amount-=step
+            if not self:would_collide(v2(0,step)) then
+                self.pos.y+=step
+            else
+                self.spd.y=0
+                break
+            end
         end
+    else
+        self.pos.y+=amount
     end
 end
 
-function cls_actor:is_solid(offset)
+function cls_actor:would_collide(offset)
     return solid_at(self:bbox(offset))
 end
 
@@ -252,17 +264,22 @@ function tile_flag_at(bbox,flag)
     end
     return false
 end
-cls_smoke=subclass(typ_smoke,cls_actor,function(self,pos,dir)
+spr_ground_smoke=51
+spr_full_smoke=48
+
+cls_smoke=subclass(typ_smoke,cls_actor,function(self,pos,start_spr,dir)
     cls_actor._ctr(self,pos+v2(mrnd(1),0))
     self.flip=v2(maybe(),false)
-    self.spr=51
+    self.spr=start_spr
+    self.start_spr=start_spr
+    self.is_solid=false
     self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
 end)
 
 function cls_smoke:update()
     self:move(self.spd)
     self.spr+=0.2
-    if (self.spr>51+3) del(actors,self)
+    if (self.spr>self.start_spr+3) del(actors,self)
 end
 
 function cls_smoke:draw()
@@ -277,7 +294,8 @@ end
 -- x gravity
 -- x downward collision
 -- wall jump
--- wall slide
+-- x wall slide
+-- add wall slide smoke
 -- variable jump time
 -- go through right and come back left (?)
 -- add tweaking menu
@@ -306,8 +324,8 @@ cls_player=subclass(typ_player,cls_actor,function(self)
     self.was_on_ground=false
 end)
 
-function cls_player:smoke(dir)
-    add(actors,cls_smoke.init(self.pos,dir))
+function cls_player:smoke(spr,dir)
+    add(actors,cls_smoke.init(self.pos,spr,dir))
 end
 
 function cls_player:update()
@@ -327,7 +345,7 @@ function cls_player:update()
     local accel=0.4
     local decel=0.2
 
-    local on_ground=self:is_solid(v2(0,1))
+    local on_ground=self:would_collide(v2(0,1))
     if on_ground then
         self.on_ground_interval=12
     elseif self.on_ground_interval>0 then
@@ -336,7 +354,7 @@ function cls_player:update()
 
     -- smoke when changing directions
     if input!=self.prev_input and input!=0 and on_ground then
-        self:smoke(-input)
+        self:smoke(spr_ground_smoke,-input)
     end
     self.prev_input=input
 
@@ -364,9 +382,11 @@ function cls_player:update()
 
     -- wall slide
     local is_wall_sliding=false
-    if input!=0 and self:is_solid(v2(input,0)) then
+    if input!=0 and self:would_collide(v2(input,0)) and not on_ground then
         is_wall_sliding=true
         maxfall=0.4
+        local smoke_dir = self.flip.x and .3 or -.3
+        if (maybe(.1)) self:smoke(spr_full_smoke,smoke_dir)
     end
 
     -- jump
@@ -375,7 +395,7 @@ function cls_player:update()
             self.jump_interval=0
             self.on_ground_interval=0
             self.spd.y=-2
-            self:smoke(v2(0,0))
+            self:smoke(spr_ground_smoke,0)
         end
     end
 
@@ -399,7 +419,7 @@ function cls_player:draw()
     spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
     local bbox=self:bbox()
     local bbox_col=8
-    if self:is_solid(v2(0,0)) then
+    if self:would_collide(v2(0,0)) then
         bbox_col=9
     end
 
@@ -459,13 +479,13 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000770700000770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-70000700007700007000007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00770000007700000000000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-07777000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-07777700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-07777700000000070000000000077700000077000000007000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00777007007000000000007000777600770067700700006000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000007770070000700070007667770760006600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+70000600007700667000007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00770000006600000000006700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+07766000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+06777700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+07777600000000070000000000077700000077000000007000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00766007007000000000007000777600770067700700006000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000006766070000700076007667770760006600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 33333333000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 44433544000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 94445544000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
