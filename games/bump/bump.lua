@@ -6,8 +6,12 @@
 --#include smoke
 
 -- fade bubbles
--- gravity
--- downward collision
+-- x gravity
+-- x downward collision
+-- variable jump time
+-- go through right and come back left (?)
+-- add tweaking menu
+-- wall jump
 
 frame=0
 dt=0
@@ -48,8 +52,8 @@ function cls_player:update()
     end
 
     local maxrun=1
-    local accel=0.3
-    local decel=0.1
+    local accel=0.4
+    local decel=0.2
 
     local on_ground=self:is_solid(v2(0,1))
     if on_ground then
@@ -64,13 +68,18 @@ function cls_player:update()
     end
     self.prev_input=input
 
-    if (not on_ground) accel=0.2
+    if not on_ground then
+        accel=0.2
+        decel=0.1
+    end
 
     -- x movement
     if abs(self.spd.x)>maxrun then
         self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
-    else
+    elseif input != 0 then
         self.spd.x=appr(self.spd.x,input*maxrun,accel)
+    else
+        self.spd.x=appr(self.spd.x,0,decel)
     end
     if (self.spd.x!=0) self.flip.x=self.spd.x<0
 
@@ -97,11 +106,6 @@ function cls_player:update()
 
     self:move(self.spd)
 
-    -- bubble instantiation
-    if abs(self.spd.x)>0.9 and rnd(1)>0.93 then
-        add(actors,cls_bubble.init(self.pos+v2(0,4),input))
-    end
-
     -- animation
     if input==0 then
         self.spr=1
@@ -119,7 +123,7 @@ function cls_player:draw()
     if self:is_solid(v2(0,0)) then
         bbox_col=9
     end
-    rect(bbox.aa.x,bbox.aa.y,bbox.bb.x-1,bbox.bb.y-1,bbox_col)
+    -- rect(bbox.aa.x,bbox.aa.y,bbox.bb.x-1,bbox.bb.y-1,bbox_col)
 
     print(self.spd:str(),64,64)
 end
