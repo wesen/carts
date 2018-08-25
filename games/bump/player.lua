@@ -33,7 +33,7 @@ function cls_player:update()
     local accel=0.4
     local decel=0.2
 
-    local on_ground=self:would_collide(v2(0,1))
+    local on_ground=self:would_be_solid_at(v2(0,1))
     if on_ground then
         self.on_ground_interval=ground_grace_interval
     elseif self.on_ground_interval>0 then
@@ -76,7 +76,7 @@ function cls_player:update()
 
     -- wall slide
     local is_wall_sliding=false
-    if input!=0 and self:would_collide(v2(input,0)) and not on_ground then
+    if input!=0 and self:would_be_solid_at(v2(input,0)) and not on_ground then
         is_wall_sliding=true
         maxfall=0.4
         local smoke_dir = self.flip.x and .3 or -.3
@@ -95,8 +95,8 @@ function cls_player:update()
             self.jump_button.hold_time+=1
         elseif self.jump_button:was_just_pressed() then
             -- check for wall jump
-            local wall_dir=self:would_collide(v2(-3,0)) and -1 
-                          or self:would_collide(v2(3,0)) and 1 
+            local wall_dir=self:would_be_solid_at(v2(-3,0)) and -1 
+                          or self:would_be_solid_at(v2(3,0)) and 1 
                           or 0
             if wall_dir!=0 then
                 self.jump_interval=0
@@ -130,7 +130,7 @@ function cls_player:draw()
     spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
     local bbox=self:bbox()
     local bbox_col=8
-    if self:would_collide(v2(0,0)) then
+    if self:would_be_solid_at(v2(0,0)) then
         bbox_col=9
     end
 

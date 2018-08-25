@@ -1,7 +1,7 @@
 actors={}
 actor_cnt=0
 
-cls_actor=class(typ,function(self,pos)
+cls_actor=class(typ_actor,function(self,pos)
     self.pos=pos
     self.id=actor_cnt
     actor_cnt+=1
@@ -16,6 +16,10 @@ function cls_actor:bbox(offset)
     return self.hitbox:to_bbox_at(self.pos+offset)
 end
 
+function cls_actor:str()
+    return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
+end
+
 function cls_actor:move(o)
     self:move_x(o.x)
     self:move_y(o.y)
@@ -27,7 +31,7 @@ function cls_actor:move_x(amount)
             local step=amount
             if (abs(amount)>1) step=sign(amount)
             amount-=step
-            if not self:would_collide(v2(step,0)) then
+            if not self:would_be_solid_at(v2(step,0)) then
                 self.pos.x+=step
             else
                 self.spd.x=0
@@ -45,7 +49,7 @@ function cls_actor:move_y(amount)
             local step=amount
             if (abs(amount)>1) step=sign(amount)
             amount-=step
-            if not self:would_collide(v2(0,step)) then
+            if not self:would_be_solid_at(v2(0,step)) then
                 self.pos.y+=step
             else
                 self.spd.y=0
@@ -57,8 +61,24 @@ function cls_actor:move_y(amount)
     end
 end
 
-function cls_actor:would_collide(offset)
+function cls_actor:would_be_solid_at(offset)
     return solid_at(self:bbox(offset))
+end
+
+function cls_actor:get_collisions(typ,offset)
+    local res={}
+
+    local bbox=self:bbox(offset)
+    for actor in all(actors) do
+        printh("found actor "..actor:str())
+        printh("self "..self:str())
+        if actor!=self and actor.typ==typ then
+            printh("found actor with "..actor:bbox():str())
+            if (bbox:collide(actor:bbox())) add(res,actor)
+        end
+    end
+
+    return res
 end
 
 function draw_actors(typ)

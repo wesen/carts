@@ -6,6 +6,7 @@ function class (typ,init)
   function c.init (...)
     local self = setmetatable({},c)
     c._ctr(self,...)
+    c.typ=typ
     self.destroyed=false
     return self
   end

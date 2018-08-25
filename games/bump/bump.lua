@@ -2,7 +2,13 @@
 --#include globals
 --#include config
 
+--#include oo
+--#include v2
+--#include bbox
+--#include hitbox
+
 --#include helpers
+
 --#include actors
 --#include button
 --#include bubbles

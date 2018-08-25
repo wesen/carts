@@ -2,6 +2,7 @@ typ_player=0
 typ_smoke=1
 typ_bubble=2
 typ_button=3
+typ_spring=4
 
 flg_solid=0
 flg_ice=1
