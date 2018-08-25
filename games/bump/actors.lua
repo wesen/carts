@@ -8,6 +8,7 @@ cls_actor=class(typ,function(self,pos)
     self.spd=v2(0,0)
     self.is_solid=true
     self.hitbox=hitbox(v2(0,0),v2(8,8))
+    add(actors,self)
 end)
 
 function cls_actor:bbox(offset)

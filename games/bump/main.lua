@@ -1,4 +1,5 @@
 function _init()
+    load_room(v2(0,0))
 end
 
 function _draw()

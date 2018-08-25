@@ -1,5 +1,17 @@
 room={pos=v2(0,0)}
 
+function load_room(pos)
+    room.pos=pos
+    for i=0,15 do
+        for j=0,15 do
+            local t=tiles[tile_at(i,j)]
+            if t!=nil then
+                t.init(v2(i,j))
+            end
+        end
+    end
+end
+
 function room_draw()
     map(room.pos.x,room.pos.y,0,0)
 end
@@ -10,6 +22,10 @@ function solid_at(bbox)
         or bbox.aa.y<0
         or bbox.bb.y>128
         or tile_flag_at(bbox,flg_solid)
+end
+
+function ice_at(bbox)
+    return tile_flag_at(bbox,flg_ice)
 end
 
 function tile_at(x,y)

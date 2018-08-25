@@ -20,7 +20,3 @@ end
 function cls_smoke:draw()
     spr(self.spr,self.pos.x,self.pos.y)
 end
-
-function make_smoke(pos)
-    add(actors,cls_smoke.init(pos))
-end

@@ -1,0 +1,6 @@
+{
+    "files.exclude": {
+        "**/*.bak": true,
+        "**/bump.p8": true
+    }
+}
