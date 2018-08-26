@@ -6,18 +6,18 @@ function load_room(pos)
         for j=0,15 do
             local t=tiles[tile_at(i,j)]
             if t!=nil then
-                t.init(v2(i,j))
+                t.init(v2(i*8,j*8))
             end
         end
     end
 end
 
 function room_draw()
-    map(room.pos.x,room.pos.y,0,0)
+    map(room.pos.x,room.pos.y,0,0,16,16,flg_solid+1)
 end
 
 function solid_at(bbox)
-    return bbox.aa.x<0 
+    return bbox.aa.x<0
         or bbox.bb.x>128
         or bbox.aa.y<0
         or bbox.bb.y>128

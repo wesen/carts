@@ -1,7 +1,10 @@
+players={}
+
 cls_player=subclass(typ_player,cls_actor,function(self)
     cls_actor._ctr(self,v2(0,6*8))
     -- players are handled separately
     del(actors,self)
+    add(players,self)
 
     self.flip=v2(false,false)
     self.jump_button=cls_button.init(btn_jump)
@@ -140,13 +143,13 @@ end
 
 function cls_player:draw()
     spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+
+    --[[
     local bbox=self:bbox()
     local bbox_col=8
     if self:is_solid_at(v2(0,0)) then
         bbox_col=9
     end
-
-    --[[
     bbox:draw(bbox_col)
     bbox=self.atk_hitbox:to_bbox_at(self.pos)
     bbox:draw(12)

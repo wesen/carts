@@ -26,7 +26,7 @@
 -- x wall jump
 -- x variable jump time
 -- x test controller input
--- add ice
+-- x add ice
 -- springs
 -- player spawn points
 -- go through right and come back left (?)

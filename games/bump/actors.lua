@@ -70,10 +70,7 @@ function cls_actor:get_collisions(typ,offset)
 
     local bbox=self:bbox(offset)
     for actor in all(actors) do
-        printh("found actor "..actor:str())
-        printh("self "..self:str())
         if actor!=self and actor.typ==typ then
-            printh("found actor with "..actor:bbox():str())
             if (bbox:collide(actor:bbox())) add(res,actor)
         end
     end
