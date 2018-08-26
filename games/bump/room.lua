@@ -1,13 +1,20 @@
+function v_idx(pos)
+ return pos.x+pos.y*16
+end
+
 cls_room=class(typ_room,function(self,pos)
  self.pos=pos
  self.spawn_locations={}
+ self.gore={}
 
  for i=0,15 do
   for j=0,15 do
    local p=v2(i,j)
    local tile=self:tile_at(p)
+   if fget(tile,flg_solid) then
+    self.gore[v_idx(p)]=0
+   end
    if tile==spr_spawn_point then
-    printh("Added spawn point at "..p:str())
     add(self.spawn_locations,p*8)
    end
    local t=tiles[tile]
@@ -18,6 +25,24 @@ end)
 
 function cls_room:draw()
  map(self.pos.x*16,self.pos.y*16,0,0,16,16,flg_solid+1)
+ for i=0,15 do
+  for j=0,15 do
+   local v=v_idx(v2(i,j))
+   local g=self.gore[v]
+   if g!=nil then
+    self.gore[v]-=0.05
+    if g>10 then
+     spr(83,i*8,j*8)
+    elseif g>5 then
+     spr(82,i*8,j*8)
+    elseif g>0 then
+     spr(81,i*8,j*8)
+    else
+     self.gore[v]=0
+    end
+   end
+  end
+ end
 end
 
 function cls_room:spawn_player()
@@ -46,16 +71,25 @@ function tile_at(x,y)
 end
 
 function tile_flag_at(bbox,flag)
- local x0=max(0,flr(bbox.aa.x/8))
- local x1=min(15,(bbox.bb.x-1)/8)
- local y0=max(0,flr(bbox.aa.y/8))
- local y1=min(15,(bbox.bb.y-1)/8)
- for i=x0,x1 do
-  for j=y0,y1 do
+ local bb=bbox:to_tile_bbox()
+ for i=bb.aa.x,bb.bb.x do
+  for j=bb.aa.y,bb.bb.y do
    if fget(tile_at(i,j),flag) then
     return true
    end
   end
  end
  return false
+end
+
+function get_tile_location_with_flag(bbox,flag)
+ local bb=bbox:to_tile_bbox()
+ for i=bb.aa.x,bb.bb.x do
+  for j=bb.aa.y,bb.bb.y do
+   if fget(tile_at(i,j),flag) then
+    return v2(i,j)
+   end
+  end
+ end
+ return nil
 end

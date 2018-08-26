@@ -42,14 +42,16 @@
 -- x add coroutine for spawn point
 -- x slippage when changing directions
 -- x flip smoke correctly when wall sliding
--- particles with sprites
+-- x particles with sprites
+-- x add gore particles and gored up tiles
+-- add gore when dying
+-- make gore slippery
 -- enemies
 -- moving platforms
 -- laser beam
 -- add water
 -- add butterflies
 -- add flies
--- add gore when dying
 -- make spikes bloodier
 -- vanishing platforms
 -- lookup / lookdown sprites

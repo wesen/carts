@@ -116,7 +116,7 @@ function cls_player:update()
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
     -- XXX test gore
-    make_explosion(self.pos,10,{35,36,37,38,38})
+    make_gore_explosion(self.pos)
    end
    self.on_ground_interval=0
    self.spd.y=-1.0
