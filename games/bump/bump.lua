@@ -17,6 +17,7 @@
 --#include player
 --#include spring
 --#include spawn
+--#include spikes
 
 -- fade bubbles
 -- x gravity
@@ -29,17 +30,28 @@
 -- x test controller input
 -- x add ice
 -- x springs
--- player spawn points
+-- x wall sliding on ice
+-- x player spawn points
+-- x spikes
+-- x respawn player after death
+-- add water
+-- add butterflies
+-- add flies
+-- add gore when dying
+-- make spikes bloodier
 -- add ease in for spawn point
 -- add coroutine for spawn point
--- wall sliding on ice
 -- vanishing platforms
 -- lookup / lookdown sprites
 -- go through right and come back left (?)
 -- add tweaking menu
 -- add second player
 -- parallax b ackground
--- spikes
 -- add trailing smoke particles when springing up
+-- add multiple players / spawn points
+-- add death mechanics
+-- add score
+-- camera shake
+-- fades
 
 --#include main

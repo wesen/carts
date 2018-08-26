@@ -4,6 +4,8 @@ typ_bubble=2
 typ_button=3
 typ_spring=4
 typ_spawn=5
+typ_spikes=6
+typ_room=7
 
 flg_solid=0
 flg_ice=1

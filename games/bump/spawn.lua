@@ -6,11 +6,10 @@ cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos)
     self.target=self.pos
     self.pos=v2(self.target.x,128)
     self.spd.y=-2
+    add(room.spawn_points,self)
 end)
-tiles[spr_spawn_point]=cls_spawn
 
 function cls_spawn:update()
-    printh("spawn pos "..self.pos:str().." target "..self.target:str().." spd "..self.spd:str())
     self:move(self.spd)
     if self.pos.y<self.target.y then
         self.spd.y=0

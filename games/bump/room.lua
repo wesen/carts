@@ -1,19 +1,33 @@
-room={pos=v2(0,0)}
+cls_room=class(typ_room,function(self,pos)
+    self.pos=pos
+    self.spawn_points={}
 
-function load_room(pos)
-    room.pos=pos
     for i=0,15 do
         for j=0,15 do
-            local t=tiles[tile_at(i,j)]
-            if t!=nil then
-                t.init(v2(i*8,j*8))
+            local p=v2(i,j)
+            local tile=self:tile_at(p)
+            if tile==spr_spawn_point then
+                printh("Added spawn point at "..p:str())
+                add(self.spawn_points,p*8)
             end
+            local t=tiles[tile]
+            if (t!=nil) t.init(p*8)
         end
     end
+end)
+
+function cls_room:draw()
+    map(self.pos.x*16,self.pos.y*16,0,0,16,16,flg_solid+1)
 end
 
-function room_draw()
-    map(room.pos.x,room.pos.y,0,0,16,16,flg_solid+1)
+function cls_room:spawn_player()
+    printh("spawn point "..self.spawn_points[1]:str())
+    cls_spawn.init(self.spawn_points[1]:clone())
+end
+
+function cls_room:tile_at(pos)
+    local v=self.pos*16+pos
+    return mget(v.x,v.y)
 end
 
 function solid_at(bbox)
@@ -29,7 +43,7 @@ function ice_at(bbox)
 end
 
 function tile_at(x,y)
-    return mget(room.pos.x*16+x,room.pos.y*16+y)
+    return room:tile_at(v2(x,y))
 end
 
 function tile_flag_at(bbox,flag)

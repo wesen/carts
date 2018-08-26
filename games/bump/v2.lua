@@ -33,3 +33,6 @@ function v2mt:str()
     return "["..tostr(self.x)..","..tostr(self.y).."]"
 end
 
+function v2mt:clone()
+    return v2(self.x,self.y)
+end

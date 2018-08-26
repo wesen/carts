@@ -4,9 +4,10 @@ cls_button=class(typ_button,function(self,btn_nr)
     self.is_pressed=false
     self.down_duration=0
     self.hold_time=0
+    self.ticks_down=0
 end)
 
-function cls_button:update() 
+function cls_button:update()
     self.is_pressed=false
     if btn(self.btn_nr) then
         self.is_pressed=not self.is_down

@@ -21,6 +21,11 @@ function cls_player:smoke(spr,dir)
     cls_smoke.init(self.pos,spr,dir)
 end
 
+function cls_player:kill()
+    del(players,self)
+    room:spawn_player()
+end
+
 function cls_player:update()
     -- from celeste's player class
     local input=btn(btn_right) and 1
@@ -30,7 +35,7 @@ function cls_player:update()
     self.jump_button:update()
 
     local maxrun=1
-    local accel=0.4
+    local accel=0.3
     local decel=0.2
 
     local on_ground=solid_at(self:bbox(v2(0,1)))
@@ -92,9 +97,11 @@ function cls_player:update()
 
     -- wall slide
     local is_wall_sliding=false
-    if input!=0 and self:is_solid_at(v2(input,0)) and not on_ground then
+    if input!=0 and self:is_solid_at(v2(input,0))
+          and not on_ground and self.spd.y>0 then
         is_wall_sliding=true
         maxfall=0.4
+        if (ice_at(self:bbox(v2(input,0)))) maxfall=1.0
         local smoke_dir = self.flip.x and .3 or -.3
         if (maybe(.1)) self:smoke(spr_wall_smoke,smoke_dir)
     end
