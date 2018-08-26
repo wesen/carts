@@ -34,13 +34,17 @@
 -- x player spawn points
 -- x spikes
 -- x respawn player after death
+-- add ease in for spawn point
+-- add coroutine for spawn point
+-- x slippage when changing directions
+-- flip smoke correctly when wall sliding
+-- moving platforms
+-- laser beam
 -- add water
 -- add butterflies
 -- add flies
 -- add gore when dying
 -- make spikes bloodier
--- add ease in for spawn point
--- add coroutine for spawn point
 -- vanishing platforms
 -- lookup / lookdown sprites
 -- go through right and come back left (?)

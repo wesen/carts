@@ -660,6 +660,7 @@ end
 -- x player spawn points
 -- x spikes
 -- x respawn player after death
+-- slippage when changing directions
 -- add water
 -- add butterflies
 -- add flies
