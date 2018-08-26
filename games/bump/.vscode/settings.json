@@ -4,5 +4,6 @@
         "**/bump.p8": true
     },
     "editor.tabSize": 1,
-    "editor.insertSpaces": true
+    "editor.insertSpaces": true,
+    "editor.detectIndentation":false
 }
