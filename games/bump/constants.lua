@@ -6,6 +6,8 @@ typ_spring=4
 typ_spawn=5
 typ_spikes=6
 typ_room=7
+typ_moving_platform=8
+typ_particle=9
 
 flg_solid=0
 flg_ice=1

@@ -20,5 +20,5 @@ function cls_smoke:update()
 end
 
 function cls_smoke:draw()
- spr(self.spr,self.pos.x,self.pos.y)
+ spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end

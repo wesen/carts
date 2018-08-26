@@ -18,7 +18,7 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos)
 end)
 
 function cls_player:smoke(spr,dir)
- cls_smoke.init(self.pos,spr,dir)
+ return cls_smoke.init(self.pos,spr,dir)
 end
 
 function cls_player:kill()
@@ -103,7 +103,10 @@ function cls_player:update()
   maxfall=0.4
   if (ice_at(self:bbox(v2(input,0)))) maxfall=1.0
   local smoke_dir = self.flip.x and .3 or -.3
-  if (maybe(.1)) self:smoke(spr_wall_smoke,smoke_dir)
+  if maybe(.1) then
+    local smoke=self:smoke(spr_wall_smoke,smoke_dir)
+    smoke.flip.x=self.flip.x
+  end
  end
 
  -- jump
@@ -112,6 +115,8 @@ function cls_player:update()
     or (on_ground_recently and self.jump_button:was_recently_pressed()) then
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
+    -- XXX test gore
+    make_explosion(self.pos,10,{32,33,34})
    end
    self.on_ground_interval=0
    self.spd.y=-1.0

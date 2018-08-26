@@ -16,10 +16,12 @@
 --#include bubbles
 --#include room
 --#include smoke
+--#include particle
 --#include player
 --#include spring
 --#include spawn
 --#include spikes
+--#include moving_platform
 
 -- fade bubbles
 -- x gravity
@@ -39,7 +41,9 @@
 -- x add ease in for spawn point
 -- x add coroutine for spawn point
 -- x slippage when changing directions
--- flip smoke correctly when wall sliding
+-- x flip smoke correctly when wall sliding
+-- particles with sprites
+-- enemies
 -- moving platforms
 -- laser beam
 -- add water

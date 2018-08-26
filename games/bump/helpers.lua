@@ -45,3 +45,7 @@ function pow(x,a)
   end
   return ret
 end
+
+function angle2vec(angle)
+ return v2(cos(angle),sin(angle))
+end
