@@ -1,18 +1,19 @@
 function v_idx(pos)
- return pos.x+pos.y*16
+ return pos.x+pos.y*128
 end
 
 function gore_idx(pos,dir)
- return (pos.x+pos.y*16)*4+dir
+ return v_idx(pos)*4+dir
 end
 
-cls_room=class(typ_room,function(self,pos)
+cls_room=class(typ_room,function(self,pos,dim)
  self.pos=pos
+ self.dim=dim
  self.spawn_locations={}
  self.gore={}
 
- for i=0,15 do
-  for j=0,15 do
+ for i=0,self.dim.x do
+  for j=0,self.dim.y do
    local p=v2(i,j)
    local tile=self:tile_at(p)
    if fget(tile,flg_solid) then
@@ -57,9 +58,10 @@ function cls_room:get_friction(tile,dir)
 end
 
 function cls_room:draw()
- map(self.pos.x*16,self.pos.y*16,0,0,16,16,flg_solid+1)
- for i=0,15 do
-  for j=0,15 do
+ map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
+ -- draw gore
+ for i=0,self.dim.x do
+  for j=0,self.dim.y do
    for dir=-1,2 do
     local v=gore_idx(v2(i,j),dir)
     local g=self.gore[v]
@@ -85,7 +87,7 @@ function cls_room:spawn_player()
 end
 
 function cls_room:tile_at(pos)
- local v=self.pos*16+pos
+ local v=self.pos+pos
  return mget(v.x,v.y)
 end
 

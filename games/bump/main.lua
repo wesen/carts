@@ -1,5 +1,5 @@
 function _init()
- room=cls_room.init(v2(1,0))
+ room=cls_room.init(v2(16,0),v2(32,16))
  room:spawn_player()
 end
 
