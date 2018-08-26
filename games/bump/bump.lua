@@ -29,6 +29,8 @@
 -- x add ice
 -- x springs
 -- player spawn points
+-- vanishing platforms
+-- lookup / lookdown sprites
 -- go through right and come back left (?)
 -- add tweaking menu
 -- add second player
@@ -36,6 +38,6 @@
 -- spikes
 -- add trailing smoke particles when springing up
 
-player=cls_player.init()
+player=cls_player.init(v2(5,13)*8)
 
 --#include main

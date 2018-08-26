@@ -1,7 +1,7 @@
 players={}
 
-cls_player=subclass(typ_player,cls_actor,function(self)
-    cls_actor._ctr(self,v2(0,6*8))
+cls_player=subclass(typ_player,cls_actor,function(self,pos)
+    cls_actor._ctr(self,pos)
     -- players are handled separately
     del(actors,self)
     add(players,self)
@@ -15,7 +15,6 @@ cls_player=subclass(typ_player,cls_actor,function(self)
     self.prev_input=0
     -- we consider we are on the ground for 12 frames
     self.on_ground_interval=0
-
 end)
 
 function cls_player:smoke(spr,dir)
