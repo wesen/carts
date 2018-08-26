@@ -27,13 +27,14 @@
 -- x variable jump time
 -- x test controller input
 -- x add ice
--- springs
+-- x springs
 -- player spawn points
 -- go through right and come back left (?)
 -- add tweaking menu
 -- add second player
 -- parallax b ackground
 -- spikes
+-- add trailing smoke particles when springing up
 
 player=cls_player.init()
 

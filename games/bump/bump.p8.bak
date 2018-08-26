@@ -590,7 +590,6 @@ end
 -- add second player
 -- parallax b ackground
 -- spikes
--- add trailing smoke particles when springing up
 
 player=cls_player.init()
 

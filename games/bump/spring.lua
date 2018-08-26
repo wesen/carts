@@ -17,6 +17,7 @@ function cls_spring:update()
             if bbox:collide(player:bbox()) then
                 player.spd.y=-3
                 self.sprung_time=10
+                local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
             end
         end
     end
