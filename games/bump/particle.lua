@@ -19,11 +19,21 @@ end
 
 function cls_particle:update()
  self.t+=dt
- if (self.t>self.lifetime) del(actors,self)
+ if self.t>self.lifetime then
+   del(actors,self)
+   return
+ end
+
+ local on_ground=solid_at(self:bbox(v2(0,1)))
+ if on_ground then
+  self.spd.y*=-0.9
+ end
  self:move(self.spd)
  local maxfall=2
  local gravity=0.12*self.weight
  self.spd.y=appr(self.spd.y,maxfall,gravity)
+
+
 end
 
 function cls_particle:draw()
@@ -35,8 +45,10 @@ end
 function make_explosion(pos,n,sprs)
  for i=0,n do
   local p=cls_particle.init(pos,0.5+rnd(2),sprs)
+  p.hitbox=hitbox(v2(2,2),v2(3,3))
   p:random_angle(1)
-  p.weight=.3
+  p.spd.x*=0.5+rnd(0.5)
+  p.weight=0.5+rnd(1)
   p:random_flip()
  end
 end
