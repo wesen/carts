@@ -1,6 +1,8 @@
 spr_wall_smoke=54
 spr_ground_smoke=51
 spr_full_smoke=48
+spr_ice_smoke=57
+spr_slide_smoke=60
 
 cls_smoke=subclass(typ_smoke,cls_actor,function(self,pos,start_spr,dir)
     cls_actor._ctr(self,pos+v2(mrnd(1),0))

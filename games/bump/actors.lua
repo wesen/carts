@@ -31,7 +31,7 @@ function cls_actor:move_x(amount)
             local step=amount
             if (abs(amount)>1) step=sign(amount)
             amount-=step
-            if not self:would_be_solid_at(v2(step,0)) then
+            if not self:is_solid_at(v2(step,0)) then
                 self.pos.x+=step
             else
                 self.spd.x=0
@@ -49,7 +49,7 @@ function cls_actor:move_y(amount)
             local step=amount
             if (abs(amount)>1) step=sign(amount)
             amount-=step
-            if not self:would_be_solid_at(v2(0,step)) then
+            if not self:is_solid_at(v2(0,step)) then
                 self.pos.y+=step
             else
                 self.spd.y=0
@@ -61,7 +61,7 @@ function cls_actor:move_y(amount)
     end
 end
 
-function cls_actor:would_be_solid_at(offset)
+function cls_actor:is_solid_at(offset)
     return solid_at(self:bbox(offset))
 end
 

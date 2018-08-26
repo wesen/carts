@@ -25,13 +25,14 @@
 -- x fall down faster
 -- x wall jump
 -- x variable jump time
+-- x test controller input
+-- add ice
+-- springs
 -- player spawn points
 -- go through right and come back left (?)
 -- add tweaking menu
--- add ice
 -- add second player
 -- parallax b ackground
--- springs
 -- spikes
 
 player=cls_player.init()

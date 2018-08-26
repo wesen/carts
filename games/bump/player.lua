@@ -9,12 +9,10 @@ cls_player=subclass(typ_player,cls_actor,function(self)
     self.hitbox=hitbox(v2(2,0),v2(4,8))
     self.atk_hitbox=hitbox(v2(1,0),v2(6,4))
 
-    self.show_smoke=false
     self.prev_input=0
     -- we consider we are on the ground for 12 frames
     self.on_ground_interval=0
 
-    self.was_on_ground=false
 end)
 
 function cls_player:smoke(spr,dir)
@@ -23,8 +21,8 @@ end
 
 function cls_player:update()
     -- from celeste's player class
-    local input=btn(btn_right) and 1 
-       or (btn(btn_left) and -1 
+    local input=btn(btn_right) and 1
+       or (btn(btn_left) and -1
        or 0)
 
     self.jump_button:update()
@@ -33,7 +31,8 @@ function cls_player:update()
     local accel=0.4
     local decel=0.2
 
-    local on_ground=self:would_be_solid_at(v2(0,1))
+    local on_ground=solid_at(self:bbox(v2(0,1)))
+    local on_ice=ice_at(self:bbox(v2(0,1)))
     if on_ground then
         self.on_ground_interval=ground_grace_interval
     elseif self.on_ground_interval>0 then
@@ -41,16 +40,31 @@ function cls_player:update()
     end
     local on_ground_recently=self.on_ground_interval>0
 
-    -- smoke when changing directions
-    if input!=self.prev_input and input!=0 and on_ground then
-        self:smoke(spr_ground_smoke,-input)
-    end
-    self.prev_input=input
-
     if not on_ground then
         accel=0.2
         decel=0.1
+    else
+        if on_ice then
+            accel=0.1
+            decel=0.03
+        end
+
+        if input!=self.prev_input and input!=0 then
+            if on_ice then
+                self:smoke(spr_ice_smoke,-input)
+            else
+                -- smoke when changing directions
+                self:smoke(spr_ground_smoke,-input)
+            end
+        end
+
+        -- add ice smoke when sliding on ice (after releasing input)
+        if input==0 and abs(self.spd.x)>0.3 and on_ice
+           and (maybe(0.15) or self.prev_input!=0) then
+            self:smoke(spr_slide_smoke,-input)
+        end
     end
+    self.prev_input=input
 
     -- x movement
     if abs(self.spd.x)>maxrun then
@@ -76,7 +90,7 @@ function cls_player:update()
 
     -- wall slide
     local is_wall_sliding=false
-    if input!=0 and self:would_be_solid_at(v2(input,0)) and not on_ground then
+    if input!=0 and self:is_solid_at(v2(input,0)) and not on_ground then
         is_wall_sliding=true
         maxfall=0.4
         local smoke_dir = self.flip.x and .3 or -.3
@@ -85,18 +99,18 @@ function cls_player:update()
 
     -- jump
     if self.jump_button.is_down then
-        if self.jump_button:is_held() 
+        if self.jump_button:is_held()
              or (on_ground_recently and self.jump_button:was_recently_pressed()) then
             if self.jump_button:was_recently_pressed() then
                 self:smoke(spr_ground_smoke,0)
-            end 
+            end
             self.on_ground_interval=0
             self.spd.y=-1.0
             self.jump_button.hold_time+=1
         elseif self.jump_button:was_just_pressed() then
             -- check for wall jump
-            local wall_dir=self:would_be_solid_at(v2(-3,0)) and -1 
-                          or self:would_be_solid_at(v2(3,0)) and 1 
+            local wall_dir=self:is_solid_at(v2(-3,0)) and -1
+                          or self:is_solid_at(v2(3,0)) and 1
                           or 0
             if wall_dir!=0 then
                 self.jump_interval=0
@@ -122,15 +136,13 @@ function cls_player:update()
     else
         self.spr=1+flr(frame/4)%3
     end
-
-    self.was_on_ground=on_ground
 end
 
 function cls_player:draw()
     spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
     local bbox=self:bbox()
     local bbox_col=8
-    if self:would_be_solid_at(v2(0,0)) then
+    if self:is_solid_at(v2(0,0)) then
         bbox_col=9
     end
 

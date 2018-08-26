@@ -6,7 +6,7 @@ end)
 tiles[tile_spring]=cls_spring
 
 function cls_spring:update()
-    printh("collide spring self "..self:str())
-    local p=self:would_collide(typ_player)
-    printh("collide player "..tostr(#p))
+    -- printh("collide spring self "..self:str())
+    -- local p=self:would_collide(typ_player)
+    -- printh("collide player "..tostr(#p))
 end
