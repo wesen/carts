@@ -210,6 +210,34 @@ end
 function angle2vec(angle)
  return v2(cos(angle),sin(angle))
 end
+
+function rspr(s,x,y,angle)
+ angle=(angle+4)%4
+ local x_=(s%16)*8
+ local y_=flr(s/16)*8
+ local f=function(i,j,p)
+   pset(x+i,y+j,p)
+ end
+ if angle==1 then
+  f=function(i,j,p)
+   pset(x+7-j,y+i,p)
+  end
+ elseif angle==2 then
+  f=function(i,j,p)
+   pset(x+7-i,y+7-j,p)
+  end
+ elseif angle==3 then
+  f=function(i,j,p)
+   pset(x+j,y+7-i,p)
+  end
+ end
+ for i=0,7 do
+  for j=0,7 do
+   local p=sget(x_+i,y_+j)
+   f(i,j,p)
+  end
+ end
+end
 -- tween routines from https://github.com/JoebRogers/PICO-Tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
@@ -464,11 +492,14 @@ function cls_room:tile_at(pos)
 end
 
 function solid_at(bbox)
- return bbox.aa.x<0
+ if bbox.aa.x<0
   or bbox.bb.x>128
   or bbox.aa.y<0
-  or bbox.bb.y>128
-  or tile_flag_at(bbox,flg_solid)
+  or bbox.bb.y>128 then
+   return true,nil
+ else
+  return tile_flag_at(bbox,flg_solid)
+ end
 end
 
 function ice_at(bbox)
@@ -484,23 +515,11 @@ function tile_flag_at(bbox,flag)
  for i=bb.aa.x,bb.bb.x do
   for j=bb.aa.y,bb.bb.y do
    if fget(tile_at(i,j),flag) then
-    return true
+    return true,v2(i,j)
    end
   end
  end
  return false
-end
-
-function get_tile_location_with_flag(bbox,flag)
- local bb=bbox:to_tile_bbox()
- for i=bb.aa.x,bb.bb.x do
-  for j=bb.aa.y,bb.bb.y do
-   if fget(tile_at(i,j),flag) then
-    return v2(i,j)
-   end
-  end
- end
- return nil
 end
 spr_wall_smoke=54
 spr_ground_smoke=51
@@ -576,15 +595,19 @@ end)
 function cls_gore:update()
  cls_particle.update(self)
 
+ local dir=sign(self.spd.x)
+
  local ground_bbox=self:bbox(v2(0,1))
- local on_ground=solid_at(ground_bbox)
- if on_ground then
-  local tile=get_tile_location_with_flag(ground_bbox,flg_solid)
-  if tile!=nil then
-   room.gore[v_idx(tile)]+=1
-   -- add tile gore
-  end
+ local side_bbox=self:bbox(v2(dir,0))
+ local on_ground,ground_tile=solid_at(ground_bbox)
+ local hit_side,side_tile=solid_at(side_bbox)
+ if on_ground and ground_tile!=nil then
+  room.gore[v_idx(ground_tile)]+=1
   self.spd.y*=-0.9
+ end
+ if hit_side and side_tile!=nil then
+  room.gore[v_idx(side_tile)]+=1
+  self.spd.x*=-0.9
  end
 end
 
@@ -865,6 +888,7 @@ end)
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
 -- x add gore particles and gored up tiles
+-- add gore on vertical surfaces
 -- add gore when dying
 -- make gore slippery
 -- enemies

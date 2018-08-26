@@ -44,6 +44,7 @@
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
 -- x add gore particles and gored up tiles
+-- add gore on vertical surfaces
 -- add gore when dying
 -- make gore slippery
 -- enemies
