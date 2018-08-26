@@ -36,8 +36,8 @@
 -- x player spawn points
 -- x spikes
 -- x respawn player after death
--- add ease in for spawn point
--- add coroutine for spawn point
+-- x add ease in for spawn point
+-- x add coroutine for spawn point
 -- x slippage when changing directions
 -- flip smoke correctly when wall sliding
 -- moving platforms

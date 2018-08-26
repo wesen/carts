@@ -170,11 +170,85 @@ function mrnd(x)
  return rnd(x*2)-x
 end
 
+--- function for calculating
+-- exponents to a higher degree
+-- of accuracy than using the
+-- ^ operator.
+-- function created by samhocevar.
+-- source: https://www.lexaloffle.com/bbs/?tid=27864
+-- @param x number to apply exponent to.
+-- @param a exponent to apply.
+-- @return the result of the
+-- calculation.
+function pow(x,a)
+  if (a==0) return 1
+  if (a<0) x,a=1/x,-a
+  local ret,a0,xn=1,flr(a),x
+  a-=a0
+  while a0>=1 do
+      if (a0%2>=1) ret*=xn
+      xn,a0=xn*xn,shr(a0,1)
+  end
+  while a>0 do
+      while a<1 do x,a=sqrt(x),a+a end
+      ret,a=ret*x,a-1
+  end
+  return ret
+end
+-- tween routines from https://github.com/JoebRogers/PICO-Tween
+function inoutquint(t, b, c, d)
+ t = t / d * 2
+ if (t < 1) return c / 2 * pow(t, 5) + b
+ return c / 2 * (pow(t - 2, 5) + 2) + b
+end
+
+function inexpo(t, b, c, d)
+ if (t == 0) return b
+ return c * pow(2, 10 * (t / d - 1)) + b - c * 0.001
+end
+
+function outexpo(t, b, c, d)
+ if (t == d) return b + c
+ return c * 1.001 * (-pow(2, -10 * t / d) + 1) + b
+end
+
+function inoutexpo(t, b, c, d)
+ if (t == 0) return b
+ if (t == d) return b + c
+ t = t / d * 2
+ if (t < 1) return c / 2 * pow(2, 10 * (t - 1)) + b - c * 0.0005
+ return c / 2 * 1.0005 * (-pow(2, -10 * (t - 1)) + 2) + b
+end
+
+function cr_move_to(obj,target,d,easetype)
+ local t=0
+ local bx=obj.pos.x
+ local cx=target.x-obj.pos.x
+ local by=obj.pos.y
+ local cy=target.y-obj.pos.y
+ while t<d do
+  t+=dt
+  if (t>d) return
+  obj.pos.x=round(easetype(t,bx,cx,d))
+  obj.pos.y=round(easetype(t,by,cy,d))
+  yield()
+ end
+end
 function tick_crs()
  for cr in all(crs) do
+  if costatus(cr)!='dead' then
+   coresume(cr)
+  else
+   del(crs,cr)
+  end
  end
 end
 
+function add_cr(f)
+ local cr=cocreate(f)
+ add(crs,cr)
+ return cr
+end
 
 actor_cnt=0
 
@@ -320,7 +394,7 @@ function cls_bubble:update()
 end
 cls_room=class(typ_room,function(self,pos)
  self.pos=pos
- self.spawn_points={}
+ self.spawn_locations={}
 
  for i=0,15 do
   for j=0,15 do
@@ -328,7 +402,7 @@ cls_room=class(typ_room,function(self,pos)
    local tile=self:tile_at(p)
    if tile==spr_spawn_point then
     printh("Added spawn point at "..p:str())
-    add(self.spawn_points,p*8)
+    add(self.spawn_locations,p*8)
    end
    local t=tiles[tile]
    if (t!=nil) t.init(p*8)
@@ -341,8 +415,7 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player()
- printh("spawn point "..self.spawn_points[1]:str())
- cls_spawn.init(self.spawn_points[1]:clone())
+ cls_spawn.init(self.spawn_locations[1]:clone())
 end
 
 function cls_room:tile_at(pos)
@@ -610,18 +683,16 @@ cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos)
  self.target=self.pos
  self.pos=v2(self.target.x,128)
  self.spd.y=-2
- add(room.spawn_points,self)
+ add_cr(function()
+  self:cr_spawn()
+ end)
 end)
 
-function cls_spawn:update()
- self:move(self.spd)
- if self.pos.y<self.target.y then
-  self.spd.y=0
-  self.pos=self.target
-  del(actors,self)
-  cls_player.init(self.target)
-  cls_smoke.init(self.pos,spr_full_smoke,0)
- end
+function cls_spawn:cr_spawn()
+ cr_move_to(self,self.target,1,inexpo)
+ del(actors,self)
+ cls_player.init(self.target)
+ cls_smoke.init(self.pos,spr_full_smoke,0)
 end
 
 function cls_spawn:draw()
@@ -664,8 +735,8 @@ end
 -- x player spawn points
 -- x spikes
 -- x respawn player after death
--- add ease in for spawn point
--- add coroutine for spawn point
+-- x add ease in for spawn point
+-- x add coroutine for spawn point
 -- x slippage when changing directions
 -- flip smoke correctly when wall sliding
 -- moving platforms
@@ -707,6 +778,7 @@ end
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+ tick_crs()
  foreach(players,function(player)
   player:update()
  end)

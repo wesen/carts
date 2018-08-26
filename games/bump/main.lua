@@ -17,6 +17,7 @@ end
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+ tick_crs()
  foreach(players,function(player)
   player:update()
  end)

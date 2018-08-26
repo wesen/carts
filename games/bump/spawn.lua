@@ -6,18 +6,16 @@ cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos)
  self.target=self.pos
  self.pos=v2(self.target.x,128)
  self.spd.y=-2
- add(room.spawn_points,self)
+ add_cr(function()
+  self:cr_spawn()
+ end)
 end)
 
-function cls_spawn:update()
- self:move(self.spd)
- if self.pos.y<self.target.y then
-  self.spd.y=0
-  self.pos=self.target
-  del(actors,self)
-  cls_player.init(self.target)
-  cls_smoke.init(self.pos,spr_full_smoke,0)
- end
+function cls_spawn:cr_spawn()
+ cr_move_to(self,self.target,1,inexpo)
+ del(actors,self)
+ cls_player.init(self.target)
+ cls_smoke.init(self.pos,spr_full_smoke,0)
 end
 
 function cls_spawn:draw()

@@ -1,6 +1,6 @@
 cls_room=class(typ_room,function(self,pos)
  self.pos=pos
- self.spawn_points={}
+ self.spawn_locations={}
 
  for i=0,15 do
   for j=0,15 do
@@ -8,7 +8,7 @@ cls_room=class(typ_room,function(self,pos)
    local tile=self:tile_at(p)
    if tile==spr_spawn_point then
     printh("Added spawn point at "..p:str())
-    add(self.spawn_points,p*8)
+    add(self.spawn_locations,p*8)
    end
    local t=tiles[tile]
    if (t!=nil) t.init(p*8)
@@ -21,8 +21,7 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player()
- printh("spawn point "..self.spawn_points[1]:str())
- cls_spawn.init(self.spawn_points[1]:clone())
+ cls_spawn.init(self.spawn_locations[1]:clone())
 end
 
 function cls_room:tile_at(pos)
