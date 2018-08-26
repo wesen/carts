@@ -8,6 +8,8 @@
 --#include hitbox
 
 --#include helpers
+--#include tween
+--#include coroutines
 
 --#include actors
 --#include button

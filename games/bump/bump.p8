@@ -22,10 +22,9 @@ dt=0
 lasttime=time()
 room=nil
 
+actors={}
 tiles={}
-
-
-
+crs={}
 jump_button_grace_interval=10
 jump_max_hold_time=15
 
@@ -62,38 +61,38 @@ local v2mt={}
 v2mt.__index=v2mt
 
 function v2(x,y)
-    local t={x=x,y=y}
-    return setmetatable(t,v2mt)
+ local t={x=x,y=y}
+ return setmetatable(t,v2mt)
 end
 
 function v2mt.__add(a,b)
-    return v2(a.x+b.x,a.y+b.y)
+ return v2(a.x+b.x,a.y+b.y)
 end
 
 function v2mt.__sub(a,b)
-    return v2(a.x-b.x,a.y-b.y)
+ return v2(a.x-b.x,a.y-b.y)
 end
 
 function v2mt.__mul(a,b)
-    if (type(a)=="number") return v2(b.x*a,b.y*a)
-    if (type(b)=="number") return v2(a.x*b,a.y*b)
-    return v2(a.x*b.x,a.y*b.y)
+ if (type(a)=="number") return v2(b.x*a,b.y*a)
+ if (type(b)=="number") return v2(a.x*b,a.y*b)
+ return v2(a.x*b.x,a.y*b.y)
 end
 
 function v2mt.__eq(a,b)
-    return a.x==b.x and a.y==b.y
+ return a.x==b.x and a.y==b.y
 end
 
 function v2mt:magnitude()
-    return sqrt(self.x^2+self.y^2)
+ return sqrt(self.x^2+self.y^2)
 end
 
 function v2mt:str()
-    return "["..tostr(self.x)..","..tostr(self.y).."]"
+ return "["..tostr(self.x)..","..tostr(self.y).."]"
 end
 
 function v2mt:clone()
-    return v2(self.x,self.y)
+ return v2(self.x,self.y)
 end
 local bboxvt={}
 bboxvt.__index=bboxvt
@@ -112,9 +111,9 @@ end
 
 function bboxvt:is_inside(v)
  return v.x>=self.aa.x
-    and v.x<=self.bb.x
-    and v.y>=self.aa.y
-    and v.y<=self.bb.y
+ and v.x<=self.bb.x
+ and v.y>=self.aa.y
+ and v.y<=self.bb.y
 end
 
 function bboxvt:str()
@@ -122,7 +121,7 @@ function bboxvt:str()
 end
 
 function bboxvt:draw(col)
-    rect(self.aa.x,self.aa.y,self.bb.x-1,self.bb.y-1,col)
+ rect(self.aa.x,self.aa.y,self.bb.x-1,self.bb.y-1,col)
 end
 
 function bboxvt:collide(other)
@@ -151,230 +150,235 @@ end
 
 -- functions
 function appr(val,target,amount)
-    return (val>target and max(val-amount,target)) or min(val+amount,target)
+ return (val>target and max(val-amount,target)) or min(val+amount,target)
 end
 
 function sign(v)
-    return v>0 and 1 or v<0 and -1 or 0
+ return v>0 and 1 or v<0 and -1 or 0
 end
 
 function round(x)
-    return flr(x+0.5)
+ return flr(x+0.5)
 end
 
 function maybe(p)
-    if (p==nil) p=0.5
-    return rnd(1)<p
+ if (p==nil) p=0.5
+ return rnd(1)<p
 end
 
 function mrnd(x)
-    return rnd(x*2)-x
+ return rnd(x*2)-x
 end
 
-actors={}
+function tick_crs()
+ for cr in all(crs) do
+ end
+end
+
+
 actor_cnt=0
 
 cls_actor=class(typ_actor,function(self,pos)
-    self.pos=pos
-    self.id=actor_cnt
-    actor_cnt+=1
-    self.spd=v2(0,0)
-    self.is_solid=true
-    self.hitbox=hitbox(v2(0,0),v2(8,8))
-    add(actors,self)
+ self.pos=pos
+ self.id=actor_cnt
+ actor_cnt+=1
+ self.spd=v2(0,0)
+ self.is_solid=true
+ self.hitbox=hitbox(v2(0,0),v2(8,8))
+ add(actors,self)
 end)
 
 function cls_actor:bbox(offset)
-    if (offset==nil) offset=v2(0,0)
-    return self.hitbox:to_bbox_at(self.pos+offset)
+ if (offset==nil) offset=v2(0,0)
+ return self.hitbox:to_bbox_at(self.pos+offset)
 end
 
 function cls_actor:str()
-    return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
+ return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
 end
 
 function cls_actor:move(o)
-    self:move_x(o.x)
-    self:move_y(o.y)
+ self:move_x(o.x)
+ self:move_y(o.y)
 end
 
 function cls_actor:move_x(amount)
-    if self.is_solid then
-        while abs(amount)>0 do
-            local step=amount
-            if (abs(amount)>1) step=sign(amount)
-            amount-=step
-            if not self:is_solid_at(v2(step,0)) then
-                self.pos.x+=step
-            else
-                self.spd.x=0
-                break
-            end
-        end
-    else
-        self.pos.x+=amount
-    end
+ if self.is_solid then
+  while abs(amount)>0 do
+   local step=amount
+   if (abs(amount)>1) step=sign(amount)
+   amount-=step
+   if not self:is_solid_at(v2(step,0)) then
+    self.pos.x+=step
+   else
+    self.spd.x=0
+    break
+   end
+  end
+ else
+  self.pos.x+=amount
+ end
 end
 
 function cls_actor:move_y(amount)
-    if self.is_solid then
-        while abs(amount)>0 do
-            local step=amount
-            if (abs(amount)>1) step=sign(amount)
-            amount-=step
-            if not self:is_solid_at(v2(0,step)) then
-                self.pos.y+=step
-            else
-                self.spd.y=0
-                break
-            end
-        end
-    else
-        self.pos.y+=amount
-    end
+ if self.is_solid then
+  while abs(amount)>0 do
+   local step=amount
+   if (abs(amount)>1) step=sign(amount)
+   amount-=step
+   if not self:is_solid_at(v2(0,step)) then
+    self.pos.y+=step
+   else
+    self.spd.y=0
+    break
+   end
+  end
+ else
+  self.pos.y+=amount
+ end
 end
 
 function cls_actor:is_solid_at(offset)
-    return solid_at(self:bbox(offset))
+ return solid_at(self:bbox(offset))
 end
 
 function cls_actor:get_collisions(typ,offset)
-    local res={}
+ local res={}
 
-    local bbox=self:bbox(offset)
-    for actor in all(actors) do
-        if actor!=self and actor.typ==typ then
-            if (bbox:collide(actor:bbox())) add(res,actor)
-        end
-    end
+ local bbox=self:bbox(offset)
+ for actor in all(actors) do
+  if actor!=self and actor.typ==typ then
+   if (bbox:collide(actor:bbox())) add(res,actor)
+  end
+ end
 
-    return res
+ return res
 end
 
 function draw_actors(typ)
-    for a in all(actors) do
-        if ((typ==nil or a.typ==typ) and a.draw!=nil) a:draw()
-    end
+ for a in all(actors) do
+  if ((typ==nil or a.typ==typ) and a.draw!=nil) a:draw()
+ end
 end
 
 function update_actors(typ)
-    for a in all(actors) do
-        if ((typ==nil or a.typ==typ) and a.update!=nil) a:update()
-    end
+ for a in all(actors) do
+  if ((typ==nil or a.typ==typ) and a.update!=nil) a:update()
+ end
 end
 
 cls_button=class(typ_button,function(self,btn_nr)
-    self.btn_nr=btn_nr
-    self.is_down=false
-    self.is_pressed=false
-    self.down_duration=0
-    self.hold_time=0
-    self.ticks_down=0
+ self.btn_nr=btn_nr
+ self.is_down=false
+ self.is_pressed=false
+ self.down_duration=0
+ self.hold_time=0
+ self.ticks_down=0
 end)
 
 function cls_button:update()
-    self.is_pressed=false
-    if btn(self.btn_nr) then
-        self.is_pressed=not self.is_down
-        self.is_down=true
-        self.ticks_down+=1
-    else
-        self.is_down=false
-        self.ticks_down=0
-        self.hold_time=0
-    end
+ self.is_pressed=false
+ if btn(self.btn_nr) then
+  self.is_pressed=not self.is_down
+  self.is_down=true
+  self.ticks_down+=1
+ else
+  self.is_down=false
+  self.ticks_down=0
+  self.hold_time=0
+ end
 end
 
 function cls_button:was_recently_pressed()
-    return self.ticks_down<jump_button_grace_interval and self.hold_time==0
+ return self.ticks_down<jump_button_grace_interval and self.hold_time==0
 end
 
 function cls_button:was_just_pressed()
-    return self.is_pressed
+ return self.is_pressed
 end
 
 function cls_button:is_held()
-    return self.hold_time>0 and self.hold_time<jump_max_hold_time
+ return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
 cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
-    cls_actor._ctr(self,pos)
-    self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
-    self.life=10
+ cls_actor._ctr(self,pos)
+ self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
+ self.life=10
 end)
 
 function cls_bubble:draw()
-    local size=4-self.life/3
-    circ(self.pos.x,self.pos.y,size,1)
+ local size=4-self.life/3
+ circ(self.pos.x,self.pos.y,size,1)
 end
 
 function cls_bubble:update()
-    self.life*=0.9
-    self:move(self.spd)
-    if (self.life<0.1) then
-        del(actors,self)
-    end
+ self.life*=0.9
+ self:move(self.spd)
+ if (self.life<0.1) then
+  del(actors,self)
+ end
 end
 cls_room=class(typ_room,function(self,pos)
-    self.pos=pos
-    self.spawn_points={}
+ self.pos=pos
+ self.spawn_points={}
 
-    for i=0,15 do
-        for j=0,15 do
-            local p=v2(i,j)
-            local tile=self:tile_at(p)
-            if tile==spr_spawn_point then
-                printh("Added spawn point at "..p:str())
-                add(self.spawn_points,p*8)
-            end
-            local t=tiles[tile]
-            if (t!=nil) t.init(p*8)
-        end
-    end
+ for i=0,15 do
+  for j=0,15 do
+   local p=v2(i,j)
+   local tile=self:tile_at(p)
+   if tile==spr_spawn_point then
+    printh("Added spawn point at "..p:str())
+    add(self.spawn_points,p*8)
+   end
+   local t=tiles[tile]
+   if (t!=nil) t.init(p*8)
+  end
+ end
 end)
 
 function cls_room:draw()
-    map(self.pos.x*16,self.pos.y*16,0,0,16,16,flg_solid+1)
+ map(self.pos.x*16,self.pos.y*16,0,0,16,16,flg_solid+1)
 end
 
 function cls_room:spawn_player()
-    printh("spawn point "..self.spawn_points[1]:str())
-    cls_spawn.init(self.spawn_points[1]:clone())
+ printh("spawn point "..self.spawn_points[1]:str())
+ cls_spawn.init(self.spawn_points[1]:clone())
 end
 
 function cls_room:tile_at(pos)
-    local v=self.pos*16+pos
-    return mget(v.x,v.y)
+ local v=self.pos*16+pos
+ return mget(v.x,v.y)
 end
 
 function solid_at(bbox)
-    return bbox.aa.x<0
-        or bbox.bb.x>128
-        or bbox.aa.y<0
-        or bbox.bb.y>128
-        or tile_flag_at(bbox,flg_solid)
+ return bbox.aa.x<0
+  or bbox.bb.x>128
+  or bbox.aa.y<0
+  or bbox.bb.y>128
+  or tile_flag_at(bbox,flg_solid)
 end
 
 function ice_at(bbox)
-    return tile_flag_at(bbox,flg_ice)
+ return tile_flag_at(bbox,flg_ice)
 end
 
 function tile_at(x,y)
-    return room:tile_at(v2(x,y))
+ return room:tile_at(v2(x,y))
 end
 
 function tile_flag_at(bbox,flag)
-    local x0=max(0,flr(bbox.aa.x/8))
-    local x1=min(15,(bbox.bb.x-1)/8)
-    local y0=max(0,flr(bbox.aa.y/8))
-    local y1=min(15,(bbox.bb.y-1)/8)
-    for i=x0,x1 do
-        for j=y0,y1 do
-            if fget(tile_at(i,j),flag) then
-                return true
-            end
-        end
-    end
-    return false
+ local x0=max(0,flr(bbox.aa.x/8))
+ local x1=min(15,(bbox.bb.x-1)/8)
+ local y0=max(0,flr(bbox.aa.y/8))
+ local y1=min(15,(bbox.bb.y-1)/8)
+ for i=x0,x1 do
+  for j=y0,y1 do
+   if fget(tile_at(i,j),flag) then
+    return true
+   end
+  end
+ end
+ return false
 end
 spr_wall_smoke=54
 spr_ground_smoke=51
@@ -383,186 +387,186 @@ spr_ice_smoke=57
 spr_slide_smoke=60
 
 cls_smoke=subclass(typ_smoke,cls_actor,function(self,pos,start_spr,dir)
-    cls_actor._ctr(self,pos+v2(mrnd(1),0))
-    self.flip=v2(maybe(),false)
-    self.spr=start_spr
-    self.start_spr=start_spr
-    self.is_solid=false
-    self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
+ cls_actor._ctr(self,pos+v2(mrnd(1),0))
+ self.flip=v2(maybe(),false)
+ self.spr=start_spr
+ self.start_spr=start_spr
+ self.is_solid=false
+ self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
 end)
 
 function cls_smoke:update()
-    self:move(self.spd)
-    self.spr+=0.2
-    if (self.spr>self.start_spr+3) del(actors,self)
+ self:move(self.spd)
+ self.spr+=0.2
+ if (self.spr>self.start_spr+3) del(actors,self)
 end
 
 function cls_smoke:draw()
-    spr(self.spr,self.pos.x,self.pos.y)
+ spr(self.spr,self.pos.x,self.pos.y)
 end
 players={}
 
 cls_player=subclass(typ_player,cls_actor,function(self,pos)
-    cls_actor._ctr(self,pos)
-    -- players are handled separately
-    del(actors,self)
-    add(players,self)
+ cls_actor._ctr(self,pos)
+ -- players are handled separately
+ del(actors,self)
+ add(players,self)
 
-    self.flip=v2(false,false)
-    self.jump_button=cls_button.init(btn_jump)
-    self.spr=1
-    self.hitbox=hitbox(v2(2,0),v2(4,8))
-    self.atk_hitbox=hitbox(v2(1,0),v2(6,4))
+ self.flip=v2(false,false)
+ self.jump_button=cls_button.init(btn_jump)
+ self.spr=1
+ self.hitbox=hitbox(v2(2,0),v2(4,8))
+ self.atk_hitbox=hitbox(v2(1,0),v2(6,4))
 
-    self.prev_input=0
-    -- we consider we are on the ground for 12 frames
-    self.on_ground_interval=0
+ self.prev_input=0
+ -- we consider we are on the ground for 12 frames
+ self.on_ground_interval=0
 end)
 
 function cls_player:smoke(spr,dir)
-    cls_smoke.init(self.pos,spr,dir)
+ cls_smoke.init(self.pos,spr,dir)
 end
 
 function cls_player:kill()
-    del(players,self)
-    room:spawn_player()
+ del(players,self)
+ room:spawn_player()
 end
 
 function cls_player:update()
-    -- from celeste's player class
-    local input=btn(btn_right) and 1
-       or (btn(btn_left) and -1
-       or 0)
+ -- from celeste's player class
+ local input=btn(btn_right) and 1
+    or (btn(btn_left) and -1
+    or 0)
 
-    self.jump_button:update()
+ self.jump_button:update()
 
-    local maxrun=1
-    local accel=0.3
-    local decel=0.2
+ local maxrun=1
+ local accel=0.3
+ local decel=0.2
 
-    local on_ground=solid_at(self:bbox(v2(0,1)))
-    local on_ice=ice_at(self:bbox(v2(0,1)))
-    if on_ground then
-        self.on_ground_interval=ground_grace_interval
-    elseif self.on_ground_interval>0 then
-        self.on_ground_interval-=1
-    end
-    local on_ground_recently=self.on_ground_interval>0
+ local on_ground=solid_at(self:bbox(v2(0,1)))
+ local on_ice=ice_at(self:bbox(v2(0,1)))
+ if on_ground then
+  self.on_ground_interval=ground_grace_interval
+ elseif self.on_ground_interval>0 then
+  self.on_ground_interval-=1
+ end
+ local on_ground_recently=self.on_ground_interval>0
 
-    if not on_ground then
-        accel=0.2
-        decel=0.1
-    else
-        if on_ice then
-            accel=0.1
-            decel=0.03
-        end
+ if not on_ground then
+  accel=0.2
+  decel=0.1
+ else
+  if on_ice then
+   accel=0.1
+   decel=0.03
+  end
 
-        if input!=self.prev_input and input!=0 then
-            if on_ice then
-                self:smoke(spr_ice_smoke,-input)
-            else
-                -- smoke when changing directions
-                self:smoke(spr_ground_smoke,-input)
-            end
-        end
+  if input!=self.prev_input and input!=0 then
+   if on_ice then
+    self:smoke(spr_ice_smoke,-input)
+   else
+    -- smoke when changing directions
+    self:smoke(spr_ground_smoke,-input)
+   end
+  end
 
-        -- add ice smoke when sliding on ice (after releasing input)
-        if input==0 and abs(self.spd.x)>0.3 and on_ice
-           and (maybe(0.15) or self.prev_input!=0) then
-            self:smoke(spr_slide_smoke,-input)
-        end
-    end
-    self.prev_input=input
+  -- add ice smoke when sliding on ice (after releasing input)
+  if input==0 and abs(self.spd.x)>0.3 and on_ice
+     and (maybe(0.15) or self.prev_input!=0) then
+   self:smoke(spr_slide_smoke,-input)
+  end
+ end
+ self.prev_input=input
 
-    -- x movement
-    if abs(self.spd.x)>maxrun then
-        self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
-    elseif input != 0 then
-        self.spd.x=appr(self.spd.x,input*maxrun,accel)
-    else
-        self.spd.x=appr(self.spd.x,0,decel)
-    end
-    if (self.spd.x!=0) self.flip.x=self.spd.x<0
+ -- x movement
+ if abs(self.spd.x)>maxrun then
+  self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
+ elseif input != 0 then
+  self.spd.x=appr(self.spd.x,input*maxrun,accel)
+ else
+  self.spd.x=appr(self.spd.x,0,decel)
+ end
+ if (self.spd.x!=0) self.flip.x=self.spd.x<0
 
-    -- y movement
-    local maxfall=2
-    local gravity=0.12
+ -- y movement
+ local maxfall=2
+ local gravity=0.12
 
-    -- slow down at apex
-    if abs(self.spd.y)<=0.15 then
-        gravity*=0.5
-    elseif self.spd.y>0 then
-        -- fall down fas2er
-        gravity*=2
-    end
+ -- slow down at apex
+ if abs(self.spd.y)<=0.15 then
+  gravity*=0.5
+ elseif self.spd.y>0 then
+  -- fall down fas2er
+  gravity*=2
+ end
 
-    -- wall slide
-    local is_wall_sliding=false
-    if input!=0 and self:is_solid_at(v2(input,0))
-          and not on_ground and self.spd.y>0 then
-        is_wall_sliding=true
-        maxfall=0.4
-        if (ice_at(self:bbox(v2(input,0)))) maxfall=1.0
-        local smoke_dir = self.flip.x and .3 or -.3
-        if (maybe(.1)) self:smoke(spr_wall_smoke,smoke_dir)
-    end
+ -- wall slide
+ local is_wall_sliding=false
+ if input!=0 and self:is_solid_at(v2(input,0))
+    and not on_ground and self.spd.y>0 then
+  is_wall_sliding=true
+  maxfall=0.4
+  if (ice_at(self:bbox(v2(input,0)))) maxfall=1.0
+  local smoke_dir = self.flip.x and .3 or -.3
+  if (maybe(.1)) self:smoke(spr_wall_smoke,smoke_dir)
+ end
 
-    -- jump
-    if self.jump_button.is_down then
-        if self.jump_button:is_held()
-             or (on_ground_recently and self.jump_button:was_recently_pressed()) then
-            if self.jump_button:was_recently_pressed() then
-                self:smoke(spr_ground_smoke,0)
-            end
-            self.on_ground_interval=0
-            self.spd.y=-1.0
-            self.jump_button.hold_time+=1
-        elseif self.jump_button:was_just_pressed() then
-            -- check for wall jump
-            local wall_dir=self:is_solid_at(v2(-3,0)) and -1
-                          or self:is_solid_at(v2(3,0)) and 1
-                          or 0
-            if wall_dir!=0 then
-                self.jump_interval=0
-                self.spd.y=-1
-                self.spd.x=-wall_dir*(maxrun+1)
-                self:smoke(spr_wall_smoke,-wall_dir*.3)
-                self.jump_button.hold_time+=1
-            end
-        end
-    end
+ -- jump
+ if self.jump_button.is_down then
+  if self.jump_button:is_held()
+    or (on_ground_recently and self.jump_button:was_recently_pressed()) then
+   if self.jump_button:was_recently_pressed() then
+    self:smoke(spr_ground_smoke,0)
+   end
+   self.on_ground_interval=0
+   self.spd.y=-1.0
+   self.jump_button.hold_time+=1
+  elseif self.jump_button:was_just_pressed() then
+   -- check for wall jump
+   local wall_dir=self:is_solid_at(v2(-3,0)) and -1
+        or self:is_solid_at(v2(3,0)) and 1
+        or 0
+   if wall_dir!=0 then
+    self.jump_interval=0
+    self.spd.y=-1
+    self.spd.x=-wall_dir*(maxrun+1)
+    self:smoke(spr_wall_smoke,-wall_dir*.3)
+    self.jump_button.hold_time+=1
+   end
+  end
+ end
 
-    if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
+ if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
-    self:move(self.spd)
+ self:move(self.spd)
 
-    -- animation
-    if input==0 then
-        self.spr=1
-    elseif is_wall_sliding then
-        self.spr=4
-    elseif not on_ground then
-        self.spr=3
-    else
-        self.spr=1+flr(frame/4)%3
-    end
+ -- animation
+ if input==0 then
+  self.spr=1
+ elseif is_wall_sliding then
+  self.spr=4
+ elseif not on_ground then
+  self.spr=3
+ else
+  self.spr=1+flr(frame/4)%3
+ end
 end
 
 function cls_player:draw()
-    spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 
-    --[[
-    local bbox=self:bbox()
-    local bbox_col=8
-    if self:is_solid_at(v2(0,0)) then
-        bbox_col=9
-    end
-    bbox:draw(bbox_col)
-    bbox=self.atk_hitbox:to_bbox_at(self.pos)
-    bbox:draw(12)
-    print(self.spd:str(),64,64)
-    ]]
+ --[[
+ local bbox=self:bbox()
+ local bbox_col=8
+ if self:is_solid_at(v2(0,0)) then
+  bbox_col=9
+ end
+ bbox:draw(bbox_col)
+ bbox=self.atk_hitbox:to_bbox_at(self.pos)
+ bbox:draw(12)
+ print(self.spd:str(),64,64)
+ ]]
 end
 
 
@@ -570,79 +574,79 @@ spr_spring_sprung=66
 spr_spring_wound=67
 
 cls_spring=subclass(typ_spring,cls_actor,function(self,pos)
-    cls_actor._ctr(self,pos)
-    self.hitbox=hitbox(v2(0,5),v2(8,3))
-    self.sprung_time=0
+ cls_actor._ctr(self,pos)
+ self.hitbox=hitbox(v2(0,5),v2(8,3))
+ self.sprung_time=0
 end)
 tiles[spr_spring_sprung]=cls_spring
 
 function cls_spring:update()
-    -- collide with players
-    local bbox=self:bbox()
-    if self.sprung_time>0 then
-        self.sprung_time-=1
-    else
-        for player in all(players) do
-            if bbox:collide(player:bbox()) then
-                player.spd.y=-3
-                self.sprung_time=10
-                local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
-            end
-        end
-    end
+ -- collide with players
+ local bbox=self:bbox()
+ if self.sprung_time>0 then
+  self.sprung_time-=1
+ else
+  for player in all(players) do
+   if bbox:collide(player:bbox()) then
+    player.spd.y=-3
+    self.sprung_time=10
+    local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
+   end
+  end
+ end
 end
 
 function cls_spring:draw()
-    -- self:bbox():draw(9)
-    local spr_=spr_spring_wound
-    if (self.sprung_time>0) spr_=spr_spring_sprung
-    spr(spr_,self.pos.x,self.pos.y)
+ -- self:bbox():draw(9)
+ local spr_=spr_spring_wound
+ if (self.sprung_time>0) spr_=spr_spring_sprung
+ spr(spr_,self.pos.x,self.pos.y)
 end
 spr_spawn_point=1
 
 cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos)
-    cls_actor._ctr(self,pos)
-    self.is_solid=false
-    self.target=self.pos
-    self.pos=v2(self.target.x,128)
-    self.spd.y=-2
-    add(room.spawn_points,self)
+ cls_actor._ctr(self,pos)
+ self.is_solid=false
+ self.target=self.pos
+ self.pos=v2(self.target.x,128)
+ self.spd.y=-2
+ add(room.spawn_points,self)
 end)
 
 function cls_spawn:update()
-    self:move(self.spd)
-    if self.pos.y<self.target.y then
-        self.spd.y=0
-        self.pos=self.target
-        del(actors,self)
-        cls_player.init(self.target)
-        cls_smoke.init(self.pos,spr_full_smoke,0)
-    end
+ self:move(self.spd)
+ if self.pos.y<self.target.y then
+  self.spd.y=0
+  self.pos=self.target
+  del(actors,self)
+  cls_player.init(self.target)
+  cls_smoke.init(self.pos,spr_full_smoke,0)
+ end
 end
 
 function cls_spawn:draw()
-    spr(spr_spawn_point,self.pos.x,self.pos.y)
+ spr(spr_spawn_point,self.pos.x,self.pos.y)
 end
 spr_spikes=68
 
 cls_spikes=subclass(typ_spikes,cls_actor,function(self,pos)
-    cls_actor._ctr(self,pos)
-    self.hitbox=hitbox(v2(0,3),v2(8,5))
+ cls_actor._ctr(self,pos)
+ self.hitbox=hitbox(v2(0,3),v2(8,5))
 end)
 tiles[spr_spikes]=cls_spikes
 
 function cls_spikes:update()
-    local bbox=self:bbox()
-    for player in all(players) do
-        if bbox:collide(player:bbox()) then
-            player:kill()
-            cls_smoke.init(self.pos,32,0)
-        end
-    end
+ local bbox=self:bbox()
+ for player in all(players) do
+  if bbox:collide(player:bbox()) then
+   player:kill()
+   cls_smoke.init(self.pos,32,0)
+  end
+ end
 end
 
 function cls_spikes:draw()
-    spr(spr_spikes,self.pos.x,self.pos.y)
+ spr(spr_spikes,self.pos.x,self.pos.y)
 end
 
 -- fade bubbles
@@ -660,14 +664,17 @@ end
 -- x player spawn points
 -- x spikes
 -- x respawn player after death
--- slippage when changing directions
+-- add ease in for spawn point
+-- add coroutine for spawn point
+-- x slippage when changing directions
+-- flip smoke correctly when wall sliding
+-- moving platforms
+-- laser beam
 -- add water
 -- add butterflies
 -- add flies
 -- add gore when dying
 -- make spikes bloodier
--- add ease in for spawn point
--- add coroutine for spawn point
 -- vanishing platforms
 -- lookup / lookdown sprites
 -- go through right and come back left (?)
@@ -682,28 +689,28 @@ end
 -- fades
 
 function _init()
-    room=cls_room.init(v2(0,0))
-    room:spawn_player()
+ room=cls_room.init(v2(0,0))
+ room:spawn_player()
 end
 
 function _draw()
-    frame+=1
+ frame+=1
 
-    cls()
-    room:draw()
-    draw_actors()
-    foreach(players,function(player)
-        player:draw()
-    end)
+ cls()
+ room:draw()
+ draw_actors()
+ foreach(players,function(player)
+  player:draw()
+ end)
 end
 
 function _update60()
-    dt=time()-lasttime
-    lasttime=time()
-    foreach(players,function(player)
-        player:update()
-    end)
-    update_actors()
+ dt=time()-lasttime
+ lasttime=time()
+ foreach(players,function(player)
+  player:update()
+ end)
+ update_actors()
 end
 
 

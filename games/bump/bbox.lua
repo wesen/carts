@@ -15,9 +15,9 @@ end
 
 function bboxvt:is_inside(v)
  return v.x>=self.aa.x
-    and v.x<=self.bb.x
-    and v.y>=self.aa.y
-    and v.y<=self.bb.y
+ and v.x<=self.bb.x
+ and v.y>=self.aa.y
+ and v.y<=self.bb.y
 end
 
 function bboxvt:str()
@@ -25,7 +25,7 @@ function bboxvt:str()
 end
 
 function bboxvt:draw(col)
-    rect(self.aa.x,self.aa.y,self.bb.x-1,self.bb.y-1,col)
+ rect(self.aa.x,self.aa.y,self.bb.x-1,self.bb.y-1,col)
 end
 
 function bboxvt:collide(other)
