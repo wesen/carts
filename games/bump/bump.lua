@@ -16,6 +16,7 @@
 --#include smoke
 --#include player
 --#include spring
+--#include spawn
 
 -- fade bubbles
 -- x gravity
@@ -29,6 +30,9 @@
 -- x add ice
 -- x springs
 -- player spawn points
+-- add ease in for spawn point
+-- add coroutine for spawn point
+-- wall sliding on ice
 -- vanishing platforms
 -- lookup / lookdown sprites
 -- go through right and come back left (?)
@@ -37,7 +41,5 @@
 -- parallax b ackground
 -- spikes
 -- add trailing smoke particles when springing up
-
-player=cls_player.init(v2(5,13)*8)
 
 --#include main

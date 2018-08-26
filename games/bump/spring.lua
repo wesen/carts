@@ -1,11 +1,12 @@
 spr_spring_sprung=66
 spr_spring_wound=67
+
 cls_spring=subclass(typ_spring,cls_actor,function(self,pos)
     cls_actor._ctr(self,pos)
     self.hitbox=hitbox(v2(0,5),v2(8,3))
     self.sprung_time=0
 end)
-tiles[tile_spring]=cls_spring
+tiles[spr_spring_sprung]=cls_spring
 
 function cls_spring:update()
     -- collide with players
