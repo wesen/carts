@@ -29,6 +29,33 @@ cls_room=class(typ_room,function(self,pos)
  end
 end)
 
+function cls_room:get_gore(tile,dir)
+ local v=gore_idx(tile,dir)
+ local g=self.gore[v]
+ if (g==nil) g=0
+ return g
+end
+
+function cls_room:get_friction(tile,dir)
+ local accel=0.3
+ local decel=0.2
+
+ local g=self:get_gore(tile,dir)
+ if g>10 then
+  accel=0.08
+  decel=0.02
+ elseif g>5 then
+  accel=0.15
+  decel=0.07
+ else
+  accel=0.2
+  decel=0.15
+ end
+ if (fget(self:tile_at(tile),flg_ice)) accel,decel=min(accel,0.1),min(decel,0.03)
+
+ return accel,decel
+end
+
 function cls_room:draw()
  map(self.pos.x*16,self.pos.y*16,0,0,16,16,flg_solid+1)
  for i=0,15 do
@@ -37,7 +64,7 @@ function cls_room:draw()
     local v=gore_idx(v2(i,j),dir)
     local g=self.gore[v]
     if g!=nil then
-     self.gore[v]-=0.05
+     self.gore[v]=min(15,self.gore[v]-0.02)
      if g>10 then
       rspr(83,i*8,j*8,dir)
      elseif g>5 then

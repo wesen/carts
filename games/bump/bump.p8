@@ -97,6 +97,26 @@ end
 function v2mt:clone()
  return v2(self.x,self.y)
 end
+
+dir_down=0
+dir_right=1
+dir_up=2
+dir_left=3
+
+vec_down=v2(0,1)
+vec_up=v2(0,-1)
+vec_right=v2(1,0)
+vec_left=v2(-1,0)
+
+function dir2vec(dir)
+ local dirs={v2(0,1),v2(1,0),v2(0,-1),v2(-1,0)}
+ return dirs[(dir+4)%4]
+end
+
+function angle2vec(angle)
+ return v2(cos(angle),sin(angle))
+end
+
 local bboxvt={}
 bboxvt.__index=bboxvt
 
@@ -207,10 +227,6 @@ function pow(x,a)
   return ret
 end
 
-function angle2vec(angle)
- return v2(cos(angle),sin(angle))
-end
-
 function rspr(s,x,y,angle)
  angle=(angle+4)%4
  local x_=(s%16)*8
@@ -238,6 +254,7 @@ function rspr(s,x,y,angle)
   end
  end
 end
+
 -- tween routines from https://github.com/JoebRogers/PICO-Tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
@@ -466,6 +483,33 @@ cls_room=class(typ_room,function(self,pos)
  end
 end)
 
+function cls_room:get_gore(tile,dir)
+ local v=gore_idx(tile,dir)
+ local g=self.gore[v]
+ if (g==nil) g=0
+ return g
+end
+
+function cls_room:get_friction(tile,dir)
+ local accel=0.3
+ local decel=0.2
+
+ local g=self:get_gore(tile,dir)
+ if g>10 then
+  accel=0.08
+  decel=0.02
+ elseif g>5 then
+  accel=0.15
+  decel=0.07
+ else
+  accel=0.2
+  decel=0.15
+ end
+ if (fget(self:tile_at(tile),flg_ice)) accel,decel=min(accel,0.1),min(decel,0.03)
+
+ return accel,decel
+end
+
 function cls_room:draw()
  map(self.pos.x*16,self.pos.y*16,0,0,16,16,flg_solid+1)
  for i=0,15 do
@@ -474,7 +518,7 @@ function cls_room:draw()
     local v=gore_idx(v2(i,j),dir)
     local g=self.gore[v]
     if g!=nil then
-     self.gore[v]-=0.05
+     self.gore[v]=min(15,self.gore[v]-0.02)
      if g>10 then
       rspr(83,i*8,j*8,dir)
      elseif g>5 then
@@ -542,6 +586,7 @@ cls_smoke=subclass(typ_smoke,cls_actor,function(self,pos,start_spr,dir)
  self.start_spr=start_spr
  self.is_solid=false
  self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
+ self.is_gore=false
 end)
 
 function cls_smoke:update()
@@ -551,7 +596,13 @@ function cls_smoke:update()
 end
 
 function cls_smoke:draw()
+ if self.is_gore then
+  pal(12,8)
+  pal(7,14)
+  pal(6,2)
+ end
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ if (self.is_gore) pal()
 end
 cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
@@ -603,8 +654,8 @@ end)
 function cls_gore:update()
  cls_particle.update(self)
 
+ -- i tried generalizing this but it's just easier to write it out
  local dir=sign(self.spd.x)
-
  local ground_bbox=self:bbox(v2(0,1))
  local ceil_bbox=self:bbox(v2(0,-1))
  local side_bbox=self:bbox(v2(dir,0))
@@ -669,22 +720,25 @@ function cls_player:update()
  local accel=0.3
  local decel=0.2
 
- local on_ground=solid_at(self:bbox(v2(0,1)))
- local on_ice=ice_at(self:bbox(v2(0,1)))
+ local ground_bbox=self:bbox(vec_down)
+ local on_ground,tile=solid_at(ground_bbox)
+ local on_ice=ice_at(ground_bbox)
+
  if on_ground then
   self.on_ground_interval=ground_grace_interval
  elseif self.on_ground_interval>0 then
   self.on_ground_interval-=1
  end
  local on_ground_recently=self.on_ground_interval>0
+ local on_gore=false
 
  if not on_ground then
   accel=0.2
   decel=0.1
  else
-  if on_ice then
-   accel=0.1
-   decel=0.03
+  if tile!=nil then
+   accel,decel=room:get_friction(tile,dir_down)
+   on_gore=room:get_gore(tile,dir_down)>0
   end
 
   if input!=self.prev_input and input!=0 then
@@ -697,9 +751,14 @@ function cls_player:update()
   end
 
   -- add ice smoke when sliding on ice (after releasing input)
-  if input==0 and abs(self.spd.x)>0.3 and on_ice
+  if input==0 and abs(self.spd.x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
-   self:smoke(spr_slide_smoke,-input)
+   if on_gore then
+    local s=self:smoke(spr_slide_smoke,-input)
+    s.is_gore=true
+   elseif on_ice then
+    self:smoke(spr_slide_smoke,-input)
+   end
   end
  end
  self.prev_input=input
@@ -884,7 +943,7 @@ end)
 -- x gravity
 -- x downward collision
 -- x wall slide
--- x add wall slide smoke
+-- x add wall slide smoko
 -- x fall down faster
 -- x wall jump
 -- x variable jump time
@@ -901,9 +960,11 @@ end)
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
 -- x add gore particles and gored up tiles
--- add gore on vertical surfaces
+-- x add gore on vertical surfaces
+-- x make gore slippery
+-- make wider levels
+-- implement camera
 -- add gore when dying
--- make gore slippery
 -- enemies
 -- moving platforms
 -- laser beam
@@ -925,7 +986,7 @@ end)
 -- fades
 
 function _init()
- room=cls_room.init(v2(0,0))
+ room=cls_room.init(v2(1,0))
  room:spawn_player()
 end
 

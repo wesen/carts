@@ -38,22 +38,25 @@ function cls_player:update()
  local accel=0.3
  local decel=0.2
 
- local on_ground=solid_at(self:bbox(v2(0,1)))
- local on_ice=ice_at(self:bbox(v2(0,1)))
+ local ground_bbox=self:bbox(vec_down)
+ local on_ground,tile=solid_at(ground_bbox)
+ local on_ice=ice_at(ground_bbox)
+
  if on_ground then
   self.on_ground_interval=ground_grace_interval
  elseif self.on_ground_interval>0 then
   self.on_ground_interval-=1
  end
  local on_ground_recently=self.on_ground_interval>0
+ local on_gore=false
 
  if not on_ground then
   accel=0.2
   decel=0.1
  else
-  if on_ice then
-   accel=0.1
-   decel=0.03
+  if tile!=nil then
+   accel,decel=room:get_friction(tile,dir_down)
+   on_gore=room:get_gore(tile,dir_down)>0
   end
 
   if input!=self.prev_input and input!=0 then
@@ -66,9 +69,14 @@ function cls_player:update()
   end
 
   -- add ice smoke when sliding on ice (after releasing input)
-  if input==0 and abs(self.spd.x)>0.3 and on_ice
+  if input==0 and abs(self.spd.x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
-   self:smoke(spr_slide_smoke,-input)
+   if on_gore then
+    local s=self:smoke(spr_slide_smoke,-input)
+    s.is_gore=true
+   elseif on_ice then
+    self:smoke(spr_slide_smoke,-input)
+   end
   end
  end
  self.prev_input=input

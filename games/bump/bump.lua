@@ -27,7 +27,7 @@
 -- x gravity
 -- x downward collision
 -- x wall slide
--- x add wall slide smoke
+-- x add wall slide smoko
 -- x fall down faster
 -- x wall jump
 -- x variable jump time
@@ -44,9 +44,11 @@
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
 -- x add gore particles and gored up tiles
--- add gore on vertical surfaces
+-- x add gore on vertical surfaces
+-- x make gore slippery
+-- make wider levels
+-- implement camera
 -- add gore when dying
--- make gore slippery
 -- enemies
 -- moving platforms
 -- laser beam

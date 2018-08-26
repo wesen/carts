@@ -48,8 +48,8 @@ end)
 function cls_gore:update()
  cls_particle.update(self)
 
+ -- i tried generalizing this but it's just easier to write it out
  local dir=sign(self.spd.x)
-
  local ground_bbox=self:bbox(v2(0,1))
  local ceil_bbox=self:bbox(v2(0,-1))
  local side_bbox=self:bbox(v2(dir,0))

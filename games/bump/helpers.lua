@@ -46,10 +46,6 @@ function pow(x,a)
   return ret
 end
 
-function angle2vec(angle)
- return v2(cos(angle),sin(angle))
-end
-
 function rspr(s,x,y,angle)
  angle=(angle+4)%4
  local x_=(s%16)*8

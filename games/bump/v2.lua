@@ -36,3 +36,22 @@ end
 function v2mt:clone()
  return v2(self.x,self.y)
 end
+
+dir_down=0
+dir_right=1
+dir_up=2
+dir_left=3
+
+vec_down=v2(0,1)
+vec_up=v2(0,-1)
+vec_right=v2(1,0)
+vec_left=v2(-1,0)
+
+function dir2vec(dir)
+ local dirs={v2(0,1),v2(1,0),v2(0,-1),v2(-1,0)}
+ return dirs[(dir+4)%4]
+end
+
+function angle2vec(angle)
+ return v2(cos(angle),sin(angle))
+end
