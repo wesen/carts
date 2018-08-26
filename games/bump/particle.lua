@@ -48,15 +48,19 @@ end)
 function cls_gore:update()
  cls_particle.update(self)
 
+ local dir=sign(self.spd.x)
+
  local ground_bbox=self:bbox(v2(0,1))
- local on_ground=solid_at(ground_bbox)
- if on_ground then
-  local tile=get_tile_location_with_flag(ground_bbox,flg_solid)
-  if tile!=nil then
-   room.gore[v_idx(tile)]+=1
-   -- add tile gore
-  end
+ local side_bbox=self:bbox(v2(dir,0))
+ local on_ground,ground_tile=solid_at(ground_bbox)
+ local hit_side,side_tile=solid_at(side_bbox)
+ if on_ground and ground_tile!=nil then
+  room.gore[v_idx(ground_tile)]+=1
   self.spd.y*=-0.9
+ end
+ if hit_side and side_tile!=nil then
+  room.gore[v_idx(side_tile)]+=1
+  self.spd.x*=-0.9
  end
 end
 

@@ -55,11 +55,14 @@ function cls_room:tile_at(pos)
 end
 
 function solid_at(bbox)
- return bbox.aa.x<0
+ if bbox.aa.x<0
   or bbox.bb.x>128
   or bbox.aa.y<0
-  or bbox.bb.y>128
-  or tile_flag_at(bbox,flg_solid)
+  or bbox.bb.y>128 then
+   return true,nil
+ else
+  return tile_flag_at(bbox,flg_solid)
+ end
 end
 
 function ice_at(bbox)
@@ -75,21 +78,9 @@ function tile_flag_at(bbox,flag)
  for i=bb.aa.x,bb.bb.x do
   for j=bb.aa.y,bb.bb.y do
    if fget(tile_at(i,j),flag) then
-    return true
+    return true,v2(i,j)
    end
   end
  end
  return false
-end
-
-function get_tile_location_with_flag(bbox,flag)
- local bb=bbox:to_tile_bbox()
- for i=bb.aa.x,bb.bb.x do
-  for j=bb.aa.y,bb.bb.y do
-   if fget(tile_at(i,j),flag) then
-    return v2(i,j)
-   end
-  end
- end
- return nil
 end
