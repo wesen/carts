@@ -51,15 +51,20 @@ function cls_gore:update()
  local dir=sign(self.spd.x)
 
  local ground_bbox=self:bbox(v2(0,1))
+ local ceil_bbox=self:bbox(v2(0,-1))
  local side_bbox=self:bbox(v2(dir,0))
  local on_ground,ground_tile=solid_at(ground_bbox)
+ local on_ceil,ceil_tile=solid_at(ceil_bbox)
  local hit_side,side_tile=solid_at(side_bbox)
+ local gore_weight=1-self.t/self.lifetime
  if on_ground and ground_tile!=nil then
-  room.gore[v_idx(ground_tile)]+=1
+  room.gore[gore_idx(ground_tile,0)]+=gore_weight
   self.spd.y*=-0.9
- end
- if hit_side and side_tile!=nil then
-  room.gore[v_idx(side_tile)]+=1
+ elseif on_ceil and ceil_tile!=nil then
+  room.gore[gore_idx(ceil_tile,2)]+=.3*gore_weight
+  self.spd.y*=-0.9
+ elseif hit_side and side_tile!=nil then
+  room.gore[gore_idx(side_tile,-dir)]+=gore_weight
   self.spd.x*=-0.9
  end
 end

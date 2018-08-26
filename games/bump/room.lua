@@ -2,6 +2,10 @@ function v_idx(pos)
  return pos.x+pos.y*16
 end
 
+function gore_idx(pos,dir)
+ return (pos.x+pos.y*16)*4+dir
+end
+
 cls_room=class(typ_room,function(self,pos)
  self.pos=pos
  self.spawn_locations={}
@@ -12,7 +16,9 @@ cls_room=class(typ_room,function(self,pos)
    local p=v2(i,j)
    local tile=self:tile_at(p)
    if fget(tile,flg_solid) then
-    self.gore[v_idx(p)]=0
+    for dir=-1,2 do
+     self.gore[gore_idx(p,dir)]=0
+    end
    end
    if tile==spr_spawn_point then
     add(self.spawn_locations,p*8)
@@ -27,18 +33,20 @@ function cls_room:draw()
  map(self.pos.x*16,self.pos.y*16,0,0,16,16,flg_solid+1)
  for i=0,15 do
   for j=0,15 do
-   local v=v_idx(v2(i,j))
-   local g=self.gore[v]
-   if g!=nil then
-    self.gore[v]-=0.05
-    if g>10 then
-     spr(83,i*8,j*8)
-    elseif g>5 then
-     spr(82,i*8,j*8)
-    elseif g>0 then
-     spr(81,i*8,j*8)
-    else
-     self.gore[v]=0
+   for dir=-1,2 do
+    local v=gore_idx(v2(i,j),dir)
+    local g=self.gore[v]
+    if g!=nil then
+     self.gore[v]-=0.05
+     if g>10 then
+      rspr(83,i*8,j*8,dir)
+     elseif g>5 then
+      rspr(82,i*8,j*8,dir)
+     elseif g>0 then
+      rspr(81,i*8,j*8,dir)
+     else
+      self.gore[v]=0
+     end
     end
    end
   end

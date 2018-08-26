@@ -73,7 +73,7 @@ function rspr(s,x,y,angle)
  for i=0,7 do
   for j=0,7 do
    local p=sget(x_+i,y_+j)
-   f(i,j,p)
+   if (p!=0) f(i,j,p)
   end
  end
 end
