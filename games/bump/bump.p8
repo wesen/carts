@@ -888,7 +888,7 @@ end)
 -- fades
 
 function _init()
- room=cls_room.init(v2(1,0))
+ room=cls_room.init(v2(0,0))
  room:spawn_player()
 end
 
