@@ -6,10 +6,6 @@ IDEAS:
 - shine a flashlight to disperse bugs / critters
 ]]
 
-function _init()
- poke(0x5f2d,1)
-end
-
 local fadetable={
  {0,0,0,0,0},
  {1,1,0,0,0},
@@ -29,30 +25,39 @@ local fadetable={
  {15,13,5,5,1}
 }
 
-fadelevel=0
+fadelevel=1
 
 mode_naive=0
 mode_peekpoke=1
+mode_lookup=2
 
 current_mode=0
-
-function _update()
-
- if btnp(4) then
-  current_mode=(current_mode+1)%2
- end
- if btnp(5) then
-  fadelevel=(fadelevel+1)%7
- end
-end
+max_mode=3
 
 function naive_replace()
   for i=0,32 do
    for j=0,32 do
     local p=pget(i,j)
-    pset(i,j,fadetable[p][fadelevel])
+    pset(i,j,fadetable[p+1][fadelevel])
    end
   end
+end
+
+lookup_tables={}
+
+function compute_lookup_tables()
+ for level=1,5 do
+  local table={}
+  for p1=0,15 do
+   for p2=0,15 do
+    local f1=fadetable[p1+1][level]
+    local f2=fadetable[p2+1][level]
+    table[p1+p2*16]=f1+f2*16
+   end
+  end
+  lookup_tables[level]=table
+ end
+ lookup_tables[1][0]=23
 end
 
 function poke_replace()
@@ -62,11 +67,34 @@ function poke_replace()
    local v=peek(a)
    local p1=band(v,0xf)
    local p2=flr(shr(v,4))
-   p1=fadetable[p1][fadelevel]
-   p2=fadetable[p2][fadelevel]
+   p1=fadetable[p1+1][fadelevel]
+   p2=fadetable[p2+1][fadelevel]
    v=bor(p1,shl(p2,4))
    poke(a,v)
   end
+ end
+end
+
+function lookup_replace()
+ for i=0,32,2 do
+  for j=0,32 do
+   local a=0x6000+j*0x40+i/2
+   poke(a,lookup_tables[fadelevel][peek(a)])
+  end
+ end
+end
+
+function _init()
+ poke(0x5f2d,1)
+ compute_lookup_tables()
+end
+
+function _update()
+ if btnp(4) then
+  current_mode=(current_mode+1)%max_mode
+ end
+ if btnp(5) then
+  fadelevel=(fadelevel+1)%6
  end
 end
 
@@ -80,6 +108,8 @@ function _draw()
    naive_replace()
   elseif current_mode==mode_peekpoke then
    poke_replace()
+  elseif current_mode==mode_lookup then
+   lookup_replace()
   end
  end
 
@@ -89,5 +119,7 @@ function _draw()
   print("naive",64,64,7)
  elseif current_mode==mode_peekpoke then
   print("peekpoke",64,64,7)
+ elseif current_mode==mode_lookup then
+  print("lookup",64,64,7)
  end
 end
