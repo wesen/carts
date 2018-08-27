@@ -12,6 +12,7 @@ cls_room=class(typ_room,function(self,pos,dim)
  self.spawn_locations={}
  self.gore={}
 
+ -- initialize tiles
  for i=0,self.dim.x do
   for j=0,self.dim.y do
    local p=v2(i,j)
@@ -59,6 +60,7 @@ end
 
 function cls_room:draw()
  map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
+
  -- draw gore
  for i=0,self.dim.x do
   for j=0,self.dim.y do
@@ -93,9 +95,9 @@ end
 
 function solid_at(bbox)
  if bbox.aa.x<0
-  or bbox.bb.x>128
+  or bbox.bb.x>room.dim.x*8
   or bbox.aa.y<0
-  or bbox.bb.y>128 then
+  or bbox.bb.y>room.dim.y*8 then
    return true,nil
  else
   return tile_flag_at(bbox,flg_solid)

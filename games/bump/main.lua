@@ -7,6 +7,11 @@ function _draw()
  frame+=1
 
  cls()
+ local player=players[1]
+ if player!=nil then
+  camera(flr(player.pos.x/128)*128,0)
+ end
+
  room:draw()
  draw_actors()
  foreach(players,function(player)
