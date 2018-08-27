@@ -42,7 +42,9 @@
 -- x slippage when changing directions
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
+
 -- add moth
+
 -- fix world collision / falling off world
 -- add light / light switch mechanic
 -- add moth following light
