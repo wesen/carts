@@ -12,6 +12,7 @@
 --#include coroutines
 
 --#include actors
+--#include moth
 --#include button
 --#include room
 --#include smoke
@@ -43,6 +44,8 @@
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
 
+-- x add moth sprites
+-- instantiate moth
 -- add moth
 
 -- fix world collision / falling off world
