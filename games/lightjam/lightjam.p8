@@ -34,7 +34,16 @@ local fadetable={
 
 fadelevel=0
 
+mode_naive=0
+mode_peekpoke=1
+
+current_mode=0
+
 function _update()
+
+ if btnp(4) then
+  current_mode=(current_mode+1)%2
+ end
  if btnp(5) then
   fadelevel=(fadelevel+1)%7
  end
@@ -70,8 +79,19 @@ function _draw()
  -- circ(stat(32),stat(33),10,9)
 
  if fadelevel>0 then
-  -- naive_replace()
-  poke_replace()
+  if current_mode==mode_naive then
+   naive_replace()
+  elseif current_mode==mode_peekpoke then
+   poke_replace()
+  end
+ end
+
+ rectfill(0,60,128,80,1)
+ print("cpu: "..tostr(stat(1)), 0, 64,7)
+ if current_mode==mode_naive then
+  print("naive",64,64,7)
+ elseif current_mode==mode_peekpoke then
+  print("peekpoke",64,64,7)
  end
 end
 
