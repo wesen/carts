@@ -13,7 +13,6 @@
 
 --#include actors
 --#include button
---#include bubbles
 --#include room
 --#include smoke
 --#include particle
@@ -43,29 +42,23 @@
 -- x slippage when changing directions
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
--- x add gore particles and gored up tiles
--- x add gore on vertical surfaces
--- x make gore slippery
+-- add moth
+-- fix world collision / falling off world
+-- add light / light switch mechanic
+-- add moth following light
+-- add simple intro levels
+
+-- add frogs
+
 -- make wider levels
 -- implement camera
--- add gore when dying
 -- enemies
 -- moving platforms
 -- laser beam
--- add water
--- add butterflies
--- add flies
--- make spikes bloodier
 -- vanishing platforms
--- lookup / lookdown sprites
--- go through right and come back left (?)
--- add tweaking menu
--- add second player
+
 -- parallax b ackground
--- add trailing smoke particles when springing up
--- add multiple players / spawn points
 -- add death mechanics
--- add score
 -- camera shake
 -- fades
 

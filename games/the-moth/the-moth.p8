@@ -11,7 +11,6 @@ typ_spikes=6
 typ_room=7
 typ_moving_platform=8
 typ_particle=9
-typ_gore=10
 
 flg_solid=0
 flg_ice=1
@@ -434,48 +433,20 @@ end
 function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
-cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
- cls_actor._ctr(self,pos)
- self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
- self.life=10
-end)
-
-function cls_bubble:draw()
- local size=4-self.life/3
- circ(self.pos.x,self.pos.y,size,1)
-end
-
-function cls_bubble:update()
- self.life*=0.9
- self:move(self.spd)
- if (self.life<0.1) then
-  del(actors,self)
- end
-end
 function v_idx(pos)
  return pos.x+pos.y*128
-end
-
-function gore_idx(pos,dir)
- return v_idx(pos)*4+dir
 end
 
 cls_room=class(typ_room,function(self,pos,dim)
  self.pos=pos
  self.dim=dim
  self.spawn_locations={}
- self.gore={}
 
  -- initialize tiles
  for i=0,self.dim.x do
   for j=0,self.dim.y do
    local p=v2(i,j)
    local tile=self:tile_at(p)
-   if fget(tile,flg_solid) then
-    for dir=-1,2 do
-     self.gore[gore_idx(p,dir)]=0
-    end
-   end
    if tile==spr_spawn_point then
     add(self.spawn_locations,p*8)
    end
@@ -485,28 +456,10 @@ cls_room=class(typ_room,function(self,pos,dim)
  end
 end)
 
-function cls_room:get_gore(tile,dir)
- local v=gore_idx(tile,dir)
- local g=self.gore[v]
- if (g==nil) g=0
- return g
-end
-
 function cls_room:get_friction(tile,dir)
  local accel=0.3
  local decel=0.2
 
- local g=self:get_gore(tile,dir)
- if g>10 then
-  accel=0.08
-  decel=0.02
- elseif g>5 then
-  accel=0.15
-  decel=0.07
- else
-  accel=0.2
-  decel=0.15
- end
  if (fget(self:tile_at(tile),flg_ice)) accel,decel=min(accel,0.1),min(decel,0.03)
 
  return accel,decel
@@ -514,28 +467,6 @@ end
 
 function cls_room:draw()
  map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
-
- -- draw gore
- for i=0,self.dim.x do
-  for j=0,self.dim.y do
-   for dir=-1,2 do
-    local v=gore_idx(v2(i,j),dir)
-    local g=self.gore[v]
-    if g!=nil then
-     self.gore[v]=min(15,self.gore[v]-0.02)
-     if g>10 then
-      rspr(83,i*8,j*8,dir)
-     elseif g>5 then
-      rspr(82,i*8,j*8,dir)
-     elseif g>0 then
-      rspr(81,i*8,j*8,dir)
-     else
-      self.gore[v]=0
-     end
-    end
-   end
-  end
- end
 end
 
 function cls_room:spawn_player()
@@ -590,7 +521,6 @@ cls_smoke=subclass(typ_smoke,cls_actor,function(self,pos,start_spr,dir)
  self.start_spr=start_spr
  self.is_solid=false
  self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
- self.is_gore=false
 end)
 
 function cls_smoke:update()
@@ -600,13 +530,7 @@ function cls_smoke:update()
 end
 
 function cls_smoke:draw()
- if self.is_gore then
-  pal(12,8)
-  pal(7,14)
-  pal(6,2)
- end
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
- if (self.is_gore) pal()
 end
 cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
@@ -646,44 +570,6 @@ function cls_particle:draw()
  spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end
 
-cls_gore=subclass(typ_gore,cls_particle,function(self,pos)
- cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
- self.hitbox=hitbox(v2(2,2),v2(3,3))
- self:random_angle(1)
- self.spd.x*=0.5+rnd(0.5)
- self.weight=0.5+rnd(1)
- self:random_flip()
-end)
-
-function cls_gore:update()
- cls_particle.update(self)
-
- -- i tried generalizing this but it's just easier to write it out
- local dir=sign(self.spd.x)
- local ground_bbox=self:bbox(v2(0,1))
- local ceil_bbox=self:bbox(v2(0,-1))
- local side_bbox=self:bbox(v2(dir,0))
- local on_ground,ground_tile=solid_at(ground_bbox)
- local on_ceil,ceil_tile=solid_at(ceil_bbox)
- local hit_side,side_tile=solid_at(side_bbox)
- local gore_weight=1-self.t/self.lifetime
- if on_ground and ground_tile!=nil then
-  room.gore[gore_idx(ground_tile,0)]+=gore_weight
-  self.spd.y*=-0.9
- elseif on_ceil and ceil_tile!=nil then
-  room.gore[gore_idx(ceil_tile,2)]+=.3*gore_weight
-  self.spd.y*=-0.9
- elseif hit_side and side_tile!=nil then
-  room.gore[gore_idx(side_tile,-dir)]+=gore_weight
-  self.spd.x*=-0.9
- end
-end
-
-function make_gore_explosion(pos)
- for i=0,10 do
-  cls_gore.init(pos)
- end
-end
 players={}
 
 cls_player=subclass(typ_player,cls_actor,function(self,pos)
@@ -734,7 +620,6 @@ function cls_player:update()
   self.on_ground_interval-=1
  end
  local on_ground_recently=self.on_ground_interval>0
- local on_gore=false
 
  if not on_ground then
   accel=0.2
@@ -742,7 +627,6 @@ function cls_player:update()
  else
   if tile!=nil then
    accel,decel=room:get_friction(tile,dir_down)
-   on_gore=room:get_gore(tile,dir_down)>0
   end
 
   if input!=self.prev_input and input!=0 then
@@ -757,10 +641,7 @@ function cls_player:update()
   -- add ice smoke when sliding on ice (after releasing input)
   if input==0 and abs(self.spd.x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
-   if on_gore then
-    local s=self:smoke(spr_slide_smoke,-input)
-    s.is_gore=true
-   elseif on_ice then
+   if on_ice then
     self:smoke(spr_slide_smoke,-input)
    end
   end
@@ -809,8 +690,6 @@ function cls_player:update()
     or (on_ground_recently and self.jump_button:was_recently_pressed()) then
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
-    -- XXX test gore
-    make_gore_explosion(self.pos)
    end
    self.on_ground_interval=0
    self.spd.y=-1.0
@@ -963,29 +842,23 @@ end)
 -- x slippage when changing directions
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
--- x add gore particles and gored up tiles
--- x add gore on vertical surfaces
--- x make gore slippery
+-- add moth
+-- fix world collision / falling off world
+-- add light / light switch mechanic
+-- add moth following light
+-- add simple intro levels
+
+-- add frogs
+
 -- make wider levels
 -- implement camera
--- add gore when dying
 -- enemies
 -- moving platforms
 -- laser beam
--- add water
--- add butterflies
--- add flies
--- make spikes bloodier
 -- vanishing platforms
--- lookup / lookdown sprites
--- go through right and come back left (?)
--- add tweaking menu
--- add second player
+
 -- parallax b ackground
--- add trailing smoke particles when springing up
--- add multiple players / spawn points
 -- add death mechanics
--- add score
 -- camera shake
 -- fades
 

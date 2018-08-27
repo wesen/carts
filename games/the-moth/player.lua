@@ -48,7 +48,6 @@ function cls_player:update()
   self.on_ground_interval-=1
  end
  local on_ground_recently=self.on_ground_interval>0
- local on_gore=false
 
  if not on_ground then
   accel=0.2
@@ -56,7 +55,6 @@ function cls_player:update()
  else
   if tile!=nil then
    accel,decel=room:get_friction(tile,dir_down)
-   on_gore=room:get_gore(tile,dir_down)>0
   end
 
   if input!=self.prev_input and input!=0 then
@@ -71,10 +69,7 @@ function cls_player:update()
   -- add ice smoke when sliding on ice (after releasing input)
   if input==0 and abs(self.spd.x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
-   if on_gore then
-    local s=self:smoke(spr_slide_smoke,-input)
-    s.is_gore=true
-   elseif on_ice then
+   if on_ice then
     self:smoke(spr_slide_smoke,-input)
    end
   end
@@ -123,8 +118,6 @@ function cls_player:update()
     or (on_ground_recently and self.jump_button:was_recently_pressed()) then
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
-    -- XXX test gore
-    make_gore_explosion(self.pos)
    end
    self.on_ground_interval=0
    self.spd.y=-1.0
