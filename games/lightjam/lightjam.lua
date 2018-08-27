@@ -37,17 +37,37 @@ function _update()
  end
 end
 
-function _draw()
- cls()
- map(0,0,0,0,16,16)
- -- circ(stat(32),stat(33),10,9)
-
- if fadelevel>0 then
+function naive_replace()
   for i=0,32 do
    for j=0,32 do
     local p=pget(i,j)
     pset(i,j,fadetable[p][fadelevel])
    end
   end
+end
+
+function poke_replace()
+ for i=0,32,2 do
+  for j=0,32 do
+   local a=0x6000+j*0x40+i/2
+   local v=peek(a)
+   local p1=band(v,0xf)
+   local p2=flr(shr(v,4))
+   p1=fadetable[p1][fadelevel]
+   p2=fadetable[p2][fadelevel]
+   v=bor(p1,shl(p2,4))
+   poke(a,v)
+  end
+ end
+end
+
+function _draw()
+ cls()
+ map(0,0,0,0,16,16)
+ -- circ(stat(32),stat(33),10,9)
+
+ if fadelevel>0 then
+  -- naive_replace()
+  poke_replace()
  end
 end
