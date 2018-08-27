@@ -33,9 +33,10 @@ fadelevel=1
 mode_naive=0
 mode_peekpoke=1
 mode_lookup=2
+mode_peeklookup=3
 
 current_mode=0
-max_mode=3
+max_mode=4
 
 function naive_replace()
   for i=0,32 do
@@ -63,6 +64,17 @@ function compute_lookup_tables()
  lookup_tables[1][0]=23
 end
 
+base_addr=0x4300
+
+function store_lookup_tables()
+ for level=1,5 do
+  local addr=base_addr+0x100*(level-1)
+  for i=0,255 do
+   poke(addr+i,lookup_tables[level][i])
+  end
+ end
+end
+
 function poke_replace()
  for i=0,32,2 do
   for j=0,32 do
@@ -87,9 +99,20 @@ function lookup_replace()
  end
 end
 
+function peeklookup_replace()
+ local addr=base_addr+0x100*(fadelevel-1)
+ for i=0,32,2 do
+  for j=0,32 do
+   local a=0x6000+j*0x40+i/2
+   poke(a,peek(bor(addr,peek(a))))
+  end
+ end
+end
+
 function _init()
  poke(0x5f2d,1)
  compute_lookup_tables()
+ store_lookup_tables()
 end
 
 function _update()
@@ -113,6 +136,8 @@ function _draw()
    poke_replace()
   elseif current_mode==mode_lookup then
    lookup_replace()
+  elseif current_mode==mode_peeklookup then
+   peeklookup_replace()
   end
  end
 
@@ -124,6 +149,8 @@ function _draw()
   print("peekpoke",64,64,7)
  elseif current_mode==mode_lookup then
   print("lookup",64,64,7)
+ elseif current_mode==mode_peeklookup then
+  print("peeklookup",64,64,7)
  end
 end
 
