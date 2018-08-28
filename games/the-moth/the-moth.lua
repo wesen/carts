@@ -6,6 +6,7 @@
 --#include v2
 --#include bbox
 --#include hitbox
+--#include camera
 
 --#include helpers
 --#include tween

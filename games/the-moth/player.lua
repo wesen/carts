@@ -5,6 +5,7 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos)
  -- players are handled separately
  del(actors,self)
  add(players,self)
+ main_camera:set_target(self)
 
  self.flip=v2(false,false)
  self.jump_button=cls_button.init(btn_jump)

@@ -1,3 +1,5 @@
+main_camera=cls_camera.init()
+
 function _init()
  room=cls_room.init(v2(16,0),v2(16,16))
  room:spawn_player()
@@ -7,10 +9,8 @@ function _draw()
  frame+=1
 
  cls()
- local player=players[1]
- if player!=nil then
-  camera(flr(player.pos.x/128)*128,0)
- end
+ local p=main_camera:compute_position()
+ camera(p.x,p.y)
 
  room:draw()
  draw_actors()
@@ -27,4 +27,5 @@ function _update60()
   player:update()
  end)
  update_actors()
+ main_camera:update()
 end

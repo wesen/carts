@@ -21,6 +21,10 @@ cls_room=class(typ_room,function(self,pos,dim)
  end
 end)
 
+function cls_room:bbox()
+ return bbox(v2(0,0),self.dim*8)
+end
+
 function cls_room:get_friction(tile,dir)
  local accel=0.3
  local decel=0.2

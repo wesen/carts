@@ -12,6 +12,7 @@ typ_room=7
 typ_moving_platform=8
 typ_particle=9
 typ_moth=10
+typ_camera=11
 
 flg_solid=0
 flg_ice=1
@@ -162,6 +163,10 @@ function bboxvt:collide(other)
    other.aa.y < self.bb.y
 end
 
+function bboxvt:clip(p)
+ return v2(mid(self.aa.x,p.x,self.bb.x),mid(self.aa.y,p.y,self.bb.y))
+end
+
 
 local hitboxvt={}
 hitboxvt.__index=hitboxvt
@@ -178,6 +183,37 @@ function hitboxvt:str()
  return self.offset:str().."-("..self.dim:str()..")"
 end
 
+cls_camera=class(typ_camera,function(self)
+ self.target=nil
+ self.pull=16
+ self.pos=v2(0,0)
+ -- this is where to add shake
+end)
+
+function cls_camera:set_target(target)
+ self.target=target
+ self.pos=target.pos:clone()
+end
+
+function cls_camera:compute_position()
+ return v2(self.pos.x-64,self.pos.y-64)
+end
+
+function cls_camera:pull_bbox()
+ local v=v2(self.pull,self.pull)
+ return bbox(self.pos-v,self.pos+v)
+end
+
+function cls_camera:update()
+ if (self.target==nil) return
+ local b=self:pull_bbox()
+ local p=self.target.pos
+ if (b.bb.x<p.x) self.pos.x+=min(p.x-b.bb.x,4)
+ if (b.aa.x>p.x) self.pos.x-=min(b.aa.x-p.x,4)
+ if (b.bb.y<p.y) self.pos.y+=min(p.y-b.bb.y,4)
+ if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,4)
+ self.pos=room:bbox():clip(self.pos)
+end
 
 -- functions
 function appr(val,target,amount)
@@ -406,7 +442,6 @@ spr_moth=5
 cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.flip=v2(false,false)
- printh("add moth")
 end)
 
 tiles[spr_moth]=cls_moth
@@ -473,6 +508,10 @@ cls_room=class(typ_room,function(self,pos,dim)
   end
  end
 end)
+
+function cls_room:bbox()
+ return bbox(v2(0,0),self.dim*8)
+end
 
 function cls_room:get_friction(tile,dir)
  local accel=0.3
@@ -595,6 +634,7 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos)
  -- players are handled separately
  del(actors,self)
  add(players,self)
+ main_camera:set_target(self)
 
  self.flip=v2(false,false)
  self.jump_button=cls_button.init(btn_jump)
@@ -884,6 +924,8 @@ end)
 -- camera shake
 -- fades
 
+main_camera=cls_camera.init()
+
 function _init()
  room=cls_room.init(v2(16,0),v2(16,16))
  room:spawn_player()
@@ -893,10 +935,8 @@ function _draw()
  frame+=1
 
  cls()
- local player=players[1]
- if player!=nil then
-  camera(flr(player.pos.x/128)*128,0)
- end
+ local p=main_camera:compute_position()
+ camera(p.x,p.y)
 
  room:draw()
  draw_actors()
@@ -913,6 +953,7 @@ function _update60()
   player:update()
  end)
  update_actors()
+ main_camera:update()
 end
 
 

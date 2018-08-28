@@ -9,6 +9,7 @@ typ_room=7
 typ_moving_platform=8
 typ_particle=9
 typ_moth=10
+typ_camera=11
 
 flg_solid=0
 flg_ice=1

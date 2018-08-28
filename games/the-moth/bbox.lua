@@ -43,3 +43,7 @@ function bboxvt:collide(other)
    other.aa.y < self.bb.y
 end
 
+function bboxvt:clip(p)
+ return v2(mid(self.aa.x,p.x,self.bb.x),mid(self.aa.y,p.y,self.bb.y))
+end
+
