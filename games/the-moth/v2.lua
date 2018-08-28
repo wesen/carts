@@ -29,6 +29,10 @@ function v2mt:magnitude()
  return sqrt(self.x^2+self.y^2)
 end
 
+function v2mt:normalize()
+ return self/self:magnitude()
+end
+
 function v2mt:str()
  return "["..tostr(self.x)..","..tostr(self.y).."]"
 end
