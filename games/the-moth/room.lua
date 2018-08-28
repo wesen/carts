@@ -2,6 +2,9 @@ cls_room=class(typ_room,function(self,pos,dim)
  self.pos=pos
  self.dim=dim
  self.spawn_locations={}
+ self.lamps={}
+
+ room=self
 
  -- initialize tiles
  for i=0,self.dim.x do

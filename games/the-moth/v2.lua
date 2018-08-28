@@ -21,6 +21,12 @@ function v2mt.__mul(a,b)
  return v2(a.x*b.x,a.y*b.y)
 end
 
+function v2mt.__div(a,b)
+ if (type(a)=="number") return v2(b.x/a,b.y/a)
+ if (type(b)=="number") return v2(a.x/b,a.y/b)
+ return v2(a.x/b.x,a.y/b.y)
+end
+
 function v2mt.__eq(a,b)
  return a.x==b.x and a.y==b.y
 end
@@ -35,6 +41,10 @@ end
 
 function v2mt:str()
  return "["..tostr(self.x)..","..tostr(self.y).."]"
+end
+
+function v2mt:flr()
+ return v2(flr(self.x),flr(self.y))
 end
 
 function v2mt:clone()

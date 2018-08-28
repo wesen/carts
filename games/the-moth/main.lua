@@ -1,7 +1,7 @@
 main_camera=cls_camera.init()
 
 function _init()
- room=cls_room.init(v2(16,0),v2(32,16))
+ cls_room.init(v2(16,0),v2(32,16))
  room:spawn_player()
 end
 

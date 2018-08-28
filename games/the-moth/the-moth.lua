@@ -51,13 +51,14 @@
 
 -- x add moth sprites
 -- x instantiate moth
+-- add light / light switch mechanic
+-- add moth following light
 -- move moth to nearest light
 -- add checkpoints
+-- show tutorial text above switch
 
 -- readd gore on death
 
--- add light / light switch mechanic
--- add moth following light
 -- add simple intro levels
 
 -- add frogs
