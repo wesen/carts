@@ -31,6 +31,14 @@ function v2mt.__eq(a,b)
  return a.x==b.x and a.y==b.y
 end
 
+function v2mt:min(v)
+ return v2(min(self.x,v.x),min(self.y,v.y))
+end
+
+function v2mt:max(v)
+ return v2(max(self.x,v.x),max(self.y,v.y))
+end
+
 function v2mt:magnitude()
  return sqrt(self.x^2+self.y^2)
 end

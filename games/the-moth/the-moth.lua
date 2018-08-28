@@ -4,6 +4,7 @@
 
 --#include oo
 --#include v2
+--#include ray
 --#include bbox
 --#include hitbox
 --#include camera

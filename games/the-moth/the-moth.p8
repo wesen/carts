@@ -96,6 +96,14 @@ function v2mt.__eq(a,b)
  return a.x==b.x and a.y==b.y
 end
 
+function v2mt:min(v)
+ return v2(min(self.x,v.x),min(self.y,v.y))
+end
+
+function v2mt:max(v)
+ return v2(max(self.x,v.x),max(self.y,v.y))
+end
+
 function v2mt:magnitude()
  return sqrt(self.x^2+self.y^2)
 end
@@ -139,6 +147,48 @@ function angle2vec(angle)
  return v2(cos(angle),sin(angle))
 end
 
+-- intersects a line with a bounding box and returns
+-- the intersection points
+-- line is a bbox representing a segment
+function isect(l,b)
+ local res={}
+
+ local d=l.bb-l.aa
+
+ local p=function(u)
+  return l.aa+d*u
+ end
+
+ local check_y=function(u)
+  if u<=1 and u>=0 then
+   local y1=l.aa.y+u*d.y
+   if y1>=b.aa.y and y1<=b.bb.y then
+    add(res,p(u))
+   end
+  end
+ end
+ local check_x=function(u)
+  if u<=1 and u>=0 then
+   local x1=l.aa.x+u*d.x
+   if x1>=b.aa.x and x1<=b.bb.x then
+    add(res,p(u))
+   end
+  end
+ end
+
+ local baa=b.aa-l.a
+ local bba=b.bb-l.a
+ if d.x!=0 then
+  check_y(baa.x/d.x)
+  check_u(bba.x/d.x)
+ end
+ if d.y!=0 then
+  check_x(baa.y/d.y)
+  check_x(bba.y/d.y)
+ end
+
+ return res
+end
 local bboxvt={}
 bboxvt.__index=bboxvt
 
@@ -533,7 +583,9 @@ end
 
 function cls_moth:draw()
  if self.target_dist>3 and frame%16<8 then
+  fillp(0b0011001111001100)
   line(self.pos.x+4,self.pos.y+4,self.target.x,self.target.y,5)
+  fillp()
  end
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end

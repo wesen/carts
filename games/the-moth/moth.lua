@@ -58,7 +58,9 @@ end
 
 function cls_moth:draw()
  if self.target_dist>3 and frame%16<8 then
+  fillp(0b0011001111001100)
   line(self.pos.x+4,self.pos.y+4,self.target.x,self.target.y,5)
+  fillp()
  end
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end
