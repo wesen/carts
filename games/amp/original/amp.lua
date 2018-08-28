@@ -470,6 +470,9 @@ function m_cam(target)
 			if(self.pos.x>self.pos_max.x)self.pos.x=self.pos_max.x
 			if(self.pos.y<self.pos_min.y)self.pos.y=self.pos_min.y
 			if(self.pos.y>self.pos_max.y)self.pos.y=self.pos_max.y
+			printh("camera pos "..tostr(self.pos.x)..","..tostr(self.pos.y))
+			printh("camera pos min "..tostr(self.pos_min.x)..","..tostr(self.pos_min.y))
+			printh("camera pos max "..tostr(self.pos_max.x)..","..tostr(self.pos_max.y))
 		end,
 
 		cam_pos=function(self)
