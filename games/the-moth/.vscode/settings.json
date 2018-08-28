@@ -1,0 +1,8 @@
+{
+ "files.exclude": {
+  "**/*.bak": true,
+  "**/bump.p8": true
+},
+    "editor.tabSize":1,
+    "editor.detectIndentation": false
+}

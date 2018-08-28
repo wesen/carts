@@ -1,2 +1,5 @@
 others
+config.txt
+log.txt
+sdl_controllers.txt
 *.bak
