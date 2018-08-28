@@ -44,12 +44,13 @@
 -- x slippage when changing directions
 -- x flip smoke correctly when wall sliding
 -- x particles with sprites
+-- x fix world collision / falling off world
+-- x add moving / pulling camera
 
 -- x add moth sprites
--- instantiate moth
--- add moth
+-- x instantiate moth
+-- move moth to nearest light
 
--- fix world collision / falling off world
 -- add light / light switch mechanic
 -- add moth following light
 -- add simple intro levels
