@@ -7,6 +7,7 @@
 --#include bbox
 --#include hitbox
 --#include camera
+--#include gfx
 
 --#include helpers
 --#include tween
@@ -23,6 +24,7 @@
 --#include spawn
 --#include spikes
 --#include moving_platform
+--#include lamp
 
 -- fade bubbles
 -- x gravity
@@ -50,6 +52,9 @@
 -- x add moth sprites
 -- x instantiate moth
 -- move moth to nearest light
+-- add checkpoints
+
+-- readd gore on death
 
 -- add light / light switch mechanic
 -- add moth following light

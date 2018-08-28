@@ -64,6 +64,10 @@ function cls_actor:is_solid_at(offset)
  return solid_at(self:bbox(offset))
 end
 
+function cls_actor:collides_with(other_actor)
+ return self:bbox():collide(other_actor:bbox())
+end
+
 function cls_actor:get_collisions(typ,offset)
  local res={}
 

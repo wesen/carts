@@ -1,7 +1,3 @@
-function v_idx(pos)
- return pos.x+pos.y*128
-end
-
 cls_room=class(typ_room,function(self,pos,dim)
  self.pos=pos
  self.dim=dim
@@ -16,7 +12,7 @@ cls_room=class(typ_room,function(self,pos,dim)
     add(self.spawn_locations,p*8)
    end
    local t=tiles[tile]
-   if (t!=nil) t.init(p*8)
+   if (t!=nil) t.init(p*8,tile)
   end
  end
 end)

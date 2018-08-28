@@ -8,7 +8,7 @@ tiles[spr_spikes]=cls_spikes
 
 function cls_spikes:update()
  local bbox=self:bbox()
- for player in all(players) do
+ if player!=nil then
   if bbox:collide(player:bbox()) then
    player:kill()
    cls_smoke.init(self.pos,32,0)

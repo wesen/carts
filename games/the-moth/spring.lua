@@ -7,14 +7,15 @@ cls_spring=subclass(typ_spring,cls_actor,function(self,pos)
  self.sprung_time=0
 end)
 tiles[spr_spring_sprung]=cls_spring
+tiles[spr_spring_wound]=cls_spring
 
 function cls_spring:update()
- -- collide with players
+ -- collide with player
  local bbox=self:bbox()
  if self.sprung_time>0 then
   self.sprung_time-=1
  else
-  for player in all(players) do
+  if player!=nil then
    if bbox:collide(player:bbox()) then
     player.spd.y=-3
     self.sprung_time=10
@@ -25,7 +26,6 @@ function cls_spring:update()
 end
 
 function cls_spring:draw()
- -- self:bbox():draw(9)
  local spr_=spr_spring_wound
  if (self.sprung_time>0) spr_=spr_spring_sprung
  spr(spr_,self.pos.x,self.pos.y)

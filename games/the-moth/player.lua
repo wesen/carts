@@ -1,10 +1,10 @@
-players={}
+player=nil
 
 cls_player=subclass(typ_player,cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
- -- players are handled separately
+ -- player is a special actor
  del(actors,self)
- add(players,self)
+ player=self
  main_camera:set_target(self)
 
  self.flip=v2(false,false)
@@ -23,7 +23,7 @@ function cls_player:smoke(spr,dir)
 end
 
 function cls_player:kill()
- del(players,self)
+ player=nil
  room:spawn_player()
 end
 

@@ -14,18 +14,14 @@ function _draw()
 
  room:draw()
  draw_actors()
- foreach(players,function(player)
-  player:draw()
- end)
+ if (player!=nil) player:draw()
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
  tick_crs()
- foreach(players,function(player)
-  player:update()
- end)
+ if (player!=nil) player:update()
  update_actors()
  main_camera:update()
 end
