@@ -91,6 +91,10 @@ function v2mt:magnitude()
  return sqrt(self.x^2+self.y^2)
 end
 
+function v2mt:normalize()
+ return self/self:magnitude()
+end
+
 function v2mt:str()
  return "["..tostr(self.x)..","..tostr(self.y).."]"
 end
@@ -164,7 +168,13 @@ function bboxvt:collide(other)
 end
 
 function bboxvt:clip(p)
- return v2(mid(self.aa.x,p.x,self.bb.x),mid(self.aa.y,p.y,self.bb.y))
+ return v2(mid(self.aa.x,p.x,self.bb.x),
+           mid(self.aa.y,p.y,self.bb.y))
+end
+
+function bboxvt:shrink(amt)
+ local v=v2(amt,amt)
+ return bbox(v+self.aa,self.bb-v)
 end
 
 
@@ -212,7 +222,7 @@ function cls_camera:update()
  if (b.aa.x>p.x) self.pos.x-=min(b.aa.x-p.x,4)
  if (b.bb.y<p.y) self.pos.y+=min(p.y-b.bb.y,4)
  if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,4)
- self.pos=room:bbox():clip(self.pos)
+ self.pos=room:bbox():shrink(64):clip(self.pos)
 end
 
 -- functions
@@ -927,7 +937,7 @@ end)
 main_camera=cls_camera.init()
 
 function _init()
- room=cls_room.init(v2(16,0),v2(16,16))
+ room=cls_room.init(v2(16,0),v2(32,16))
  room:spawn_player()
 end
 

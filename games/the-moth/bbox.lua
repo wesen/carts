@@ -44,6 +44,12 @@ function bboxvt:collide(other)
 end
 
 function bboxvt:clip(p)
- return v2(mid(self.aa.x,p.x,self.bb.x),mid(self.aa.y,p.y,self.bb.y))
+ return v2(mid(self.aa.x,p.x,self.bb.x),
+           mid(self.aa.y,p.y,self.bb.y))
+end
+
+function bboxvt:shrink(amt)
+ local v=v2(amt,amt)
+ return bbox(v+self.aa,self.bb-v)
 end
 
