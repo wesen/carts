@@ -76,7 +76,7 @@ function _draw()
   update_particle(p)
  end
  local cpu3=stat(1)
- print("cpu "..tostr(cpu1),0,0)
- print("cpu "..tostr(cpu2-cpu1),0,8)
- print("cpu "..tostr(cpu3-cpu2),0,16)
+ print("metatable cpu "..tostr(cpu1),0,0)
+ print("member function cpu "..tostr(cpu2-cpu1),0,8)
+ print("regular function cpu "..tostr(cpu3-cpu2),0,16)
 end
