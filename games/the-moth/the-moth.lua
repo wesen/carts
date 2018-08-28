@@ -59,6 +59,7 @@
 -- show tutorial text above switch
 
 -- readd gore on death
+-- add fire as a moth obstacle
 
 -- add simple intro levels
 
