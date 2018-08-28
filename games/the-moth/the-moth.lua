@@ -56,8 +56,18 @@
 -- x add moth following light
 -- x move moth to nearest light
 -- better moth movement
+-- x ray collision with moth to find nearest visible lamp
+-- x switches can toggle multiple lamps
+-- better lamp switches
+-- bresenham dashed line
 -- add checkpoints
 -- show tutorial text above switch
+-- moth animation when seeing light
+-- better darker tiles
+-- exit door
+-- draw moth above light
+-- add fireflies flying around
+-- particles trailing moth
 
 -- readd gore on death
 -- add fire as a moth obstacle
@@ -66,17 +76,20 @@
 
 -- add frogs
 
--- make wider levels
--- implement camera
+-- x make wider levels
+-- x implement camera
 -- enemies
 -- moving platforms
 -- laser beam
 -- vanishing platforms
 
--- parallax b ackground
+-- parallax background
 -- add death mechanics
 -- camera shake
 -- fades
+
+-- music
+-- sfx
 
 --include main-test
 --#include main
