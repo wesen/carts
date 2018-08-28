@@ -27,38 +27,38 @@ function isect(l,b)
  if dx!=0 then
   u=(b.aa.x-l.a.x)
   if u<=dx and u>=0 then
-   u/=dx
-   local y1=l.a.y+u*dy
+   local u1=u/dx
+   local y1=l.a.y+u1*dy
    if y1>=b.aa.y and y1<=b.bb.y then
-    add(res,{x=l.a.x+u*dx,y=y1})
+    add(res,{x=l.a.x+u,y=y1})
    end
   end
  
 
   u=(b.bb.x-l.a.x)
   if u<=dx and u>=0 then
-   u/=dx
-   local y1=l.a.y+u*dy
+   local u1=u/dx
+   local y1=l.a.y+u1*dy
    if y1>=b.aa.y and y1<=b.bb.y then
-    add(res,{x=l.a.x+u*dx,y=y1})
+    add(res,{x=l.a.x+u,y=y1})
    end
   end
  end
  if dy!=0 then
   u=(b.aa.y-l.a.y)
   if u<=dy and u>=0 then
-   u/=dy
-   local x1=l.a.x+u*dx
+   local u1=u/dy
+   local x1=l.a.x+u1*dx
    if x1>=b.aa.x and x1<=b.bb.x then
-    add(res,{x=x1,y=l.a.y+u*dy})
+    add(res,{x=x1,y=l.a.y+u})
    end
   end
   u=(b.bb.y-l.a.y)
   if u<=dy and u>=0 then
-   u/=dy
-   local x1=l.a.x+u*dx
+   local u1=u/dy
+   local x1=l.a.x+u1*dx
    if x1>=b.aa.x and x1<=b.bb.x then
-    add(res,{x=x1,y=l.a.y+u*dy})
+    add(res,{x=x1,y=l.a.y+u})
    end
   end
  end
