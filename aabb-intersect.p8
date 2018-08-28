@@ -66,6 +66,55 @@ function isect(l,b)
  return res
 end
 
+function does_isect(l,b)
+ local res={}
+ 
+ local dx=l.b.x-l.a.x
+ local dy=l.b.y-l.a.y
+
+ local u=0  
+ if dx!=0 then
+  u=(b.aa.x-l.a.x)
+  if u<=dx and u>=0 then
+   local u1=u/dx
+   local y1=l.a.y+u1*dy
+   if y1>=b.aa.y and y1<=b.bb.y then
+    return true
+   end
+  end
+ 
+  u=(b.bb.x-l.a.x)
+  if u<=dx and u>=0 then
+   local u1=u/dx
+   local y1=l.a.y+u1*dy
+   if y1>=b.aa.y and y1<=b.bb.y then
+    return true
+   end
+  end
+ end
+ if dy!=0 then
+  u=(b.aa.y-l.a.y)
+  if u<=dy and u>=0 then
+   local u1=u/dy
+   local x1=l.a.x+u1*dx
+   if x1>=b.aa.x and x1<=b.bb.x then
+    return true
+   end
+  end
+  u=(b.bb.y-l.a.y)
+  if u<=dy and u>=0 then
+   local u1=u/dy
+   local x1=l.a.x+u1*dx
+   if x1>=b.aa.x and x1<=b.bb.x then
+    return true
+   end
+  end
+ end
+ 
+ return false
+end
+
+
 function _init()
  poke(0x5f2d,1)
 end
@@ -83,7 +132,7 @@ end
 
 function _draw()
  for i=0,500 do
-  isect(l1,b)
+  does_isect(l1,b)
  end
 
  cls()
