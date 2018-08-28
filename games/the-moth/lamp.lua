@@ -7,7 +7,7 @@ cls_lamp=class(typ_lamp,function(self,pos,tile)
  self.pos=pos
  self.is_on=tile==spr_lamp_on
  -- lookup number in tile below
- self.nr=room:tile_at(self.pos/8+v2(0,1))
+ self.nr=room:tile_at(self.pos/8+v2(0,1))-spr_lamp_nr_base
  room.lamps[self.nr]=self
  add(actors,self)
 end)
@@ -29,7 +29,7 @@ cls_lamp_switch=subclass(typ_lamp_switch,cls_actor,function(self,pos,tile)
  self.hitbox=hitbox(v2(-3,-3),v2(11,11))
  self.is_solid=false
  -- lookup number in tile above
- self.nr=room:tile_at(self.pos/8+v2(0,-1))
+ self.nr=room:tile_at(self.pos/8+v2(0,-1))-spr_lamp_nr_base
  self.is_on=tile==spr_switch_on
  self.player_near=false
 end)

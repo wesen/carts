@@ -51,9 +51,10 @@
 
 -- x add moth sprites
 -- x instantiate moth
--- add light / light switch mechanic
--- add moth following light
--- move moth to nearest light
+-- x add light / light switch mechanic
+-- x add moth following light
+-- x move moth to nearest light
+-- better moth movement
 -- add checkpoints
 -- show tutorial text above switch
 
