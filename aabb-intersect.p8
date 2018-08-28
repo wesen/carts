@@ -74,7 +74,12 @@ function _update()
 end
 
 function _draw()
+ for i=0,500 do
+  isect(l1,b)
+ end
+
  cls()
+ print("cpu "..tostr(stat(1)),64,64,1)
  draw_box(b,7)
  draw_line(l1,8)
  

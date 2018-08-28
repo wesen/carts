@@ -31,7 +31,12 @@ function _update()
 end
 
 function _draw()
+ for i=0,500 do
+  linebox(l1,box)
+ end
+ 
  cls()
+ print("cpu "..tostr(stat(1)),64,64,1)
  draw_line(l1,7)
  draw_line(l2,8)
  draw_box(box,9)
