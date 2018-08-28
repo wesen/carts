@@ -19,14 +19,25 @@ function cls_moth:get_nearest_lamp()
    local v=(lamp.pos-self.pos)
    local d=v:sqrmagnitude()/10000.
    if d<dist then
-    dist=d
-    dir=v
-    nearest_lamp=lamp
+    if self:is_lamp_visible(lamp.pos) then
+     dist=d
+     dir=v
+     nearest_lamp=lamp
+    end
    end
   end
  end
 
  return nearest_lamp,dir
+end
+
+function cls_moth:is_lamp_visible(p)
+ local ray=bbox(self.pos+v2(4,4),p)
+ for tile in all(room.solid_tiles) do
+  local p=isect(ray,tile)
+  if (#p>0) return false
+ end
+ return true
 end
 
 function cls_moth:update()

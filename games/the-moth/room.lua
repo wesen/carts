@@ -3,6 +3,7 @@ cls_room=class(typ_room,function(self,pos,dim)
  self.dim=dim
  self.spawn_locations={}
  self.lamps={}
+ self.solid_tiles={}
 
  room=self
 
@@ -11,6 +12,10 @@ cls_room=class(typ_room,function(self,pos,dim)
   for j=0,self.dim.y do
    local p=v2(i,j)
    local tile=self:tile_at(p)
+   -- add solid tile bboxes for collision check
+   if fget(tile,flg_solid) then
+    add(self.solid_tiles,bbox(p*8,p*8+v2(8,8)))
+   end
    if tile==spr_spawn_point then
     add(self.spawn_locations,p*8)
    end

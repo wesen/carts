@@ -8,7 +8,7 @@ cls_lamp=class(typ_lamp,function(self,pos,tile)
  self.is_on=tile==spr_lamp_on
  -- lookup number in tile below
  self.nr=room:tile_at(self.pos/8+v2(0,1))-spr_lamp_nr_base
- room.lamps[self.nr]=self
+ add(room.lamps,self)
  add(actors,self)
 end)
 
@@ -45,9 +45,12 @@ function cls_lamp_switch:update()
 end
 
 function cls_lamp_switch:switch()
- local lamp=room.lamps[self.nr]
- lamp.is_on=not lamp.is_on
- self.is_on=lamp.is_on
+ for lamp in all(room.lamps) do
+  if lamp.nr==self.nr then
+   lamp.is_on=not lamp.is_on
+   self.is_on=lamp.is_on
+  end
+ end
 end
 
 function cls_lamp_switch:draw()

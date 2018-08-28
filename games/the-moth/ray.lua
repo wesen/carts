@@ -4,6 +4,16 @@
 function isect(l,b)
  local res={}
 
+ -- check if we can eliminate the bbox altogether
+ local vmin=l.aa:min(l.bb)
+ local vmax=l.aa:max(l.bb)
+ if b.aa.x>vmax.x or
+    b.aa.y>vmax.y or
+    b.bb.x<vmin.x or
+    b.bb.y<vmin.y then
+  return {}
+ end
+
  local d=l.bb-l.aa
 
  local p=function(u)
@@ -27,11 +37,11 @@ function isect(l,b)
   end
  end
 
- local baa=b.aa-l.a
- local bba=b.bb-l.a
+ local baa=b.aa-l.aa
+ local bba=b.bb-l.aa
  if d.x!=0 then
   check_y(baa.x/d.x)
-  check_u(bba.x/d.x)
+  check_y(bba.x/d.x)
  end
  if d.y!=0 then
   check_x(baa.y/d.y)

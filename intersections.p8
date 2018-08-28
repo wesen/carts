@@ -43,7 +43,9 @@ function _draw()
 
  local p,intersects=lineline(l1,l2)
  local circ_col=intersects and 7 or 8
- circ(p.x,p.y,3,circ_col)
+ if p!=nil then
+  circ(p.x,p.y,3,circ_col)
+ end
  local ps=linebox(l1,box)
  for p in all(ps) do
   circ(p.x,p.y,3,12)

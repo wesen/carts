@@ -78,4 +78,5 @@
 -- camera shake
 -- fades
 
+--include main-test
 --#include main
