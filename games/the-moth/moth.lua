@@ -77,5 +77,5 @@ function cls_moth:draw()
   line(self.pos.x+4,self.pos.y+4,self.target.x,self.target.y,5)
   fillp()
  end
- spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ bspr(self.spr,self.pos.x,self.pos.y,self.flip.x,self.flip.y,0)
 end

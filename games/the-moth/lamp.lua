@@ -27,7 +27,7 @@ spr_switch_off=70
 cls_lamp_switch=subclass(typ_lamp_switch,cls_actor,function(self,pos,tile)
  cls_actor._ctr(self,pos)
  self.pos=pos
- self.hitbox=hitbox(v2(0,0),v2(8,8))
+ self.hitbox=hitbox(v2(-2,-2),v2(12,12))
  self.is_solid=false
  -- lookup number in tile above
  self.nr=room:tile_at(self.pos/8+v2(0,-1))-spr_lamp_nr_base
@@ -57,6 +57,7 @@ end
 function cls_lamp_switch:draw()
  local spr_=self.is_on and spr_switch_on or spr_switch_off
  spr(spr_,self.pos.x,self.pos.y)
+ -- self:bbox():draw(7)
 end
 
 function cls_lamp_switch:draw_text()
