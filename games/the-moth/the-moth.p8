@@ -48,7 +48,7 @@ function class (typ,init)
   function c.init (...)
     local self = setmetatable({},c)
     c._ctr(self,...)
-    c.typ=typ
+    self.typ=typ
     self.destroyed=false
     return self
   end
@@ -60,7 +60,7 @@ end
 
 function subclass(typ,parent,init)
  local c=class(typ,init)
- return setmetatable(c,parent)
+ return setmetatable(c,{__index=parent})
 end
 
 
@@ -1050,13 +1050,14 @@ spr_lamp_on=96
 
 spr_lamp_nr_base=84
 
-cls_lamp=class(typ_lamp,function(self,pos,tile)
+cls_lamp=subclass(typ_lamp,cls_actor,function(self,pos,tile)
+ cls_actor._ctr(self,pos)
  self.pos=pos
  self.is_on=tile==spr_lamp_on
+ self.is_solid=false
  -- lookup number in tile below
  self.nr=room:tile_at(self.pos/8+v2(0,1))-spr_lamp_nr_base
  add(room.lamps,self)
- add(actors,self)
 end)
 
 tiles[spr_lamp_off]=cls_lamp
@@ -1104,7 +1105,7 @@ function cls_lamp_switch:draw()
  local spr_=self.is_on and spr_switch_on or spr_switch_off
  spr(spr_,self.pos.x,self.pos.y)
  if self.player_near then
-  print("x",self.pos.x+2,self.pos.y-10,7)
+  print("x - switch",self.pos.x-15,self.pos.y-10,7)
  end
 end
 spr_exit_on=100
@@ -1112,14 +1113,29 @@ spr_exit_off=102
 
 cls_exit=subclass(typ_exit,cls_lamp,function(self,pos,tile)
  cls_lamp._ctr(self,pos,tile)
+ self.hitbox=hitbox(v2(0,0),v2(16,16))
+ self.player_near=false
+ self.moth_near=false
 end)
 
 tiles[spr_exit_off]=cls_exit
 tiles[spr_exit_on]=cls_exit
 
+function cls_exit:update()
+ self.player_near=player!=nil and player:collides_with(self)
+
+ self.moth_near=moth!=nil and moth:collides_with(self)
+ if self.player_near and self.moth_near and btnp(btn_action) then
+  printh("NEXT LEVEL")
+ end
+end
+
 function cls_exit:draw()
  local spr_=self.is_on and spr_exit_on or spr_exit_off
  spr(spr_,self.pos.x,self.pos.y,2,2)
+ if self.player_near and self.moth_near then
+  print("x - exit",self.pos.x-15,self.pos.y-10,7)
+ end
 end
 
 -- fade bubbles
@@ -1188,6 +1204,7 @@ end
 -- sfx
 
 --include main-test
+--include main-test-oo
 main_camera=cls_camera.init()
 
 function _init()

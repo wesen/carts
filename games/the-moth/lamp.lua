@@ -3,13 +3,14 @@ spr_lamp_on=96
 
 spr_lamp_nr_base=84
 
-cls_lamp=class(typ_lamp,function(self,pos,tile)
+cls_lamp=subclass(typ_lamp,cls_actor,function(self,pos,tile)
+ cls_actor._ctr(self,pos)
  self.pos=pos
  self.is_on=tile==spr_lamp_on
+ self.is_solid=false
  -- lookup number in tile below
  self.nr=room:tile_at(self.pos/8+v2(0,1))-spr_lamp_nr_base
  add(room.lamps,self)
- add(actors,self)
 end)
 
 tiles[spr_lamp_off]=cls_lamp
@@ -57,6 +58,6 @@ function cls_lamp_switch:draw()
  local spr_=self.is_on and spr_switch_on or spr_switch_off
  spr(spr_,self.pos.x,self.pos.y)
  if self.player_near then
-  print("x",self.pos.x+2,self.pos.y-10,7)
+  print("x - switch",self.pos.x-15,self.pos.y-10,7)
  end
 end

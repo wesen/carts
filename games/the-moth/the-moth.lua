@@ -94,4 +94,5 @@
 -- sfx
 
 --include main-test
+--include main-test-oo
 --#include main
