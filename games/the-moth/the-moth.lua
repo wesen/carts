@@ -71,13 +71,13 @@
 -- find a proper way to define lamp target offsets
 
 -- x switch levels when reaching exit door
--- add timed lamps
+-- add timed lamp s
 -- add title screen
 -- add simple intro levels
 
 -- x better darker tiles
 -- add fireflies flying around
--- parallax background
+-- x parallax background
 -- add marker above lamps the switch will activate
 -- camera shake
 

@@ -22,7 +22,9 @@ end
 
 function cls_exit:draw()
  local spr_=self.is_on and spr_exit_on or spr_exit_off
+ palt(0,false)
  spr(spr_,self.pos.x,self.pos.y,2,2)
+ palt()
 end
 
 function cls_exit:draw_text()

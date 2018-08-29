@@ -39,7 +39,10 @@ function cls_room:get_friction(tile,dir)
 end
 
 function cls_room:draw()
+ palt(14,true)
+ palt(0,false)
  map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
+ palt()
 end
 
 function cls_room:spawn_player()
