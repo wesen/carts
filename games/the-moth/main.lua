@@ -1,8 +1,7 @@
 main_camera=cls_camera.init()
 
 function _init()
- cls_room.init(v2(16,0),v2(32,16))
- room:spawn_player()
+ game:load_level(2)
 end
 
 function _draw()
@@ -17,9 +16,11 @@ function _draw()
  if (player!=nil) player:draw()
  if (moth!=nil) moth:draw()
 
+ palt(0,false)
  for a in all(actors) do
   if (a.draw_text!=nil) a:draw_text()
  end
+ palt()
 end
 
 function _update60()

@@ -1,6 +1,6 @@
-cls_room=class(typ_room,function(self,pos,dim)
- self.pos=pos
- self.dim=dim
+cls_room=class(typ_room,function(self,r)
+ self.pos=r.pos
+ self.dim=r.dim
  self.player_spawn=nil
  self.moth_spawn=nil
  self.lamps={}
@@ -9,8 +9,8 @@ cls_room=class(typ_room,function(self,pos,dim)
  room=self
 
  -- initialize tiles
- for i=0,self.dim.x do
-  for j=0,self.dim.y do
+ for i=0,self.dim.x-1 do
+  for j=0,self.dim.y-1 do
    local p=v2(i,j)
    local tile=self:tile_at(p)
    -- add solid tile bboxes for collision check

@@ -1,5 +1,4 @@
 --#include constants
---#include globals
 --#include config
 
 --#include oo
@@ -7,6 +6,9 @@
 --#include ray
 --#include bbox
 --#include hitbox
+
+--#include globals
+
 --#include camera
 --#include gfx
 
@@ -27,6 +29,7 @@
 --#include moving_platform
 --#include lamp
 --#include exit
+--#include game
 
 -- fade bubbles
 -- x gravity
@@ -64,8 +67,9 @@
 -- x show tutorial text above switch
 -- x make wider levels
 -- x implement camera
+-- find a proper way to define lamp target offsets
 
--- switch levels when reaching exit door
+-- x switch levels when reaching exit door
 -- add title screen
 -- add simple intro levels
 

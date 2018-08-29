@@ -35,7 +35,7 @@ function cls_moth:get_nearest_lamp()
 end
 
 function cls_moth:is_lamp_visible(p)
- local ray=bbox(self.pos+v2(4,4),p)
+ local ray=bbox(self.pos+v2(4,4),p+v2(6,6))
  for tile in all(room.solid_tiles) do
   local p=isect(ray,tile)
   if (#p>0) return false
@@ -47,7 +47,7 @@ function cls_moth:update()
  local nearest_lamp=self:get_nearest_lamp()
  if nearest_lamp!=nil then
   self.found_lamp=true
-  self.target=nearest_lamp.pos+v2(4,4)
+  self.target=nearest_lamp.pos+v2(6,6)
  elseif self.found_lamp then
   self.found_lamp=false
   self.target=self.pos:clone()

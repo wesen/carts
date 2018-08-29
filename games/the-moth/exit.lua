@@ -16,7 +16,7 @@ function cls_exit:update()
 
  self.moth_near=moth!=nil and moth:collides_with(self)
  if self.player_near and self.moth_near and btnp(btn_action) then
-  printh("NEXT LEVEL")
+  game:next_level()
  end
 end
 
