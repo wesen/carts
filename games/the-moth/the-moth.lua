@@ -55,24 +55,25 @@
 -- x add light / light switch mechanic
 -- x add moth following light
 -- x move moth to nearest light
--- better moth movement
 -- x ray collision with moth to find nearest visible lamp
 -- x switches can toggle multiple lamps
+-- exit door
+-- add title screen
+-- add simple intro levels
+
 -- better lamp switches
+-- better moth movement
 -- bresenham dashed line
 -- add checkpoints
 -- show tutorial text above switch
 -- moth animation when seeing light
 -- better darker tiles
--- exit door
 -- draw moth above light
 -- add fireflies flying around
 -- particles trailing moth
 
 -- readd gore on death
 -- add fire as a moth obstacle
-
--- add simple intro levels
 
 -- add frogs
 
