@@ -27,6 +27,10 @@ function rspr(s,x,y,angle)
  end
 end
 
+function should_blink(n)
+ return flr(frame/n)%2==1
+end
+
 function palbg(col)
  for i=1,16 do
   pal(i,col)

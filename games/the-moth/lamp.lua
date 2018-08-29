@@ -27,7 +27,7 @@ spr_switch_off=70
 cls_lamp_switch=subclass(typ_lamp_switch,cls_actor,function(self,pos,tile)
  cls_actor._ctr(self,pos)
  self.pos=pos
- self.hitbox=hitbox(v2(-3,-3),v2(11,11))
+ self.hitbox=hitbox(v2(0,0),v2(8,8))
  self.is_solid=false
  -- lookup number in tile above
  self.nr=room:tile_at(self.pos/8+v2(0,-1))-spr_lamp_nr_base
@@ -60,9 +60,9 @@ function cls_lamp_switch:draw()
 end
 
 function cls_lamp_switch:draw_text()
- if self.player_near then
+ if self.player_near and should_blink(24) then
   palt(0,false)
-  bstr("\x97 - switch",self.pos.x-15,self.pos.y-10,0,14)
+  bstr("\x97",self.pos.x-1,self.pos.y-8,0,6)
   palt()
  end
 end
