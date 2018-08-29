@@ -1210,7 +1210,14 @@ end
 -- x move moth to nearest light
 -- x ray collision with moth to find nearest visible lamp
 -- x switches can toggle multiple lamps
--- exit door
+-- x exit door
+-- x better help texts
+-- x draw moth above light
+-- x show tutorial text above switch
+-- x make wider levels
+-- x implement camera
+
+-- switch levels when reaching exit door
 -- add title screen
 -- add simple intro levels
 
@@ -1218,10 +1225,8 @@ end
 -- better moth movement
 -- bresenham dashed line
 -- add checkpoints
--- show tutorial text above switch
 -- moth animation when seeing light
 -- better darker tiles
--- draw moth above light
 -- add fireflies flying around
 -- particles trailing moth
 
@@ -1230,8 +1235,6 @@ end
 
 -- add frogs
 
--- x make wider levels
--- x implement camera
 -- enemies
 -- moving platforms
 -- laser beam
