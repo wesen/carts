@@ -26,6 +26,7 @@
 --#include spikes
 --#include moving_platform
 --#include lamp
+--#include exit
 
 -- fade bubbles
 -- x gravity

@@ -15,6 +15,7 @@ function _draw()
  room:draw()
  draw_actors()
  if (player!=nil) player:draw()
+ if (moth!=nil) moth:draw()
 end
 
 function _update60()
@@ -22,6 +23,7 @@ function _update60()
  lasttime=time()
  tick_crs()
  if (player!=nil) player:update()
+ if (moth!=nil) moth:update()
  update_actors()
  main_camera:update()
 end

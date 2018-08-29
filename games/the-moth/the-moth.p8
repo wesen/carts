@@ -15,6 +15,7 @@ typ_moth=10
 typ_camera=11
 typ_lamp=12
 typ_lamp_switch=13
+typ_exit=14
 
 flg_solid=0
 flg_ice=1
@@ -383,7 +384,7 @@ function v_idx(pos)
  return pos.x+pos.y*128
 end
 
--- tween routines from https://github.com/joebrogers/pico-tween
+-- tween routines from https://github.com/JoebRogers/PICO-Tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
  if (t < 1) return c / 2 * pow(t, 5) + b
@@ -534,6 +535,7 @@ function update_actors(typ)
 end
 
 spr_moth=5
+moth=nil
 
 cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
@@ -541,6 +543,8 @@ cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  self.target=self.pos:clone()
  self.target_dist=0
  self.found_lamp=false
+ del(actors,self)
+ moth=self
 end)
 
 tiles[spr_moth]=cls_moth
@@ -584,7 +588,7 @@ function cls_moth:update()
   self.found_lamp=false
   self.target=self.pos:clone()
  end
- 
+
  local maxvel=.3
  local accel=0.1
  local dist=self.target-self.pos
@@ -597,6 +601,7 @@ function cls_moth:update()
  self.spd.x=appr(self.spd.x,spd.x,accel)+mrnd(accel)
  self.spd.y=appr(self.spd.y,spd.y,accel)+mrnd(accel)
 
+ if (abs(self.spd.x)>0.2) self.flip.x=self.spd.x<0
  self:move(self.spd)
 
  self.spr=spr_moth+flr(frame/8)%3
@@ -646,7 +651,8 @@ end
 cls_room=class(typ_room,function(self,pos,dim)
  self.pos=pos
  self.dim=dim
- self.spawn_locations={}
+ self.player_spawn=nil
+ self.moth_spawn=nil
  self.lamps={}
  self.solid_tiles={}
 
@@ -661,9 +667,8 @@ cls_room=class(typ_room,function(self,pos,dim)
    if fget(tile,flg_solid) then
     add(self.solid_tiles,bbox(p*8,p*8+v2(8,8)))
    end
-   if tile==spr_spawn_point then
-    add(self.spawn_locations,p*8)
-   end
+   if (tile==spr_spawn_point) self.player_spawn=p*8
+   if (tile==spr_moth) self.moth_spawn=p*8
    local t=tiles[tile]
    if (t!=nil) t.init(p*8,tile)
   end
@@ -688,7 +693,7 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player()
- cls_spawn.init(self.spawn_locations[1]:clone())
+ cls_spawn.init(self.player_spawn:clone())
 end
 
 function cls_room:tile_at(pos)
@@ -1102,6 +1107,20 @@ function cls_lamp_switch:draw()
   print("x",self.pos.x+2,self.pos.y-10,7)
  end
 end
+spr_exit_on=100
+spr_exit_off=102
+
+cls_exit=subclass(typ_exit,cls_lamp,function(self,pos,tile)
+ cls_lamp._ctr(self,pos,tile)
+end)
+
+tiles[spr_exit_off]=cls_exit
+tiles[spr_exit_on]=cls_exit
+
+function cls_exit:draw()
+ local spr_=self.is_on and spr_exit_on or spr_exit_off
+ spr(spr_,self.pos.x,self.pos.y,2,2)
+end
 
 -- fade bubbles
 -- x gravity
@@ -1131,24 +1150,25 @@ end
 -- x add light / light switch mechanic
 -- x add moth following light
 -- x move moth to nearest light
--- better moth movement
 -- x ray collision with moth to find nearest visible lamp
 -- x switches can toggle multiple lamps
+-- exit door
+-- add title screen
+-- add simple intro levels
+
 -- better lamp switches
+-- better moth movement
 -- bresenham dashed line
 -- add checkpoints
 -- show tutorial text above switch
 -- moth animation when seeing light
 -- better darker tiles
--- exit door
 -- draw moth above light
 -- add fireflies flying around
 -- particles trailing moth
 
 -- readd gore on death
 -- add fire as a moth obstacle
-
--- add simple intro levels
 
 -- add frogs
 
@@ -1185,6 +1205,7 @@ function _draw()
  room:draw()
  draw_actors()
  if (player!=nil) player:draw()
+ if (moth!=nil) moth:draw()
 end
 
 function _update60()
@@ -1192,6 +1213,7 @@ function _update60()
  lasttime=time()
  tick_crs()
  if (player!=nil) player:update()
+ if (moth!=nil) moth:update()
  update_actors()
  main_camera:update()
 end
@@ -1408,7 +1430,7 @@ __map__
 0000000000004141414040400000000000000000000000000000000000000000626300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0042000000000000000000004100000000000000000000000000000000000000557300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4040000000400001000000004100000000000062630000000000000000000000004040005500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000400040404000004100400000000055730000000000000000000000000000004600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000404000400000000000004100000005005455400000000000000062630000000041414141000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000404200000000004100000001004646404200000000000054730000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000400040404000004100400000000055730000000000000000000000000000004605000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000404000400000000000004100000000005455400000000000000062630000000041414141005666670000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000404200000000004100000000004646404200000000000054730000000000000000014656770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4444444444404044414141444044444040404040404040404444404040404040404040404040404040404040404040404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

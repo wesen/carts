@@ -1,4 +1,5 @@
 spr_moth=5
+moth=nil
 
 cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
@@ -6,6 +7,8 @@ cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  self.target=self.pos:clone()
  self.target_dist=0
  self.found_lamp=false
+ del(actors,self)
+ moth=self
 end)
 
 tiles[spr_moth]=cls_moth
@@ -49,7 +52,7 @@ function cls_moth:update()
   self.found_lamp=false
   self.target=self.pos:clone()
  end
- 
+
  local maxvel=.3
  local accel=0.1
  local dist=self.target-self.pos
@@ -62,6 +65,7 @@ function cls_moth:update()
  self.spd.x=appr(self.spd.x,spd.x,accel)+mrnd(accel)
  self.spd.y=appr(self.spd.y,spd.y,accel)+mrnd(accel)
 
+ if (abs(self.spd.x)>0.2) self.flip.x=self.spd.x<0
  self:move(self.spd)
 
  self.spr=spr_moth+flr(frame/8)%3

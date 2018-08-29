@@ -1,7 +1,8 @@
 cls_room=class(typ_room,function(self,pos,dim)
  self.pos=pos
  self.dim=dim
- self.spawn_locations={}
+ self.player_spawn=nil
+ self.moth_spawn=nil
  self.lamps={}
  self.solid_tiles={}
 
@@ -16,9 +17,8 @@ cls_room=class(typ_room,function(self,pos,dim)
    if fget(tile,flg_solid) then
     add(self.solid_tiles,bbox(p*8,p*8+v2(8,8)))
    end
-   if tile==spr_spawn_point then
-    add(self.spawn_locations,p*8)
-   end
+   if (tile==spr_spawn_point) self.player_spawn=p*8
+   if (tile==spr_moth) self.moth_spawn=p*8
    local t=tiles[tile]
    if (t!=nil) t.init(p*8,tile)
   end
@@ -43,7 +43,7 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player()
- cls_spawn.init(self.spawn_locations[1]:clone())
+ cls_spawn.init(self.player_spawn:clone())
 end
 
 function cls_room:tile_at(pos)

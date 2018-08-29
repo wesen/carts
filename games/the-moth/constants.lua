@@ -12,6 +12,7 @@ typ_moth=10
 typ_camera=11
 typ_lamp=12
 typ_lamp_switch=13
+typ_exit=14
 
 flg_solid=0
 flg_ice=1
