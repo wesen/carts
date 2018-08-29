@@ -1,23 +1,29 @@
 spr_lamp_off=98
 spr_lamp_on=96
+spr_lamp2_off=106
+spr_lamp2_on=104
 
 spr_lamp_nr_base=84
 
 cls_lamp=subclass(typ_lamp,cls_actor,function(self,pos,tile)
  cls_actor._ctr(self,pos)
  self.pos=pos
- self.is_on=tile==spr_lamp_on
+ self.is_on=(tile)%4==0
  self.is_solid=false
  -- lookup number in tile below
  self.nr=room:tile_at(self.pos/8+v2(0,1))-spr_lamp_nr_base
+ self.spr=tile-(self.is_on and 0 or 2)
+ printh("iitialized with "..tostr(tile).." "..tostr(self.spr))
  add(room.lamps,self)
 end)
 
 tiles[spr_lamp_off]=cls_lamp
 tiles[spr_lamp_on]=cls_lamp
+tiles[spr_lamp2_off]=cls_lamp
+tiles[spr_lamp2_on]=cls_lamp
 
 function cls_lamp:draw()
- local spr_=self.is_on and spr_lamp_on or spr_lamp_off
+ local spr_=self.spr+(self.is_on and 0 or 2)
  spr(spr_,self.pos.x,self.pos.y,2,2)
 end
 

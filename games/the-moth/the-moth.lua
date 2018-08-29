@@ -71,16 +71,21 @@
 -- find a proper way to define lamp target offsets
 
 -- x switch levels when reaching exit door
+-- add timed lamps
 -- add title screen
 -- add simple intro levels
+
+-- x better darker tiles
+-- add fireflies flying around
+-- parallax background
+-- add marker above lamps the switch will activate
+-- camera shake
 
 -- better lamp switches
 -- better moth movement
 -- bresenham dashed line
 -- add checkpoints
 -- moth animation when seeing light
--- better darker tiles
--- add fireflies flying around
 -- particles trailing moth
 
 -- readd gore on death
@@ -93,9 +98,6 @@
 -- laser beam
 -- vanishing platforms
 
--- parallax background
--- add death mechanics
--- camera shake
 -- fades
 
 -- music
