@@ -156,6 +156,8 @@ end
 
 function cls_player:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ -- not convinced by border
+ -- bspr(self.spr,self.pos.x,self.pos.y,self.flip.x,self.flip.y,0)
 
  --[[
  local bbox=self:bbox()

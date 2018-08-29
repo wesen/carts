@@ -57,7 +57,12 @@ end
 function cls_lamp_switch:draw()
  local spr_=self.is_on and spr_switch_on or spr_switch_off
  spr(spr_,self.pos.x,self.pos.y)
+end
+
+function cls_lamp_switch:draw_text()
  if self.player_near then
-  print("x - switch",self.pos.x-15,self.pos.y-10,7)
+  palt(0,false)
+  bstr("\x97 - switch",self.pos.x-15,self.pos.y-10,0,14)
+  palt()
  end
 end

@@ -14,6 +14,10 @@ function cls_camera:compute_position()
  return v2(self.pos.x-64,self.pos.y-64)
 end
 
+function cls_camera:abs_position(p)
+ return p+self:compute_position()
+end
+
 function cls_camera:pull_bbox()
  local v=v2(self.pull,self.pull)
  return bbox(self.pos-v,self.pos+v)

@@ -16,6 +16,10 @@ function _draw()
  draw_actors()
  if (player!=nil) player:draw()
  if (moth!=nil) moth:draw()
+
+ for a in all(actors) do
+  if (a.draw_text!=nil) a:draw_text()
+ end
 end
 
 function _update60()

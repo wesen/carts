@@ -23,7 +23,11 @@ end
 function cls_exit:draw()
  local spr_=self.is_on and spr_exit_on or spr_exit_off
  spr(spr_,self.pos.x,self.pos.y,2,2)
- if self.player_near and self.moth_near then
-  print("x - exit",self.pos.x-15,self.pos.y-10,7)
+end
+
+function cls_exit:draw_text()
+ if self.player_near and self.moth_near and flr(frame/32)%2==1 then
+  local pos=main_camera:abs_position(v2(50,64))
+  bstr("\x97 - exit",self.pos.x-4,self.pos.y-10,0,14)
  end
 end

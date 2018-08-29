@@ -287,6 +287,10 @@ function cls_camera:compute_position()
  return v2(self.pos.x-64,self.pos.y-64)
 end
 
+function cls_camera:abs_position(p)
+ return p+self:compute_position()
+end
+
 function cls_camera:pull_bbox()
  local v=v2(self.pull,self.pull)
  return bbox(self.pos-v,self.pos+v)
@@ -329,6 +333,33 @@ function rspr(s,x,y,angle)
    if (p!=0) f(i,j,p)
   end
  end
+end
+
+function palbg(col)
+ for i=1,16 do
+  pal(i,col)
+ end
+end
+
+function bspr(s,x,y,flipx,flipy,col)
+ palbg(col)
+ spr(s,x-1,y,1,1,flipx,flipy)
+ spr(s,x+1,y,1,1,flipx,flipy)
+ spr(s,x,y-1,1,1,flipx,flipy)
+ spr(s,x,y+1,1,1,flipx,flipy)
+ pal()
+ spr(s,x,y,1,1,flipx,flipy)
+end
+
+function bstr(s,x,y,c1,c2)
+	for i=0,2 do
+	 for j=0,2 do
+	  if not(i==1 and j==1) then
+	   print(s,x+i,y+j,c1)
+	  end
+	 end
+	end
+	print(s,x+1,y+1,c2)
 end
 
 
@@ -951,6 +982,8 @@ end
 
 function cls_player:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ -- not convinced by border
+ -- bspr(self.spr,self.pos.x,self.pos.y,self.flip.x,self.flip.y,0)
 
  --[[
  local bbox=self:bbox()
@@ -1104,8 +1137,13 @@ end
 function cls_lamp_switch:draw()
  local spr_=self.is_on and spr_switch_on or spr_switch_off
  spr(spr_,self.pos.x,self.pos.y)
+end
+
+function cls_lamp_switch:draw_text()
  if self.player_near then
-  print("x - switch",self.pos.x-15,self.pos.y-10,7)
+  palt(0,false)
+  bstr("\x97 - switch",self.pos.x-15,self.pos.y-10,0,14)
+  palt()
  end
 end
 spr_exit_on=100
@@ -1133,8 +1171,12 @@ end
 function cls_exit:draw()
  local spr_=self.is_on and spr_exit_on or spr_exit_off
  spr(spr_,self.pos.x,self.pos.y,2,2)
- if self.player_near and self.moth_near then
-  print("x - exit",self.pos.x-15,self.pos.y-10,7)
+end
+
+function cls_exit:draw_text()
+ if self.player_near and self.moth_near and flr(frame/32)%2==1 then
+  local pos=main_camera:abs_position(v2(50,64))
+  bstr("\x97 - exit",self.pos.x-4,self.pos.y-10,0,14)
  end
 end
 
@@ -1223,6 +1265,10 @@ function _draw()
  draw_actors()
  if (player!=nil) player:draw()
  if (moth!=nil) moth:draw()
+
+ for a in all(actors) do
+  if (a.draw_text!=nil) a:draw_text()
+ end
 end
 
 function _update60()
