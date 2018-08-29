@@ -30,6 +30,7 @@
 --#include lamp
 --#include exit
 --#include game
+--#include fireflies
 
 -- fade bubbles
 -- x gravity

@@ -1,6 +1,7 @@
 main_camera=cls_camera.init()
 
 function _init()
+ fireflies_init()
  game:load_level(2)
 end
 
@@ -8,6 +9,7 @@ function _draw()
  frame+=1
 
  cls()
+
  local p=main_camera:compute_position()
  camera(p.x,p.y)
 
@@ -21,12 +23,15 @@ function _draw()
   if (a.draw_text!=nil) a:draw_text()
  end
  palt()
+
+  fireflies_draw()
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
  tick_crs()
+ fireflies_update()
  if (player!=nil) player:update()
  if (moth!=nil) moth:update()
  update_actors()
