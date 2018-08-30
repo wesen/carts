@@ -1,7 +1,6 @@
 main_camera=cls_camera.init()
 
 function _init()
- fireflies_init()
  game:load_level(1)
 end
 
@@ -16,9 +15,12 @@ function _draw()
  -- map(72,0,0,0,32,16)
  -- map(72,0,32,0,32,16)
 
- camera(p.x/1.5,p.y/1.5)
+ camera(p.x/2,p.y/2)
  map(72,32,0,0,32,16)
  map(72,32,32,0,32,16)
+
+ camera(p.x/1.5,p.y/1.5)
+ fireflies_draw()
 
  camera(p.x,p.y)
  room:draw()
@@ -32,7 +34,9 @@ function _draw()
  end
  palt()
 
-  fireflies_draw()
+ camera(0,0)
+ -- print cpu
+ -- print(tostr(stat(1),64,64,1))
 end
 
 function _update60()

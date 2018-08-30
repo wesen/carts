@@ -18,14 +18,13 @@ function fireflies_draw()
  end
 end
 
-function fireflies_init()
- local w=128
- local h=128
+function fireflies_init(v)
+ fireflies={}
  for i=0,20 do
   local p={
-   x=rnd(w),
-   y=rnd(h),
-   speed=(0.05+rnd(.3))*rndsign(),
+   x=rnd(v.x),
+   y=rnd(v.y),
+   speed=(0.01+rnd(.1))*rndsign(),
    size=rnd(3),
    maxlife=30+rnd(50),
    life=0,

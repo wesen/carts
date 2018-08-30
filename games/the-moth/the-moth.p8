@@ -1236,6 +1236,7 @@ function cls_game:load_level(level)
  player=nil
  moth=nil
  cls_room.init(levels[self.current_level])
+ fireflies_init(room.dim*8)
  room:spawn_player()
 end
 
@@ -1264,14 +1265,13 @@ function fireflies_draw()
  end
 end
 
-function fireflies_init()
- local w=128
- local h=128
+function fireflies_init(v)
+ fireflies={}
  for i=0,20 do
   local p={
-   x=rnd(w),
-   y=rnd(h),
-   speed=(0.05+rnd(.3))*rndsign(),
+   x=rnd(v.x),
+   y=rnd(v.y),
+   speed=(0.01+rnd(.1))*rndsign(),
    size=rnd(3),
    maxlife=30+rnd(50),
    life=0,
@@ -1319,7 +1319,10 @@ end
 -- x show tutorial text above switch
 -- x make wider levels
 -- x implement camera
--- find a proper way to define lamp target offsets
+-- x better darker tiles
+-- x add fireflies flying around
+-- x parallax background
+-- x make fireflies slower
 
 -- x switch levels when reaching exit door
 -- add timed lamps
@@ -1327,15 +1330,12 @@ end
 -- add simple intro levels
 -- debounce moth switching lamps
 -- limit moth fov
-
--- x better darker tiles
--- x add fireflies flying around
--- x parallax background
--- make fireflies slower
--- generate parallax background
 -- add marker above lamps the switch will activate
+
+-- generate parallax background
 -- camera shake
 
+-- find a proper way to define lamp target offsets
 -- x better lamp switches
 -- better moth movement
 -- bresenham dashed line
@@ -1363,7 +1363,6 @@ end
 main_camera=cls_camera.init()
 
 function _init()
- fireflies_init()
  game:load_level(1)
 end
 
@@ -1378,9 +1377,12 @@ function _draw()
  -- map(72,0,0,0,32,16)
  -- map(72,0,32,0,32,16)
 
- camera(p.x/1.5,p.y/1.5)
+ camera(p.x/2,p.y/2)
  map(72,32,0,0,32,16)
  map(72,32,32,0,32,16)
+
+ camera(p.x/1.5,p.y/1.5)
+ fireflies_draw()
 
  camera(p.x,p.y)
  room:draw()
@@ -1394,7 +1396,9 @@ function _draw()
  end
  palt()
 
-  fireflies_draw()
+ camera(0,0)
+ -- print cpu
+ -- print(tostr(stat(1),64,64,1))
 end
 
 function _update60()

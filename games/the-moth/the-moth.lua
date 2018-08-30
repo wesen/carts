@@ -68,7 +68,10 @@
 -- x show tutorial text above switch
 -- x make wider levels
 -- x implement camera
--- find a proper way to define lamp target offsets
+-- x better darker tiles
+-- x add fireflies flying around
+-- x parallax background
+-- x make fireflies slower
 
 -- x switch levels when reaching exit door
 -- add timed lamps
@@ -76,15 +79,12 @@
 -- add simple intro levels
 -- debounce moth switching lamps
 -- limit moth fov
-
--- x better darker tiles
--- x add fireflies flying around
--- x parallax background
--- make fireflies slower
--- generate parallax background
 -- add marker above lamps the switch will activate
+
+-- generate parallax background
 -- camera shake
 
+-- find a proper way to define lamp target offsets
 -- x better lamp switches
 -- better moth movement
 -- bresenham dashed line
