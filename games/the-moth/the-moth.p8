@@ -1250,7 +1250,7 @@ end
 function cls_lamp_switch:draw_text()
  if self.player_near and should_blink(24) then
   palt(0,false)
-  bstr("\\x97",self.pos.x-1,self.pos.y-8,0,6)
+  bstr("\x97",self.pos.x-1,self.pos.y-8,0,6)
   palt()
  end
 end
@@ -1286,7 +1286,7 @@ end
 function cls_exit:draw_text()
  if self.player_near and self.moth_near and flr(frame/32)%2==1 then
   local pos=main_camera:abs_position(v2(50,64))
-  bstr("\\x97 - exit",self.pos.x-4,self.pos.y-10,0,14)
+  bstr("\x97 - exit",self.pos.x-4,self.pos.y-10,0,14)
  end
 end
 cls_game=class(typ_game,function(self)
