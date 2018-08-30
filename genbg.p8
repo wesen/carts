@@ -30,9 +30,10 @@ function _draw()
  local mw=32
  local mh=32
  local sx=(m+1)*8
- for i=0,400 do
+ for i=0,0 do
   local x,y=rnd(mw),rnd(mh)
-  local w=min(mw-x,rnd(mw/6))
+  local w=flr(min(mw-x,rnd(mw/6)))
+  x,y=flr(x),flr(y)
   local h=min(mh-y,rnd(mh/6))
   h=w
   local c=sget(
@@ -41,16 +42,23 @@ function _draw()
   rectfill(x,y,x+w,y+h,c)
  end
  
- for i=0,30 do
+ for i=0,400 do
   local x,y=rnd(mw),rnd(mh)
-  local w=max(2,rnd(8))
+  local w=flr(max(1,rnd(5)))
   local h=w
   local c=sget(
      sx+x/(mw/8),
      y/(mh/8))
-  x+=rnd(3)
-  y+=rnd(3)
-  rect(x,y,x+w,y+h,c)
+  x,y=flr(x),flr(y)
+  if c!=0 or true then
+   x+=rnd(10)
+   y+=rnd(10)
+   if rnd(1)>0.2 then
+    rect(x,y,x+w,y+h,c)
+   else
+    rectfill(x,y,x+w,y+h,c)
+   end
+  end
  end
 end
 __gfx__
