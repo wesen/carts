@@ -71,17 +71,21 @@
 -- find a proper way to define lamp target offsets
 
 -- x switch levels when reaching exit door
--- add timed lamp s
+-- add timed lamps
 -- add title screen
 -- add simple intro levels
+-- debounce moth switching lamps
+-- limit moth fov
 
 -- x better darker tiles
--- add fireflies flying around
+-- x add fireflies flying around
 -- x parallax background
+-- make fireflies slower
+-- generate parallax background
 -- add marker above lamps the switch will activate
 -- camera shake
 
--- better lamp switches
+-- x better lamp switches
 -- better moth movement
 -- bresenham dashed line
 -- add checkpoints

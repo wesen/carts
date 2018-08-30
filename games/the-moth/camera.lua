@@ -33,3 +33,23 @@ function cls_camera:update()
  if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,4)
  self.pos=room:bbox():shrink(64):clip(self.pos)
 end
+
+-- from trasevol_dog
+function add_shake(p)
+ local a=rnd(1)
+ shkx+=p*cos(a)
+ shky+=p*sin(a)
+end
+
+function update_shake()
+ if abs(shkx)+abs(shky)<1 then
+  shkx=0
+  shky=0
+ end
+ 
+ shkx*=-0.4-rnd(0.1)
+ shky*=-0.4-rnd(0.1)
+end
+
+-- shkx,shky=0,0
+--   add_shake(8)
