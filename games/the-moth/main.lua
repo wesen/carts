@@ -36,7 +36,8 @@ function _draw()
 
  camera(0,0)
  -- print cpu
- -- print(tostr(stat(1),64,64,1))
+ print(tostr(stat(1)),64,64,1)
+ print(tostr(stat(7)).." fps",64,70,1)
 end
 
 function _update60()
