@@ -75,25 +75,32 @@
 -- x better spreading of fireflies
 -- x debounce moth switching lamps
 -- x limit moth fov
-
 -- x switch levels when reaching exit door
 -- x readd gore on death
+
+-- respawn at last switch
+-- better spike collision
+-- spikes should only kill you when falling down
+-- fade and room transitions
+-- moth animation when seeing light
+-- fix slight double jump (?)
+
 -- add simple intro levels
 -- add timed lamps
 -- add marker above lamps the switch will activate
 
 -- add title screen
 -- generate parallax background
--- camera shake
+-- camera shake on death
 
--- spikes should only kill you when falling down
+-- moth dash mechanics?
+
 
 -- find a proper way to define lamp target offsets
 -- x better lamp switches
 -- better moth movement
 -- bresenham dashed line
--- add checkpoints
--- moth animation when seeing light
+-- x add checkpoints
 -- particles trailing moth
 
 -- add fire as a moth obstacle
