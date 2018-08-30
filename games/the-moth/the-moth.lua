@@ -73,8 +73,8 @@
 -- x parallax background
 -- x make fireflies slower
 -- x better spreading of fireflies
--- debounce moth switching lamps
--- limit moth fov
+-- x debounce moth switching lamps
+-- x limit moth fov
 
 -- x switch levels when reaching exit door
 -- x readd gore on death
@@ -85,6 +85,8 @@
 -- add title screen
 -- generate parallax background
 -- camera shake
+
+-- spikes should only kill you when falling down
 
 -- find a proper way to define lamp target offsets
 -- x better lamp switches

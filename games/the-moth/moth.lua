@@ -6,6 +6,7 @@ cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  self.target=self.pos:clone()
  self.target_dist=0
  self.found_lamp=false
+ self.new_light_debounce=0
  del(actors,self)
  moth=self
 end)
@@ -21,7 +22,7 @@ function cls_moth:get_nearest_lamp()
    local v=(lamp.pos-self.pos)
    local d=v:magnitude()
    if d<dist and d<moth_los_limit then
-    if self:is_lamp_visible(lamp.pos) then
+    if self:is_lamp_visible(lamp) then
      dist=d
      dir=v
      nearest_lamp=lamp
@@ -33,8 +34,8 @@ function cls_moth:get_nearest_lamp()
  return nearest_lamp,dir
 end
 
-function cls_moth:is_lamp_visible(p)
- local ray=bbox(self.pos+v2(4,4),p+v2(6,6))
+function cls_moth:is_lamp_visible(lamp)
+ local ray=bbox(self.pos+v2(4,4),lamp.light_position)
  for tile in all(room.solid_tiles) do
   local p=isect(ray,tile)
   if (#p>0) return false
@@ -43,13 +44,23 @@ function cls_moth:is_lamp_visible(p)
 end
 
 function cls_moth:update()
- local nearest_lamp=self:get_nearest_lamp()
- if nearest_lamp!=nil then
-  self.found_lamp=true
-  self.target=nearest_lamp.pos+v2(6,6)
- elseif self.found_lamp then
-  self.found_lamp=false
-  self.target=self.pos:clone()
+ self.new_light_debounce=max(0,self.new_light_debounce-1)
+
+ if self.new_light_debounce==0 then
+  local nearest_lamp=self:get_nearest_lamp()
+  if nearest_lamp!=nil then
+   local p=nearest_lamp.light_position
+   if p!=self.target then
+    printh("Found new light debounce "..tostr(self.new_light_debounce))
+    self.new_light_debounce=60
+    self.target=nearest_lamp.light_position
+    self.found_lamp=true
+   end
+  elseif self.found_lamp then
+   self.found_lamp=false
+   self.target=self.pos:clone()
+   self.new_light_debounce=60
+  end
  end
 
  local maxvel=.3

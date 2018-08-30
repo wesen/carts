@@ -13,7 +13,7 @@ cls_lamp=subclass(typ_lamp,cls_actor,function(self,pos,tile)
  -- lookup number in tile below
  self.nr=room:tile_at(self.pos/8+v2(0,1))-spr_lamp_nr_base
  self.spr=tile-(self.is_on and 0 or 2)
- printh("iitialized with "..tostr(tile).." "..tostr(self.spr))
+ self.light_position=self.pos+v2(6,6)
  add(room.lamps,self)
 end)
 
