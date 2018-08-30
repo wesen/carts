@@ -20,16 +20,16 @@ end
 
 function fireflies_init(v)
  fireflies={}
- for i=0,20 do
+ for i=0,(v.x*v.y/20) do
   local p={
-   x=rnd(v.x),
-   y=rnd(v.y),
+   x=rnd(v.x*8),
+   y=rnd(v.y*8),
    speed=(0.01+rnd(.1))*rndsign(),
    size=rnd(3),
    maxlife=30+rnd(50),
    life=0,
    counter=0,
-   radius=60
+   radius=30+min(v.x,v.y)
   }
   p.life=rnd(p.maxlife)
   add(fireflies,p)

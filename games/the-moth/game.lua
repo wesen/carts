@@ -9,7 +9,7 @@ function cls_game:load_level(level)
  player=nil
  moth=nil
  cls_room.init(levels[self.current_level])
- fireflies_init(room.dim*8)
+ fireflies_init(room.dim)
  room:spawn_player()
 end
 

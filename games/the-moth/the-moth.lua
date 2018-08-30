@@ -72,6 +72,7 @@
 -- x add fireflies flying around
 -- x parallax background
 -- x make fireflies slower
+-- x better spreading of fireflies
 
 -- x switch levels when reaching exit door
 -- add timed lamps
