@@ -23,8 +23,12 @@ function cls_player:smoke(spr,dir)
 end
 
 function cls_player:kill()
+ make_gore_explosion(self.pos)
  player=nil
- room:spawn_player()
+ add_cr(function()
+  wait_for(2)
+  room:spawn_player()
+ end)
 end
 
 function cls_player:update()
