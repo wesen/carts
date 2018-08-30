@@ -13,3 +13,10 @@ function add_cr(f)
  add(crs,cr)
  return cr
 end
+
+function wait_for(t)
+ while t>0 do
+  t-=dt
+  yield()
+ end
+end
