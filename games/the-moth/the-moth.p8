@@ -31,6 +31,8 @@ jump_max_hold_time=15
 
 ground_grace_interval=12
 
+moth_los_limit=200
+
 
 
 function class (typ,init)
@@ -269,6 +271,9 @@ room=nil
 actors={}
 tiles={}
 crs={}
+
+moth=nil
+player=nil
 
 levels={
  {pos=v2(16,0),dim=v2(32,16)},
@@ -607,7 +612,6 @@ function update_actors(typ)
 end
 
 spr_moth=5
-moth=nil
 
 cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
@@ -628,8 +632,8 @@ function cls_moth:get_nearest_lamp()
  for _,lamp in pairs(room.lamps) do
   if lamp.is_on then
    local v=(lamp.pos-self.pos)
-   local d=v:sqrmagnitude()/10000.
-   if d<dist then
+   local d=v:magnitude()
+   if d<dist and d<moth_los_limit then
     if self:is_lamp_visible(lamp.pos) then
      dist=d
      dir=v
@@ -1278,7 +1282,6 @@ cls_game=class(typ_game,function(self)
 end)
 
 function cls_game:load_level(level)
- printh("load level "..tostr(level))
  self.current_level=level
  actors={}
  player=nil
@@ -1372,15 +1375,16 @@ end
 -- x parallax background
 -- x make fireflies slower
 -- x better spreading of fireflies
-
--- x switch levels when reaching exit door
--- add timed lamps
--- add title screen
--- add simple intro levels
 -- debounce moth switching lamps
 -- limit moth fov
+
+-- x switch levels when reaching exit door
+-- x readd gore on death
+-- add simple intro levels
+-- add timed lamps
 -- add marker above lamps the switch will activate
 
+-- add title screen
 -- generate parallax background
 -- camera shake
 
@@ -1392,7 +1396,6 @@ end
 -- moth animation when seeing light
 -- particles trailing moth
 
--- readd gore on death
 -- add fire as a moth obstacle
 
 -- add frogs
@@ -1447,8 +1450,8 @@ function _draw()
 
  camera(0,0)
  -- print cpu
- print(tostr(stat(1)),64,64,1)
- print(tostr(stat(7)).." fps",64,70,1)
+ -- print(tostr(stat(1)),64,64,1)
+ -- print(tostr(stat(7)).." fps",64,70,1)
 end
 
 function _update60()

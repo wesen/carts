@@ -1,5 +1,4 @@
 spr_moth=5
-moth=nil
 
 cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
@@ -20,8 +19,8 @@ function cls_moth:get_nearest_lamp()
  for _,lamp in pairs(room.lamps) do
   if lamp.is_on then
    local v=(lamp.pos-self.pos)
-   local d=v:sqrmagnitude()/10000.
-   if d<dist then
+   local d=v:magnitude()
+   if d<dist and d<moth_los_limit then
     if self:is_lamp_visible(lamp.pos) then
      dist=d
      dir=v

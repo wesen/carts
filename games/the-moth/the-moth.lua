@@ -73,15 +73,16 @@
 -- x parallax background
 -- x make fireflies slower
 -- x better spreading of fireflies
-
--- x switch levels when reaching exit door
--- add timed lamps
--- add title screen
--- add simple intro levels
 -- debounce moth switching lamps
 -- limit moth fov
+
+-- x switch levels when reaching exit door
+-- x readd gore on death
+-- add simple intro levels
+-- add timed lamps
 -- add marker above lamps the switch will activate
 
+-- add title screen
 -- generate parallax background
 -- camera shake
 
@@ -93,7 +94,6 @@
 -- moth animation when seeing light
 -- particles trailing moth
 
--- readd gore on death
 -- add fire as a moth obstacle
 
 -- add frogs

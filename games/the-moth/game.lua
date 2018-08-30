@@ -3,7 +3,6 @@ cls_game=class(typ_game,function(self)
 end)
 
 function cls_game:load_level(level)
- printh("load level "..tostr(level))
  self.current_level=level
  actors={}
  player=nil
