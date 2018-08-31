@@ -33,6 +33,7 @@ ground_grace_interval=12
 
 moth_los_limit=200
 
+dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,14}
 
 
 function class (typ,init)
@@ -271,6 +272,7 @@ room=nil
 actors={}
 tiles={}
 crs={}
+draw_crs={}
 
 moth=nil
 player=nil
@@ -281,6 +283,8 @@ levels={
  {pos=v2(0,0),dim=v2(16,16)}
 }
 
+is_fading=false
+is_screen_dark=false
 
 cls_camera=class(typ_camera,function(self)
  self.target=nil
@@ -399,6 +403,45 @@ end
 
 
 
+-- fade
+function fade(fade_in)
+ is_fading=true
+ is_screen_dark=false
+ local p=0
+ for i=1,10 do
+  local i_=i
+  local time_elapsed=0
+  
+  if (fade_in==true) i_=10-i
+  p=flr(mid(0,i_/10,1)*100)
+ 
+  while time_elapsed<0.1 do
+   for j=1,15 do
+    local kmax=(p+(j*1.46))/22
+    local col=j
+    for k=1,kmax do
+     if (col==0) break
+     col=dpal[col]
+    end
+    pal(j,col,1)
+   end
+   
+   if not fade_in and p==100 then
+    -- this needs to be set before the final yield
+    -- draw will continue to be called even if we are
+    -- in a coresumed cr, if i understand this correctly
+    is_screen_dark=true
+   end  
+   
+   time_elapsed+=dt
+   yield()
+  end
+ end
+
+ is_fading=false
+end
+
+
 -- functions
 function appr(val,target,amount)
  return (val>target and max(val-amount,target)) or min(val+amount,target)
@@ -494,12 +537,13 @@ function cr_move_to(obj,target,d,easetype)
   yield()
  end
 end
-function tick_crs()
- for cr in all(crs) do
+function tick_crs(crs_)
+ for cr in all(crs_) do
   if costatus(cr)!='dead' then
-   coresume(cr)
+   local status,err=coresume(cr)
+   if (not status) printh("cr error "..err)
   else
-   del(crs,cr)
+   del(crs_,cr)
   end
  end
 end
@@ -507,6 +551,12 @@ end
 function add_cr(f)
  local cr=cocreate(f)
  add(crs,cr)
+ return cr
+end
+
+function add_draw_cr(f)
+ local cr=cocreate(f)
+ add(draw_crs,cr)
  return cr
 end
 
@@ -785,7 +835,8 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player()
- cls_spawn.init(self.player_spawn:clone())
+ local spawn=cls_spawn.init(self.player_spawn:clone())
+ main_camera:set_target(spawn)
 end
 
 function cls_room:tile_at(pos)
@@ -1146,7 +1197,7 @@ cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos)
   self:cr_spawn()
  end)
  add_cr(function()
-  wait_for(0.5)
+  wait_for(0.2)
   sfx(32)
  end)
 end)
@@ -1310,13 +1361,19 @@ cls_game=class(typ_game,function(self)
 end)
 
 function cls_game:load_level(level)
- self.current_level=level
- actors={}
- player=nil
- moth=nil
- cls_room.init(levels[self.current_level])
- fireflies_init(room.dim)
- room:spawn_player()
+ add_draw_cr(function ()
+  printh("fade")
+  fade(false)
+  printh("fade2")
+  self.current_level=level
+  actors={}
+  player=nil
+  moth=nil
+  cls_room.init(levels[self.current_level])
+  fireflies_init(room.dim)
+  room:spawn_player()
+  fade(true)
+ end)
 end
 
 function cls_game:next_level()
@@ -1452,8 +1509,8 @@ end
 main_camera=cls_camera.init()
 
 function _init()
- music(0)
- game:load_level(2)
+ -- music(0)
+ game:load_level(1)
 end
 
 function _draw()
@@ -1461,32 +1518,37 @@ function _draw()
 
  cls()
 
- local p=main_camera:compute_position()
- camera(p.x/1.5,p.y/1.5)
- fireflies_draw()
+ if not is_screen_dark then
+  local p=main_camera:compute_position()
+  camera(p.x/1.5,p.y/1.5)
+  fireflies_draw()
 
- camera(p.x,p.y)
- room:draw()
- draw_actors()
- if (player!=nil) player:draw()
- if (moth!=nil) moth:draw()
+  camera(p.x,p.y)
+  if (room!=nil) room:draw()
+  draw_actors()
+  if (player!=nil) player:draw()
+  if (moth!=nil) moth:draw()
 
- palt(0,false)
- for a in all(actors) do
-  if (a.draw_text!=nil) a:draw_text()
+  palt(0,false)
+  for a in all(actors) do
+   if (a.draw_text!=nil) a:draw_text()
+  end
+  palt()
+
+  camera(0,0)
+  -- print cpu
+  -- print(tostr(stat(1)),64,64,1)
+  -- print(tostr(stat(7)).." fps",64,70,1)
  end
- palt()
 
- camera(0,0)
- -- print cpu
- -- print(tostr(stat(1)),64,64,1)
- -- print(tostr(stat(7)).." fps",64,70,1)
+ tick_crs(draw_crs)
+
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
- tick_crs()
+ tick_crs(crs)
  fireflies_update()
  if (player!=nil) player:update()
  if (moth!=nil) moth:update()
@@ -1781,7 +1843,7 @@ __sfx__
 011800200c0550f055130550c0551f0551a0551b0551f0550c0500c0350c02500000000000000000000000000e05511055140550e055110551b05518055110551405014035140251400000000000000000000000
 001800001803018030180300c0300c7300c7301b0301b0301b0301b0301b03511030117301173511030110300e0300e0300e0300e0300e7300e7300e0300f0300f0300f0300f0351303013730137351303013030
 011800002b0522b0522b0422b0422b1322b1222905229052290422904229032290322902229022291122911227052270422704227032271222613226052260422604226032261122413224032240322b1222b122
-011800000f05513055160550f055220551d0551f0550c0550e0500e035130051d005000000000000000000001105514055110550e0551a0551b0551a055160551305013035000000000000000000000000000000
+011800001d05513055160550f055220551d0551f0550c0550e0500e035130051d005000000000000000000001105514055110550e0551a0551b0551a055160551305013035000000000000000000000000000000
 011800002c0522c0522c0422c0422c1322c1222b0522b0522b0422b0422b03229032290222902226112261122705227042270422703227122241322405224042240421b0321b1121b1321b0321a0321a1221a122
 001800001803018030180300c0300c7300c7301b0301b0301b0301b0301b03511030117301173511030110300e0300e0300e0300e0300e7300e7300e0300f0300f0300f0300f0351303013730137351303013030
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -1809,7 +1871,7 @@ __sfx__
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 01060000000000a0500c0500f0500f0501105016050180501b0501d0501f050220502205027050290502e02027020290102b0002e000300003300035000350000000000000000000000000000000000000000000
 0106000029050270502e050290502705022050220501f0501d0501b0501805016050110500f0500f0500c02009020290002b0002e000300003300035000350000000000000000000000000000000000000000000
-00030000000000405006050060500705008050090500a0500c0500d0500f05011050170501c05023050290502d050000000000000000000000000000000000000000000000000000000000000000000000000000
+00030000000000505006050060500705008050090500a0500c0500d0500f05011050170501c05023050290502d050000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
 01 01020344
 02 04060544

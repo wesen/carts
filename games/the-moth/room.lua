@@ -47,7 +47,8 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player()
- cls_spawn.init(self.player_spawn:clone())
+ local spawn=cls_spawn.init(self.player_spawn:clone())
+ main_camera:set_target(spawn)
 end
 
 function cls_room:tile_at(pos)

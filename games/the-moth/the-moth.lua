@@ -11,6 +11,7 @@
 
 --#include camera
 --#include gfx
+--#include fade
 
 --#include helpers
 --#include tween

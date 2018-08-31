@@ -1,9 +1,10 @@
-function tick_crs()
- for cr in all(crs) do
+function tick_crs(crs_)
+ for cr in all(crs_) do
   if costatus(cr)!='dead' then
-   coresume(cr)
+   local status,err=coresume(cr)
+   if (not status) printh("cr error "..err)
   else
-   del(crs,cr)
+   del(crs_,cr)
   end
  end
 end
@@ -11,6 +12,12 @@ end
 function add_cr(f)
  local cr=cocreate(f)
  add(crs,cr)
+ return cr
+end
+
+function add_draw_cr(f)
+ local cr=cocreate(f)
+ add(draw_crs,cr)
  return cr
 end
 
