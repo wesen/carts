@@ -21,6 +21,7 @@ function cls_spring:update()
     self.sprung_time=10
     local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
     sfx(38)
+    main_camera:add_shake(3)
    end
   end
  end

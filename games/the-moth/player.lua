@@ -30,6 +30,7 @@ end
 function cls_player:kill()
  make_gore_explosion(self.pos)
  player=nil
+ main_camera:add_shake(8)
  sfx(0)
  add_cr(function()
   wait_for(1)
