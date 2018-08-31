@@ -84,11 +84,12 @@
 -- x fade and room transitions
 
 -- x add timed lamps
+-- x hair after jump
+-- x room transition sfx
+
 -- better spike collision
--- room transition sfx
 -- moth animation when seeing light
 -- fix slight double jump (?)
--- hair after jump
 
 -- add simple intro levels
 -- add marker above lamps the switch will activate

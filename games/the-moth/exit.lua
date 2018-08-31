@@ -6,6 +6,7 @@ cls_exit=subclass(typ_exit,cls_lamp,function(self,pos,tile)
  self.hitbox=hitbox(v2(4,4),v2(8,8))
  self.player_near=false
  self.moth_near=false
+ self.activated=false
 end)
 
 tiles[spr_exit_off]=cls_exit
@@ -15,7 +16,8 @@ function cls_exit:update()
  self.player_near=player!=nil and player:collides_with(self)
 
  self.moth_near=moth!=nil and moth:collides_with(self)
- if self.moth_near then
+ if self.moth_near and not self.activated then
+  self.activated=true
   game:next_level()
  end
 end
@@ -28,11 +30,4 @@ function cls_exit:draw()
  spr(spr_,self.pos.x,self.pos.y,2,2)
  palt()
  pal()
-end
-
-function cls_exit:draw_text()
- if self.player_near and self.moth_near and flr(frame/32)%2==1 then
-  local pos=main_camera:abs_position(v2(50,64))
-  bstr("\x97",self.pos.x-4,self.pos.y-10,0,14)
- end
 end

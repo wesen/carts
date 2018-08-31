@@ -1,4 +1,3 @@
-
 function darken(p,_pal)
  for j=1,15 do
   local kmax=(p+(j*1.46))/22
@@ -7,8 +6,12 @@ function darken(p,_pal)
    if (col==0) break
    col=dpal[col]
   end
+  if (col==14) col=13
+  if (col==2) col=5
+  if (col==8) col=5
   pal(j,col,_pal)
  end
+ printh("correct red and stuff")
 end
 
 -- fade

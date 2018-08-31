@@ -408,7 +408,6 @@ function bstr(s,x,y,c1,c2)
 end
 
 
-
 function darken(p,_pal)
  for j=1,15 do
   local kmax=(p+(j*1.46))/22
@@ -417,8 +416,12 @@ function darken(p,_pal)
    if (col==0) break
    col=dpal[col]
   end
+  if (col==14) col=13
+  if (col==2) col=5
+  if (col==8) col=5
   pal(j,col,_pal)
  end
+ printh("correct red and stuff")
 end
 
 -- fade
@@ -1417,6 +1420,7 @@ cls_exit=subclass(typ_exit,cls_lamp,function(self,pos,tile)
  self.hitbox=hitbox(v2(4,4),v2(8,8))
  self.player_near=false
  self.moth_near=false
+ self.activated=false
 end)
 
 tiles[spr_exit_off]=cls_exit
@@ -1426,7 +1430,8 @@ function cls_exit:update()
  self.player_near=player!=nil and player:collides_with(self)
 
  self.moth_near=moth!=nil and moth:collides_with(self)
- if self.moth_near then
+ if self.moth_near and not self.activated then
+  self.activated=true
   game:next_level()
  end
 end
@@ -1441,12 +1446,6 @@ function cls_exit:draw()
  pal()
 end
 
-function cls_exit:draw_text()
- if self.player_near and self.moth_near and flr(frame/32)%2==1 then
-  local pos=main_camera:abs_position(v2(50,64))
-  bstr("\x97",self.pos.x-4,self.pos.y-10,0,14)
- end
-end
 cls_game=class(typ_game,function(self)
  self.current_level=1
 end)
@@ -1454,6 +1453,7 @@ end)
 function cls_game:load_level(level)
  add_draw_cr(function ()
   fade(false)
+  wait_for(1)
   self.current_level=level
   actors={}
   player=nil
@@ -1471,10 +1471,13 @@ function cls_game:load_level(level)
   fireflies_init(room.dim)
   room:spawn_player()
   fade(true)
+  music(0)
  end)
 end
 
 function cls_game:next_level()
+ music(-1,300)
+ sfx(39)
  self:load_level(self.current_level%#levels+1)
 end
 
@@ -1567,11 +1570,12 @@ end
 -- x fade and room transitions
 
 -- x add timed lamps
+-- x hair after jump
+-- x room transition sfx
+
 -- better spike collision
--- room transition sfx
 -- moth animation when seeing light
 -- fix slight double jump (?)
--- hair after jump
 
 -- add simple intro levels
 -- add marker above lamps the switch will activate
@@ -1610,7 +1614,7 @@ main_camera=cls_camera.init()
 
 function _init()
  -- music(0)
- game:load_level(2)
+ game:load_level(1)
 end
 
 function _draw()
@@ -1982,6 +1986,7 @@ __sfx__
 0104000013265333000a3000130000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 010400000c255333000a3000130000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000100000c0500805008050000000b0500b0500c0500e0500f0501105016050180501b0501f05022050240502405022050200501d0501b0501605016050160501b0501d0501f0501d0501b0501b0500000000000
+010c00000c0350f035130351b0351f03524035270352b0353004030032300223001230015000000e00011000140000e000110001b000180001100014000140001400014000000000000000000000000000000000
 __music__
 03 01020344
 02 04060544
