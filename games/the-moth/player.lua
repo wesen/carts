@@ -25,8 +25,9 @@ end
 function cls_player:kill()
  make_gore_explosion(self.pos)
  player=nil
+ sfx(0)
  add_cr(function()
-  wait_for(2)
+  wait_for(1)
   room:spawn_player()
  end)
 end

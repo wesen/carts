@@ -39,6 +39,7 @@ cls_lamp_switch=subclass(typ_lamp_switch,cls_actor,function(self,pos,tile)
  self.nr=room:tile_at(self.pos/8+v2(0,-1))-spr_lamp_nr_base
  self.is_on=tile==spr_switch_on
  self.player_near=false
+ add(room.switches,self)
 end)
 
 tiles[spr_switch_off]=cls_lamp_switch
@@ -52,11 +53,20 @@ function cls_lamp_switch:update()
 end
 
 function cls_lamp_switch:switch()
+ -- switch switches too
  for lamp in all(room.lamps) do
   if lamp.nr==self.nr then
    lamp.is_on=not lamp.is_on
    self.is_on=lamp.is_on
   end
+ end
+ for switch in all(room.switches) do
+  if (switch.nr==self.nr) switch.is_on=self.is_on
+ end
+ if self.is_on then
+  sfx(30)
+ else
+  sfx(31)
  end
 end
 

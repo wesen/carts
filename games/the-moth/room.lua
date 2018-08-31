@@ -4,6 +4,7 @@ cls_room=class(typ_room,function(self,r)
  self.player_spawn=nil
  self.moth_spawn=nil
  self.lamps={}
+ self.switches={}
  self.solid_tiles={}
 
  room=self
