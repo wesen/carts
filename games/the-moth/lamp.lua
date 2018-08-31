@@ -64,6 +64,13 @@ function cls_lamp:draw()
  local spr_=self.spr+(is_light and 0 or 2)
  spr(spr_,self.pos.x,self.pos.y,2,2)
  pal()
+
+ if self.countdown_t!=nil and self.countdown_t>0 then
+  local x1=self.pos.x
+  local y1=self.pos.y-5
+  rect(x1,y1,x1+10,y1+2,1)
+  rect(x1+9*(1-self.countdown_t/self.countdown),y1+1,x1+9,y1+1,9)
+ end
 end
 
 spr_switch_on=69
