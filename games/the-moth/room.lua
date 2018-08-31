@@ -71,7 +71,7 @@ function cls_room:spawn_player()
 end
 
 function cls_room:handle_switch_toggle(switch)
- self.player_spawn=self.pos
+ self.player_spawn=switch.pos
 
  switch.is_on=not switch.is_on
 
