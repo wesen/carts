@@ -703,6 +703,7 @@ cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  self.target_dist=0
  self.found_lamp=false
  self.new_light_debounce=0
+ self.ghosts={}
  del(actors,self)
  moth=self
 end)
@@ -757,8 +758,8 @@ function cls_moth:update()
   end
  end
 
- local maxvel=.3
- local accel=0.1
+ local maxvel=.5
+ local accel=0.2
  local dist=self.target-self.pos
  self.target_dist=dist:magnitude()
 
@@ -773,14 +774,19 @@ function cls_moth:update()
  self:move(self.spd)
 
  self.spr=spr_moth+flr(frame/8)%3
-end
 
+ if self.spd:sqrmagnitude()>0.1 and #self.ghosts<7 then
+  if (frame%5==0) insert(self.ghosts,self.pos:clone())
+ else
+  popend(self.ghosts)
+ end
+end
 function cls_moth:draw()
- -- if self.target_dist>3 and frame%16<8 then
- --  fillp(0b0011001111001100)
- --  line(self.pos.x+4,self.pos.y+4,self.target.x,self.target.y,5)
- --  fillp()
- -- end
+ local cols={6,6,13,13,5,1,1}
+ for i,ghost in pairs(self.ghosts) do
+  circfill(ghost.x+4,ghost.y+4,.5,cols[i])
+ end
+
  bspr(self.spr,self.pos.x,self.pos.y,self.flip.x,self.flip.y,0)
 end
 cls_button=class(typ_button,function(self,btn_nr)
@@ -1603,7 +1609,7 @@ end
 main_camera=cls_camera.init()
 
 function _init()
- music(0)
+ -- music(0)
  game:load_level(2)
 end
 
