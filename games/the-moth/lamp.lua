@@ -31,6 +31,21 @@ function cls_lamp:update()
    self.is_on=not self.is_on
   end
  end
+
+ -- these lights turn off after a while
+ if self.countdown!=nil and self.is_on then
+  self.countdown_t-=dt
+  if self.countdown_t<0 then
+   room:handle_lamp_off(self)
+  end
+ end
+end
+
+function cls_lamp:toggle()
+ self.is_on=not self.is_on
+ if self.countdown!=nil and self.is_on then
+  self.countdown_t=self.countdown
+ end
 end
 
 function cls_lamp:draw()

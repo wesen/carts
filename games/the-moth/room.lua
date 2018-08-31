@@ -38,7 +38,7 @@ cls_room=class(typ_room,function(self,r)
   for timer in all(l.countdown_lights) do
    for lamp in all(self.lamps) do
     if lamp.nr==timer[1] then
-     lamp.countdown={timer[2],timer[3]}
+     lamp.countdown=timer[2]
     end
    end
   end
@@ -71,18 +71,19 @@ function cls_room:spawn_player()
 end
 
 function cls_room:handle_switch_toggle(switch)
- printh("handle switch toggle")
  self.player_spawn=self.pos
+
+ switch.is_on=not switch.is_on
 
  for lamp in all(self.lamps) do
   if lamp.nr==switch.nr then
-   lamp.is_on=not lamp.is_on
-   switch.is_on=lamp.is_on
+   lamp:toggle()
   end
  end
 
- for switch in all(self.switches) do
-  if (switch.nr==switch.nr) switch.is_on=switch.is_on
+ -- sync all the other switches on the same circuit
+ for s_ in all(self.switches) do
+  if (s_.nr==switch.nr) s_.is_on=switch.is_on
  end
  if switch.is_on then
   sfx(30)
@@ -91,7 +92,12 @@ function cls_room:handle_switch_toggle(switch)
  end
 end
 
+-- this is a bit dirty because every lamp on the circuit will sync the switches
 function cls_room:handle_lamp_off(lamp)
+ lamp:toggle()
+ for s_ in all(self.switches) do
+  if (s_.nr==lamp.nr) s_.is_on=lamp.is_on
+ end
 end
 
 function cls_room:tile_at(pos)

@@ -87,11 +87,14 @@
 -- x hair after jump
 -- x room transition sfx
 
--- make timer lamps flicker
+-- x make timer lamps flicker
+-- lamp off sfx
+-- lamp flicker sfx
 
 -- make longer music
 
 -- make countdown lamps
+-- show progress bar on countdown lamp
 
 -- better spike collision
 -- moth animation when seeing light
