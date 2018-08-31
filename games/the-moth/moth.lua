@@ -62,8 +62,8 @@ function cls_moth:update()
   end
  end
 
- local maxvel=.5
- local accel=0.2
+ local maxvel=.8
+ local accel=0.05
  local dist=self.target-self.pos
  self.target_dist=dist:magnitude()
 

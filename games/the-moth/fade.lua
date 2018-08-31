@@ -11,7 +11,6 @@ function darken(p,_pal)
   if (col==8) col=5
   pal(j,col,_pal)
  end
- printh("correct red and stuff")
 end
 
 -- fade

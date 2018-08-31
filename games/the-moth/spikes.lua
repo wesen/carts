@@ -18,4 +18,7 @@ end
 
 function cls_spikes:draw()
  spr(spr_spikes,self.pos.x,self.pos.y)
+ local bbox=self:bbox()
+ local bbox_col=8
+ bbox:draw(bbox_col)
 end
