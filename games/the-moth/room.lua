@@ -24,6 +24,25 @@ cls_room=class(typ_room,function(self,r)
    if (t!=nil) t.init(p*8,tile)
   end
  end
+
+  -- configuring special lights from config
+  local l=levels[game.current_level]
+  for timer in all(l.timer_lights) do
+   for lamp in all(self.lamps) do
+    if lamp.nr==timer[1] then
+     lamp.timer={timer[2],timer[3]}
+    end
+   end
+  end
+
+  for timer in all(l.countdown_lights) do
+   for lamp in all(self.lamps) do
+    if lamp.nr==timer[1] then
+     lamp.countdown={timer[2],timer[3]}
+    end
+   end
+  end
+
 end)
 
 function cls_room:bbox()

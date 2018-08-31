@@ -13,23 +13,6 @@ function cls_game:load_level(level)
   local l=levels[self.current_level]
   cls_room.init(l)
 
-  -- configuring special lights from config
-  for timer in all(l.timer_lights) do
-   for lamp in all(room.lamps) do
-    if lamp.nr==timer[1] then
-     lamp.timer={timer[2],timer[3]}
-    end
-   end
-  end
-
-  for timer in all(l.countdown_lights) do
-   for lamp in all(room.lamps) do
-    if lamp.nr==timer[1] then
-     lamp.countdown={timer[2],timer[3]}
-    end
-   end
-  end
-
   fireflies_init(room.dim)
   room:spawn_player()
   fade(true)

@@ -87,6 +87,8 @@
 -- x hair after jump
 -- x room transition sfx
 
+-- make timer lamps flicker
+
 -- make longer music
 
 -- make countdown lamps

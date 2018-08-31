@@ -24,6 +24,7 @@ tiles[spr_lamp2_on]=cls_lamp
 
 function cls_lamp:update()
 
+ -- flickering light logic
  if self.timer!=nil then
   local tick=frame%self.timer[1]
   if tick==0 or tick==self.timer[2] then
@@ -45,6 +46,7 @@ cls_lamp_switch=subclass(typ_lamp_switch,cls_actor,function(self,pos,tile)
  self.pos=pos
  self.hitbox=hitbox(v2(-2,-2),v2(12,12))
  self.is_solid=false
+
  -- lookup number in tile above
  self.nr=room:tile_at(self.pos/8+v2(0,-1))-spr_lamp_nr_base
  self.is_on=tile==spr_switch_on
