@@ -22,6 +22,16 @@ tiles[spr_lamp_on]=cls_lamp
 tiles[spr_lamp2_off]=cls_lamp
 tiles[spr_lamp2_on]=cls_lamp
 
+function cls_lamp:update()
+
+ if self.timer!=nil then
+  local tick=frame%self.timer[1]
+  if tick==0 or tick==self.timer[2] then
+   self.is_on=not self.is_on
+  end
+ end
+end
+
 function cls_lamp:draw()
  local spr_=self.spr+(self.is_on and 0 or 2)
  spr(spr_,self.pos.x,self.pos.y,2,2)

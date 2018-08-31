@@ -4,14 +4,21 @@ end)
 
 function cls_game:load_level(level)
  add_draw_cr(function ()
-  printh("fade")
   fade(false)
-  printh("fade2")
   self.current_level=level
   actors={}
   player=nil
   moth=nil
-  cls_room.init(levels[self.current_level])
+  local l=levels[self.current_level]
+  cls_room.init(l)
+  for timer in all(l.timer_lights) do
+   for lamp in all(room.lamps) do
+    if lamp.nr==timer[1] then
+     lamp.timer={timer[2],timer[3]}
+    end
+   end
+  end
+
   fireflies_init(room.dim)
   room:spawn_player()
   fade(true)

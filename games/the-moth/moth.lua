@@ -51,7 +51,6 @@ function cls_moth:update()
   if nearest_lamp!=nil then
    local p=nearest_lamp.light_position
    if p!=self.target then
-    printh("Found new light debounce "..tostr(self.new_light_debounce))
     self.new_light_debounce=60
     self.target=nearest_lamp.light_position
     self.found_lamp=true
@@ -59,7 +58,6 @@ function cls_moth:update()
   elseif self.found_lamp then
    self.found_lamp=false
    self.target=self.pos:clone()
-   self.new_light_debounce=60
   end
  end
 

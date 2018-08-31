@@ -82,13 +82,13 @@
 -- x respawn at last switch
 -- x fade and room transitions
 
+-- x add timed lamps
 -- better spike collision
 -- room transition sfx
 -- moth animation when seeing light
 -- fix slight double jump (?)
 
 -- add simple intro levels
--- add timed lamps
 -- add marker above lamps the switch will activate
 
 -- add title screen
