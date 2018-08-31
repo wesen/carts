@@ -34,8 +34,21 @@ function cls_lamp:update()
 end
 
 function cls_lamp:draw()
- local spr_=self.spr+(self.is_on and 0 or 2)
+ local is_light=self.is_on
+ if (self.timer and maybe(0.01)) is_light=true
+
+ if not is_light then
+  pal(9,0)
+  pal(7,0)
+ elseif is_light and not self.is_on then
+  pal(13,1)
+  pal(5,1)
+  pal(6,1)
+  pal(7,13)
+ end
+ local spr_=self.spr+(is_light and 0 or 2)
  spr(spr_,self.pos.x,self.pos.y,2,2)
+ pal()
 end
 
 spr_switch_on=69
