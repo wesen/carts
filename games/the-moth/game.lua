@@ -25,7 +25,7 @@ function cls_game:load_level(level)
   for timer in all(l.countdown_lights) do
    for lamp in all(room.lamps) do
     if lamp.nr==timer[1] then
-     lamp.countdown=timer[2]
+     lamp.countdown={timer[2],timer[3]}
     end
    end
   end

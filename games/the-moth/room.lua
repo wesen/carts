@@ -51,6 +51,30 @@ function cls_room:spawn_player()
  main_camera:set_target(spawn)
 end
 
+function cls_room:handle_switch_toggle(switch)
+ printh("handle switch toggle")
+ self.player_spawn=self.pos
+
+ for lamp in all(self.lamps) do
+  if lamp.nr==switch.nr then
+   lamp.is_on=not lamp.is_on
+   switch.is_on=lamp.is_on
+  end
+ end
+
+ for switch in all(self.switches) do
+  if (switch.nr==switch.nr) switch.is_on=switch.is_on
+ end
+ if switch.is_on then
+  sfx(30)
+ else
+  sfx(31)
+ end
+end
+
+function cls_room:handle_lamp_off(lamp)
+end
+
 function cls_room:tile_at(pos)
  local v=self.pos+pos
  return mget(v.x,v.y)

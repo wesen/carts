@@ -58,26 +58,7 @@ tiles[spr_switch_on]=cls_lamp_switch
 function cls_lamp_switch:update()
  self.player_near=player!=nil and player:collides_with(self)
  if self.player_near and btnp(btn_action) then
-  self:switch()
- end
-end
-
-function cls_lamp_switch:switch()
- -- switch switches too
- room.player_spawn=self.pos
- for lamp in all(room.lamps) do
-  if lamp.nr==self.nr then
-   lamp.is_on=not lamp.is_on
-   self.is_on=lamp.is_on
-  end
- end
- for switch in all(room.switches) do
-  if (switch.nr==self.nr) switch.is_on=self.is_on
- end
- if self.is_on then
-  sfx(30)
- else
-  sfx(31)
+  room:handle_switch_toggle(self)
  end
 end
 

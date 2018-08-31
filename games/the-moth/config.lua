@@ -10,7 +10,7 @@ dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,13}
 levels={
  {pos=v2(0,16),
   dim=v2(16,16),
-  countdown_lights={{1,2}}
+  countdown_lights={{1,2,4}}
  },
  {pos=v2(16,0),
   dim=v2(32,16),
