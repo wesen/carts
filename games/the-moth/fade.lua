@@ -21,20 +21,20 @@ function fade(fade_in)
  for i=1,10 do
   local i_=i
   local time_elapsed=0
-  
+
   if (fade_in==true) i_=10-i
   p=flr(mid(0,i_/10,1)*100)
- 
+
   while time_elapsed<0.1 do
    darken(p,1)
-   
+
    if not fade_in and p==100 then
     -- this needs to be set before the final yield
     -- draw will continue to be called even if we are
     -- in a coresumed cr, if i understand this correctly
     is_screen_dark=true
-   end  
-   
+   end
+
    time_elapsed+=dt
    yield()
   end

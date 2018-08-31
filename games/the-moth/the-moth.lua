@@ -1,5 +1,4 @@
 --#include constants
---#include config
 
 --#include oo
 --#include v2
@@ -7,6 +6,7 @@
 --#include bbox
 --#include hitbox
 
+--#include config
 --#include globals
 
 --#include camera
@@ -86,6 +86,10 @@
 -- x add timed lamps
 -- x hair after jump
 -- x room transition sfx
+
+-- make longer music
+
+-- make countdown lamps
 
 -- better spike collision
 -- moth animation when seeing light
