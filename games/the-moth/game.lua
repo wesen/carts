@@ -2,10 +2,12 @@ cls_game=class(typ_game,function(self)
  self.current_level=1
 end)
 
-function cls_game:load_level(level)
+function cls_game:load_level(level,skip_fade)
  add_draw_cr(function ()
-  fade(false)
-  wait_for(1)
+  if not skip_fade then
+   fade(false)
+   wait_for(1)
+  end
   self.current_level=level
   actors={}
   player=nil
@@ -16,7 +18,7 @@ function cls_game:load_level(level)
   fireflies_init(room.dim)
   room:spawn_player()
   fade(true)
-  music(0)
+  -- music(0)
  end)
 end
 
