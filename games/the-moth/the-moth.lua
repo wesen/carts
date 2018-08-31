@@ -88,23 +88,25 @@
 -- x room transition sfx
 
 -- x make timer lamps flicker
--- lamp off sfx
--- lamp flicker sfx
+-- x add vertical spikes
+
+-- x lamp off sfx
+-- x lamp flicker sfx
+
+-- moth animation when seeing light
+-- camera shake on death
 
 -- make longer music
 
--- make countdown lamps
--- show progress bar on countdown lamp
-
--- better spike collision
--- moth animation when seeing light
--- fix slight double jump (?)
+-- x make countdown lamps
+-- x show progress bar on countdown lamp
 
 -- add simple intro levels
--- add marker above lamps the switch will activate
+
+-- -x- better spike collision
+-- -x- fix slight double jump (?)
 
 -- add title screen
--- camera shake on death
 
 -- moth dash mechanics?
 

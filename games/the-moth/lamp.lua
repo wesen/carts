@@ -29,6 +29,7 @@ function cls_lamp:update()
   local tick=frame%self.timer[1]
   if tick==0 or tick==self.timer[2] then
    self.is_on=not self.is_on
+   if (self.is_on) sfx(40)
   end
  end
 
@@ -37,6 +38,7 @@ function cls_lamp:update()
   self.countdown_t-=dt
   if self.countdown_t<0 then
    room:handle_lamp_off(self)
+   sfx(31)
   end
  end
 end
@@ -52,6 +54,18 @@ function cls_lamp:draw()
  local is_light=self.is_on
  if (self.timer and maybe(0.01)) is_light=true
 
+ if self.countdown_t!=nil
+    and self.countdown_t<4
+    and self.is_on then
+  local max_blk=64
+  local min_blk=16
+  local h=max_blk-min_blk
+  local blk=min_blk+(self.countdown_t/self.countdown)*h
+  if should_blink(blk,blk) then
+   is_light=false
+  end
+ end
+
  if not is_light then
   pal(9,0)
   pal(7,0)
@@ -65,7 +79,7 @@ function cls_lamp:draw()
  spr(spr_,self.pos.x,self.pos.y,2,2)
  pal()
 
- if self.countdown_t!=nil and self.countdown_t>0 then
+ if self.countdown_t!=nil and self.countdown_t>0 and is_light then
   local x1=self.pos.x
   local y1=self.pos.y-5
   rect(x1,y1,x1+10,y1+2,1)
@@ -106,7 +120,7 @@ function cls_lamp_switch:draw()
 end
 
 function cls_lamp_switch:draw_text()
- if self.player_near and should_blink(24) and player.on_ground then
+ if player!=nil and self.player_near and should_blink(24) and player.on_ground then
   palt(0,false)
   bstr("\x97",self.pos.x-1,self.pos.y-8,0,6)
   palt()
