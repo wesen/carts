@@ -14,6 +14,7 @@
 --#include fade
 
 --#include helpers
+--#include queues
 --#include tween
 --#include coroutines
 
@@ -87,6 +88,7 @@
 -- room transition sfx
 -- moth animation when seeing light
 -- fix slight double jump (?)
+-- hair after jump
 
 -- add simple intro levels
 -- add marker above lamps the switch will activate

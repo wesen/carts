@@ -2,7 +2,7 @@ main_camera=cls_camera.init()
 
 function _init()
  -- music(0)
- game:load_level(2)
+ game:load_level(1)
 end
 
 function _draw()
@@ -34,6 +34,10 @@ function _draw()
  end
 
  tick_crs(draw_crs)
+
+ if game.current_level==1 then
+  print("guide bepo to the exit", 20, 56, 7)
+ end
 
 end
 

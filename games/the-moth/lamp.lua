@@ -88,7 +88,7 @@ function cls_lamp_switch:draw()
 end
 
 function cls_lamp_switch:draw_text()
- if self.player_near and should_blink(24) then
+ if self.player_near and should_blink(24) and player.on_ground then
   palt(0,false)
   bstr("\x97",self.pos.x-1,self.pos.y-8,0,6)
   palt()

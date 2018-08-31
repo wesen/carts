@@ -25,7 +25,7 @@ function fireflies_init(v)
    x=rnd(v.x*8),
    y=rnd(v.y*8),
    speed=(0.01+rnd(.1))*rndsign(),
-   size=rnd(3),
+   size=rnd(2),
    maxlife=30+rnd(50),
    life=0,
    counter=0,

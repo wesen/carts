@@ -16,6 +16,11 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos)
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
  self.on_ground_interval=0
+ self.step_count=0
+
+ self.ghosts={}
+ self.on_ground=true
+
 end)
 
 function cls_player:smoke(spr,dir)
@@ -46,6 +51,7 @@ function cls_player:update()
 
  local ground_bbox=self:bbox(vec_down)
  local on_ground,tile=solid_at(ground_bbox)
+ self.on_ground=on_ground
  local on_ice=ice_at(ground_bbox)
 
  if on_ground then
@@ -64,11 +70,13 @@ function cls_player:update()
   end
 
   if input!=self.prev_input and input!=0 then
+   self.step_count=0
    if on_ice then
     self:smoke(spr_ice_smoke,-input)
    else
     -- smoke when changing directions
     self:smoke(spr_ground_smoke,-input)
+    sfx(34)
    end
   end
 
@@ -82,7 +90,7 @@ function cls_player:update()
  end
  self.prev_input=input
 
- -- x movement
+ -- compute x speed by acceleration / friction
  if abs(self.spd.x)>maxrun then
   self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
  elseif input != 0 then
@@ -90,7 +98,24 @@ function cls_player:update()
  else
   self.spd.x=appr(self.spd.x,0,decel)
  end
- if (self.spd.x!=0) self.flip.x=self.spd.x<0
+
+ if self.spd.x!=0 then
+  -- step sounds
+  if input != 0 and on_ground then
+   self.step_count+=1
+   if self.step_count==22 then
+    sfx(36)
+    self.step_count=0
+   elseif self.step_count==15 then
+    sfx(37)
+   elseif self.step_count==7 then
+    sfx(33)
+   end
+  end
+
+  -- orient sprite
+  self.flip.x=self.spd.x<0
+ end
 
  -- y movement
  local maxfall=2
@@ -124,6 +149,7 @@ function cls_player:update()
     or (on_ground_recently and self.jump_button:was_recently_pressed()) then
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
+    sfx(35)
    end
    self.on_ground_interval=0
    self.spd.y=-1.0
@@ -138,6 +164,7 @@ function cls_player:update()
     self.spd.y=-1
     self.spd.x=-wall_dir*(maxrun+1)
     self:smoke(spr_wall_smoke,-wall_dir*.3)
+    sfx(35)
     self.jump_button.hold_time+=1
    end
   end
@@ -157,13 +184,26 @@ function cls_player:update()
  else
   self.spr=1+flr(frame/4)%3
  end
+
+ if (not on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
+ if ((on_ground or #self.ghosts>7)) popend(self.ghosts)
 end
 
 function cls_player:draw()
+ local dark=0
+ for ghost in all(self.ghosts) do
+  dark+=10
+  darken(dark)
+  spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
+ end
+ pal()
+
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+
  -- not convinced by border
  -- bspr(self.spr,self.pos.x,self.pos.y,self.flip.x,self.flip.y,0)
 
+ -- debug drawing bbox
  --[[
  local bbox=self:bbox()
  local bbox_col=8
