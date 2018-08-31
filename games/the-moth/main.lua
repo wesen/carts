@@ -2,7 +2,7 @@ main_camera=cls_camera.init()
 
 function _init()
  -- music(0)
- game:load_level(1)
+ game:load_level(2)
 end
 
 function _draw()

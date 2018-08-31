@@ -54,6 +54,7 @@ end
 
 function cls_lamp_switch:switch()
  -- switch switches too
+ room.player_spawn=self.pos
  for lamp in all(room.lamps) do
   if lamp.nr==self.nr then
    lamp.is_on=not lamp.is_on

@@ -79,10 +79,11 @@
 -- x switch levels when reaching exit door
 -- x readd gore on death
 
--- respawn at last switch
+-- x respawn at last switch
+-- x fade and room transitions
+
 -- better spike collision
--- spikes should only kill you when falling down
--- fade and room transitions
+-- room transition sfx
 -- moth animation when seeing light
 -- fix slight double jump (?)
 
@@ -91,12 +92,12 @@
 -- add marker above lamps the switch will activate
 
 -- add title screen
--- generate parallax background
 -- camera shake on death
 
 -- moth dash mechanics?
 
 
+-- x-x-x generate parallax background
 -- find a proper way to define lamp target offsets
 -- x better lamp switches
 -- better moth movement

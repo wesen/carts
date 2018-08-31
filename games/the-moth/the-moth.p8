@@ -1292,6 +1292,7 @@ end
 
 function cls_lamp_switch:switch()
  -- switch switches too
+ room.player_spawn=self.pos
  for lamp in all(room.lamps) do
   if lamp.nr==self.nr then
    lamp.is_on=not lamp.is_on
@@ -1465,10 +1466,11 @@ end
 -- x switch levels when reaching exit door
 -- x readd gore on death
 
--- respawn at last switch
+-- x respawn at last switch
+-- x fade and room transitions
+
 -- better spike collision
--- spikes should only kill you when falling down
--- fade and room transitions
+-- room transition sfx
 -- moth animation when seeing light
 -- fix slight double jump (?)
 
@@ -1477,12 +1479,12 @@ end
 -- add marker above lamps the switch will activate
 
 -- add title screen
--- generate parallax background
 -- camera shake on death
 
 -- moth dash mechanics?
 
 
+-- x-x-x generate parallax background
 -- find a proper way to define lamp target offsets
 -- x better lamp switches
 -- better moth movement
@@ -1510,7 +1512,7 @@ main_camera=cls_camera.init()
 
 function _init()
  -- music(0)
- game:load_level(1)
+ game:load_level(2)
 end
 
 function _draw()
