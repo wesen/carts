@@ -96,14 +96,14 @@
 -- moth animation when seeing light
 -- x camera shake on death
 
--- implement windows
+-- x implement windows
 
 -- make longer music
 
 -- x make countdown lamps
 -- x show progress bar on countdown lamp
 
--- add simple intro levels
+-- x add simple intro levels
 
 -- -x- better spike collision
 -- -x- fix slight double jump (?)

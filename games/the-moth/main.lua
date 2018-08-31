@@ -1,7 +1,7 @@
 main_camera=cls_camera.init()
 
 function _init()
- game:load_level(4)
+ game:load_level(1)
 end
 
 function _draw()
