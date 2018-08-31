@@ -20,6 +20,7 @@ function cls_spring:update()
     player.spd.y=-3
     self.sprung_time=10
     local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
+    sfx(38)
    end
   end
  end
