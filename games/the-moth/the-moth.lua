@@ -94,7 +94,7 @@
 -- x lamp flicker sfx
 
 -- moth animation when seeing light
--- camera shake on death
+-- x camera shake on death
 
 -- make longer music
 
