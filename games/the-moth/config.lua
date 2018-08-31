@@ -11,6 +11,12 @@ levels={
  {pos=v2(0,0),
   dim=v2(16,16)},
  {pos=v2(16,0),
+  dim=v2(16,16)},
+ {pos=v2(32,0),
+  dim=v2(16,16)},
+ {pos=v2(48,0),
+  dim=v2(16,16)},
+ {pos=v2(64,0),
   dim=v2(16,16)}
   -- {lamp_nr,countdown_s}
   -- countdown_lights={{1,4}},

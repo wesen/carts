@@ -17,6 +17,7 @@ typ_game=15
 
 flg_solid=0
 flg_ice=1
+flg_opaque=2
 
 btn_right=1
 btn_left=0

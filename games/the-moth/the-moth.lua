@@ -96,6 +96,8 @@
 -- moth animation when seeing light
 -- x camera shake on death
 
+-- implement windows
+
 -- make longer music
 
 -- x make countdown lamps

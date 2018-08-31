@@ -5,7 +5,7 @@ cls_room=class(typ_room,function(self,r)
  self.moth_spawn=nil
  self.lamps={}
  self.switches={}
- self.solid_tiles={}
+ self.opaque_tiles={}
 
  room=self
 
@@ -15,8 +15,8 @@ cls_room=class(typ_room,function(self,r)
    local p=v2(i,j)
    local tile=self:tile_at(p)
    -- add solid tile bboxes for collision check
-   if fget(tile,flg_solid) then
-    add(self.solid_tiles,bbox(p*8,p*8+v2(8,8)))
+   if fget(tile,flg_opaque) then
+    add(self.opaque_tiles,bbox(p*8,p*8+v2(8,8)))
    end
    if (tile==spr_spawn_point) self.player_spawn=p*8
    if (tile==spr_moth) self.moth_spawn=p*8

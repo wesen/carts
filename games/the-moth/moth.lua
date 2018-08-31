@@ -37,7 +37,7 @@ end
 
 function cls_moth:is_lamp_visible(lamp)
  local ray=bbox(self.pos+v2(4,4),lamp.light_position)
- for tile in all(room.solid_tiles) do
+ for tile in all(room.opaque_tiles) do
   local p=isect(ray,tile)
   if (#p>0) return false
  end
