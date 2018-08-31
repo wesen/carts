@@ -55,7 +55,7 @@ function cls_lamp:draw()
  if (self.timer and maybe(0.01)) is_light=true
 
  if self.countdown_t!=nil
-    and self.countdown_t<4
+    and self.countdown_t<3
     and self.is_on then
   local max_blk=64
   local min_blk=16

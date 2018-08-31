@@ -98,6 +98,9 @@ function cls_room:handle_lamp_off(lamp)
  for s_ in all(self.switches) do
   if (s_.nr==lamp.nr) s_.is_on=lamp.is_on
  end
+ for l in all(self.lamps) do
+  if (l.nr==lamp.nr and l!=lamp) l:toggle()
+ end
 end
 
 function cls_room:tile_at(pos)

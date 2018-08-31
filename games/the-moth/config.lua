@@ -13,7 +13,7 @@ levels={
   -- {lamp_nr,countdown_s}
   countdown_lights={{1,4}},
   -- {lamp_nr,frames_off,frames_on}
-  timer_lights={{2,128,16}}
+  timer_lights={{2,128,64}}
  },
  {pos=v2(16,0),
   dim=v2(32,16)

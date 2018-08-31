@@ -1,14 +1,13 @@
 main_camera=cls_camera.init()
 
 function _init()
- game:load_level(2)
+ game:load_level(1)
 end
 
 function _draw()
  frame+=1
 
  cls()
-
  if not is_screen_dark then
   local p=main_camera:compute_position()
   camera(p.x/1.5,p.y/1.5)
