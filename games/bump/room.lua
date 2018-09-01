@@ -84,8 +84,9 @@ function cls_room:draw()
  end
 end
 
-function cls_room:spawn_player()
- cls_spawn.init(self.spawn_locations[1]:clone())
+function cls_room:spawn_player(input_port)
+ local i = flr(rnd(#self.spawn_locations))
+ cls_spawn.init(self.spawn_locations[1]:clone(), input_port)
 end
 
 function cls_room:tile_at(pos)

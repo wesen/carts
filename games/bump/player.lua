@@ -1,16 +1,18 @@
 players={}
 
-cls_player=subclass(typ_player,cls_actor,function(self,pos)
+cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  -- players are handled separately
  del(actors,self)
  add(players,self)
 
  self.flip=v2(false,false)
- self.jump_button=cls_button.init(btn_jump)
+ self.input_port=input_port
+ self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
  self.hitbox=hitbox(v2(2,0),v2(4,8))
- self.atk_hitbox=hitbox(v2(1,0),v2(6,4))
+ self.head_hitbox=hitbox(v2(1,-1),v2(6,1))
+ self.feet_hitbox=hitbox(v2(1,7),v2(6,1))
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -23,13 +25,13 @@ end
 
 function cls_player:kill()
  del(players,self)
- room:spawn_player()
+ room:spawn_player(self.input_port)
 end
 
 function cls_player:update()
  -- from celeste's player class
- local input=btn(btn_right) and 1
-    or (btn(btn_left) and -1
+ local input=btn(btn_right, self.input_port) and 1
+    or (btn(btn_left, self.input_port) and -1
     or 0)
 
  self.jump_button:update()
@@ -124,7 +126,7 @@ function cls_player:update()
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
     -- XXX test gore
-    make_gore_explosion(self.pos)
+    --make_gore_explosion(self.pos)
    end
    self.on_ground_interval=0
    self.spd.y=-1.0
@@ -158,6 +160,25 @@ function cls_player:update()
  else
   self.spr=1+flr(frame/4)%3
  end
+
+ -- interact with players
+ local feet_box=self.feet_hitbox:to_bbox_at(self.pos)
+ for player in all(players) do
+
+  -- collide
+  
+
+  -- attack
+  local head_box=player.head_hitbox:to_bbox_at(player.pos)
+  if player!=self and feet_box:collide(head_box) then
+   self.spd.y=-2.0
+   make_gore_explosion(player.pos)
+   cls_smoke.init(self.pos,32,0)
+   player:kill()
+  end
+
+ end
+
 end
 
 function cls_player:draw()
@@ -170,9 +191,9 @@ function cls_player:draw()
   bbox_col=9
  end
  bbox:draw(bbox_col)
- bbox=self.atk_hitbox:to_bbox_at(self.pos)
+ bbox=self.feet_hitbox:to_bbox_at(self.pos)
  bbox:draw(12)
  print(self.spd:str(),64,64)
- ]]
+ --]]
 end
 

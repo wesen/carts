@@ -69,4 +69,9 @@
 -- camera shake
 -- fades
 
+-- multiple players
+-- random player spawns
+-- player collision
+-- player kill
+
 --#include main
