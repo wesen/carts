@@ -14,6 +14,7 @@ typ_lamp=12
 typ_lamp_switch=13
 typ_exit=14
 typ_game=15
+typ_heart=16
 
 flg_solid=0
 flg_ice=1

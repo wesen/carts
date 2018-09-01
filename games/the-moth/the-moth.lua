@@ -24,6 +24,7 @@
 --#include room
 --#include smoke
 --#include particle
+--#include heart
 --#include player
 --#include spring
 --#include spawn

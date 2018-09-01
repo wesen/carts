@@ -24,6 +24,10 @@ function mrnd(x)
  return rnd(x*2)-x
 end
 
+function rnd_elt(v)
+ return v[min(#v,1+flr(rnd(#v)+0.5))]
+end
+
 --- function for calculating
 -- exponents to a higher degree
 -- of accuracy than using the

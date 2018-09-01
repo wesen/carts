@@ -9,6 +9,7 @@ cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  self.new_light_debounce=0
  self.ghosts={}
  self.heart_hitbox=hitbox(v2(-3,-3),v2(8+6,8+6))
+ self.heart_debounce=0
  del(actors,self)
  moth=self
 end)
@@ -85,6 +86,19 @@ function cls_moth:update()
  else
   popend(self.ghosts)
  end
+
+ -- heart collision
+ if player!=nil and self.heart_hitbox:to_bbox_at(self.pos):collide(player:bbox()) then
+  if self.heart_debounce<=0 then
+   cls_heart.init(self.pos)
+   sfx(rnd_elt({41,42,43,44,45,46,47}))
+   self.heart_debounce=16+rnd(32)
+  else
+   self.heart_debounce-=1
+  end
+ else
+  self.heart_debounce=0
+ end
 end
 
 function cls_moth:draw()
@@ -94,7 +108,4 @@ function cls_moth:draw()
  end
 
  bspr(self.spr,self.pos.x,self.pos.y,self.flip.x,self.flip.y,0)
-
- local heart_bbox=self.heart_hitbox:to_bbox(v2(0,0))
- heart_bbox:draw(8)
 end
