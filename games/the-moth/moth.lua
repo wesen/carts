@@ -92,7 +92,7 @@ function cls_moth:update()
   if self.heart_debounce<=0 then
    cls_heart.init(self.pos)
    sfx(rnd_elt({41,42,43,44,45,46,47}))
-   self.heart_debounce=16+rnd(32)
+   self.heart_debounce=48+rnd(32)
   else
    self.heart_debounce-=1
   end

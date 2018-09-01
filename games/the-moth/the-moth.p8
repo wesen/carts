@@ -813,7 +813,7 @@ function cls_moth:update()
   if self.heart_debounce<=0 then
    cls_heart.init(self.pos)
    sfx(rnd_elt({41,42,43,44,45,46,47}))
-   self.heart_debounce=16+rnd(32)
+   self.heart_debounce=48+rnd(32)
   else
    self.heart_debounce-=1
   end
@@ -1105,13 +1105,14 @@ end
 cls_heart=subclass(typ_heart,cls_particle,function(self,pos)
  cls_particle._ctr(self,pos+v2(mrnd(3),-rnd(3)-2),2.5+rnd(2),{20})
  self.spd=v2(0,-rnd(0.3)-0.2)
- self.amp=0.3+rnd(0.4)
- self.angle_spd=rnd(3)+0.3
+ self.amp=0.6+rnd(0.4)
+ self.offset=maybe() and 0 or 0.5
+ self.angle_spd=rnd(.4)+0.3
  self.ghosts={}
 end)
 
 function cls_heart:update()
- self.spd.x=cos(self.t*self.angle_spd)*self.amp
+ self.spd.x=cos(self.t*self.angle_spd+self.offset)*self.amp
  cls_particle.update(self)
 
  if #self.ghosts<7 then
