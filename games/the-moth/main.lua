@@ -35,19 +35,20 @@ function _draw()
 
  tick_crs(draw_crs)
 
- if game.current_level==1 then
+ if game.current_level==1 or game.current_level==10 then
   sspr(66,2,43,11,21,21,86,22)
   local fidx=flr(frame/8)%3*8
   sspr(8+fidx,0,8,8,2,24,16,16)
   sspr(40+fidx,0,8,8,110,25,16,16)
   print("- slono -",48,46,15)
+ end
 
+ if game.current_level==1 then
   local cols={6,6,13,13,5,5,1,1,5,5,13,13}
   print("guide bepo to the exit", 20, 58, cols[text_col+1])
   print("c - jump", 51, 66, cols[text_col+1])
   if (frame%4==0) text_col=(text_col+1)%#cols
  end
-
 end
 
 function _update60()

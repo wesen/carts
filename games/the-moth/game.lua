@@ -19,7 +19,7 @@ function cls_game:load_level(level,skip_fade)
   room:spawn_player()
   fade(true)
   music(0)
- end)
+  end)
 end
 
 function cls_game:next_level()

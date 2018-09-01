@@ -26,12 +26,18 @@ levels={
  -- level 6
  {pos=v2(80,0),
   dim=v2(16,16)},
+ -- level 9
+ {pos=v2(0,16),
+  dim=v2(16,16)},
  -- level 7
  {pos=v2(96,0),
   dim=v2(16,16)},
  -- level 8
  {pos=v2(112,0),
-  dim=v2(16,16)}
+  dim=v2(16,16)},
+ -- level 10
+ {pos=v2(16,16),
+  dim=v2(16,16)},
   -- {lamp_nr,countdown_s}
   -- countdown_lights={{1,4}},
   -- {lamp_nr,frames_off,frames_on}
