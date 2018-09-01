@@ -18,7 +18,7 @@ function cls_game:load_level(level,skip_fade)
   fireflies_init(room.dim)
   room:spawn_player()
   fade(true)
-  -- music(0)
+  music(0)
  end)
 end
 

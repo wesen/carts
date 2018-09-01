@@ -93,12 +93,12 @@
 -- x lamp off sfx
 -- x lamp flicker sfx
 
--- moth animation when seeing light
 -- x camera shake on death
 
 -- x implement windows
 
 -- make longer music
+-- moth animation when seeing light
 
 -- x make countdown lamps
 -- x show progress bar on countdown lamp
@@ -112,14 +112,15 @@
 
 -- moth dash mechanics?
 
+-- add heart
 
 -- x-x-x generate parallax background
 -- find a proper way to define lamp target offsets
 -- x better lamp switches
--- better moth movement
+-- x better moth movement
 -- bresenham dashed line
 -- x add checkpoints
--- particles trailing moth
+-- x particles trailing moth
 
 -- add fire as a moth obstacle
 
