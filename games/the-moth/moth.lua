@@ -8,6 +8,7 @@ cls_moth=subclass(typ_moth,cls_actor,function(self,pos)
  self.found_lamp=false
  self.new_light_debounce=0
  self.ghosts={}
+ self.heart_hitbox=hitbox(v2(-3,-3),v2(8+6,8+6))
  del(actors,self)
  moth=self
 end)
@@ -85,6 +86,7 @@ function cls_moth:update()
   popend(self.ghosts)
  end
 end
+
 function cls_moth:draw()
  local cols={6,6,13,13,5,1,1}
  for i,ghost in pairs(self.ghosts) do
@@ -92,4 +94,7 @@ function cls_moth:draw()
  end
 
  bspr(self.spr,self.pos.x,self.pos.y,self.flip.x,self.flip.y,0)
+
+ local heart_bbox=self.heart_hitbox:to_bbox(v2(0,0))
+ heart_bbox:draw(8)
 end

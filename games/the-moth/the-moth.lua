@@ -97,6 +97,8 @@
 
 -- x implement windows
 
+-- add heart
+
 -- make longer music
 -- moth animation when seeing light
 
@@ -111,8 +113,6 @@
 -- add title screen
 
 -- moth dash mechanics?
-
--- add heart
 
 -- x-x-x generate parallax background
 -- find a proper way to define lamp target offsets
