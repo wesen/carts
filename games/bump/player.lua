@@ -164,10 +164,7 @@ function cls_player:update()
  -- interact with players
  local feet_box=self.feet_hitbox:to_bbox_at(self.pos)
  for player in all(players) do
-
-  -- collide
   
-
   -- attack
   local head_box=player.head_hitbox:to_bbox_at(player.pos)
   if player!=self and feet_box:collide(head_box) then
