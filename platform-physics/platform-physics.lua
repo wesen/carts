@@ -58,6 +58,10 @@ function _init()
  add(menu.entries,e)
  e=cls_menu_numberentry.init("jump_spd",function(v) jump_spd=v end,2,0,4,0.1)
  add(menu.entries,e)
+ e=cls_menu_numberentry.init("air_accel",function(v) air_accel=v end,0.2,0,.4,0.01)
+ add(menu.entries,e)
+ e=cls_menu_numberentry.init("air_decel",function(v) air_decel=v end,0.1,0,.4,0.01)
+ add(menu.entries,e)
 end
 
 function _update60()
@@ -93,6 +97,6 @@ function _draw()
   print("pos.y",0,104,11)
   logger:draw("pos.y",0,128,11)
  end
- 
+
  if (menu.visible) menu:draw()
 end

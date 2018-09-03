@@ -6,6 +6,8 @@ local ground_grace_interval=12
 local maxrun=1
 local accel=0.3
 local decel=0.2
+local air_accel=0.2
+local air_decel=0.1
 local jump_spd=2
 
 local jump_button_grace_interval=10
