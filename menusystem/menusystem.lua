@@ -4,33 +4,42 @@
 
 local menu=cls_menu.init()
 
+local radius=1
+local spd=2
+local pos_x=1
+local draw_circle=true
+
 function _init()
-  menu:add("test",function() printh("test callback") end)
-  menu:add("test2",function() printh("test2 callback") end)
-  menu:add("test3",function() printh("test3 callback") end)
+  menu:add("hide circle",
+  function(self)
+    if draw_circle then
+     draw_circle=false
+     self.text="draw circle"
+    else
+     draw_circle=true
+     self.text="hide circle"
+   end
+  end)
 
   local e=cls_menu_numberentry.init(
-   "value",
-   function(v) printh("value callback "..tostr(v)) end,
+   "radius",
+   function(v) radius=v end,
    1,1,10)
   add(menu.entries,e)
   e=cls_menu_numberentry.init(
-   "value 2",
-   function(v) printh("value2 callback "..tostr(v)) end,
+   "spd",
+   function(v) spd=v end,
    10,1,20)
   add(menu.entries,e)
-
-  menuitem(1,"resume",function()
-  poke(0x5f30,1)
-end)
-
 end
 
 function _update()
-  menu:update()
+  if (menu.visible) menu:update()
+  pos_x=(pos_x+spd)%128
 end
 
 function _draw()
  cls()
- menu:draw()
+ if (draw_circle) circfill(pos_x,64,radius,8)
+ if (menu.visible) menu:draw()
 end

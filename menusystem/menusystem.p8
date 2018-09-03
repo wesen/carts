@@ -21,6 +21,7 @@ end
 cls_menu=class(function(self)
   self.entries={}
   self.current_entry=1
+  self.visible=true
 end)
 
 function cls_menu:draw()
@@ -32,6 +33,9 @@ function cls_menu:draw()
   local w=64
   local left=64-w/2
   local top=64-h/2
+  palt(0,false)
+  rectfill(left,top,64+w/2,64+h/2,5)
+  palt()
   rect(left,top,64+w/2,64+h/2,7)
   top+=6
   local y=top
@@ -73,7 +77,7 @@ function cls_menuentry:size()
 end
 
 function cls_menuentry:activate()
-  if (self.callback!=nil) self.callback()
+  if (self.callback!=nil) self.callback(self)
 end
 
 function cls_menuentry:update()
@@ -87,6 +91,7 @@ cls_menu_numberentry=class(function(self,text,callback,value,min,max,inc)
   self.max=max or 10
   self.inc=inc or 1
   self.state=0 -- 0=close, 1=open
+  if (self.callback!=nil) self.callback(self.value,self)
 end)
 
 function cls_menu_numberentry:size()
@@ -97,7 +102,7 @@ function cls_menu_numberentry:activate()
   if self.state==0 then
     self.state=1
   else
-    if (self.callback!=nil) self.callback(self.value)
+    if (self.callback!=nil) self.callback(self.value,self)
     self.state=0
   end
 end
@@ -124,6 +129,7 @@ end
 function cls_menu_numberentry:update()
   if (btnp(0)) self.value=max(self.min,self.value-self.inc)
   if (btnp(1)) self.value=min(self.max,self.value+self.inc)
+  if (self.callback!=nil) self.callback(self.value)
 end
 
 function tidx_inc(idx,n)
@@ -137,35 +143,44 @@ end
 
 local menu=cls_menu.init()
 
+local radius=1
+local spd=2
+local pos_x=1
+local draw_circle=true
+
 function _init()
-  menu:add("test",function() printh("test callback") end)
-  menu:add("test2",function() printh("test2 callback") end)
-  menu:add("test3",function() printh("test3 callback") end)
+  menu:add("hide circle",
+  function(self)
+    if draw_circle then
+     draw_circle=false
+     self.text="draw circle"
+    else
+     draw_circle=true
+     self.text="hide circle"
+   end
+  end)
 
   local e=cls_menu_numberentry.init(
-   "value",
-   function(v) printh("value callback "..tostr(v)) end,
+   "radius",
+   function(v) radius=v end,
    1,1,10)
   add(menu.entries,e)
   e=cls_menu_numberentry.init(
-   "value 2",
-   function(v) printh("value2 callback "..tostr(v)) end,
+   "spd",
+   function(v) spd=v end,
    10,1,20)
   add(menu.entries,e)
-
-  menuitem(1,"resume",function()
-  poke(0x5f30,1)
-end)
-
 end
 
 function _update()
-  menu:update()
+  if (menu.visible) menu:update()
+  pos_x=(pos_x+spd)%128
 end
 
 function _draw()
  cls()
- menu:draw()
+ if (draw_circle) circfill(pos_x,64,radius,8)
+ if (menu.visible) menu:draw()
 end
 
 __gfx__

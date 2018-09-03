@@ -1,6 +1,7 @@
 cls_menu=class(function(self)
   self.entries={}
   self.current_entry=1
+  self.visible=true
 end)
 
 function cls_menu:draw()
@@ -12,6 +13,9 @@ function cls_menu:draw()
   local w=64
   local left=64-w/2
   local top=64-h/2
+  palt(0,false)
+  rectfill(left,top,64+w/2,64+h/2,5)
+  palt()
   rect(left,top,64+w/2,64+h/2,7)
   top+=6
   local y=top
@@ -53,7 +57,7 @@ function cls_menuentry:size()
 end
 
 function cls_menuentry:activate()
-  if (self.callback!=nil) self.callback()
+  if (self.callback!=nil) self.callback(self)
 end
 
 function cls_menuentry:update()
@@ -67,6 +71,7 @@ cls_menu_numberentry=class(function(self,text,callback,value,min,max,inc)
   self.max=max or 10
   self.inc=inc or 1
   self.state=0 -- 0=close, 1=open
+  if (self.callback!=nil) self.callback(self.value,self)
 end)
 
 function cls_menu_numberentry:size()
@@ -77,7 +82,7 @@ function cls_menu_numberentry:activate()
   if self.state==0 then
     self.state=1
   else
-    if (self.callback!=nil) self.callback(self.value)
+    if (self.callback!=nil) self.callback(self.value,self)
     self.state=0
   end
 end
@@ -104,4 +109,5 @@ end
 function cls_menu_numberentry:update()
   if (btnp(0)) self.value=max(self.min,self.value-self.inc)
   if (btnp(1)) self.value=min(self.max,self.value+self.inc)
+  if (self.callback!=nil) self.callback(self.value)
 end
