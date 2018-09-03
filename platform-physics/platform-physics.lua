@@ -7,8 +7,11 @@
 --#include hitbox
 --#include menu
 --#include helpers
+--#include smoke
 --#include room
 --#include player
+
+actors={}
 
 menu=cls_menu.init()
 local player=cls_player:init()
@@ -50,12 +53,18 @@ function _update60()
 
  if (menu.visible) menu:update()
  player:update()
+ for actor in all(actors) do
+  actor:update()
+ end
 end
 
 function _draw()
  frame+=1
  cls()
  room:draw()
+ for actor in all(actors) do
+  actor:draw()
+ end
  player:draw()
  if (menu.visible) menu:draw()
 end
