@@ -29,7 +29,7 @@ function cls_menu:draw()
     h+=entry:size()
   end
 
-  local w=48
+  local w=64
   local left=64-w/2
   local top=64-h/2
   rect(left,top,64+w/2,64+h/2,7)
@@ -56,6 +56,7 @@ function cls_menu:update()
   self.current_entry=btnp(3) and tidx_inc(e,n) or (btnp(2) and tidx_dec(e,n)) or e
 
   if (btnp(5)) self.entries[self.current_entry]:activate()
+  self.entries[self.current_entry]:update()
 end
 
 cls_menuentry=class(function(self,text,callback)
@@ -75,8 +76,55 @@ function cls_menuentry:activate()
   if (self.callback!=nil) self.callback()
 end
 
-cls_menu_numberentry=class(function(self,text,callback)
+function cls_menuentry:update()
+end
+
+cls_menu_numberentry=class(function(self,text,callback,value,min,max,inc)
+  self.text=text
+  self.callback=callback
+  self.value=value
+  self.min=min or 0
+  self.max=max or 10
+  self.inc=inc or 1
+  self.state=0 -- 0=close, 1=open
 end)
+
+function cls_menu_numberentry:size()
+  return self.state==0 and 8 or 18
+end
+
+function cls_menu_numberentry:activate()
+  if self.state==0 then
+    self.state=1
+  else
+    if (self.callback!=nil) self.callback(self.value)
+    self.state=0
+  end
+end
+
+function cls_menu_numberentry:draw(x,y)
+  if self.state==0 then
+    print(self.text,x,y,7)
+  else
+    print(self.text,x,y,7)
+    local off=10
+    local w=24
+    local left=x
+    local right=x+w
+    line(left,y+off,right,y+off,13)
+    line(left,y+off,left,y+off+1)
+    line(right,y+off,right,y+off+1)
+    line(left+1,y+off+2,right-1,y+off+2,6)
+    local pct=(self.value-self.min)/(self.max-self.min)
+    print(tostr(self.value),right+5,y+off-2,7)
+    spr(1,left-2+pct*w,y+off-2)
+  end
+end
+
+function cls_menu_numberentry:update()
+  if (btnp(0)) self.value=max(self.min,self.value-self.inc)
+  if (btnp(1)) self.value=min(self.max,self.value+self.inc)
+end
 
 function tidx_inc(idx,n)
   return (idx%n)+1
@@ -93,6 +141,17 @@ function _init()
   menu:add("test",function() printh("test callback") end)
   menu:add("test2",function() printh("test2 callback") end)
   menu:add("test3",function() printh("test3 callback") end)
+
+  local e=cls_menu_numberentry.init(
+   "value",
+   function(v) printh("value callback "..tostr(v)) end,
+   1,1,10)
+  add(menu.entries,e)
+  e=cls_menu_numberentry.init(
+   "value 2",
+   function(v) printh("value2 callback "..tostr(v)) end,
+   10,1,20)
+  add(menu.entries,e)
 
   menuitem(1,"resume",function()
   poke(0x5f30,1)
