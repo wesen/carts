@@ -89,6 +89,8 @@ function cls_player:update()
 
  if input==0 then
   self.spr=1
+ elseif not on_ground then
+  self.spr=3
  else
   self.spr=1+flr(frame/4)%3
  end
