@@ -1,5 +1,5 @@
 cls_player=class(function(self)
- self.pos=v2(64,48)
+ self.pos=v2(64,16)
  self.spd=v2(0,0)
  self.spr=1
  self.flip=v2(false,false)
@@ -64,6 +64,12 @@ function cls_player:update()
  -- actually move
  self:move_x(self.spd.x)
  self:move_y(self.spd.y)
+
+ -- log values
+ logger:add("spd.x",self.spd.x)
+ logger:add("spd.y",self.spd.y)
+ logger:add("pos.x",self.pos.x)
+ logger:add("pos.y",self.pos.y)
 
  -- compute graphics
  if input!=self.prev_input and input!=0 and on_ground then
