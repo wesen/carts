@@ -33,9 +33,7 @@ function cls_menu:draw()
   local w=64
   local left=64-w/2
   local top=64-h/2
-  palt(0,false)
   rectfill(left,top,64+w/2,64+h/2,5)
-  palt()
   rect(left,top,64+w/2,64+h/2,7)
   top+=6
   local y=top
