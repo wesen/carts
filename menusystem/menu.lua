@@ -1,3 +1,4 @@
+--[[
 cls_menu=class(function(self)
   self.entries={}
   self.current_entry=1
@@ -109,3 +110,4 @@ function cls_menu_numberentry:update()
   if (btnp(1)) self.value=min(self.max,self.value+self.inc)
   if (self.callback!=nil) self.callback(self.value)
 end
+--]]
