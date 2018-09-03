@@ -23,26 +23,16 @@ local lasttime=time()
 function _init()
  menu.visible=false
 
-local e=cls_menu_numberentry.init(
- "gravity",
- function(v) gravity=v end,
- 0.12,0,0.3,0.05)
-add(menu.entries,e)
-e=cls_menu_numberentry.init(
- "accel",
- function(v) accel=v end,
- 0.3,0,1,0.05)
-add(menu.entries,e)
-e=cls_menu_numberentry.init(
- "decel",
- function(v) decel=v end,
- 0.2,0,1,0.05)
-add(menu.entries,e)
-e=cls_menu_numberentry.init(
- "maxrun",
- function(v) maxrun=v end,
- 1,0,3,0.1)
-add(menu.entries,e)
+ local e=cls_menu_numberentry.init("gravity",function(v) gravity=v end,0.12,0,0.3,0.05)
+ add(menu.entries,e)
+ e=cls_menu_numberentry.init("accel",function(v) accel=v end,0.3,0,1,0.05)
+ add(menu.entries,e)
+ e=cls_menu_numberentry.init("decel",function(v) decel=v end,0.2,0,1,0.05)
+ add(menu.entries,e)
+ e=cls_menu_numberentry.init("maxrun",function(v) maxrun=v end,1,0,3,0.1)
+ add(menu.entries,e)
+ e=cls_menu_numberentry.init("jump_spd",function(v) jump_spd=v end,2,0,4,0.1)
+ add(menu.entries,e)
 end
 
 function _update60()
