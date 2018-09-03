@@ -1,5 +1,5 @@
 cls_player=class(function(self)
- self.pos=v2(64,64)
+ self.pos=v2(64,48)
  self.spd=v2(0,0)
  self.spr=1
  self.flip=v2(false,false)
