@@ -2,15 +2,15 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 function class (init)
-  local c = {}
-  c.__index = c
-  c._ctr=init
-  function c.init (...)
-    local self = setmetatable({},c)
-    c._ctr(self,...)
-    return self
-  end
-  return c
+ local c = {}
+ c.__index = c
+ c._ctr=init
+ function c.init (...)
+  local self = setmetatable({},c)
+  c._ctr(self,...)
+  return self
+ end
+ return c
 end
 
 function subclass(parent,init)
@@ -100,6 +100,76 @@ end
 
 function angle2vec(angle)
  return v2(cos(angle),sin(angle))
+end
+
+local bboxvt={}
+bboxvt.__index=bboxvt
+
+function bbox(aa,bb)
+ return setmetatable({aa=aa,bb=bb},bboxvt)
+end
+
+function bboxvt:w()
+ return self.bb.x-self.aa.x
+end
+
+function bboxvt:h()
+ return self.bb.y-self.aa.y
+end
+
+function bboxvt:is_inside(v)
+ return v.x>=self.aa.x
+ and v.x<=self.bb.x
+ and v.y>=self.aa.y
+ and v.y<=self.bb.y
+end
+
+function bboxvt:str()
+ return self.aa:str().."-"..self.bb:str()
+end
+
+function bboxvt:draw(col)
+ rect(self.aa.x,self.aa.y,self.bb.x-1,self.bb.y-1,col)
+end
+
+function bboxvt:to_tile_bbox()
+ local x0=max(0,flr(self.aa.x/8))
+ local x1=min(room.dim.x,(self.bb.x-1)/8)
+ local y0=max(0,flr(self.aa.y/8))
+ local y1=min(room.dim.y,(self.bb.y-1)/8)
+ return bbox(v2(x0,y0),v2(x1,y1))
+end
+
+function bboxvt:collide(other)
+ return other.bb.x > self.aa.x and
+   other.bb.y > self.aa.y and
+   other.aa.x < self.bb.x and
+   other.aa.y < self.bb.y
+end
+
+function bboxvt:clip(p)
+ return v2(mid(self.aa.x,p.x,self.bb.x),
+           mid(self.aa.y,p.y,self.bb.y))
+end
+
+function bboxvt:shrink(amt)
+ local v=v2(amt,amt)
+ return bbox(v+self.aa,self.bb-v)
+end
+
+local hitboxvt={}
+hitboxvt.__index=hitboxvt
+
+function hitbox(offset,dim)
+ return setmetatable({offset=offset,dim=dim},hitboxvt)
+end
+
+function hitboxvt:to_bbox_at(v)
+ return bbox(self.offset+v,self.offset+v+self.dim)
+end
+
+function hitboxvt:str()
+ return self.offset:str().."-("..self.dim:str()..")"
 end
 
 cls_menu=class(function(self)
@@ -247,15 +317,66 @@ function mrnd(x)
  return rnd(x*2)-x
 end
 
+flg_solid=0
+
+cls_room=class(function(self)
+ self.pos=v2(0,0)
+ self.dim=v2(16,16)
+end)
+
+function cls_room:bbox()
+ return bbox(v2(0,0),self.dim*8)
+end
+
+function cls_room:draw()
+ map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid)
+end
+
+function cls_room:tile_at(pos)
+ local v=self.pos+pos
+ return mget(v.x,v.y)
+end
+
+function cls_room:solid_at(bbox)
+ if bbox.aa.x<0
+  or bbox.bb.x>self.dim.x*8
+  or bbox.aa.y<0
+  or bbox.bb.y>self.dim.y*8 then
+   return true,nil
+ else
+  return self:tile_flag_at(bbox,flg_solid)
+ end
+end
+
+function cls_room:tile_flag_at(bbox,flag)
+ local bb=bbox:to_tile_bbox()
+ for i=bb.aa.x,bb.bb.x do
+  for j=bb.aa.y,bb.bb.y do
+   if fget(self:tile_at(i,j),flag) then
+    return true,v2(i,j)
+   end
+  end
+ end
+ return false
+end
+
 cls_player=class(function(self)
- self.pos=v2(64,64)
+ self.pos=v2(64,48)
  self.spd=v2(0,0)
  self.spr=1
  self.flip=v2(false,false)
+
+ self.hitbox=hitbox(v2(2,0),v2(4,8))
 end)
+
+function cls_player:bbox(offset)
+ if (offset==nil) offset=v2(0,0)
+ return self.hitbox:to_bbox_at(self.pos+offset)
+end
 
 function cls_player:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ self:bbox():draw(8)
 end
 
 function cls_player:update()
@@ -265,13 +386,19 @@ end
 
 local menu=cls_menu.init()
 local player=cls_player:init()
+local room=cls_room:init()
 frame=0
+dt=0
+local lasttime=time()
 
 function _init()
  menu.visible=false
 end
 
-function _update()
+function _update60()
+ dt=time()-lasttime
+ lasttime=time()
+
  player:update()
  if (menu.visible) menu:update()
 end
@@ -279,6 +406,7 @@ end
 function _draw()
  frame+=1
  cls()
+ room:draw()
  player:draw()
  if (menu.visible) menu:draw()
 end
@@ -412,3 +540,12 @@ c6cc6ccccc0000cc000000000000000000eeee0000eeeee000eeeee00eeeee0000000e0000eeee00
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000777000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c3
+__map__
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+4040404040404040404040404040404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
