@@ -81,7 +81,6 @@ function cls_menu_numberentry:activate()
   if self.state==0 then
     self.state=1
   else
-    if (self.callback!=nil) self.callback(self.value,self)
     self.state=0
   end
 end

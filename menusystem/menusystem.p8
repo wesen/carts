@@ -101,7 +101,6 @@ function cls_menu_numberentry:activate()
   if self.state==0 then
     self.state=1
   else
-    if (self.callback!=nil) self.callback(self.value,self)
     self.state=0
   end
 end
@@ -209,10 +208,15 @@ function cls_menuentry:update()
 end
 
 -- number entry
-cls_menu_numberentry=class(function(self,text,callback)
+cls_menu_numberentry=class(function(self,text,callback,value,min,max,inc)
   self.text=text
   self.callback=callback
+  self.value=value
+  self.min=min or 0
+  self.max=max or 10
+  self.inc=inc or 1
   self.state=0 -- 0=close, 1=open
+  if (self.callback!=nil) self.callback(self.value,self)
 end)
 
 function cls_menu_numberentry:size()
@@ -232,7 +236,6 @@ function cls_menu_numberentry:draw(x,y)
     print(self.text,x,y,7)
   else
     print(self.text,x,y,7)
-
     local off=10
     local w=24
     local left=x
@@ -241,13 +244,16 @@ function cls_menu_numberentry:draw(x,y)
     line(left,y+off,left,y+off+1)
     line(right,y+off,right,y+off+1)
     line(left+1,y+off+2,right-1,y+off+2,6)
-    local pct=0
-    print(0,right+5,y+off-2,7)
+    local pct=(self.value-self.min)/(self.max-self.min)
+    print(tostr(self.value),right+5,y+off-2,7)
     spr(1,left-2+pct*w,y+off-2)
   end
 end
 
 function cls_menu_numberentry:update()
+  if (btnp(0)) self.value=max(self.min,self.value-self.inc)
+  if (btnp(1)) self.value=min(self.max,self.value+self.inc)
+  if (self.callback!=nil) self.callback(self.value)
 end
 
 -- main code
@@ -267,9 +273,15 @@ menu:add("hide circle",
    self.text="hide circle"
   end
  end)
-local e=cls_menu_numberentry.init("radius", function() end)
+local e=cls_menu_numberentry.init(
+ "radius",
+ function(v) radius=v end,
+  1,1,10)
 add(menu.entries,e)
-local e=cls_menu_numberentry.init("spd", function() end)
+e=cls_menu_numberentry.init(
+ "spd",
+ function(v) spd=v end,
+  10,1,20)
 add(menu.entries,e)
 
 function _update()
