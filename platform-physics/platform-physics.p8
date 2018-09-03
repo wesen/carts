@@ -157,8 +157,30 @@ function bboxvt:shrink(amt)
  return bbox(v+self.aa,self.bb-v)
 end
 
+cls_debouncer=class(function(self,duration)
+ self.duration=duration
+ self.t=0
+end)
+
+function cls_debouncer:debounce(v)
+ if v then
+  self.t=self.duration
+ elseif self.t>0 then
+  self.t-=1
+ end
+end
+
+function cls_debouncer:is_on()
+ return self.t>0
+end
+
  local maxfall=2
  local gravity=0.12
+
+local ground_grace_interval=12
+
+local jump_button_grace_interval=10
+local jump_max_hold_time=15
 
 flg_solid=0
 flg_ice=1
@@ -381,6 +403,7 @@ cls_player=class(function(self)
 
  self.hitbox=hitbox(v2(2,0),v2(4,8))
  self.on_ground=true
+ self.ground_debouncer=cls_debouncer.init(ground_grace_interval)
 end)
 
 function cls_player:str()
@@ -401,13 +424,17 @@ function cls_player:draw()
 end
 
 function cls_player:update()
+ -- get arrow input
  local input=btn(btn_right) and 1
     or (btn(btn_left) and -1
     or 0)
  if (menu.visible) input=0
 
+ -- check if we are on ground
  local on_ground,tile=self:is_solid_at(vec_down)
  self.on_ground=on_ground
+ self.ground_debouncer:debounce(on_ground)
+ local on_ground_recently=self.ground_debouncer:is_on()
 
  -- compute X speed
  if input!=0 then

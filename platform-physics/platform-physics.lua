@@ -1,6 +1,7 @@
 --#include oo
 --#include v2
 --#include bbox
+--#include debouncer
 --#include config
 --#include constants
 --#include hitbox

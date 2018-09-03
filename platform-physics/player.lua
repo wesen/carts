@@ -6,6 +6,7 @@ cls_player=class(function(self)
 
  self.hitbox=hitbox(v2(2,0),v2(4,8))
  self.on_ground=true
+ self.ground_debouncer=cls_debouncer.init(ground_grace_interval)
 end)
 
 function cls_player:str()
@@ -26,13 +27,17 @@ function cls_player:draw()
 end
 
 function cls_player:update()
+ -- get arrow input
  local input=btn(btn_right) and 1
     or (btn(btn_left) and -1
     or 0)
  if (menu.visible) input=0
 
+ -- check if we are on ground
  local on_ground,tile=self:is_solid_at(vec_down)
  self.on_ground=on_ground
+ self.ground_debouncer:debounce(on_ground)
+ local on_ground_recently=self.ground_debouncer:is_on()
 
  -- compute X speed
  if input!=0 then
