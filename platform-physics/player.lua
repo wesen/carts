@@ -33,6 +33,7 @@ function cls_player:update()
  local on_ground,tile=self:is_solid_at(vec_down)
  self.on_ground=on_ground
 
+ -- compute X speed
  if input!=0 then
   self.spd.x=input
  end
@@ -41,7 +42,13 @@ function cls_player:update()
   self.flip.x=self.spd.x<0
  end
 
+ -- compute Y speed
+ local maxfall=2
+ local gravity=0.12
+ if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
+
  self:move_x(self.spd.x)
+ self:move_y(self.spd.y)
 
  if input==0 then
   self.spr=1
@@ -59,6 +66,20 @@ function cls_player:move_x(amount)
    self.pos.x+=step
   else
    self.spd.x=0
+   break
+  end
+ end
+end
+
+function cls_player:move_y(amount)
+ while abs(amount)>0 do
+  local step=amount
+  if (abs(amount)>1) step=sign(amount)
+  amount-=step
+  if not self:is_solid_at(v2(0,step)) then
+   self.pos.y+=step
+  else
+   self.spd.y=0
    break
   end
  end
