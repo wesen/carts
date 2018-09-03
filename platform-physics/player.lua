@@ -58,6 +58,7 @@ function cls_player:update()
  end
 
  -- compute Y speed
+ if (btnp(btn_jump) and on_ground) self.spd.y=-2
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
  -- actually move
@@ -65,7 +66,7 @@ function cls_player:update()
  self:move_y(self.spd.y)
 
  -- compute graphics
- if input!=self.prev_input and input!=0 then
+ if input!=self.prev_input and input!=0 and on_ground then
    -- smoke when changing directions
    self:smoke(spr_ground_smoke,-input)
  end

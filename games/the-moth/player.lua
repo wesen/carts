@@ -217,4 +217,3 @@ function cls_player:draw()
  print(self.spd:str(),64,64)
  ]]
 end
-

@@ -354,6 +354,32 @@ function mrnd(x)
  return rnd(x*2)-x
 end
 
+spr_wall_smoke=54
+spr_ground_smoke=51
+spr_full_smoke=48
+spr_ice_smoke=57
+spr_slide_smoke=60
+
+cls_smoke=class(function(self,pos,start_spr,dir)
+ self.pos=pos+v2(mrnd(1),0)
+ self.flip=v2(maybe(),false)
+ self.spr=start_spr
+ self.start_spr=start_spr
+ self.is_solid=false
+ self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
+ add(actors,self)
+end)
+
+function cls_smoke:update()
+ self.pos+=self.spd
+ self.spr+=0.2
+ if (self.spr>self.start_spr+3) del(actors,self)
+end
+
+function cls_smoke:draw()
+ spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+end
+
 flg_solid=0
 
 cls_room=class(function(self)
@@ -408,6 +434,7 @@ cls_player=class(function(self)
  self.hitbox=hitbox(v2(2,0),v2(4,8))
  self.on_ground=true
  self.ground_debouncer=cls_debouncer.init(ground_grace_interval)
+ self.prev_input=0
 end)
 
 function cls_player:str()
@@ -425,6 +452,10 @@ end
 
 function cls_player:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+end
+
+function cls_player:smoke(spr,dir)
+ return cls_smoke.init(self.pos,spr,dir)
 end
 
 function cls_player:update()
@@ -454,10 +485,20 @@ function cls_player:update()
  end
 
  -- compute Y speed
+ if (btnp(btn_jump) and on_ground) self.spd.y=-2
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
+ -- actually move
  self:move_x(self.spd.x)
  self:move_y(self.spd.y)
+
+ -- compute graphics
+ if input!=self.prev_input and input!=0 and on_ground then
+   -- smoke when changing directions
+   self:smoke(spr_ground_smoke,-input)
+ end
+
+ self.prev_input=input
 
  if input==0 then
   self.spr=1
@@ -494,6 +535,8 @@ function cls_player:move_y(amount)
  end
 end
 
+
+actors={}
 
 menu=cls_menu.init()
 local player=cls_player:init()
@@ -535,12 +578,18 @@ function _update60()
 
  if (menu.visible) menu:update()
  player:update()
+ for actor in all(actors) do
+  actor:update()
+ end
 end
 
 function _draw()
  frame+=1
  cls()
  room:draw()
+ for actor in all(actors) do
+  actor:draw()
+ end
  player:draw()
  if (menu.visible) menu:draw()
 end
