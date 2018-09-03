@@ -4,18 +4,26 @@ cls_menu=class(function(self)
 end)
 
 function cls_menu:draw()
-  local h=#self.entries*8+8
+  local h=8 -- border
+  for entry in all(self.entries) do
+    h+=entry:size()
+  end
+
   local w=48
   local left=64-w/2
   local top=64-h/2
   rect(left,top,64+w/2,64+h/2,7)
-  top+=6-8
+  top+=6
+  local y=top
   for i,entry in pairs(self.entries) do
     local off=0
-    if (i==self.current_entry) off+=1
-    entry:draw(left+10+off,top+i*8)
+    if i==self.current_entry then
+     off+=1
+     spr(2,left+3,y-2)
+    end
+    entry:draw(left+10+off,y)
+    y+=entry:size()
   end
-  spr(2,left+3,top-2+self.current_entry*8)
 end
 
 function cls_menu:add(text,cb)
@@ -35,4 +43,8 @@ end)
 
 function cls_menuentry:draw(x,y)
   print(self.text,x,y,7)
+end
+
+function cls_menuentry:size()
+  return 8
 end
