@@ -1,6 +1,7 @@
 --#include oo
 --#include v2
 --#include bbox
+--#include constants
 --#include hitbox
 --#include menu
 --#include helpers
@@ -9,7 +10,7 @@
 
 local menu=cls_menu.init()
 local player=cls_player:init()
-local room=cls_room:init()
+room=cls_room:init()
 frame=0
 dt=0
 local lasttime=time()

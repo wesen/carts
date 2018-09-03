@@ -157,6 +157,14 @@ function bboxvt:shrink(amt)
  return bbox(v+self.aa,self.bb-v)
 end
 
+flg_solid=0
+flg_ice=1
+
+btn_right=1
+btn_left=0
+btn_jump=4
+btn_action=5
+
 local hitboxvt={}
 hitboxvt.__index=hitboxvt
 
@@ -352,8 +360,10 @@ function cls_room:tile_flag_at(bbox,flag)
  local bb=bbox:to_tile_bbox()
  for i=bb.aa.x,bb.bb.x do
   for j=bb.aa.y,bb.bb.y do
-   if fget(self:tile_at(i,j),flag) then
-    return true,v2(i,j)
+   local v=v2(i,j)
+   local v2=v+self.pos
+   if fget(mget(v2.x,v2.y),flag) then
+    return true,v
    end
   end
  end
@@ -367,26 +377,58 @@ cls_player=class(function(self)
  self.flip=v2(false,false)
 
  self.hitbox=hitbox(v2(2,0),v2(4,8))
+ self.on_ground=true
 end)
+
+function cls_player:str()
+ return "player["..tostr(self.id)..",t:"..tostr(self.typ).."]"
+end
 
 function cls_player:bbox(offset)
  if (offset==nil) offset=v2(0,0)
  return self.hitbox:to_bbox_at(self.pos+offset)
 end
 
+function cls_player:is_solid_at(offset)
+ return room:solid_at(self:bbox(offset))
+end
+
 function cls_player:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
- self:bbox():draw(8)
 end
 
 function cls_player:update()
- self.spr=1+flr(frame/4)%3
+ local input=btn(btn_right) and 1
+    or (btn(btn_left) and -1
+    or 0)
+
+ local on_ground,tile=self:is_solid_at(vec_down)
+ self.on_ground=on_ground
+
+ if input!=0 then
+  self.spd.x=input
+ end
+
+ if self.spd.x!=0 then
+  self.flip.x=self.spd.x<0
+ end
+
+ self:move_x(self.spd.x)
+
+ if input==0 then
+  self.spr=1
+ else
+  self.spr=1+flr(frame/4)%3
+ end
+end
+
+function cls_player:move_x(amt)
 end
 
 
 local menu=cls_menu.init()
 local player=cls_player:init()
-local room=cls_room:init()
+room=cls_room:init()
 frame=0
 dt=0
 local lasttime=time()

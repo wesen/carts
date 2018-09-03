@@ -33,8 +33,10 @@ function cls_room:tile_flag_at(bbox,flag)
  local bb=bbox:to_tile_bbox()
  for i=bb.aa.x,bb.bb.x do
   for j=bb.aa.y,bb.bb.y do
-   if fget(self:tile_at(i,j),flag) then
-    return true,v2(i,j)
+   local v=v2(i,j)
+   local v2=v+self.pos
+   if fget(mget(v2.x,v2.y),flag) then
+    return true,v
    end
   end
  end
