@@ -24,18 +24,26 @@ cls_menu=class(function(self)
 end)
 
 function cls_menu:draw()
-  local h=#self.entries*8+8
+  local h=8 -- border
+  for entry in all(self.entries) do
+    h+=entry:size()
+  end
+
   local w=48
   local left=64-w/2
   local top=64-h/2
   rect(left,top,64+w/2,64+h/2,7)
-  top+=6-8
+  top+=6
+  local y=top
   for i,entry in pairs(self.entries) do
     local off=0
-    if (i==self.current_entry) off+=1
-    entry:draw(left+10+off,top+i*8)
+    if i==self.current_entry then
+     off+=1
+     spr(2,left+3,y-2)
+    end
+    entry:draw(left+10+off,y)
+    y+=entry:size()
   end
-  spr(2,left+3,top-2+self.current_entry*8)
 end
 
 function cls_menu:add(text,cb)
@@ -46,6 +54,8 @@ function cls_menu:update()
   local e=self.current_entry
   local n=#self.entries
   self.current_entry=btnp(3) and tidx_inc(e,n) or (btnp(2) and tidx_dec(e,n)) or e
+
+  if (btnp(5)) self.entries[self.current_entry]:activate()
 end
 
 cls_menuentry=class(function(self,text,callback)
@@ -56,6 +66,17 @@ end)
 function cls_menuentry:draw(x,y)
   print(self.text,x,y,7)
 end
+
+function cls_menuentry:size()
+  return 8
+end
+
+function cls_menuentry:activate()
+  if (self.callback!=nil) self.callback()
+end
+
+cls_menu_numberentry=class(function(self,text,callback)
+end)
 
 function tidx_inc(idx,n)
   return (idx%n)+1
@@ -72,6 +93,10 @@ function _init()
   menu:add("test",function() printh("test callback") end)
   menu:add("test2",function() printh("test2 callback") end)
   menu:add("test3",function() printh("test3 callback") end)
+
+  menuitem(1,"resume",function()
+  poke(0x5f30,1)
+end)
 
 end
 

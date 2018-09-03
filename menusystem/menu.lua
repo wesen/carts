@@ -34,6 +34,8 @@ function cls_menu:update()
   local e=self.current_entry
   local n=#self.entries
   self.current_entry=btnp(3) and tidx_inc(e,n) or (btnp(2) and tidx_dec(e,n)) or e
+
+  if (btnp(5)) self.entries[self.current_entry]:activate()
 end
 
 cls_menuentry=class(function(self,text,callback)
@@ -48,3 +50,10 @@ end
 function cls_menuentry:size()
   return 8
 end
+
+function cls_menuentry:activate()
+  if (self.callback!=nil) self.callback()
+end
+
+cls_menu_numberentry=class(function(self,text,callback)
+end)
