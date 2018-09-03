@@ -5,6 +5,7 @@ cls_player=class(function(self)
  self.flip=v2(false,false)
 
  self.hitbox=hitbox(v2(2,0),v2(4,8))
+ self.jump_button=cls_button.init(btn_jump)
  self.on_ground=true
  self.ground_debouncer=cls_debouncer.init(ground_grace_interval)
  self.prev_input=0

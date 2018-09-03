@@ -174,6 +174,10 @@ function cls_debouncer:is_on()
  return self.t>0
 end
 
+function cls_debouncer:clear()
+ self.t=0
+end
+
 -- queues - *sigh*
 function insert(t,val,max_)
  local l=min(#t+1,max_)
@@ -181,6 +185,40 @@ function insert(t,val,max_)
   t[i]=t[i-1]
  end
  t[1]=val
+end
+
+cls_button=class(function(self,btn_nr)
+ self.btn_nr=btn_nr
+ self.is_down=false
+ self.is_pressed=false
+ self.down_duration=0
+ self.hold_time=0
+ self.ticks_down=0
+end)
+
+function cls_button:update()
+ self.is_pressed=false
+ if btn(self.btn_nr) then
+  self.is_pressed=not self.is_down
+  self.is_down=true
+  self.ticks_down+=1
+ else
+  self.is_down=false
+  self.ticks_down=0
+  self.hold_time=0
+ end
+end
+
+function cls_button:was_recently_pressed()
+ return self.ticks_down<jump_button_grace_interval and self.hold_time==0
+end
+
+function cls_button:was_just_pressed()
+ return self.is_pressed
+end
+
+function cls_button:is_held()
+ return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
 
  local maxfall=2
@@ -467,6 +505,7 @@ cls_player=class(function(self)
  self.flip=v2(false,false)
 
  self.hitbox=hitbox(v2(2,0),v2(4,8))
+ self.jump_button=cls_button.init(btn_jump)
  self.on_ground=true
  self.ground_debouncer=cls_debouncer.init(ground_grace_interval)
  self.prev_input=0
@@ -528,7 +567,10 @@ function cls_player:update()
  end
 
  -- compute Y speed
- if (btnp(btn_jump) and on_ground) self.spd.y=-jump_spd
+ if btnp(btn_jump) and on_ground_recently then
+   self.spd.y=-jump_spd
+   self.ground_debouncer:clear()
+  end
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
  -- actually move
@@ -551,6 +593,8 @@ function cls_player:update()
 
  if input==0 then
   self.spr=1
+ elseif not on_ground then
+  self.spr=3
  else
   self.spr=1+flr(frame/4)%3
  end
