@@ -66,7 +66,10 @@ function cls_player:update()
  end
 
  -- compute Y speed
- if (btnp(btn_jump) and on_ground) self.spd.y=-jump_spd
+ if btnp(btn_jump) and on_ground_recently then
+   self.spd.y=-jump_spd
+   self.ground_debouncer:clear()
+  end
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
  -- actually move

@@ -14,3 +14,7 @@ end
 function cls_debouncer:is_on()
  return self.t>0
 end
+
+function cls_debouncer:clear()
+ self.t=0
+end
