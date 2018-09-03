@@ -10,7 +10,7 @@ function cls_room:bbox()
 end
 
 function cls_room:draw()
- map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid)
+ map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
 end
 
 function cls_room:tile_at(pos)
