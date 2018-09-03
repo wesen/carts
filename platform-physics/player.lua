@@ -50,5 +50,16 @@ function cls_player:update()
  end
 end
 
-function cls_player:move_x(amt)
+function cls_player:move_x(amount)
+ while abs(amount)>0 do
+  local step=amount
+  if (abs(amount)>1) step=sign(amount)
+  amount-=step
+  if not self:is_solid_at(v2(step,0)) then
+   self.pos.x+=step
+  else
+   self.spd.x=0
+   break
+  end
+ end
 end
