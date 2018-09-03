@@ -18,165 +18,268 @@ function subclass(parent,init)
  return setmetatable(c,{__index=parent})
 end
 
+-- vectors
+local v2mt={}
+v2mt.__index=v2mt
+
+function v2(x,y)
+ local t={x=x,y=y}
+ return setmetatable(t,v2mt)
+end
+
+function v2mt.__add(a,b)
+ return v2(a.x+b.x,a.y+b.y)
+end
+
+function v2mt.__sub(a,b)
+ return v2(a.x-b.x,a.y-b.y)
+end
+
+function v2mt.__mul(a,b)
+ if (type(a)=="number") return v2(b.x*a,b.y*a)
+ if (type(b)=="number") return v2(a.x*b,a.y*b)
+ return v2(a.x*b.x,a.y*b.y)
+end
+
+function v2mt.__div(a,b)
+ if (type(a)=="number") return v2(b.x/a,b.y/a)
+ if (type(b)=="number") return v2(a.x/b,a.y/b)
+ return v2(a.x/b.x,a.y/b.y)
+end
+
+function v2mt.__eq(a,b)
+ return a.x==b.x and a.y==b.y
+end
+
+function v2mt:min(v)
+ return v2(min(self.x,v.x),min(self.y,v.y))
+end
+
+function v2mt:max(v)
+ return v2(max(self.x,v.x),max(self.y,v.y))
+end
+
+function v2mt:magnitude()
+ return sqrt(self.x^2+self.y^2)
+end
+
+function v2mt:sqrmagnitude()
+ return self.x^2+self.y^2
+end
+
+function v2mt:normalize()
+ return self/self:magnitude()
+end
+
+function v2mt:str()
+ return "["..tostr(self.x)..","..tostr(self.y).."]"
+end
+
+function v2mt:flr()
+ return v2(flr(self.x),flr(self.y))
+end
+
+function v2mt:clone()
+ return v2(self.x,self.y)
+end
+
+dir_down=0
+dir_right=1
+dir_up=2
+dir_left=3
+
+vec_down=v2(0,1)
+vec_up=v2(0,-1)
+vec_right=v2(1,0)
+vec_left=v2(-1,0)
+
+function dir2vec(dir)
+ local dirs={v2(0,1),v2(1,0),v2(0,-1),v2(-1,0)}
+ return dirs[(dir+4)%4]
+end
+
+function angle2vec(angle)
+ return v2(cos(angle),sin(angle))
+end
+
 cls_menu=class(function(self)
-  self.entries={}
-  self.current_entry=1
-  self.visible=true
+ self.entries={}
+ self.current_entry=1
+ self.visible=true
 end)
 
 function cls_menu:draw()
-  local h=8 -- border
-  for entry in all(self.entries) do
-    h+=entry:size()
-  end
+ local h=8 -- border
+ for entry in all(self.entries) do
+  h+=entry:size()
+ end
 
-  local w=64
-  local left=64-w/2
-  local top=64-h/2
-  rectfill(left,top,64+w/2,64+h/2,5)
-  rect(left,top,64+w/2,64+h/2,7)
-  top+=6
-  local y=top
-  for i,entry in pairs(self.entries) do
-    local off=0
-    if i==self.current_entry then
-     off+=1
-     spr(2,left+3,y-2)
-    end
-    entry:draw(left+10+off,y)
-    y+=entry:size()
+ local w=64
+ local left=64-w/2
+ local top=64-h/2
+ rectfill(left,top,64+w/2,64+h/2,5)
+ rect(left,top,64+w/2,64+h/2,7)
+ top+=6
+ local y=top
+ for i,entry in pairs(self.entries) do
+  local off=0
+  if i==self.current_entry then
+   off+=1
+   spr(2,left+3,y-2)
   end
+  entry:draw(left+10+off,y)
+  y+=entry:size()
+ end
 end
 
 function cls_menu:add(text,cb)
-  add(self.entries,cls_menuentry.init(text,cb))
+ add(self.entries,cls_menuentry.init(text,cb))
 end
 
 function cls_menu:update()
-  local e=self.current_entry
-  local n=#self.entries
-  self.current_entry=btnp(3) and tidx_inc(e,n) or (btnp(2) and tidx_dec(e,n)) or e
+ local e=self.current_entry
+ local n=#self.entries
+ self.current_entry=btnp(3) and tidx_inc(e,n) or (btnp(2) and tidx_dec(e,n)) or e
 
-  if (btnp(5)) self.entries[self.current_entry]:activate()
-  self.entries[self.current_entry]:update()
+ if (btnp(5)) self.entries[self.current_entry]:activate()
+ self.entries[self.current_entry]:update()
 end
 
 cls_menuentry=class(function(self,text,callback)
-  self.text=text
-  self.callback=callback
+ self.text=text
+ self.callback=callback
 end)
 
 function cls_menuentry:draw(x,y)
-  print(self.text,x,y,7)
+ print(self.text,x,y,7)
 end
 
 function cls_menuentry:size()
-  return 8
+ return 8
 end
 
 function cls_menuentry:activate()
-  if (self.callback!=nil) self.callback(self)
+ if (self.callback!=nil) self.callback(self)
 end
 
 function cls_menuentry:update()
 end
 
 cls_menu_numberentry=class(function(self,text,callback,value,min,max,inc)
-  self.text=text
-  self.callback=callback
-  self.value=value
-  self.min=min or 0
-  self.max=max or 10
-  self.inc=inc or 1
-  self.state=0 -- 0=close, 1=open
-  if (self.callback!=nil) self.callback(self.value,self)
+ self.text=text
+ self.callback=callback
+ self.value=value
+ self.min=min or 0
+ self.max=max or 10
+ self.inc=inc or 1
+ self.state=0 -- 0=close, 1=open
+ if (self.callback!=nil) self.callback(self.value,self)
 end)
 
 function cls_menu_numberentry:size()
-  return self.state==0 and 8 or 18
+ return self.state==0 and 8 or 18
 end
 
 function cls_menu_numberentry:activate()
-  if self.state==0 then
-    self.state=1
-  else
-    self.state=0
-  end
+ if self.state==0 then
+  self.state=1
+ else
+  self.state=0
+ end
 end
 
 function cls_menu_numberentry:draw(x,y)
-  if self.state==0 then
-    print(self.text,x,y,7)
-  else
-    print(self.text,x,y,7)
-    local off=10
-    local w=24
-    local left=x
-    local right=x+w
-    line(left,y+off,right,y+off,13)
-    line(left,y+off,left,y+off+1)
-    line(right,y+off,right,y+off+1)
-    line(left+1,y+off+2,right-1,y+off+2,6)
-    local pct=(self.value-self.min)/(self.max-self.min)
-    print(tostr(self.value),right+5,y+off-2,7)
-    spr(1,left-2+pct*w,y+off-2)
-  end
+ if self.state==0 then
+  print(self.text,x,y,7)
+ else
+  print(self.text,x,y,7)
+  local off=10
+  local w=24
+  local left=x
+  local right=x+w
+  line(left,y+off,right,y+off,13)
+  line(left,y+off,left,y+off+1)
+  line(right,y+off,right,y+off+1)
+  line(left+1,y+off+2,right-1,y+off+2,6)
+  local pct=(self.value-self.min)/(self.max-self.min)
+  print(tostr(self.value),right+5,y+off-2,7)
+  spr(1,left-2+pct*w,y+off-2)
+ end
 end
 
 function cls_menu_numberentry:update()
-  if (btnp(0)) self.value=max(self.min,self.value-self.inc)
-  if (btnp(1)) self.value=min(self.max,self.value+self.inc)
-  if (self.callback!=nil) self.callback(self.value)
+ if (btnp(0)) self.value=max(self.min,self.value-self.inc)
+ if (btnp(1)) self.value=min(self.max,self.value+self.inc)
+ if (self.callback!=nil) self.callback(self.value)
 end
 
 function tidx_inc(idx,n)
-  return (idx%n)+1
+ return (idx%n)+1
 end
 
 function tidx_dec(idx,n)
-  return (idx-2)%n+1
+ return (idx-2)%n+1
+end
+
+-- implement bounded acceleration
+function appr(val,target,amount)
+ return (val>target and max(val-amount,target)) or min(val+amount,target)
+end
+
+function sign(v)
+ return v>0 and 1 or v<0 and -1 or 0
+end
+
+function rndsign()
+ return rnd(1)>0.5 and 1 or -1
+end
+
+function round(x)
+ return flr(x+0.5)
+end
+
+function maybe(p)
+ if (p==nil) p=0.5
+ return rnd(1)<p
+end
+
+function mrnd(x)
+ return rnd(x*2)-x
+end
+
+cls_player=class(function(self)
+ self.pos=v2(64,64)
+ self.spd=v2(0,0)
+ self.spr=1
+ self.flip=v2(false,false)
+end)
+
+function cls_player:draw()
+ spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+end
+
+function cls_player:update()
+ self.spr=1+flr(frame/4)%3
 end
 
 
 local menu=cls_menu.init()
-
-local radius=1
-local spd=2
-local pos_x=1
-local draw_circle=true
+local player=cls_player:init()
+frame=0
 
 function _init()
-  menu:add("hide circle",
-  function(self)
-    if draw_circle then
-     draw_circle=false
-     self.text="draw circle"
-    else
-     draw_circle=true
-     self.text="hide circle"
-   end
-  end)
-
-  local e=cls_menu_numberentry.init(
-   "radius",
-   function(v) radius=v end,
-   1,1,10)
-  add(menu.entries,e)
-  e=cls_menu_numberentry.init(
-   "spd",
-   function(v) spd=v end,
-   10,1,20)
-  add(menu.entries,e)
+ menu.visible=false
 end
 
 function _update()
-  if (menu.visible) menu:update()
-  pos_x=(pos_x+spd)%128
+ player:update()
+ if (menu.visible) menu:update()
 end
 
 function _draw()
+ frame+=1
  cls()
- if (draw_circle) circfill(pos_x,64,radius,8)
+ player:draw()
  if (menu.visible) menu:draw()
 end
 
