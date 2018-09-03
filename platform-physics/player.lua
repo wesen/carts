@@ -29,6 +29,7 @@ function cls_player:update()
  local input=btn(btn_right) and 1
     or (btn(btn_left) and -1
     or 0)
+ if (menu.visible) input=0
 
  local on_ground,tile=self:is_solid_at(vec_down)
  self.on_ground=on_ground
@@ -43,8 +44,6 @@ function cls_player:update()
  end
 
  -- compute Y speed
- local maxfall=2
- local gravity=0.12
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
  self:move_x(self.spd.x)

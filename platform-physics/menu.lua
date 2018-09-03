@@ -21,7 +21,7 @@ function cls_menu:draw()
   local off=0
   if i==self.current_entry then
    off+=1
-   spr(2,left+3,y-2)
+   spr(22,left+3,y-2)
   end
   entry:draw(left+10+off,y)
   y+=entry:size()
@@ -99,7 +99,7 @@ function cls_menu_numberentry:draw(x,y)
   line(left+1,y+off+2,right-1,y+off+2,6)
   local pct=(self.value-self.min)/(self.max-self.min)
   print(tostr(self.value),right+5,y+off-2,7)
-  spr(1,left-2+pct*w,y+off-2)
+  spr(21,left-2+pct*w,y+off-2)
  end
 end
 
