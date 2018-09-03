@@ -39,9 +39,13 @@ function cls_player:update()
  self.ground_debouncer:debounce(on_ground)
  local on_ground_recently=self.ground_debouncer:is_on()
 
- -- compute X speed
- if input!=0 then
-  self.spd.x=input
+ -- compute x speed by acceleration / friction
+ if abs(self.spd.x)>maxrun then
+  self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
+ elseif input != 0 then
+  self.spd.x=appr(self.spd.x,input*maxrun,accel)
+ else
+  self.spd.x=appr(self.spd.x,0,decel)
  end
 
  if self.spd.x!=0 then
