@@ -208,6 +208,48 @@ end
 function cls_menuentry:update()
 end
 
+-- number entry
+cls_menu_numberentry=class(function(self,text,callback)
+  self.text=text
+  self.callback=callback
+  self.state=0 -- 0=close, 1=open
+end)
+
+function cls_menu_numberentry:size()
+  return self.state==0 and 8 or 18
+end
+
+function cls_menu_numberentry:activate()
+  if self.state==0 then
+    self.state=1
+  else
+    self.state=0
+  end
+end
+
+function cls_menu_numberentry:draw(x,y)
+  if self.state==0 then
+    print(self.text,x,y,7)
+  else
+    print(self.text,x,y,7)
+
+    local off=10
+    local w=24
+    local left=x
+    local right=x+w
+    line(left,y+off,right,y+off,13)
+    line(left,y+off,left,y+off+1)
+    line(right,y+off,right,y+off+1)
+    line(left+1,y+off+2,right-1,y+off+2,6)
+    local pct=0
+    print(0,right+5,y+off-2,7)
+    spr(1,left-2+pct*w,y+off-2)
+  end
+end
+
+function cls_menu_numberentry:update()
+end
+
 -- main code
 local radius=1
 local spd=2
@@ -225,8 +267,10 @@ menu:add("hide circle",
    self.text="hide circle"
   end
  end)
-menu:add("entry 2")
-menu:add("entry 3")
+local e=cls_menu_numberentry.init("radius", function() end)
+add(menu.entries,e)
+local e=cls_menu_numberentry.init("spd", function() end)
+add(menu.entries,e)
 
 function _update()
   menu:update()
