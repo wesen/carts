@@ -567,6 +567,15 @@ function cls_player:update()
   decel_=ice_decel
  end
 
+ -- slow down at apex
+ local gravity_=gravity
+ if abs(self.spd.y)<=0.3 then
+  gravity_*=0.5
+ elseif self.spd.y>0 then
+  -- fall down fas2er
+  gravity_*=2
+ end
+
  if abs(self.spd.x)>maxrun then
   self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel_)
  elseif input != 0 then
@@ -587,7 +596,7 @@ function cls_player:update()
    self.ground_debouncer:clear()
   end
  end
- if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
+ if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity_)
 
  -- actually move
  self:move_x(self.spd.x)
