@@ -3,8 +3,8 @@
 --#include bbox
 --#include debouncer
 --#include queues
---#include button
 --#include config
+--#include button
 --#include logger
 --#include constants
 --#include hitbox

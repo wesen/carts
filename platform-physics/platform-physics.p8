@@ -187,6 +187,21 @@ function insert(t,val,max_)
  t[1]=val
 end
 
+local maxfall=2
+local gravity=0.12
+
+local ground_grace_interval=12
+
+local maxrun=1
+local accel=0.3
+local decel=0.2
+local air_accel=0.2
+local air_decel=0.1
+local jump_spd=2
+
+local jump_button_grace_interval=10
+local jump_max_hold_time=15
+
 cls_button=class(function(self,btn_nr)
  self.btn_nr=btn_nr
  self.is_down=false
@@ -220,21 +235,6 @@ end
 function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
-
- local maxfall=2
- local gravity=0.12
-
-local ground_grace_interval=12
-
-local maxrun=1
-local accel=0.3
-local decel=0.2
-local air_accel=0.2
-local air_decel=0.1
-local jump_spd=2
-
-local jump_button_grace_interval=10
-local jump_max_hold_time=15
 
 cls_logger=class(function(self,duration)
  self.values={}
@@ -533,6 +533,8 @@ function cls_player:smoke(spr,dir)
 end
 
 function cls_player:update()
+ self.jump_button:update()
+ 
  -- get arrow input
  local input=btn(btn_right) and 1
     or (btn(btn_left) and -1
@@ -567,10 +569,13 @@ function cls_player:update()
  end
 
  -- compute Y speed
- if btnp(btn_jump) and on_ground_recently then
+ if self.jump_button.is_down then
+  if self.jump_button:was_recently_pressed() and on_ground_recently then
+   self:smoke(spr_ground_smoke,0)
    self.spd.y=-jump_spd
    self.ground_debouncer:clear()
   end
+ end
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
  -- actually move

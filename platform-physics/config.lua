@@ -1,5 +1,5 @@
- local maxfall=2
- local gravity=0.12
+local maxfall=2
+local gravity=0.12
 
 local ground_grace_interval=12
 

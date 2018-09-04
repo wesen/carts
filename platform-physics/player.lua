@@ -33,6 +33,8 @@ function cls_player:smoke(spr,dir)
 end
 
 function cls_player:update()
+ self.jump_button:update()
+ 
  -- get arrow input
  local input=btn(btn_right) and 1
     or (btn(btn_left) and -1
@@ -67,10 +69,13 @@ function cls_player:update()
  end
 
  -- compute Y speed
- if btnp(btn_jump) and on_ground_recently then
+ if self.jump_button.is_down then
+  if self.jump_button:was_recently_pressed() and on_ground_recently then
+   self:smoke(spr_ground_smoke,0)
    self.spd.y=-jump_spd
    self.ground_debouncer:clear()
   end
+ end
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
  -- actually move
