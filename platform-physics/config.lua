@@ -1,4 +1,7 @@
 local maxfall=2
+local wallslide_maxfall=0.4
+local wallslide_ice_maxfall=1
+
 local gravity=0.12
 
 local ground_grace_interval=12

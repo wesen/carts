@@ -9,6 +9,8 @@ cls_player=class(function(self)
  self.on_ground=true
  self.ground_debouncer=cls_debouncer.init(ground_grace_interval)
  self.prev_input=0
+
+ self.ghosts={}
 end)
 
 function cls_player:str()
@@ -25,6 +27,14 @@ function cls_player:is_solid_at(offset)
 end
 
 function cls_player:draw()
+ local dark=0
+ for ghost in all(self.ghosts) do
+  dark+=10
+  darken(dark)
+  spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
+ end
+ pal()
+
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end
 
@@ -43,6 +53,7 @@ function cls_player:update()
 
  -- check if we are on ground
  local bbox_ground=self:bbox(vec_down)
+ local bbox_dir=self:bbox(v2(input,0))
  local on_ground,tile=room:solid_at(bbox_ground)
  self.on_ground=on_ground
  self.ground_debouncer:debounce(on_ground)
@@ -52,6 +63,7 @@ function cls_player:update()
  -- compute x speed by acceleration / friction
  local accel_=accel
  local decel_=decel
+ local maxfall_=maxfall
 
  if not on_ground then
   accel_=air_accel
@@ -84,6 +96,19 @@ function cls_player:update()
   self.flip.x=self.spd.x<0
  end
 
+ -- wall slide
+ local is_wall_sliding=false
+ if input!=0 and room:solid_at(bbox_dir) and not on_ground and self.spd.y>0 then
+  is_wall_sliding=true
+  maxfall_=wallslide_maxfall
+  if (room:tile_flag_at(bbox_dir,flg_ice)) maxfall_=wallslide_ice_maxfall
+  local smoke_dir = self.flip.x and .3 or -.3
+  if maybe(.1) then
+    local smoke=self:smoke(spr_wall_smoke,smoke_dir)
+    smoke.flip.x=self.flip.x
+  end
+ end
+
  -- compute Y speed
  if self.jump_button.is_down then
   if self.jump_button:was_recently_pressed() and on_ground_recently then
@@ -92,7 +117,7 @@ function cls_player:update()
    self.ground_debouncer:clear()
   end
  end
- if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity_)
+ if (not on_ground) self.spd.y=appr(self.spd.y,maxfall_,gravity_)
 
  -- actually move
  self:move_x(self.spd.x)
@@ -122,6 +147,7 @@ function cls_player:update()
 
  self.prev_input=input
 
+ -- choosing sprite
  if input==0 then
   self.spr=1
  elseif not on_ground then
@@ -129,6 +155,9 @@ function cls_player:update()
  else
   self.spr=1+flr(frame/4)%3
  end
+
+ if (not on_ground and frame%2==0) insert(self.ghosts,self.pos:clone(),7)
+ if ((on_ground or #self.ghosts>7)) popend(self.ghosts)
 end
 
 function cls_player:move_x(amount)

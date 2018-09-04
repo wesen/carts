@@ -2,6 +2,7 @@
 --#include v2
 --#include bbox
 --#include debouncer
+--#include gfx
 --#include queues
 --#include config
 --#include button
