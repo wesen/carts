@@ -225,7 +225,7 @@ local air_decel=0.1
 local ice_accel=0.1
 local ice_decel=0.03
 
-local jump_spd=2
+local jump_spd=.2
 
 local jump_button_grace_interval=10
 local jump_max_hold_time=15
@@ -639,10 +639,22 @@ function cls_player:update()
 
  -- compute Y speed
  if self.jump_button.is_down then
-  if self.jump_button:was_recently_pressed() and on_ground_recently then
-   self:smoke(spr_ground_smoke,0)
-   self.spd.y=-jump_spd
-   self.ground_debouncer:clear()
+  if self.jump_button:is_held() or
+  (self.jump_button:was_recently_pressed() and on_ground_recently) then
+   if (self.jump_button:was_recently_pressed()) self:smoke(spr_ground_smoke,0)
+    self.spd.y=-jump_spd
+    self.ground_debouncer:clear()
+    self.jump_button.hold_time+=1
+   elseif self.jump_button:was_just_pressed() then
+    local wall_dir=self:is_solid_at(v2(-3,0)) and -1
+         or self:is_solid_at(v2(3,0)) and 1
+         or 0
+    if wall_dir!=0 then
+     self.spd.y=-jump_spd
+     self.spd.x=-wall_dir*(maxrun+1)
+     self:smoke(spr_wall_smoke,-wall_dir*.3)
+     self.jump_button.hold_time+=1
+   end
   end
  end
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall_,gravity_)
@@ -678,6 +690,8 @@ function cls_player:update()
  -- choosing sprite
  if input==0 then
   self.spr=1
+ elseif is_wall_sliding then
+  self.spr=4
  elseif not on_ground then
   self.spr=3
  else
@@ -760,7 +774,7 @@ function _init()
  add(menu.entries,e)
  e=cls_menu_numberentry.init("maxrun",function(v) maxrun=v end,1,0,3,0.1)
  add(menu.entries,e)
- e=cls_menu_numberentry.init("jump_spd",function(v) jump_spd=v end,2,0,4,0.1)
+ e=cls_menu_numberentry.init("jump_spd",function(v) jump_spd=v end,1,0,2,0.05)
  add(menu.entries,e)
  e=cls_menu_numberentry.init("air_accel",function(v) air_accel=v end,0.2,0,.4,0.01)
  add(menu.entries,e)

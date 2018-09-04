@@ -15,7 +15,7 @@ local air_decel=0.1
 local ice_accel=0.1
 local ice_decel=0.03
 
-local jump_spd=2
+local jump_spd=.2
 
 local jump_button_grace_interval=10
 local jump_max_hold_time=15

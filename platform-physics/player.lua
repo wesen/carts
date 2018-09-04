@@ -111,10 +111,22 @@ function cls_player:update()
 
  -- compute Y speed
  if self.jump_button.is_down then
-  if self.jump_button:was_recently_pressed() and on_ground_recently then
-   self:smoke(spr_ground_smoke,0)
-   self.spd.y=-jump_spd
-   self.ground_debouncer:clear()
+  if self.jump_button:is_held() or
+  (self.jump_button:was_recently_pressed() and on_ground_recently) then
+   if (self.jump_button:was_recently_pressed()) self:smoke(spr_ground_smoke,0)
+    self.spd.y=-jump_spd
+    self.ground_debouncer:clear()
+    self.jump_button.hold_time+=1
+   elseif self.jump_button:was_just_pressed() then
+    local wall_dir=self:is_solid_at(v2(-3,0)) and -1
+         or self:is_solid_at(v2(3,0)) and 1
+         or 0
+    if wall_dir!=0 then
+     self.spd.y=-jump_spd
+     self.spd.x=-wall_dir*(maxrun+1)
+     self:smoke(spr_wall_smoke,-wall_dir*.3)
+     self.jump_button.hold_time+=1
+   end
   end
  end
  if (not on_ground) self.spd.y=appr(self.spd.y,maxfall_,gravity_)
