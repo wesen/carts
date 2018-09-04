@@ -150,6 +150,8 @@ function cls_player:update()
  -- choosing sprite
  if input==0 then
   self.spr=1
+ elseif is_wall_sliding then
+  self.spr=4
  elseif not on_ground then
   self.spr=3
  else
