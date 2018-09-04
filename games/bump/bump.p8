@@ -16,6 +16,9 @@ typ_gore=10
 flg_solid=0
 flg_ice=1
 
+p1_input=0
+p2_input=1
+
 btn_right=1
 btn_left=0
 btn_jump=4
@@ -24,10 +27,12 @@ frame=0
 dt=0
 lasttime=time()
 room=nil
+spawn_idx=1
 
 actors={}
 tiles={}
 crs={}
+
 jump_button_grace_interval=10
 jump_max_hold_time=15
 
@@ -57,6 +62,7 @@ function subclass(typ,parent,init)
  local c=class(typ,init)
  return setmetatable(c,parent)
 end
+
 
 
 -- vectors
@@ -117,6 +123,7 @@ function angle2vec(angle)
  return v2(cos(angle),sin(angle))
 end
 
+
 local bboxvt={}
 bboxvt.__index=bboxvt
 
@@ -161,6 +168,7 @@ function bboxvt:collide(other)
    other.aa.x < self.bb.x and
    other.aa.y < self.bb.y
 end
+
 
 
 local hitboxvt={}
@@ -255,7 +263,8 @@ function rspr(s,x,y,angle)
  end
 end
 
--- tween routines from https://github.com/JoebRogers/PICO-Tween
+
+-- tween routines from https://github.com/joebrogers/pico-tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
  if (t < 1) return c / 2 * pow(t, 5) + b
@@ -294,6 +303,7 @@ function cr_move_to(obj,target,d,easetype)
   yield()
  end
 end
+
 function tick_crs()
  for cr in all(crs) do
   if costatus(cr)!='dead' then
@@ -342,11 +352,11 @@ function cls_actor:move_x(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
    amount-=step
-   if not self:is_solid_at(v2(step,0)) then
-    self.pos.x+=step
-   else
+   if self:is_solid_at(v2(step,0)) or self:is_actor_at(v2(step,0)) then
     self.spd.x=0
     break
+   else
+    self.pos.x+=step
    end
   end
  else
@@ -360,11 +370,11 @@ function cls_actor:move_y(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
    amount-=step
-   if not self:is_solid_at(v2(0,step)) then
-    self.pos.y+=step
-   else
+   if self:is_solid_at(v2(0,step)) or self:is_actor_at(v2(0,step)) then
     self.spd.y=0
     break
+   else
+    self.pos.y+=step
    end
   end
  else
@@ -374,6 +384,18 @@ end
 
 function cls_actor:is_solid_at(offset)
  return solid_at(self:bbox(offset))
+end
+
+function cls_actor:is_actor_at(offset)
+
+ for player in all(players) do
+  local bbox_other = player:bbox()
+  if self!=player and bbox_other:collide(self:bbox(offset)) then
+   return true
+  end
+ end
+
+ return false
 end
 
 function cls_actor:get_collisions(typ,offset)
@@ -401,8 +423,10 @@ function update_actors(typ)
  end
 end
 
-cls_button=class(typ_button,function(self,btn_nr)
+
+cls_button=class(typ_button,function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
+ self.input_port=input_port
  self.is_down=false
  self.is_pressed=false
  self.down_duration=0
@@ -412,7 +436,7 @@ end)
 
 function cls_button:update()
  self.is_pressed=false
- if btn(self.btn_nr) then
+ if btn(self.btn_nr, self.input_port) then
   self.is_pressed=not self.is_down
   self.is_down=true
   self.ticks_down+=1
@@ -434,6 +458,7 @@ end
 function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
+
 cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
  cls_actor._ctr(self,pos)
  self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
@@ -452,6 +477,7 @@ function cls_bubble:update()
   del(actors,self)
  end
 end
+
 function v_idx(pos)
  return pos.x+pos.y*128
 end
@@ -538,8 +564,16 @@ function cls_room:draw()
  end
 end
 
-function cls_room:spawn_player()
- cls_spawn.init(self.spawn_locations[1]:clone())
+function cls_room:spawn_player(input_port)
+ --local i = flr(rnd(#self.spawn_locations)) + 1
+
+ local spawn_pos = self.spawn_locations[spawn_idx]:clone()
+ cls_spawn.init(spawn_pos, input_port)
+
+ spawn_idx += 1
+ if spawn_idx > #self.spawn_locations then 
+  spawn_idx = 1
+ end
 end
 
 function cls_room:tile_at(pos)
@@ -577,6 +611,7 @@ function tile_flag_at(bbox,flag)
  end
  return false
 end
+
 spr_wall_smoke=54
 spr_ground_smoke=51
 spr_full_smoke=48
@@ -608,6 +643,7 @@ function cls_smoke:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
  if (self.is_gore) pal()
 end
+
 cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(false,false)
@@ -684,19 +720,22 @@ function make_gore_explosion(pos)
   cls_gore.init(pos)
  end
 end
+
 players={}
 
-cls_player=subclass(typ_player,cls_actor,function(self,pos)
+cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  -- players are handled separately
  del(actors,self)
  add(players,self)
 
  self.flip=v2(false,false)
- self.jump_button=cls_button.init(btn_jump)
+ self.input_port=input_port
+ self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
  self.hitbox=hitbox(v2(2,0),v2(4,8))
- self.atk_hitbox=hitbox(v2(1,0),v2(6,4))
+ self.head_hitbox=hitbox(v2(1,-1),v2(6,1))
+ self.feet_hitbox=hitbox(v2(1,7),v2(6,1))
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -709,13 +748,13 @@ end
 
 function cls_player:kill()
  del(players,self)
- room:spawn_player()
+ room:spawn_player(self.input_port)
 end
 
 function cls_player:update()
  -- from celeste's player class
- local input=btn(btn_right) and 1
-    or (btn(btn_left) and -1
+ local input=btn(btn_right, self.input_port) and 1
+    or (btn(btn_left, self.input_port) and -1
     or 0)
 
  self.jump_button:update()
@@ -809,8 +848,8 @@ function cls_player:update()
     or (on_ground_recently and self.jump_button:was_recently_pressed()) then
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
-    -- XXX test gore
-    make_gore_explosion(self.pos)
+    -- xxx test gore
+    --make_gore_explosion(self.pos)
    end
    self.on_ground_interval=0
    self.spd.y=-1.0
@@ -844,6 +883,22 @@ function cls_player:update()
  else
   self.spr=1+flr(frame/4)%3
  end
+
+ -- interact with players
+ local feet_box=self.feet_hitbox:to_bbox_at(self.pos)
+ for player in all(players) do
+  
+  -- attack
+  local head_box=player.head_hitbox:to_bbox_at(player.pos)
+  if player!=self and feet_box:collide(head_box) then
+   self.spd.y=-2.0
+   make_gore_explosion(player.pos)
+   cls_smoke.init(self.pos,32,0)
+   player:kill()
+  end
+
+ end
+
 end
 
 function cls_player:draw()
@@ -856,11 +911,12 @@ function cls_player:draw()
   bbox_col=9
  end
  bbox:draw(bbox_col)
- bbox=self.atk_hitbox:to_bbox_at(self.pos)
+ bbox=self.feet_hitbox:to_bbox_at(self.pos)
  bbox:draw(12)
  print(self.spd:str(),64,64)
- ]]
+ --]]
 end
+
 
 
 spr_spring_sprung=66
@@ -895,12 +951,14 @@ function cls_spring:draw()
  if (self.sprung_time>0) spr_=spr_spring_sprung
  spr(spr_,self.pos.x,self.pos.y)
 end
+
 spr_spawn_point=1
 
-cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos)
+cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  self.target=self.pos
+ self.input_port=input_port
  self.pos=v2(self.target.x,128)
  self.spd.y=-2
  add_cr(function()
@@ -911,13 +969,14 @@ end)
 function cls_spawn:cr_spawn()
  cr_move_to(self,self.target,1,inexpo)
  del(actors,self)
- cls_player.init(self.target)
+ cls_player.init(self.target, self.input_port)
  cls_smoke.init(self.pos,spr_full_smoke,0)
 end
 
 function cls_spawn:draw()
  spr(spr_spawn_point,self.pos.x,self.pos.y)
 end
+
 spr_spikes=68
 
 cls_spikes=subclass(typ_spikes,cls_actor,function(self,pos)
@@ -939,9 +998,35 @@ end
 function cls_spikes:draw()
  spr(spr_spikes,self.pos.x,self.pos.y)
 end
+
 cls_moving_platform=subclass(typ_moving_platform,cls_actor,function(pos)
  cls_actor._ctr(self,pos)
 end)
+
+--#include constants
+--#include globals
+--#include config
+
+--#include oo
+--#include v2
+--#include bbox
+--#include hitbox
+
+--#include helpers
+--#include tween
+--#include coroutines
+
+--#include actors
+--#include button
+--#include bubbles
+--#include room
+--#include smoke
+--#include particle
+--#include player
+--#include spring
+--#include spawn
+--#include spikes
+--#include moving_platform
 
 -- fade bubbles
 -- x gravity
@@ -989,9 +1074,17 @@ end)
 -- camera shake
 -- fades
 
+-- multiple players
+-- random player spawns
+-- player collision
+-- player kill
+
+--#include main
+
 function _init()
  room=cls_room.init(v2(0,0),v2(16,16))
- room:spawn_player()
+ room:spawn_player(p1_input)
+ room:spawn_player(p2_input)
 end
 
 function _draw()
@@ -1207,16 +1300,16 @@ __map__
 0000004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000420000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000420000000001000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4141414100000040404000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000404141000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000005000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000404141000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4000000000000000000000414040404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000004040000000000000000000000000000000004141410000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000004141414040400000000000000000000000414141000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0042000000000000000000004100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4040000000400001000000004100000000000000000000004040404041414141404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000400040404000004100404000005050500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000404000400000000000004100000000000000000041414100000000000000000041414141000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000404200000000004100000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000404000400000000000004105000000000000000041414100000000000000000041414141000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000404200000000004100050005000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4444444444404044414141444044444041414141414141414140404040404040404040404040404040404040404040404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
