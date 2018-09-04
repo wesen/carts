@@ -161,7 +161,6 @@ function cls_player:update()
         or self:is_solid_at(v2(3,0)) and 1
         or 0
    if wall_dir!=0 then
-    self.jump_interval=0
     self.spd.y=-1
     self.spd.x=-wall_dir*(maxrun+1)
     self:smoke(spr_wall_smoke,-wall_dir*.3)
