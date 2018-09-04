@@ -63,6 +63,14 @@ function cls_player:update()
   decel_=ice_decel
  end
 
+ -- slow down at apex
+ if abs(self.spd.y)<=0.15 then
+  gravity*=0.5
+ elseif self.spd.y>0 then
+  -- fall down fas2er
+  gravity*=2
+ end
+
  if abs(self.spd.x)>maxrun then
   self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel_)
  elseif input != 0 then
