@@ -18,7 +18,6 @@ function subclass(parent,init)
  return setmetatable(c,{__index=parent})
 end
 
---[[
 cls_menu=class(function(self)
   self.entries={}
   self.current_entry=1
@@ -101,7 +100,6 @@ function cls_menu_numberentry:activate()
   if self.state==0 then
     self.state=1
   else
-    if (self.callback!=nil) self.callback(self.value,self)
     self.state=0
   end
 end
@@ -130,7 +128,6 @@ function cls_menu_numberentry:update()
   if (btnp(1)) self.value=min(self.max,self.value+self.inc)
   if (self.callback!=nil) self.callback(self.value)
 end
---]]
 
 function tidx_inc(idx,n)
   return (idx%n)+1
@@ -141,47 +138,8 @@ function tidx_dec(idx,n)
 end
 
 
-cls_menu=class(function(self)
- self.entries={}
-end)
-function cls_menu:update() end
-function cls_menu:draw()
-  local h=8
-  for entry in all(self.entries) do h+=8 end
-  local w=64
-  local left=64-w/2
-  local right=64+w/2
-  local top=64-h/2
-  local bottom=64+h/2
-  rectfill(left,top,right,bottom,5)
-  rect(left,top,right,bottom,7)
-  top+=6
-  local y=top
-  for entry in all(self.entries) do
-    print(entry,left+10,y)
-    y+=8
-  end
-end
-
-function cls_menu:add(text)
-  add(self.entries,text)
-end
-
 local menu=cls_menu.init()
-menu:add("entry 1")
-menu:add("entry 2")
-menu:add("entry 3")
 
-function _update()
-  menu:update()
-end
-
-function _draw()
-  cls()
-  menu:draw()
-end
-
---[[
 local radius=1
 local spd=2
 local pos_x=1
@@ -221,8 +179,6 @@ function _draw()
  if (draw_circle) circfill(pos_x,64,radius,8)
  if (menu.visible) menu:draw()
 end
-
-]]
 
 __gfx__
 00000000666760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -342,7 +342,7 @@ metalevel_bbox=bbox(v2(112,0),v2(125,7))
 dbg_skip_start=false
 dbg_skip_metalevel=false
 dbg_auto_win=false
-dbg_start_level=0
+dbg_start_level=8
 dbg_draw=false
 disable_music=false
 

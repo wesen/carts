@@ -1,4 +1,3 @@
---[[
 cls_menu=class(function(self)
   self.entries={}
   self.current_entry=1
@@ -81,7 +80,6 @@ function cls_menu_numberentry:activate()
   if self.state==0 then
     self.state=1
   else
-    if (self.callback!=nil) self.callback(self.value,self)
     self.state=0
   end
 end
@@ -110,4 +108,3 @@ function cls_menu_numberentry:update()
   if (btnp(1)) self.value=min(self.max,self.value+self.inc)
   if (self.callback!=nil) self.callback(self.value)
 end
---]]
