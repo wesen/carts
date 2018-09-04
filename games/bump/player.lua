@@ -179,7 +179,15 @@ function cls_player:update()
 end
 
 function cls_player:draw()
+
+ pal(cols_face[1], cols_face[self.input_port + 1])
+ pal(cols_hair[1], cols_hair[self.input_port + 1])
+
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+
+ pal(cols_face[1], cols_face[1])
+ pal(cols_hair[1], cols_hair[1])
+ 
 
  --[[
  local bbox=self:bbox()

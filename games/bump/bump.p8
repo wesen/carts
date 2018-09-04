@@ -16,6 +16,10 @@ typ_gore=10
 flg_solid=0
 flg_ice=1
 
+--first value is default
+cols_face={ 7, 12 }
+cols_hair={ 13, 10 }
+
 p1_input=0
 p2_input=1
 
@@ -264,7 +268,7 @@ function rspr(s,x,y,angle)
 end
 
 
--- tween routines from https://github.com/joebrogers/pico-tween
+-- tween routines from https://github.com/JoebRogers/PICO-Tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
  if (t < 1) return c / 2 * pow(t, 5) + b
@@ -848,7 +852,7 @@ function cls_player:update()
     or (on_ground_recently and self.jump_button:was_recently_pressed()) then
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
-    -- xxx test gore
+    -- XXX test gore
     --make_gore_explosion(self.pos)
    end
    self.on_ground_interval=0
@@ -902,7 +906,15 @@ function cls_player:update()
 end
 
 function cls_player:draw()
+
+ pal(cols_face[1], cols_face[self.input_port + 1])
+ pal(cols_hair[1], cols_hair[self.input_port + 1])
+
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+
+ pal(cols_face[1], cols_face[1])
+ pal(cols_hair[1], cols_hair[1])
+ 
 
  --[[
  local bbox=self:bbox()

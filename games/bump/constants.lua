@@ -13,6 +13,10 @@ typ_gore=10
 flg_solid=0
 flg_ice=1
 
+--first value is default
+cols_face={ 7, 12 }
+cols_hair={ 13, 10 }
+
 p1_input=0
 p2_input=1
 
