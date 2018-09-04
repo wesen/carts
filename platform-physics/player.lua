@@ -34,7 +34,7 @@ end
 
 function cls_player:update()
  self.jump_button:update()
- 
+
  -- get arrow input
  local input=btn(btn_right) and 1
     or (btn(btn_left) and -1
@@ -42,10 +42,12 @@ function cls_player:update()
  if (menu.visible) input=0
 
  -- check if we are on ground
- local on_ground,tile=self:is_solid_at(vec_down)
+ local bbox_ground=self:bbox(vec_down)
+ local on_ground,tile=room:solid_at(bbox_ground)
  self.on_ground=on_ground
  self.ground_debouncer:debounce(on_ground)
  local on_ground_recently=self.ground_debouncer:is_on()
+ local on_ice=room:tile_flag_at(bbox_ground,flg_ice)
 
  -- compute x speed by acceleration / friction
  local accel_=accel
@@ -54,6 +56,11 @@ function cls_player:update()
  if not on_ground then
   accel_=air_accel
   decel_=air_decel
+ end
+
+ if on_ice then
+  accel_=ice_accel
+  decel_=ice_decel
  end
 
  if abs(self.spd.x)>maxrun then
@@ -90,8 +97,18 @@ function cls_player:update()
 
  -- compute graphics
  if input!=self.prev_input and input!=0 and on_ground then
+  if on_ice then
+   self:smoke(spr_ice_smoke,-input)
+  else
    -- smoke when changing directions
    self:smoke(spr_ground_smoke,-input)
+  end
+ end
+
+  -- add ice smoke when sliding on ice (after releasing input)
+ if on_ice and input==0 and abs(self.spd.x)>0.3
+    and (maybe(0.15) or self.prev_input!=0) then
+   self:smoke(spr_slide_smoke,-input)
  end
 
  self.prev_input=input
