@@ -8,12 +8,13 @@
 --#include fade
 --#include coroutines
 --#include clock
+local clock=cls_clock.init(v2(100,100))
+
+--#include clock-control
+local clock_control=cls_clock_control.init()
 
 --#include player
 --#include enemy-manager
-
-
-local clock=cls_clock.init(v2(100,100))
 
 function _init()
  player=cls_player.init(v2(64,64))
@@ -39,7 +40,8 @@ function _draw()
 end
 
 function _update60()
- dt=(time()-lasttime)*time_factor
+ clock_control:update()
+ dt=clock_control:get_dt()
  lasttime=time()
  tick_crs(crs)
 

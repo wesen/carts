@@ -234,6 +234,7 @@ end
 
 local frame=0
 local dt=0
+local time_factor=1
 local lasttime=time()
 local room=nil
 
@@ -247,6 +248,54 @@ local enemy_manager=nil
 
 local is_fading=false
 local is_screen_dark=false
+
+local dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,13}
+
+
+function darken(p,_pal)
+ for j=1,15 do
+  local kmax=(p+(j*1.46))/22
+  local col=j
+  for k=1,kmax do
+   if (col==0) break
+   col=dpal[col]
+  end
+  if (col==14) col=13
+  if (col==2) col=5
+  if (col==8) col=5
+  pal(j,col,_pal)
+ end
+end
+
+-- fade
+function fade(fade_in)
+ is_fading=true
+ is_screen_dark=false
+ local p=0
+ for i=1,10 do
+  local i_=i
+  local time_elapsed=0
+
+  if (fade_in==true) i_=10-i
+  p=flr(mid(0,i_/10,1)*100)
+
+  while time_elapsed<0.1 do
+   darken(p,1)
+
+   if not fade_in and p==100 then
+    -- this needs to be set before the final yield
+    -- draw will continue to be called even if we are
+    -- in a coresumed cr, if i understand this correctly
+    is_screen_dark=true
+   end
+
+   time_elapsed+=dt
+   yield()
+  end
+ end
+
+ is_fading=false
+end
 
 function tick_crs(crs_)
  for cr in all(crs_) do
@@ -278,6 +327,70 @@ function wait_for(t)
  end
 end
 
+cls_clock=class(function(self,pos)
+ self.t=0
+ self.pos=pos
+end)
+
+function cls_clock:update()
+ self.t+=dt
+end
+
+function cls_clock:draw()
+ for i=0,10 do
+  local x=cos(self.t-i*0.1)
+  local y=sin(self.t-i*0.1)
+  darken(i*10)
+  circfill(self.pos.x+x*10,self.pos.y+y*10,(10-i)/3,7)
+ end
+ pal()
+end
+
+local clock=cls_clock.init(v2(100,100))
+
+local slow_time_factor=0.2
+local slow_time_countdown=2
+
+local state_normal_time=0
+local state_slow_time=1
+
+cls_clock_control=class(function(self)
+ self.time_factor=1
+ self.lasttime=time()
+ self.countdown=0
+ self.state=state_normal_time
+end)
+
+function cls_clock_control:get_dt()
+ local dt=time()-lasttime
+ self.countdown-=dt
+ lasttime=time()
+ if (self.state==state_slow_time) return dt*slow_time_factor
+ return dt
+end
+
+function cls_clock_control:update()
+ if self.state==state_slow_time and self.countdown<0 then
+  self.state=state_normal_time
+ end
+end
+
+function cls_clock_control:on_enemy_winds_up()
+ self.state=state_slow_time
+ self.countdown=slow_time_countdown
+end
+
+function cls_clock_control:on_enemy_attacks()
+ self.state=state_normal_time
+end
+
+function cls_clock_control:on_player_attacks()
+ self.state=state_slow_time
+ self.countdown=slow_time_countdown
+end
+
+local clock_control=cls_clock_control.init()
+
 cls_player=class(function(self,pos)
  self.pos=pos
 end)
@@ -293,7 +406,7 @@ local countdown_idle=2
 local countdown_winding_up=1
 local countdown_attacking=1
 
-local hit_interval=2
+local hit_interval=6
 
 local state_idle=0
 local state_winding_up=1
@@ -307,7 +420,7 @@ enemy_colors[state_stunned]=7
 
 cls_enemy_manager=class(function(self)
  self.enemies={}
- self.hit_countdown=hit_interval
+ self.hit_countdown=2
 end)
 
 function cls_enemy_manager:draw()
@@ -324,11 +437,13 @@ function cls_enemy_manager:update()
 
  foreach(self.enemies,function(e)
   e.countdown-=dt
+
   if e.state==state_idle and e.countdown<lowest_countdown then
    next_enemy=e
    lowest_countdown=e.countdown
   elseif e.state==state_winding_up and e.countdown<0 then
    printh("ATTACK")
+   clock_control:on_enemy_attacks()
    e.state=state_attacking
    e.countdown=countdown_attacking
   elseif e.state==state_attacking and e.countdown<0 then
@@ -341,6 +456,7 @@ function cls_enemy_manager:update()
   self.hit_countdown=hit_interval
   next_enemy.state=state_winding_up
   next_enemy.countdown=countdown_winding_up
+  clock_control:on_enemy_winds_up()
  end
 end
 
@@ -351,7 +467,6 @@ function cls_enemy_manager:add_enemy(pos)
   countdown=0
 })
 end
-
 
 
 function _init()
@@ -374,16 +489,19 @@ function _draw()
  foreach(actors, function(a) a:draw() end)
  enemy_manager:draw()
  player:draw()
+ clock:draw()
 end
 
 function _update60()
- dt=time()-lasttime
+ clock_control:update()
+ dt=clock_control:get_dt()
  lasttime=time()
  tick_crs(crs)
 
  player:update()
  enemy_manager:update()
  foreach(actors, function(a) a:update() end)
+ clock:update()
 end
 
 __gfx__

@@ -33,11 +33,13 @@ function cls_enemy_manager:update()
 
  foreach(self.enemies,function(e)
   e.countdown-=dt
+
   if e.state==state_idle and e.countdown<lowest_countdown then
    next_enemy=e
    lowest_countdown=e.countdown
   elseif e.state==state_winding_up and e.countdown<0 then
    printh("ATTACK")
+   clock_control:on_enemy_attacks()
    e.state=state_attacking
    e.countdown=countdown_attacking
   elseif e.state==state_attacking and e.countdown<0 then
@@ -50,6 +52,7 @@ function cls_enemy_manager:update()
   self.hit_countdown=hit_interval
   next_enemy.state=state_winding_up
   next_enemy.countdown=countdown_winding_up
+  clock_control:on_enemy_winds_up()
  end
 end
 
