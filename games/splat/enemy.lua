@@ -1,6 +1,5 @@
 cls_enemy=class(function(self,pos)
  self.pos=pos
- add(actors,self)
 end)
 
 function cls_enemy:bbox(offset)

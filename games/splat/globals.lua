@@ -1,14 +1,15 @@
-frame=0
-dt=0
-lasttime=time()
-room=nil
+local frame=0
+local dt=0
+local lasttime=time()
+local room=nil
 
-actors={}
-tiles={}
-crs={}
-draw_crs={}
+local actors={}
+local tiles={}
+local crs={}
+local draw_crs={}
 
-player=nil
+local player=nil
+local enemy_manager=nil
 
-is_fading=false
-is_screen_dark=false
+local is_fading=false
+local is_screen_dark=false

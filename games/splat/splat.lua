@@ -3,15 +3,20 @@
 --#include v2
 --#include bbox
 --#include hitbox
---#include coroutines
 --#include globals
+--#include coroutines
 --#include enemy
+--#include player
+--#include enemy-manager
+
 
 function _init()
- cls_enemy.init(v2(32,64))
- cls_enemy.init(v2(64,32))
- cls_enemy.init(v2(64,96))
- cls_enemy.init(v2(96,64))
+ player=cls_player.init(v2(64,64))
+ enemy_manager=cls_enemy_manager.init()
+ enemy_manager:add_enemy(v2(32,64))
+ enemy_manager:add_enemy(v2(64,32))
+ enemy_manager:add_enemy(v2(64,96))
+ enemy_manager:add_enemy(v2(96,64))
 end
 
 function _draw()
@@ -23,7 +28,8 @@ function _draw()
 
  tick_crs(draw_crs)
  foreach(actors, function(a) a:draw() end)
- -- player:draw()
+ enemy_manager:draw()
+ player:draw()
 end
 
 function _update60()
@@ -31,6 +37,7 @@ function _update60()
  lasttime=time()
  tick_crs(crs)
 
- -- player:update()
+ player:update()
+ enemy_manager:update()
  foreach(actors, function(a) a:update() end)
 end

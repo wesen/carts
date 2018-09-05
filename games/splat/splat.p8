@@ -232,6 +232,22 @@ function hitboxvt:str()
  return self.offset:str().."-("..self.dim:str()..")"
 end
 
+local frame=0
+local dt=0
+local lasttime=time()
+local room=nil
+
+local actors={}
+local tiles={}
+local crs={}
+local draw_crs={}
+
+local player=nil
+local enemy_manager=nil
+
+local is_fading=false
+local is_screen_dark=false
+
 function tick_crs(crs_)
  for cr in all(crs_) do
   if costatus(cr)!='dead' then
@@ -262,24 +278,8 @@ function wait_for(t)
  end
 end
 
-frame=0
-dt=0
-lasttime=time()
-room=nil
-
-actors={}
-tiles={}
-crs={}
-draw_crs={}
-
-player=nil
-
-is_fading=false
-is_screen_dark=false
-
 cls_enemy=class(function(self,pos)
  self.pos=pos
- add(actors,self)
 end)
 
 function cls_enemy:bbox(offset)
@@ -298,12 +298,42 @@ end
 function cls_enemy:update()
 end
 
+cls_player=class(function(self,pos)
+ self.pos=pos
+end)
+
+function cls_player:draw()
+ rectfill(self.pos.x,self.pos.y,self.pos.x+8,self.pos.y+8,7)
+end
+
+function cls_player:update()
+end
+
+cls_enemy_manager=class(function(self)
+ self.enemies={}
+end)
+
+function cls_enemy_manager:draw()
+ foreach(self.enemies,function(e) e:draw() end)
+end
+
+function cls_enemy_manager:update()
+ foreach(self.enemies,function(e) e:update() end)
+end
+
+function cls_enemy_manager:add_enemy(pos)
+ add(self.enemies,cls_enemy.init(pos))
+end
+
+
 
 function _init()
- cls_enemy.init(v2(32,64))
- cls_enemy.init(v2(64,32))
- cls_enemy.init(v2(64,96))
- cls_enemy.init(v2(96,64))
+ player=cls_player.init(v2(64,64))
+ enemy_manager=cls_enemy_manager.init()
+ enemy_manager:add_enemy(v2(32,64))
+ enemy_manager:add_enemy(v2(64,32))
+ enemy_manager:add_enemy(v2(64,96))
+ enemy_manager:add_enemy(v2(96,64))
 end
 
 function _draw()
@@ -315,7 +345,8 @@ function _draw()
 
  tick_crs(draw_crs)
  foreach(actors, function(a) a:draw() end)
- -- player:draw()
+ enemy_manager:draw()
+ player:draw()
 end
 
 function _update60()
@@ -323,7 +354,8 @@ function _update60()
  lasttime=time()
  tick_crs(crs)
 
- -- player:update()
+ player:update()
+ enemy_manager:update()
  foreach(actors, function(a) a:update() end)
 end
 
