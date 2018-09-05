@@ -5,7 +5,6 @@
 --#include hitbox
 --#include globals
 --#include coroutines
---#include enemy
 --#include player
 --#include enemy-manager
 
