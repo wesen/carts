@@ -30,11 +30,11 @@ function cls_actor:move_x(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
    amount-=step
-   if not self:is_solid_at(v2(step,0)) then
-    self.pos.x+=step
-   else
+   if self:is_solid_at(v2(step,0)) or self:is_actor_at(v2(step,0)) then
     self.spd.x=0
     break
+   else
+    self.pos.x+=step
    end
   end
  else
@@ -48,11 +48,11 @@ function cls_actor:move_y(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
    amount-=step
-   if not self:is_solid_at(v2(0,step)) then
-    self.pos.y+=step
-   else
+   if self:is_solid_at(v2(0,step)) or self:is_actor_at(v2(0,step)) then
     self.spd.y=0
     break
+   else
+    self.pos.y+=step
    end
   end
  else
@@ -62,6 +62,18 @@ end
 
 function cls_actor:is_solid_at(offset)
  return solid_at(self:bbox(offset))
+end
+
+function cls_actor:is_actor_at(offset)
+
+ for player in all(players) do
+  local bbox_other = player:bbox()
+  if self!=player and bbox_other:collide(self:bbox(offset)) then
+   return true
+  end
+ end
+
+ return false
 end
 
 function cls_actor:get_collisions(typ,offset)

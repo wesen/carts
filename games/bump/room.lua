@@ -84,8 +84,16 @@ function cls_room:draw()
  end
 end
 
-function cls_room:spawn_player()
- cls_spawn.init(self.spawn_locations[1]:clone())
+function cls_room:spawn_player(input_port)
+ --local i = flr(rnd(#self.spawn_locations)) + 1
+
+ local spawn_pos = self.spawn_locations[spawn_idx]:clone()
+ cls_spawn.init(spawn_pos, input_port)
+
+ spawn_idx += 1
+ if spawn_idx > #self.spawn_locations then 
+  spawn_idx = 1
+ end
 end
 
 function cls_room:tile_at(pos)
