@@ -10,9 +10,9 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
- self.hitbox=hitbox(v2(2,0),v2(4,8))
- self.head_hitbox=hitbox(v2(1,-1),v2(6,1))
- self.feet_hitbox=hitbox(v2(1,7),v2(6,1))
+ self.hitbox=hitbox(v2(2,0),v2(4,7))
+ self.head_hitbox=hitbox(v2(1,-1),v2(3,1))
+ self.feet_hitbox=hitbox(v2(1,7),v2(3,1))
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -167,7 +167,10 @@ function cls_player:update()
   
   -- attack
   local head_box=player.head_hitbox:to_bbox_at(player.pos)
-  if player!=self and feet_box:collide(head_box) then
+  if player!=self and
+   feet_box:collide(head_box) and
+   not on_ground and 
+   self.spd.y>0 then
    self.spd.y=-2.0
    make_gore_explosion(player.pos)
    cls_smoke.init(self.pos,32,0)
@@ -196,7 +199,7 @@ function cls_player:draw()
   bbox_col=9
  end
  bbox:draw(bbox_col)
- bbox=self.feet_hitbox:to_bbox_at(self.pos)
+ bbox=self.hitbox:to_bbox_at(self.pos)
  bbox:draw(12)
  print(self.spd:str(),64,64)
  --]]
