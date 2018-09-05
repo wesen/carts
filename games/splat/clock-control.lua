@@ -1,5 +1,5 @@
 local slow_time_factor=0.2
-local slow_time_countdown=2
+local slow_time_countdown=3
 
 local state_normal_time=0
 local state_slow_time=1

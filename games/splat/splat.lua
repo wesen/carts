@@ -13,6 +13,8 @@ local clock=cls_clock.init(v2(100,100))
 --#include clock-control
 local clock_control=cls_clock_control.init()
 
+--#include particle
+
 --#include player
 --#include enemy-manager
 

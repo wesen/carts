@@ -16,7 +16,7 @@ enemy_colors[state_stunned]=7
 
 cls_enemy_manager=class(function(self)
  self.enemies={}
- self.hit_countdown=2
+ self.hit_countdown=0
 end)
 
 function cls_enemy_manager:draw()
@@ -38,7 +38,9 @@ function cls_enemy_manager:update()
    next_enemy=e
    lowest_countdown=e.countdown
   elseif e.state==state_winding_up and e.countdown<0 then
-   printh("ATTACK")
+   for i=1,30 do
+    cls_gore.init(e.pos)
+   end
    clock_control:on_enemy_attacks()
    e.state=state_attacking
    e.countdown=countdown_attacking
