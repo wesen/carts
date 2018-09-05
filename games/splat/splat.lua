@@ -4,10 +4,16 @@
 --#include bbox
 --#include hitbox
 --#include globals
+
+--#include fade
 --#include coroutines
+--#include clock
+
 --#include player
 --#include enemy-manager
 
+
+local clock=cls_clock.init(v2(100,100))
 
 function _init()
  player=cls_player.init(v2(64,64))
@@ -29,14 +35,16 @@ function _draw()
  foreach(actors, function(a) a:draw() end)
  enemy_manager:draw()
  player:draw()
+ clock:draw()
 end
 
 function _update60()
- dt=time()-lasttime
+ dt=(time()-lasttime)*time_factor
  lasttime=time()
  tick_crs(crs)
 
  player:update()
  enemy_manager:update()
  foreach(actors, function(a) a:update() end)
+ clock:update()
 end

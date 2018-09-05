@@ -2,7 +2,7 @@ local countdown_idle=2
 local countdown_winding_up=1
 local countdown_attacking=1
 
-local hit_interval=2
+local hit_interval=6
 
 local state_idle=0
 local state_winding_up=1
@@ -16,7 +16,7 @@ enemy_colors[state_stunned]=7
 
 cls_enemy_manager=class(function(self)
  self.enemies={}
- self.hit_countdown=hit_interval
+ self.hit_countdown=2
 end)
 
 function cls_enemy_manager:draw()
