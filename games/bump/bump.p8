@@ -356,12 +356,16 @@ function cls_actor:move_x(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
    amount-=step
-   if self:is_solid_at(v2(step,0)) or self:is_actor_at(v2(step,0)) then
+
+   local solid=self:is_solid_at(v2(step,0))
+   local actor=self:is_actor_at(v2(step,0))
+   if solid or actor then
     self.spd.x=0
     break
    else
     self.pos.x+=step
    end
+
   end
  else
   self.pos.x+=amount
@@ -374,12 +378,20 @@ function cls_actor:move_y(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
    amount-=step
-   if self:is_solid_at(v2(0,step)) or self:is_actor_at(v2(0,step)) then
+
+   local solid=self:is_solid_at(v2(0,step))
+   local actor=self:is_actor_at(v2(0,step))
+   --[[local actor=(
+    (step>0 and self:is_actor_at(v2(0,step-1))) or
+    (step<0 and self:is_actor_at(v2(0,step+1)))
+    )]]
+   if solid or actor then
     self.spd.y=0
     break
    else
     self.pos.y+=step
    end
+
   end
  else
   self.pos.y+=amount
@@ -737,9 +749,9 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
- self.hitbox=hitbox(v2(2,0),v2(4,7))
- self.head_hitbox=hitbox(v2(1,-1),v2(3,1))
- self.feet_hitbox=hitbox(v2(1,7),v2(3,1))
+ self.hitbox=hitbox(v2(2,0),v2(4,8))
+ self.head_hitbox=hitbox(v2(2,-1),v2(4,1))
+ self.feet_hitbox=hitbox(v2(2,7),v2(4,1))
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -769,6 +781,8 @@ function cls_player:update()
 
  local ground_bbox=self:bbox(vec_down)
  local on_ground,tile=solid_at(ground_bbox)
+ local on_actor=self:is_actor_at(vec_down)
+ on_ground=on_ground or on_actor
  local on_ice=ice_at(ground_bbox)
 
  if on_ground then
@@ -903,9 +917,9 @@ function cls_player:update()
    cls_smoke.init(self.pos,32,0)
    player:kill()
   end
-
+  
  end
-
+ 
 end
 
 function cls_player:draw()
@@ -919,15 +933,17 @@ function cls_player:draw()
  pal(cols_hair[1], cols_hair[1])
  
 
- --[-[
+ --[[
  local bbox=self:bbox()
  local bbox_col=8
  if self:is_solid_at(v2(0,0)) then
   bbox_col=9
  end
  bbox:draw(bbox_col)
- bbox=self.hitbox:to_bbox_at(self.pos)
- bbox:draw(12)
+ --bbox=self.feet_hitbox:to_bbox_at(self.pos)
+ --bbox:draw(12)
+ --bbox=self.head_hitbox:to_bbox_at(self.pos)
+ --bbox:draw(12)
  print(self.spd:str(),64,64)
  --]]
 end
@@ -1089,10 +1105,12 @@ end)
 -- camera shake
 -- fades
 
--- multiple players
--- random player spawns
--- player collision
--- player kill
+-- x multiple players
+-- x random player spawns
+-- x player collision
+-- x player kill
+-- x player colors
+-- score
 
 --#include main
 
