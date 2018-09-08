@@ -1,7 +1,7 @@
 jump_button_grace_interval=10
 jump_max_hold_time=15
 
-ground_grace_interval=12
+ground_grace_interval=6
 
 moth_los_limit=200
 
@@ -43,4 +43,3 @@ levels={
   -- {lamp_nr,frames_off,frames_on}
   -- timer_lights={{2,128,64}}
 }
-

@@ -23,7 +23,6 @@ tiles[spr_lamp2_off]=cls_lamp
 tiles[spr_lamp2_on]=cls_lamp
 
 function cls_lamp:update()
-
  -- flickering light logic
  if self.timer!=nil then
   local tick=frame%self.timer[1]
