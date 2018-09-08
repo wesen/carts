@@ -63,8 +63,8 @@ function cls_player:update()
  local on_ground_recently=self.on_ground_interval>0
 
  if not on_ground then
-  accel=0.2
-  decel=0.1
+  accel=0.1
+  decel=0.02
  else
   if tile!=nil then
    accel,decel=room:get_friction(tile,dir_down)
@@ -153,7 +153,7 @@ function cls_player:update()
     sfx(35)
    end
    self.on_ground_interval=0
-   self.spd.y=-1.0
+   self.spd.y=-1.2
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
@@ -161,8 +161,8 @@ function cls_player:update()
         or self:is_solid_at(v2(3,0)) and 1
         or 0
    if wall_dir!=0 then
-    self.spd.y=-1
-    self.spd.x=-wall_dir*(maxrun+1)
+    self.spd.y=-1.2
+    self.spd.x=-wall_dir*(maxrun+0.3)
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     sfx(35)
     self.jump_button.hold_time+=1
@@ -198,7 +198,9 @@ function cls_player:draw()
  end
  pal()
 
+ pal(13,10)
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ pal()
 
  -- not convinced by border
  -- bspr(self.spr,self.pos.x,self.pos.y,self.flip.x,self.flip.y,0)

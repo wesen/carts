@@ -5,13 +5,13 @@ function flood(x,y,col,pat)
  pat=pat or 0
  local oc=pget(x,y)
  if (oc==col) return
- local queue={}
- local add=mid(pat,0,1)
- printh("add "..tostr(add))
+-- local queue={}
+-- local add=mid(pat,0,1)
+-- printh("add "..tostr(add))
  
  function fill2(x,y)
   if pget(x,y)==oc then
-   queue[#queue+add]=x*256+y
+--   queue[#queue+add]=x*256+y
    pset(x,y,col)
    if (x>0) fill2(x-1,y)
    if (x<127) fill2(x+1,y)
@@ -30,10 +30,8 @@ function flood(x,y,col,pat)
    q=queue[i]
    a=flr(q/256)
    b=q-a*256
-   printh("pattern "..tostr(a).." "..tostr(b))
    local _x=poff+a%8
    local _y=b%8
-   printh("_x "..tostr(_x).." _y "..tostr(_y))
    if (sget(poff+a%8,b%8)==0) pset(a,b,oc)
   end
  end
@@ -42,7 +40,8 @@ end
 function _draw()
  cls()
  rect(10,10,80,80,8)
- flood(40,40,9,2)
+ flood(40,40,9)
+ print(tostr(stat(1)),64,64,7)
 end
 __gfx__
 00000000090000000900000009090909000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

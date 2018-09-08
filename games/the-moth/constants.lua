@@ -19,6 +19,7 @@ typ_heart=16
 flg_solid=0
 flg_ice=1
 flg_opaque=2
+flg_background=7
 
 btn_right=1
 btn_left=0
