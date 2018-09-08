@@ -5,64 +5,85 @@ function _init()
  poke(0x5f2d,1)
 end
 
-tether={x=64,x=28}
+tether={x=64,y=28}
+
+mode_swinging=1
+mode_free=2
+mode_pulling=3
 
 obj={
  x=10,y=28,
  sx=.2,sy=2,
- tethered=false,
- jumping=true,
- l=53
+ mode=mode_free,
+ l=0
 }
 
-maxl=10
 maxfall=3
-gravity=0.12
+gravity=0.20
+maxl=10
 
-px=64
-py=28
-x=0
-y=0
+prevbtn=false
 
 function _update()
 -- x=stat(32)
 -- y=stat(33)
- obj.sy=appr(obj.sy,maxfall,gravity)
+ local _gravity=gravity
+ if (obj.mode==mode_free) _gravity*=0.5
+ if (obj.mode==mode_swing) _gravity*=1.5
+ obj.sy=appr(obj.sy,maxfall,_gravity)
+
  local prevx=obj.x
  local prevy=obj.y
 
- if (btn(0)) obj.sx,obj.sy=-1,obj.sy
- if (btn(1)) obj.sx,obj.sy=1,obj.sy
 
  obj.y+=obj.sy
  obj.x+=obj.sx
 
- printh("obj sx "..tostr(obj.sx))
+ obj.x=mid(0,obj.x,128)
+ obj.y=mid(0,obj.y,128)
 
- local v={x=obj.x-px,y=obj.y-py}
+ local v={x=obj.x-tether.x,y=obj.y-tether.y}
  local l=sqrt(v.x^2+v.y^2)
+
+ if btn(4) and not previnput then
+  if obj.mode==mode_free then
+   printh("pulling")
+   obj.mode=mode_pulling
+   obj.l=l
+  end
+ end
+
+ if not btn(4) and obj.mode!=mode_free then
+  obj.mode=mode_free
+ end
+
+ prevbtn=btn(4)
+
  local _maxl=maxl
- if obj.jumping then
+ if obj.mode==mode_pulling then
   _maxl=max(obj.l,maxl)
+  obj.l-=3
  end
 
- printh("l "..tostr(l).." maxl "..tostr(_maxl))
+ if obj.mode!=mode_free then
+  printh("obj l "..tostr(obj.l).." mode "..tostr(obj.mode).." l "..tostr(l).." maxl "..tostr(_maxl))
+  if obj.mode==mode_pulling and l<maxl then
+   printh("swinging")
+   obj.mode=mode_swinging
+  end
 
- if l>_maxl then
-  v.x=v.x*_maxl/l
-  v.y=v.y*_maxl/l
-  obj.x=px+v.x
-  obj.y=py+v.y
-  obj.sx=obj.x-prevx
-  obj.sy=obj.y-prevy
+  if l>_maxl then
+   printh("cap v  "..tostr(_maxl/l))
+   v.x=v.x*_maxl/l
+   v.y=v.y*_maxl/l
+   obj.x=tether.x+v.x
+   obj.y=tether.y+v.y
+   obj.sx=obj.x-prevx
+   obj.sy=obj.y-prevy
 
-  obj.sx*=1
-  obj.sy*=1
- end
-
- if obj.jumping then
-  obj.l=l
-  obj.l-=2
+   obj.sx*=1
+   obj.sy*=1
+  end
  end
 end
 
@@ -72,8 +93,12 @@ function _draw()
 -- local a=atan2(x-px,y-py)
 -- print(tostr(x)..","..tostr(y),64,80,7)
 -- print(tostr(a),64,64,7)
- line(obj.x,obj.y,px,py,7)
+ if obj.mode!=mode_free then
+  line(obj.x,obj.y,tether.x,tether.y,7)
+ end
+
  rect(obj.x,obj.y,obj.x+4,obj.y+4,8)
+ circ(tether.x,tether.y,2,9)
 end
 -->8
 function appr(val,target,amount)
