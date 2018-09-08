@@ -238,7 +238,7 @@ end
 
 birds={}
 selected_bird=nil
-bird_sprs={ 1,16,32 }
+bird_sprs={ 32,16,1 }
 
 function get_row_y(row)
  return row*25+5
@@ -250,7 +250,7 @@ cls_bird=class(function(self,row,spd,col)
  self.spd=spd
  self.col=col
  self.angle=rnd(1)
- self.range=2+rnd(4)
+ self.range=2+rnd(2)
  self.angle_spd=0.05+rnd(0.05)
  add(birds,self)
 end)
@@ -258,6 +258,24 @@ end)
 function cls_bird:update()
  self.x-=self.spd
  self.angle+=self.angle_spd+mrnd(0.1)
+ if self.x<19 then
+  if self.row==self.col then
+   game.score+=1
+  else
+   game.losses+=1
+  end
+  del(birds,self)
+  if self==selected_bird then
+   local _birds=get_closest_birds()
+   local dirs={dir_right,dir_down,dir_up}
+   for i=1,3 do
+    local dir=dirs[i]
+    if selected_bird!=nil and _birds[dir]!=nil then
+     selected_bird=_birds[dir]
+    end
+   end
+  end
+ end
 end
 
 function cls_bird:draw()
@@ -265,6 +283,12 @@ function cls_bird:draw()
  local y0=get_row_y(self.row)+cos(self.angle)*self.range
  local off=flr(self.spd*frame/3)%3
  spr(bird_sprs[self.col]+off,x0,y0)
+ if self==selected_bird then
+  line(x0+2,y0+10,x0+6,y0+10,7)
+  line(x0+2,y0-2,x0+6,y0-2,7)
+  line(x0-2,y0+2,x0-2,y0+6,7)
+  line(x0+10,y0+2,x0+10,y0+6,7)
+ end
 end
 
 function cls_bird:pos()
@@ -288,14 +312,14 @@ function get_closest_birds()
    end
    if bpos.y>spos.y and d<down then
     res[dir_down]=b
-    up=d
+    down=d
    end
    if bpos.y==spos.y then
-    if bpos.x>spos.x and d<left then
+    if bpos.x<spos.x and d<left then
      res[dir_left]=b
      left=d
     end
-    if bpos.x<spos.x and d<right then
+    if bpos.x>spos.x and d<right then
      res[dir_right]=b
      right=d
     end
@@ -303,24 +327,6 @@ function get_closest_birds()
   end
  end
  return res
-end
-
-function game_update(self)
- if rnd(1)<0.05 then
-  local row=flr(rnd(3))+1
-  local col=flr(rnd(3))+1
-  local spd=0.3+rnd(0.8)
-  cls_bird.init(row,spd,col)
- end
-
- if (selected_bird==nil and #birds>0) selected_bird=birds[1]
- local _birds=get_closest_birds()
-
- for i=0,3 do
-  if btnp(i) and _birds[i]!=nil then
-   selected_bird=_birds[i]
-  end
- end
 end
 
 houses={}
@@ -337,20 +343,54 @@ function cls_house:update()
 end
 
 function cls_house:draw()
- spr(house_sprs[self.row],10,get_row_y(self.row)-3,2,2)
+ spr(house_sprs[self.row],10,get_row_y(self.row)-5,2,2)
+end
+
+cls_game=class(function(self)
+ self.score=0
+ self.losses=0
+end)
+
+function cls_game:update()
+ if rnd(1)<0.01 then
+  local row=flr(rnd(3))+1
+  local col=flr(rnd(3))+1
+  local spd=0.2+rnd(0.2)
+  cls_bird.init(row,spd,col)
+ end
+
+ if (selected_bird==nil and #birds>0) selected_bird=birds[1]
+ local _birds=get_closest_birds()
+
+ if btn(4) and selected_bird!=nil then
+  if (btnp(dir_up) and selected_bird.row>1) selected_bird.row-=1
+  if (btnp(dir_down) and selected_bird.row<3) selected_bird.row+=1
+ else
+  for i=0,3 do
+   if btnp(i) and _birds[i]!=nil then
+    selected_bird=_birds[i]
+   end
+  end
+ end
+end
+
+function cls_game:draw()
+ print("losses: "..tostr(self.losses),20,0,7)
+ print("score: "..tostr(self.score),80,0,7)
 end
 
 
-score=0
 frame=0
 lasttime=time()
 dt=0
 
+game=cls_game.init()
+
 -->8
 function _init()
- cls_bird.init(1,0.5,1)
- cls_bird.init(2,0.6,2)
- cls_bird.init(3,0.7,3)
+ cls_bird.init(1,0.1,3)
+ cls_bird.init(2,0.2,1)
+ cls_bird.init(3,0.15,2)
  selected_bird=birds[1]
 
  cls_house.init(1,1)
@@ -362,7 +402,7 @@ function _update()
  frame+=1
  dt=time()-lasttime
  lasttime=time()
- game_update(game)
+ game:update()
  foreach(birds,function(b) b:update() end)
 end
 
@@ -370,9 +410,8 @@ function _draw()
  cls()
  foreach(houses,function(h) h:draw() end)
  foreach(birds,function(b) b:draw() end)
+ game:draw()
 end
-
-game={}
 
 __gfx__
 000000000088eee00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

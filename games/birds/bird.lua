@@ -1,6 +1,6 @@
 birds={}
 selected_bird=nil
-bird_sprs={ 1,16,32 }
+bird_sprs={ 32,16,1 }
 
 function get_row_y(row)
  return row*25+5
@@ -12,7 +12,7 @@ cls_bird=class(function(self,row,spd,col)
  self.spd=spd
  self.col=col
  self.angle=rnd(1)
- self.range=2+rnd(4)
+ self.range=2+rnd(2)
  self.angle_spd=0.05+rnd(0.05)
  add(birds,self)
 end)
@@ -20,6 +20,24 @@ end)
 function cls_bird:update()
  self.x-=self.spd
  self.angle+=self.angle_spd+mrnd(0.1)
+ if self.x<19 then
+  if self.row==self.col then
+   game.score+=1
+  else
+   game.losses+=1
+  end
+  del(birds,self)
+  if self==selected_bird then
+   local _birds=get_closest_birds()
+   local dirs={dir_right,dir_down,dir_up}
+   for i=1,3 do
+    local dir=dirs[i]
+    if selected_bird!=nil and _birds[dir]!=nil then
+     selected_bird=_birds[dir]
+    end
+   end
+  end
+ end
 end
 
 function cls_bird:draw()
@@ -27,6 +45,12 @@ function cls_bird:draw()
  local y0=get_row_y(self.row)+cos(self.angle)*self.range
  local off=flr(self.spd*frame/3)%3
  spr(bird_sprs[self.col]+off,x0,y0)
+ if self==selected_bird then
+  line(x0+2,y0+10,x0+6,y0+10,7)
+  line(x0+2,y0-2,x0+6,y0-2,7)
+  line(x0-2,y0+2,x0-2,y0+6,7)
+  line(x0+10,y0+2,x0+10,y0+6,7)
+ end
 end
 
 function cls_bird:pos()
@@ -50,14 +74,14 @@ function get_closest_birds()
    end
    if bpos.y>spos.y and d<down then
     res[dir_down]=b
-    up=d
+    down=d
    end
    if bpos.y==spos.y then
-    if bpos.x>spos.x and d<left then
+    if bpos.x<spos.x and d<left then
      res[dir_left]=b
      left=d
     end
-    if bpos.x<spos.x and d<right then
+    if bpos.x>spos.x and d<right then
      res[dir_right]=b
      right=d
     end
@@ -65,22 +89,4 @@ function get_closest_birds()
   end
  end
  return res
-end
-
-function game_update(self)
- if rnd(1)<0.05 then
-  local row=flr(rnd(3))+1
-  local col=flr(rnd(3))+1
-  local spd=0.3+rnd(0.8)
-  cls_bird.init(row,spd,col)
- end
-
- if (selected_bird==nil and #birds>0) selected_bird=birds[1]
- local _birds=get_closest_birds()
-
- for i=0,3 do
-  if btnp(i) and _birds[i]!=nil then
-   selected_bird=_birds[i]
-  end
- end
 end
