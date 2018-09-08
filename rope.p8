@@ -18,7 +18,7 @@ obj={
  l=0
 }
 
-maxfall=3
+maxfall=5
 gravity=0.20
 maxl=10
 
@@ -28,13 +28,24 @@ function _update()
 -- x=stat(32)
 -- y=stat(33)
  local _gravity=gravity
- if (obj.mode==mode_free) _gravity*=0.5
+ if (obj.mode==mode_free) _gravity*=0.8
  if (obj.mode==mode_swing) _gravity*=1.5
  obj.sy=appr(obj.sy,maxfall,_gravity)
 
  local prevx=obj.x
  local prevy=obj.y
 
+ if (obj.x<0) obj.x=127
+ if (obj.x>127) obj.x=0
+ if (obj.y<0) obj.y=127
+ if obj.y>118 then
+  obj.y=118
+  obj.sy=-obj.sy
+  obj.sx*=0.95
+  obj.sy*=0.3
+  if (abs(obj.sy)<0.5) obj.sy=0
+  if (abs(obj.sx)<0.5) obj.sx=0
+ end
 
  obj.y+=obj.sy
  obj.x+=obj.sx
