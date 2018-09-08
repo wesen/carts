@@ -240,6 +240,11 @@ crs={}
 
 player=nil
 
+btn_right=1
+btn_left=0
+btn_fly=4
+btn_action=5
+
 function tick_crs(crs_)
  for cr in all(crs_) do
   if costatus(cr)!='dead' then
@@ -270,16 +275,202 @@ function wait_for(t)
  end
 end
 
-cls_player=class(function(self)
+
+actor_cnt=0
+actors={}
+
+cls_actor=class(function(self,pos)
+ self.pos=pos
+ self.id=actor_cnt
+ actor_cnt+=1
+ self.spd=v2(0,0)
+ self.is_solid=true
+ self.hitbox=hitbox(v2(0,0),v2(8,8))
+ add(actors,self)
 end)
 
-cls_button=class(typ_button,function(self,btn_nr)
+function cls_actor:bbox(offset)
+ if (offset==nil) offset=v2(0,0)
+ return self.hitbox:to_bbox_at(self.pos+offset)
+end
+
+function cls_actor:str()
+ return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
+end
+
+function cls_actor:move(o)
+ self:move_x(o.x)
+ self:move_y(o.y)
+end
+
+function cls_actor:move_x(amount)
+ if self.is_solid then
+  while abs(amount)>0 do
+   local step=amount
+   if (abs(amount)>1) step=sign(amount)
+   amount-=step
+   if not self:is_solid_at(v2(step,0)) then
+    self.pos.x+=step
+   else
+    self.spd.x=0
+    break
+   end
+  end
+ else
+  self.pos.x+=amount
+ end
+end
+
+function cls_actor:move_y(amount)
+ if self.is_solid then
+  while abs(amount)>0 do
+   local step=amount
+   if (abs(amount)>1) step=sign(amount)
+   amount-=step
+   if not self:is_solid_at(v2(0,step)) then
+    self.pos.y+=step
+   else
+    self.spd.y=0
+    break
+   end
+  end
+ else
+  self.pos.y+=amount
+ end
+end
+
+function cls_actor:is_solid_at(offset)
+ return solid_at(self:bbox(offset))
+end
+
+function cls_actor:collides_with(other_actor)
+ return self:bbox():collide(other_actor:bbox())
+end
+
+function cls_actor:get_collisions(typ,offset)
+ local res={}
+
+ local bbox=self:bbox(offset)
+ for actor in all(actors) do
+  if actor!=self and actor.typ==typ then
+   if (bbox:collide(actor:bbox())) add(res,actor)
+  end
+ end
+
+ return res
+end
+
+function draw_actors(typ)
+ for a in all(actors) do
+  if ((typ==nil or a.typ==typ) and a.draw!=nil) a:draw()
+ end
+end
+
+function update_actors(typ)
+ for a in all(actors) do
+  if ((typ==nil or a.typ==typ) and a.update!=nil) a:update()
+ end
+end
+
+room=nil
+
+cls_room=class(function(self)
+end)
+
+function cls_room:draw()
+end
+
+function cls_room:update()
+end
+
+function cls_room:solid_at(bbox)
+ printh("solid bbox "..bbox:str())
+ if bbox.aa.x<0
+  or bbox.bb.x>128
+  or bbox.aa.y<0
+  or bbox.bb.y>128 then
+   return true,nil
+ else
+  for e in all(self.environment) do
+   if (bbox:collide(e:bbox())) return true,e
+  end
+  return false
+ end
+end
+
+function solid_at(bbox)
+ return room:solid_at(bbox)
+end
+
+cls_player=subclass(cls_actor,function(self)
+ self.pos=v2(10,80)
+ self.fly_button=cls_button.init(btn_fly,30)
+ self.spd=v2(0,0)
+ self.hitbox=hitbox(v2(0,0),v2(8,8))
+ self.is_solid=true
+ del(actors,self)
+end)
+
+function cls_player:draw()
+ rectfill(self.pos.x,self.pos.y,self.pos.x+8,self.pos.y+8,7)
+end
+
+function cls_player:update()
+ local input=btn(btn_right) and 1
+    or (btn(btn_left) and -1
+    or 0)
+
+ self.fly_button:update()
+
+ -- x movement
+ local maxrun=1
+ local accel=0.1
+ local decel=0.01
+
+ if abs(self.spd.x)>maxrun then
+  self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
+ elseif input != 0 then
+  self.spd.x=appr(self.spd.x,input*maxrun,accel)
+ else
+  self.spd.x=appr(self.spd.x,0,decel)
+ end
+
+ local maxfall=2
+ local gravity=0.12
+
+ if self.fly_button.is_down then
+  if self.fly_button:is_held() or self.fly_button:was_just_pressed() then
+   self.spd.y=-1.2
+   self.fly_button.hold_time+=1
+  end
+ end
+
+ self.spd.y=appr(self.spd.y,maxfall,gravity)
+
+ self:move(self.spd)
+end
+
+cls_projectile=subclass(cls_actor,function(self,pos,spd)
+ self.pos=pos
+ self.spd=spd
+ self.has_weight=true
+end)
+
+function cls_project:update()
+ self.pos+=self.spd
+ if self.pos
+end
+
+
+
+cls_button=class(function(self,btn_nr,max_hold_time)
  self.btn_nr=btn_nr
  self.is_down=false
  self.is_pressed=false
  self.down_duration=0
  self.hold_time=0
  self.ticks_down=0
+ self.max_hold_time=max_hold_time
 end)
 
 function cls_button:update()
@@ -295,20 +486,17 @@ function cls_button:update()
  end
 end
 
-function cls_button:was_recently_pressed()
- return self.ticks_down<jump_button_grace_interval and self.hold_time==0
-end
-
 function cls_button:was_just_pressed()
  return self.is_pressed
 end
 
 function cls_button:is_held()
- return self.hold_time>0 and self.hold_time<jump_max_hold_time
+ return self.hold_time>0 and self.hold_time<self.max_hold_time
 end
 
 function _init()
  player=cls_player.init()
+ room=cls_room.init()
 end
 
 function _draw()

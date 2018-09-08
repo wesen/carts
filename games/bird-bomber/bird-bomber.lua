@@ -5,6 +5,12 @@
 --#include hitbox
 --#include globals
 --#include coroutines
+
+--#include actors
+--#include level
 --#include player
+--#include projectile
+--#include enemy
+--#include environment
 --#include button
 --#include main

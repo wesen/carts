@@ -20,7 +20,6 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos)
 
  self.ghosts={}
  self.on_ground=true
-
 end)
 
 function cls_player:smoke(spr,dir)

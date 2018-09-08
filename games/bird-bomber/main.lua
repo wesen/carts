@@ -1,5 +1,6 @@
 function _init()
  player=cls_player.init()
+ room=cls_room.init()
 end
 
 function _draw()
