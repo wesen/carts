@@ -169,14 +169,14 @@ function cls_player:update()
   
   -- attack
   local head_box=player.head_hitbox:to_bbox_at(player.pos)
-  if player!=self and
-   feet_box:collide(head_box) and
-   not on_ground and 
-   self.spd.y>0 then
-   self.spd.y=-2.0
+  local can_attack=not on_ground and self.spd.y>0
+
+  if player!=self and feet_box:collide(head_box) and can_attack then
    make_gore_explosion(player.pos)
    cls_smoke.init(self.pos,32,0)
+   self.spd.y=-2.0
    player:kill()
+   scores[self.input_port+1]+=1
   end
   
  end
