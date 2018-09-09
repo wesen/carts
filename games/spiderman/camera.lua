@@ -32,6 +32,7 @@ function cls_camera:update()
  if (b.aa.x>p.x) self.pos.x-=min(b.aa.x-p.x,4)
  if (b.bb.y<p.y) self.pos.y+=min(p.y-b.bb.y,4)
  if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,4)
+ if (self.pos.y>64) self.pos.y=64
  -- self.pos=room:bbox():shrink(64):clip(self.pos)
  self:update_shake()
 end

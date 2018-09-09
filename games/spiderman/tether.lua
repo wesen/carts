@@ -1,5 +1,3 @@
-tethers={}
-
 cls_tether=class(function(self,pos)
   self.pos=pos
   add(tethers,self)

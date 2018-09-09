@@ -406,8 +406,6 @@ function cls_player:update()
  prevbtn=btn(4)
 end
 
-tethers={}
-
 cls_tether=class(function(self,pos)
   self.pos=pos
   add(tethers,self)
@@ -454,6 +452,7 @@ function cls_camera:update()
  if (b.aa.x>p.x) self.pos.x-=min(b.aa.x-p.x,4)
  if (b.bb.y<p.y) self.pos.y+=min(p.y-b.bb.y,4)
  if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,4)
+ if (self.pos.y>64) self.pos.y=64
  -- self.pos=room:bbox():shrink(64):clip(self.pos)
  self:update_shake()
 end
@@ -503,14 +502,45 @@ function wait_for(t)
  end
 end
 
+row_background=1
+row_foreground=2
+row_middleground=3
+building_cols={1,13,5}
+buildings={}
+
+cls_building=class(function(self,pos,row)
+ self.pos=pos
+ self.row=row
+ add(buildings,self)
+end)
+
+function cls_building:draw()
+ rectfill(self.pos.x,122,self.pos.x+20,128-self.pos.y,building_cols[self.row])
+end
+
 
 lasttime=time()
 dt=0
 frame=1
+tethers={}
 
 function _init()
  player=cls_player.init(v2(10,10))
  cls_tether.init(v2(64,28))
+
+ cls_building.init(v2(0,80),row_background)
+ cls_building.init(v2(90,40),row_background)
+ cls_building.init(v2(130,50),row_background)
+ cls_building.init(v2(200,90),row_background)
+
+ cls_building.init(v2(40,100),row_middleground)
+ cls_building.init(v2(70,80),row_middleground)
+ cls_building.init(v2(150,90),row_middleground)
+
+ cls_building.init(v2(20,30),row_foreground)
+ cls_building.init(v2(60,40),row_foreground)
+ cls_building.init(v2(120,80),row_foreground)
+
  main_camera=cls_camera.init()
  main_camera:set_target(player)
 end
@@ -534,15 +564,25 @@ function _draw()
  cls()
  local p=main_camera:compute_position()
  camera(p.x/1.5,p.y/1.5)
+ for building in all(buildings) do
+  if (building.row==row_background) building:draw()
+ end
  -- parallax background
 
  camera(p.x,p.y)
- player:draw()
+ for building in all(buildings) do
+  if (building.row==row_middleground) building:draw()
+ end
  for tether in all(tethers) do
   tether:draw()
  end
+ player:draw()
 
  -- foreground
+ camera(p.x/0.75,p.y/0.75)
+ for building in all(buildings) do
+  if (building.row==row_foreground) building:draw()
+ end
 end
 
 __gfx__
