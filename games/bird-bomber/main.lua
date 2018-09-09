@@ -6,6 +6,9 @@ end
 function _draw()
  frame+=1
  cls()
+ for actor in all(actors) do
+  actor:draw()
+ end
  player:draw()
 
 end
@@ -15,4 +18,7 @@ function _update60()
  lasttime=time()
  tick_crs(crs)
  player:update()
+ for actor in all(actors) do
+  actor:update()
+ end
 end

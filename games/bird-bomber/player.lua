@@ -1,11 +1,14 @@
 cls_player=subclass(cls_actor,function(self)
  self.pos=v2(10,80)
  self.fly_button=cls_button.init(btn_fly,30)
+ -- self.fire_button=cls_button.init(btn_fire,30)
  self.spd=v2(0,0)
  self.hitbox=hitbox(v2(0,0),v2(8,8))
  self.is_solid=true
  self.spr=35
  self.flip=v2(false,false)
+ self.prev_input=0
+ self.weight=0.5
  del(actors,self)
 end)
 
@@ -35,10 +38,8 @@ function cls_player:update()
   self.spd.x=appr(self.spd.x,0,decel)
  end
 
- self.flip.x=self.spd.x<0
-
  local maxfall=2
- local gravity=0.12
+ local gravity=0.12*self.weight
 
  self.spr=35
  if self.fly_button.is_down then
@@ -50,6 +51,18 @@ function cls_player:update()
  end
 
  self.spd.y=appr(self.spd.y,maxfall,gravity)
+ local dir=self.flip.x and -1 or 1
 
  self:move(self.spd)
+
+ if input!=self.prev_input and input!=0 then
+  printh("Update input")
+  self.flip.x=input==-1
+ end
+ self.prev_input=input
+
+ if btnp(btn_fire) then
+  printh("FIRE")
+  cls_projectile.init(self.pos+v2(0,8),v2(self.spd.x+dir*0.5,0))
+ end
 end

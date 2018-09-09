@@ -8,4 +8,4 @@ player=nil
 btn_right=1
 btn_left=0
 btn_fly=4
-btn_action=5
+btn_fire=5
