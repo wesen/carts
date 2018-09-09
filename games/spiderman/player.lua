@@ -22,7 +22,20 @@ cls_player=class(function(self,pos)
 end)
 
 function cls_player:get_closest_tether()
- return tethers[1]
+ local d=10000
+ local res=nil
+ for tether in all(tethers) do
+  if (self.spd.x>0 and tether.pos.x>self.pos.x) or
+   (self.spd.x<=0 and tether.pos.x<self.pos.x) then
+    local _d=abs(self.pos.x-tether.pos.x)
+    if _d<d then
+     res=tether
+     d=_d
+    end
+  end
+ end
+ if (res==nil) res=tethers[1]
+ return res
 end
 
 function cls_player:draw()

@@ -14,22 +14,62 @@ dt=0
 frame=1
 tethers={}
 
+function cull_elts()
+ local off=0
+ if player.pos.x>256 then
+  off=-128
+ elseif player.pos.x<128 then
+  off=128
+ else
+  return
+ end
+
+ player.pos.x+=off
+ player.prev.x+=off
+ main_camera.pos.x+=off
+
+ for tether in all(tethers) do
+  tether.pos.x+=off
+  if tether.pos.x>384 or tether.pos.x<0 then
+   del(tethers,tether)
+  end
+ end
+
+ for building in all(buildings) do
+  building.pos.x+=off
+  if building.pos.x>384 or building.pos.x<0 then
+   del(buildings,building)
+  end
+ end
+
+ if (off==128) add_elts(0)
+ if (off==-128) add_elts(256)
+end
+
+function add_elts(off)
+ -- for i=1,5+flr(rnd(5)) do
+ --  cls_building.init(v2(flr(rnd(128))+off,60+flr(rnd(60))),row_background)
+ -- end
+ local boff=0
+ for i=1,3+flr(rnd(5)) do
+  local b=v2(boff+off,60+flr(rnd(60)))
+  boff+=30+flr(rnd(50))
+  if b.x<off+128 then
+   cls_tether.init(v2(b.x,128-b.y))
+   cls_building.init(b,row_middleground)
+  end
+ end
+ -- for i=1,5+flr(rnd(5)) do
+ --  cls_building.init(v2(flr(rnd(128))+off,20+flr(rnd(40))),row_foreground)
+ -- end
+end
+
 function _init()
  player=cls_player.init(v2(160,10))
- cls_tether.init(v2(204,28))
 
- cls_building.init(v2(0,80),row_background)
- cls_building.init(v2(90,40),row_background)
- cls_building.init(v2(130,50),row_background)
- cls_building.init(v2(200,90),row_background)
-
- cls_building.init(v2(40,100),row_middleground)
- cls_building.init(v2(70,80),row_middleground)
- cls_building.init(v2(150,90),row_middleground)
-
- cls_building.init(v2(20,30),row_foreground)
- cls_building.init(v2(60,40),row_foreground)
- cls_building.init(v2(120,80),row_foreground)
+ add_elts(0)
+ add_elts(128)
+ add_elts(256)
 
  main_camera=cls_camera.init()
  main_camera:set_target(player)
@@ -46,6 +86,8 @@ function _update()
  end
 
  main_camera:update()
+
+ cull_elts()
 end
 
 function _draw()
