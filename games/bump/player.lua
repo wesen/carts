@@ -47,8 +47,7 @@ function cls_player:update()
 
  local ground_bbox=self:bbox(vec_down)
  local on_ground,tile=solid_at(ground_bbox)
- local on_actor=self:is_actor_at(vec_down)
- on_ground=on_ground or on_actor
+ local on_actor=self:is_actor_at(v2(input,0))
  local on_ice=ice_at(ground_bbox)
 
  if on_ground then
