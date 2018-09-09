@@ -30,6 +30,7 @@ end
 
 function cls_player:kill()
  del(players,self)
+    sfx(1)
  room:spawn_player(self.input_port)
 end
 
@@ -131,8 +132,7 @@ function cls_player:update()
     or (on_ground_recently and self.jump_button:was_recently_pressed()) then
    if self.jump_button:was_recently_pressed() then
     self:smoke(spr_ground_smoke,0)
-    -- XXX test gore
-    --make_gore_explosion(self.pos)
+    sfx(0)
    end
    self.on_ground_interval=0
    self.spd.y=-1.0
