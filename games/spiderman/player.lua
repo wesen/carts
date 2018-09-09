@@ -111,11 +111,6 @@ function cls_player:update()
  self.prev.x=self.pos.x
  self.prev.y=self.pos.y
 
- -- world boundaries
- if (self.pos.x<=0) self.pos.x=127
- if (self.pos.x>127) self.pos.x=0
- if (self.pos.y<=0) self.pos.y=117  --if (self.pos.y<=0) self.pos.y=115 --edited
-
  -- bounce on floor
  if self.pos.y>=118 then --if self.pos.y>118 then  --edited
   self.pos.y=118
@@ -128,10 +123,6 @@ function cls_player:update()
 
  self.pos.y+=self.spd.y
  self.pos.x+=self.spd.x
-
- self.pos.x=mid(0,self.pos.x,128)
- self.pos.y=mid(0,self.pos.y,128)
-
 
  if btn(4) and not prevbtn then
   if self.mode==mode_free then
@@ -150,6 +141,7 @@ function cls_player:update()
 
   if not btn(4) and self.mode!=mode_free then
    self.mode=mode_free
+   self.current_tether=nil
   end
 
   local _normal_tether_length=normal_tether_length
@@ -170,6 +162,11 @@ function cls_player:update()
    end
   end
  end
+
+ local vs=self.spd:magnitude()
+ local max_v=7
+ self.spd.y=mid(-5,self.spd.y,4)
+ if (vs>max_v) self.spd*=max_v/vs
 
  prevbtn=btn(4)
 end

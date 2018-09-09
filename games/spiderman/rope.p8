@@ -346,11 +346,6 @@ function cls_player:update()
  self.prev.x=self.pos.x
  self.prev.y=self.pos.y
 
- -- world boundaries
- if (self.pos.x<=0) self.pos.x=127
- if (self.pos.x>127) self.pos.x=0
- if (self.pos.y<=0) self.pos.y=117  --if (self.pos.y<=0) self.pos.y=115 --edited
-
  -- bounce on floor
  if self.pos.y>=118 then --if self.pos.y>118 then  --edited
   self.pos.y=118
@@ -363,10 +358,6 @@ function cls_player:update()
 
  self.pos.y+=self.spd.y
  self.pos.x+=self.spd.x
-
- self.pos.x=mid(0,self.pos.x,128)
- self.pos.y=mid(0,self.pos.y,128)
-
 
  if btn(4) and not prevbtn then
   if self.mode==mode_free then
@@ -385,6 +376,7 @@ function cls_player:update()
 
   if not btn(4) and self.mode!=mode_free then
    self.mode=mode_free
+   self.current_tether=nil
   end
 
   local _normal_tether_length=normal_tether_length
@@ -406,6 +398,11 @@ function cls_player:update()
   end
  end
 
+ local vs=self.spd:magnitude()
+ local max_v=7
+ self.spd.y=mid(-5,self.spd.y,4)
+ if (vs>max_v) self.spd*=max_v/vs
+
  prevbtn=btn(4)
 end
 
@@ -423,25 +420,129 @@ end
 function cls_tether:update()
 end
 
+cls_camera=class(function(self)
+ self.target=nil
+ self.pull=16
+ self.pos=v2(0,0)
+ self.shk=v2(0,0)
+ -- this is where to add shake
+end)
+
+function cls_camera:set_target(target)
+ self.target=target
+ self.pos=target.pos:clone()
+end
+
+function cls_camera:compute_position()
+ return v2(self.pos.x-64+self.shk.x,self.pos.y-64+self.shk.y)
+end
+
+function cls_camera:abs_position(p)
+ return p+self:compute_position()
+end
+
+function cls_camera:pull_bbox()
+ local v=v2(self.pull,self.pull)
+ return bbox(self.pos-v,self.pos+v)
+end
+
+function cls_camera:update()
+ if (self.target==nil) return
+ local b=self:pull_bbox()
+ local p=self.target.pos
+ if (b.bb.x<p.x) self.pos.x+=min(p.x-b.bb.x,4)
+ if (b.aa.x>p.x) self.pos.x-=min(b.aa.x-p.x,4)
+ if (b.bb.y<p.y) self.pos.y+=min(p.y-b.bb.y,4)
+ if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,4)
+ -- self.pos=room:bbox():shrink(64):clip(self.pos)
+ self:update_shake()
+end
+
+-- from trasevol_dog
+function cls_camera:add_shake(p)
+ local a=rnd(1)
+ self.shk+=v2(p*cos(a),p*sin(a))
+end
+
+function cls_camera:update_shake()
+ if abs(self.shk.x)+abs(self.shk.y)<1 then
+  self.shk=v2(0,0)
+ end
+ if frame%4==0 then
+  self.shk*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
+ end
+end
+
+function tick_crs(crs_)
+ for cr in all(crs_) do
+  if costatus(cr)!='dead' then
+   local status,err=coresume(cr)
+   if (not status) printh("cr error "..err)
+  else
+   del(crs_,cr)
+  end
+ end
+end
+
+function add_cr(f)
+ local cr=cocreate(f)
+ add(crs,cr)
+ return cr
+end
+
+function add_draw_cr(f)
+ local cr=cocreate(f)
+ add(draw_crs,cr)
+ return cr
+end
+
+function wait_for(t)
+ while t>0 do
+  t-=dt
+  yield()
+ end
+end
+
+
+lasttime=time()
+dt=0
+frame=1
 
 function _init()
  player=cls_player.init(v2(10,10))
  cls_tether.init(v2(64,28))
+ main_camera=cls_camera.init()
+ main_camera:set_target(player)
 end
 
 function _update()
+ dt=time()-lasttime
+ lasttime=time()
+ tick_crs(crs)
+
  player:update()
  for tether in all(tethers) do
   tether:update()
  end
+
+ main_camera:update()
 end
 
 function _draw()
+ frame+=1
+
  cls()
+ local p=main_camera:compute_position()
+ camera(p.x/1.5,p.y/1.5)
+ -- parallax background
+
+ camera(p.x,p.y)
  player:draw()
  for tether in all(tethers) do
   tether:draw()
  end
+
+ -- foreground
 end
 
 __gfx__
