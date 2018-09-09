@@ -13,8 +13,8 @@ cls_room=class(typ_room,function(self,pos,dim)
  self.gore={}
 
  -- initialize tiles
- for i=0,self.dim.x do
-  for j=0,self.dim.y do
+ for i=0,self.dim.x-1 do
+  for j=0,self.dim.y-1 do
    local p=v2(i,j)
    local tile=self:tile_at(p)
    if fget(tile,flg_solid) then
