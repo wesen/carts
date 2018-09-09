@@ -91,7 +91,7 @@ function cls_room:spawn_player(input_port)
  cls_spawn.init(spawn_pos, input_port)
 
  spawn_idx += 1
- if spawn_idx > #self.spawn_locations then 
+ if spawn_idx > #self.spawn_locations then
   spawn_idx = 1
  end
 end
