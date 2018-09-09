@@ -1,10 +1,15 @@
 players={}
 
+player_cnt=0
+
 cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  -- players are handled separately
  del(actors,self)
  add(players,self)
+
+ self.nr=player_cnt
+ player_cnt+=1
 
  self.flip=v2(false,false)
  self.input_port=input_port
