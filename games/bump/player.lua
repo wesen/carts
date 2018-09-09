@@ -32,7 +32,7 @@ end
 
 function cls_player:kill()
  del(players,self)
-    sfx(1)
+  sfx(1)
  room:spawn_player(self.input_port)
 end
 

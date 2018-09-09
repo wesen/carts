@@ -24,6 +24,7 @@
 --#include spawn
 --#include spikes
 --#include moving_platform
+--#include teleporter
 
 -- fade bubbles
 -- x gravity
@@ -48,34 +49,34 @@
 -- x add gore particles and gored up tiles
 -- x add gore on vertical surfaces
 -- x make gore slippery
--- make wider levels
--- implement camera
--- add gore when dying
--- enemies
+-- x add gore when dying
 -- moving platforms
 -- laser beam
 -- add water
 -- add butterflies
 -- add flies
--- make spikes bloodier
 -- vanishing platforms
 -- lookup / lookdown sprites
 -- go through right and come back left (?)
--- add tweaking menu
--- add second player
--- parallax b ackground
+-- x add second player
 -- add trailing smoke particles when springing up
--- add multiple players / spawn points
--- add death mechanics
--- add score
+-- x add multiple players / spawn points
+-- x add death mechanics
+-- x add score
 -- camera shake
 -- fades
+
+-- powerups
+-- bomb
+-- superspeed
+-- invincibility
+-- superjump
+-- gravity tweak
 
 -- x multiple players
 -- x random player spawns
 -- x player collision
 -- x player kill
 -- x player colors
--- score
 
 --#include main

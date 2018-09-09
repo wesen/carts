@@ -21,5 +21,7 @@ p1_input=0
 p2_input=1
 
 btn_right=1
+btn_up=2
+btn_down=3
 btn_left=0
 btn_jump=4
