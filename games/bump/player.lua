@@ -8,6 +8,8 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  del(actors,self)
  add(players,self)
 
+ self.ghosts={}
+
  self.nr=player_cnt
  player_cnt+=1
 
@@ -60,8 +62,8 @@ function cls_player:update()
  local on_gore=false
 
  if not on_ground then
-  accel=0.2
-  decel=0.1
+  accel=0.1
+  decel=0.05
  else
   if tile!=nil then
    accel,decel=room:get_friction(tile,dir_down)
@@ -135,7 +137,7 @@ function cls_player:update()
     sfx(0)
    end
    self.on_ground_interval=0
-   self.spd.y=-1.0
+   self.spd.y=-1.2
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
@@ -145,7 +147,7 @@ function cls_player:update()
    if wall_dir!=0 then
     self.jump_interval=0
     self.spd.y=-1
-    self.spd.x=-wall_dir*(maxrun+1)
+    self.spd.x=-wall_dir*(maxrun+.6)
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     self.jump_button.hold_time+=1
    end
