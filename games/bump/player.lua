@@ -15,7 +15,7 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
- self.hitbox=hitbox(v2(2,0),v2(4,8))
+ self.hitbox=hitbox(v2(2,0.5),v2(4,7))
  self.head_hitbox=hitbox(v2(2,-1),v2(4,1))
  self.feet_hitbox=hitbox(v2(2,7),v2(4,1))
 
