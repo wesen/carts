@@ -1,15 +1,20 @@
-room=nil
+level=nil
 
-cls_room=class(function(self)
+cls_level=class(function(self)
 end)
 
-function cls_room:draw()
+function cls_level:draw()
+ rect(0,0,128,128,7)
 end
 
-function cls_room:update()
+function cls_level:bbox()
+ return bbox(v2(0,0),v2(128,128))
 end
 
-function cls_room:solid_at(bbox)
+function cls_level:update()
+end
+
+function cls_level:solid_at(bbox)
  if bbox.aa.x<0
   or bbox.bb.x>128
   or bbox.aa.y<0
@@ -24,5 +29,5 @@ function cls_room:solid_at(bbox)
 end
 
 function solid_at(bbox)
- return room:solid_at(bbox)
+ return level:solid_at(bbox)
 end

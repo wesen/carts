@@ -9,6 +9,7 @@
 --#include actors
 --#include level
 --#include player
+--#include camera
 --#include projectile
 --#include enemy
 --#include environment
