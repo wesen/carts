@@ -170,21 +170,23 @@ function cls_player:update()
  -- interact with players
  local feet_box=self.feet_hitbox:to_bbox_at(self.pos)
  for player in all(players) do
-  
-  -- attack
-  local head_box=player.head_hitbox:to_bbox_at(player.pos)
-  local can_attack=not on_ground and self.spd.y>0
+  if self!=player then
 
-  if player!=self and feet_box:collide(head_box) and can_attack then
-   make_gore_explosion(player.pos)
-   cls_smoke.init(self.pos,32,0)
-   self.spd.y=-2.0
-   player:kill()
-   scores[self.input_port+1]+=1
+   -- attack
+   local head_box=player.head_hitbox:to_bbox_at(player.pos)
+   local can_attack=not on_ground and self.spd.y>0
+   -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
+
+   if feet_box:collide(head_box) and can_attack then
+    make_gore_explosion(player.pos)
+    cls_smoke.init(self.pos,32,0)
+    self.spd.y=-2.0
+    player:kill()
+    scores[self.input_port+1]+=1
+   end
   end
-  
  end
- 
+
 end
 
 function cls_player:draw()
