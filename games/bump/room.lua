@@ -62,26 +62,26 @@ function cls_room:draw()
  map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
 
  -- draw gore
- for i=0,self.dim.x do
-  for j=0,self.dim.y do
-   for dir=-1,2 do
-    local v=gore_idx(v2(i,j),dir)
-    local g=self.gore[v]
-    if g!=nil then
-     self.gore[v]=min(15,self.gore[v]-0.02)
-     if g>10 then
-      rspr(83,i*8,j*8,dir)
-     elseif g>5 then
-      rspr(82,i*8,j*8,dir)
-     elseif g>0 then
-      rspr(81,i*8,j*8,dir)
-     else
-      self.gore[v]=0
-     end
-    end
-   end
-  end
- end
+--  for i=0,self.dim.x do
+--   for j=0,self.dim.y do
+--    for dir=-1,2 do
+--     local v=gore_idx(v2(i,j),dir)
+--     local g=self.gore[v]
+--     if g!=nil then
+--      self.gore[v]=min(15,self.gore[v]-0.001)
+--      if g>10 then
+--       rspr(83,i*8,j*8,dir)
+--      elseif g>5 then
+--       rspr(82,i*8,j*8,dir)
+--      elseif g>0 then
+--       rspr(81,i*8,j*8,dir)
+--      else
+--       self.gore[v]=0
+--      end
+--     end
+--    end
+--   end
+--  end
 end
 
 function cls_room:spawn_player(input_port)
