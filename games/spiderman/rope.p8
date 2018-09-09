@@ -283,73 +283,60 @@ function cls_player:draw()
   self.current_tether.pos.x,self.current_tether.pos.y,7)
  end
 
- local spr_=33
+ local tether=self.current_tether
 
- local dir=self.prev.x>self.pos.x and -1 or
- self.prev.x<self.pos.x and 1 or 0
- local is_idle=self.spd:sqrmagnitude()<.2
- and self.current_tether!=nil
- and self.pos.y>self.current_tether.pos.y
+ if(self.pos.y>=118) then
+  --printh("stopped on ground")
+  spr(17,self.pos.x,self.pos.y,1,1,false, false)
 
- -- on ground
- if (self.pos.y>=118) spr_=17
- if (is_idle) spr_=37
+ elseif(true) then
+  if (self.spd.y < .2 and self.spd.x < .2 and (tether==nil or self.pos.y > tether.pos.y)) then
+   --printh("player is idle)
+   spr(37,self.pos.x-5,self.pos.y-1,1,1,false, false)
 
- if abs(self.spd.y)<.3 then
-  if dir==-1 then
-   spr_=35
+  elseif (self.spd.y < .4 and self.prev.x > self.pos.x) then
+   --printh("player was moving left")
+   spr(35,self.pos.x-3,self.pos.y-2,1,1,true, false)
+
+  elseif (self.spd.y < .4 and self.prev.x < self.pos.x) then
+   --printh("player was moving right")
+   spr(35,self.pos.x-4,self.pos.y-2,1,1,false, false)
+
+  elseif (self.spd.x < .4 and self.prev.y < self.pos.y
+    and tether!=nil and self.pos.x <= tether.pos.x) then
+   --printh("player was moving down tether to right")
+   spr(33,self.pos.x-5,self.pos.y-3,1,1,false,false)
+
+  elseif (self.spd.x < .4 and self.prev.y < self.pos.y
+   and tether!=nil and self.pos.x > tether.pos.x) then
+   --printh("player was moving down and tehter to left")
+   spr(33,self.pos.x-2,self.pos.y-3,1,1,true, false)
+
+  elseif (self.spd.x < .4 and self.prev.y > self.pos.y
+  and tether!=nil and self.pos.x <= tether.pos.x) then
+   --printh("player was moving up, tether to the right")
+   -- spr(33,self.pos.x-5,self.pos.y-4,1,1,false,true)
+   spr(36,self.pos.x-5,self.pos.y-2,1,1,true, false)
+  elseif (self.spd.x < .4 and self.prev.y > self.pos.y
+  and tether!=nil and self.pos.x > tether.pos.x) then
+   --printh("player was moving up, tether to the left")
+   -- spr(33,self.pos.x-2,self.pos.y-4,1,1,true,true)
+   spr(36,self.pos.x-2,self.pos.y-2,1,1,false, false)
+  elseif (self.prev.x > self.pos.x and self.prev.y < self.pos.y) then
+   --printh("player was moving down and left")
+   spr(34,self.pos.x-1,self.pos.y-2,1,1,true, false)
+  elseif (self.prev.x < self.pos.x and self.prev.y < self.pos.y) then
+   --printh("player was moving down and right")
+   spr(34,self.pos.x-6,self.pos.y-2,1,1,false, false)
+  elseif (self.prev.x > self.pos.x and self.prev.y > self.pos.y) then
+   -- printh("player was moving up and left")
+   spr(36,self.pos.x-5,self.pos.y-2,1,1,true, false)
+  elseif (self.prev.x < self.pos.x and self.prev.y > self.pos.y) then
+   --printh("player was moving up and right")
+   spr(36,self.pos.x-2,self.pos.y-2,1,1,false, false)
   end
- else
+
  end
-
- spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
-
- --[[
-elseif (obj.sy < .4 and obj.prevx > obj.x) then
---printh("player was moving left")
-spr(35,obj.x-3,obj.y-2,1,1,true, false)
-
-elseif (obj.sy < .4 and obj.prevx < obj.x) then
---printh("player was moving right")
-spr(35,obj.x-4,obj.y-2,1,1,false, false)
-
-elseif (obj.sx < .4 and obj.prevy < obj.y and obj.x <= tether.x) then
---printh("player was moving down tether to right")
-spr(33,obj.x-5,obj.y-3,1,1,false,false)
-
-elseif (obj.sx < .4 and obj.prevy < obj.y and obj.x > tether.x) then
---printh("player was moving down and tehter to left")
-spr(33,obj.x-2,obj.y-3,1,1,true, false)
-
-elseif (obj.sx < .4 and obj.prevy > obj.y and obj.x <= tether.x) then
---printh("player was moving up, tether to the right")
--- spr(33,obj.x-5,obj.y-4,1,1,false,true)
-spr(36,obj.x-5,obj.y-2,1,1,true, false)
-elseif (obj.sx < .4 and obj.prevy > obj.y and obj.x > tether.x) then
---printh("player was moving up, tether to the left")
--- spr(33,obj.x-2,obj.y-4,1,1,true,true)
-spr(36,obj.x-2,obj.y-2,1,1,false, false)
-
-
-
-
-elseif (obj.prevx > obj.x and obj.prevy < obj.y) then
---printh("player was moving down and left")
-spr(34,obj.x-1,obj.y-2,1,1,true, false)
-
-elseif (obj.prevx < obj.x and obj.prevy < obj.y) then
---printh("player was moving down and right")
-spr(34,obj.x-6,obj.y-2,1,1,false, false)
-
-elseif (obj.prevx > obj.x and obj.prevy > obj.y) then
--- printh("player was moving up and left")
-spr(36,obj.x-5,obj.y-2,1,1,true, false)
-
-elseif (obj.prevx < obj.x and obj.prevy > obj.y) then
---printh("player was moving up and right")
-spr(36,obj.x-2,obj.y-2,1,1,false, false)
-end
-]]
 end
 
 function cls_player:update()
