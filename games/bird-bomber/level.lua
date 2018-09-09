@@ -4,7 +4,7 @@ cls_level=class(function(self)
 end)
 
 function cls_level:draw()
- rect(0,0,128,128,7)
+ rect(0,0,127,127,7)
 end
 
 function cls_level:bbox()
