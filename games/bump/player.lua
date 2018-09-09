@@ -179,7 +179,7 @@ function cls_player:update()
    local can_attack=not on_ground and self.spd.y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
-   if feet_box:collide(head_box) and can_attack then
+   if (feet_box:collide(head_box) and can_attack) or self:bbox():collide(player:bbox()) then
     make_gore_explosion(player.pos)
     cls_smoke.init(self.pos,32,0)
     self.spd.y=-2.0
