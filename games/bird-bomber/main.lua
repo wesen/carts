@@ -3,6 +3,7 @@ function _init()
  level=cls_level.init()
  main_camera=cls_camera.init()
  main_camera:set_target(player)
+ music(1)
 end
 
 function _draw()

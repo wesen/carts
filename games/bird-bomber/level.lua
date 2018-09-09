@@ -4,11 +4,11 @@ cls_level=class(function(self)
 end)
 
 function cls_level:draw()
- rect(0,0,127,127,7)
+ map(0,0,0,0,32,16)
 end
 
 function cls_level:bbox()
- return bbox(v2(0,0),v2(128,128))
+ return bbox(v2(0,0),v2(256,128))
 end
 
 function cls_level:update()
@@ -16,9 +16,9 @@ end
 
 function cls_level:solid_at(bbox)
  if bbox.aa.x<0
-  or bbox.bb.x>128
+  or bbox.bb.x>256
   or bbox.aa.y<0
-  or bbox.bb.y>128 then
+  or bbox.bb.y>120 then
    return true,nil
  else
   for e in all(self.environment) do
