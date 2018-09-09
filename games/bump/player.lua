@@ -11,8 +11,8 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
  self.hitbox=hitbox(v2(2,0),v2(4,8))
- self.head_hitbox=hitbox(v2(1,-1),v2(6,1))
- self.feet_hitbox=hitbox(v2(1,7),v2(6,1))
+ self.head_hitbox=hitbox(v2(2,-1),v2(4,1))
+ self.feet_hitbox=hitbox(v2(2,7),v2(4,1))
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -42,6 +42,8 @@ function cls_player:update()
 
  local ground_bbox=self:bbox(vec_down)
  local on_ground,tile=solid_at(ground_bbox)
+ local on_actor=self:is_actor_at(vec_down)
+ on_ground=on_ground or on_actor
  local on_ice=ice_at(ground_bbox)
 
  if on_ground then
@@ -167,15 +169,18 @@ function cls_player:update()
   
   -- attack
   local head_box=player.head_hitbox:to_bbox_at(player.pos)
-  if player!=self and feet_box:collide(head_box) then
-   self.spd.y=-2.0
+  local can_attack=not on_ground and self.spd.y>0
+
+  if player!=self and feet_box:collide(head_box) and can_attack then
    make_gore_explosion(player.pos)
    cls_smoke.init(self.pos,32,0)
+   self.spd.y=-2.0
    player:kill()
+   scores[self.input_port+1]+=1
   end
-
+  
  end
-
+ 
 end
 
 function cls_player:draw()
@@ -196,8 +201,10 @@ function cls_player:draw()
   bbox_col=9
  end
  bbox:draw(bbox_col)
- bbox=self.feet_hitbox:to_bbox_at(self.pos)
- bbox:draw(12)
+ --bbox=self.feet_hitbox:to_bbox_at(self.pos)
+ --bbox:draw(12)
+ --bbox=self.head_hitbox:to_bbox_at(self.pos)
+ --bbox:draw(12)
  print(self.spd:str(),64,64)
  --]]
 end
