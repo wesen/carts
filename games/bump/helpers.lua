@@ -20,6 +20,11 @@ function mrnd(x)
  return rnd(x*2)-x
 end
 
+function rnd_elt(arr)
+ local idx=flr(rnd(#arr))+1
+ return arr[idx]
+end
+
 --- function for calculating
 -- exponents to a higher degree
 -- of accuracy than using the

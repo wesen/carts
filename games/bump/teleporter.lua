@@ -12,9 +12,26 @@ tiles[spr_tele_enter]=cls_tele_enter
 function cls_tele_enter:update()
  local bbox=self:bbox()
  for player in all(players) do
-  if bbox:collide(player:bbox()) then--or btnp(btn_up,player.input_port) then
-   printh("TELEPORT")
-   player.pos = tele_exits[1].pos:clone()
+  if bbox:collide(player:bbox()) and player.on_ground and not player.is_teleporting then
+   add_cr(function()
+    player.is_teleporting=true
+    player.spd=v2(0,0)
+    player.ghosts={}
+    
+    local anim_length=10
+    for i=0,anim_length do
+     local w=i/anim_length*10
+     rectfill(player.pos.x+4-w,player.pos.y+4-w,player.pos.x+4+w,player.pos.y+4+w,7)
+     yield()
+    end
+    player.pos = rnd_elt(tele_exits).pos:clone()
+    for i=0,anim_length do
+     local w=(anim_length-i)/anim_length*10
+     rectfill(player.pos.x+4-w,player.pos.y+4-w,player.pos.x+4+w,player.pos.y+4+w,7)
+     yield()
+    end
+    player.is_teleporting=false
+   end,draw_crs)
   end
  end
 end

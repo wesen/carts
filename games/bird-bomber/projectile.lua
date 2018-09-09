@@ -5,7 +5,6 @@ cls_projectile=subclass(cls_actor,function(self,pos,spd)
  self.weight=1.2
  self.flip=v2(false,false)
  self.spr=6 -- bomb
- printh("projs pos "..self.pos:str())
 end)
 
 function cls_projectile:draw()
@@ -22,7 +21,6 @@ function cls_projectile:update()
  self.flip.x=self.spd.x<0
 
  if solid_at(self:bbox()) then
-  printh("EXPLODE")
   main_camera:add_shake(4)
   cls_boom.init(self.pos,32,rnd_elt(bomb_colors))
   del(actors,self)

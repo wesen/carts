@@ -24,6 +24,9 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
  self.on_ground_interval=0
+
+ self.is_teleporting=false
+ self.on_ground=false
 end)
 
 function cls_player:smoke(spr,dir)
@@ -37,6 +40,13 @@ function cls_player:kill()
 end
 
 function cls_player:update()
+ if self.is_teleporting then
+ else
+  self:update_normal()
+ end
+end
+
+function cls_player:update_normal()
  -- from celeste's player class
  local input=btn(btn_right, self.input_port) and 1
     or (btn(btn_left, self.input_port) and -1
@@ -49,11 +59,11 @@ function cls_player:update()
  local decel=0.2
 
  local ground_bbox=self:bbox(vec_down)
- local on_ground,tile=solid_at(ground_bbox)
+ self.on_ground,tile=solid_at(ground_bbox)
  local on_actor=self:is_actor_at(v2(input,0))
  local on_ice=ice_at(ground_bbox)
 
- if on_ground then
+ if self.on_ground then
   self.on_ground_interval=ground_grace_interval
  elseif self.on_ground_interval>0 then
   self.on_ground_interval-=1
@@ -61,7 +71,7 @@ function cls_player:update()
  local on_ground_recently=self.on_ground_interval>0
  local on_gore=false
 
- if not on_ground then
+ if not self.on_ground then
   accel=0.1
   decel=0.05
  else
@@ -117,7 +127,7 @@ function cls_player:update()
  -- wall slide
  local is_wall_sliding=false
  if input!=0 and self:is_solid_at(v2(input,0))
-    and not on_ground and self.spd.y>0 then
+    and not self.on_ground and self.spd.y>0 then
   is_wall_sliding=true
   maxfall=0.4
   if (ice_at(self:bbox(v2(input,0)))) maxfall=1.0
@@ -154,7 +164,7 @@ function cls_player:update()
   end
  end
 
- if (not on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
+ if (not self.on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
 
  self:move(self.spd)
 
@@ -163,7 +173,7 @@ function cls_player:update()
   self.spr=1
  elseif is_wall_sliding then
   self.spr=4
- elseif not on_ground then
+ elseif not self.on_ground then
   self.spr=3
  else
   self.spr=1+flr(frame/4)%3
@@ -176,7 +186,7 @@ function cls_player:update()
 
    -- attack
    local head_box=player.head_hitbox:to_bbox_at(player.pos)
-   local can_attack=not on_ground and self.spd.y>0
+   local can_attack=not self.on_ground and self.spd.y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
    if (feet_box:collide(head_box) and can_attack) or self:bbox():collide(player:bbox()) then
@@ -189,40 +199,41 @@ function cls_player:update()
   end
  end
 
- if (not on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
- if ((on_ground or #self.ghosts>7)) popend(self.ghosts)
+ if (not self.on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
+ if ((self.on_ground or #self.ghosts>4)) popend(self.ghosts)
 end
 
 function cls_player:draw()
+ if not self.is_teleporting then
+  local dark=0
+  for ghost in all(self.ghosts) do
+   dark+=10
+   darken(dark)
+   spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
+  end
+  pal()
 
- local dark=0
- for ghost in all(self.ghosts) do
-  dark+=10
-  darken(dark)
-  spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
+  pal(cols_face[1], cols_face[self.input_port + 1])
+  pal(cols_hair[1], cols_hair[self.input_port + 1])
+
+  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+
+  pal(cols_face[1], cols_face[1])
+  pal(cols_hair[1], cols_hair[1])
+
+
+  --[[
+  local bbox=self:bbox()
+  local bbox_col=8
+  if self:is_solid_at(v2(0,0)) then
+   bbox_col=9
+  end
+  bbox:draw(bbox_col)
+  --bbox=self.feet_hitbox:to_bbox_at(self.pos)
+  --bbox:draw(12)
+  --bbox=self.head_hitbox:to_bbox_at(self.pos)
+  --bbox:draw(12)
+  print(self.spd:str(),64,64)
+  --]]
  end
- pal()
-
- pal(cols_face[1], cols_face[self.input_port + 1])
- pal(cols_hair[1], cols_hair[self.input_port + 1])
-
- spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
-
- pal(cols_face[1], cols_face[1])
- pal(cols_hair[1], cols_hair[1])
-
-
- --[[
- local bbox=self:bbox()
- local bbox_col=8
- if self:is_solid_at(v2(0,0)) then
-  bbox_col=9
- end
- bbox:draw(bbox_col)
- --bbox=self.feet_hitbox:to_bbox_at(self.pos)
- --bbox:draw(12)
- --bbox=self.head_hitbox:to_bbox_at(self.pos)
- --bbox:draw(12)
- print(self.spd:str(),64,64)
- --]]
 end

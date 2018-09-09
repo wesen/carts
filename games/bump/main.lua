@@ -18,6 +18,7 @@ function _draw()
  foreach(players,function(player)
   player:draw()
  end)
+ tick_crs(draw_crs)
 
  local entry_length=50
  for i=0,#scores-1,1 do
