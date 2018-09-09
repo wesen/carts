@@ -15,8 +15,8 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
- self.hitbox=hitbox(v2(2,0.5),v2(4,7))
- self.head_hitbox=hitbox(v2(2,-1),v2(4,1))
+ self.hitbox=hitbox(v2(2,0.5),v2(4,7.5))
+ self.head_hitbox=hitbox(v2(0,-1),v2(8,1))
  self.feet_hitbox=hitbox(v2(2,7),v2(4,1))
 
  self.prev_input=0
@@ -198,7 +198,7 @@ function cls_player:draw()
 
  pal(cols_face[1], cols_face[1])
  pal(cols_hair[1], cols_hair[1])
- 
+
 
  --[[
  local bbox=self:bbox()

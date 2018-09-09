@@ -10,6 +10,8 @@
 --#include helpers
 --#include tween
 --#include coroutines
+--#include queues
+--#include gfx
 
 --#include actors
 --#include button
