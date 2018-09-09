@@ -4,11 +4,15 @@ cls_player=subclass(cls_actor,function(self)
  self.spd=v2(0,0)
  self.hitbox=hitbox(v2(0,0),v2(8,8))
  self.is_solid=true
+ self.spr=35
+ self.flip=v2(false,false)
  del(actors,self)
 end)
 
 function cls_player:draw()
- rectfill(self.pos.x,self.pos.y,self.pos.x+8,self.pos.y+8,7)
+ palt(7,true)
+ spr(self.spr,self.pos.x,self.pos.y,1,1,not self.flip.x,self.flip.y)
+ palt()
 end
 
 function cls_player:update()
@@ -31,11 +35,15 @@ function cls_player:update()
   self.spd.x=appr(self.spd.x,0,decel)
  end
 
+ self.flip.x=self.spd.x<0
+
  local maxfall=2
  local gravity=0.12
 
+ self.spr=35
  if self.fly_button.is_down then
   if self.fly_button:is_held() or self.fly_button:was_just_pressed() then
+   self.spr=36
    self.spd.y=-1.2
    self.fly_button.hold_time+=1
   end
