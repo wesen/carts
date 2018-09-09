@@ -1154,7 +1154,6 @@ function cls_tele_exit:draw()
 end
 
 
--- fade bubbles
 -- x gravity
 -- x downward collision
 -- x wall slide
@@ -1194,12 +1193,39 @@ end
 -- camera shake
 -- fades
 
--- powerups
+-- remove typ code
+-- number of player selector menu
+-- title screen
+-- game end screen (kills or timer)
+-- prettier score display
+-- pretty pass
+
+-- powerups - item dropper
+-- visualize power ups
+-- different sprites for different players
 -- bomb
 -- superspeed
 -- invincibility
 -- superjump
 -- gravity tweak
+-- double jump
+-- dash
+-- invisibility
+-- meteors
+-- flamethrower
+-- bullet time
+-- whip
+-- jetpack
+-- moving platforms
+-- vanishing platforms
+-- miniature mode
+-- lasers
+-- gun
+-- doppelgangers
+-- rope
+-- decrease score when dying on spikes
+-- selfbomber (on a timer)
+-- level design
 
 -- x multiple players
 -- x random player spawns
