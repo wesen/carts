@@ -77,7 +77,6 @@ function cls_actor:is_solid_at(offset)
 end
 
 function cls_actor:is_actor_at(offset)
-
  for player in all(players) do
   local bbox_other = player:bbox()
   if self!=player and bbox_other:collide(self:bbox(offset)) then

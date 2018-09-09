@@ -26,7 +26,6 @@ p2_input=1
 btn_right=1
 btn_left=0
 btn_jump=4
-
 frame=0
 dt=0
 lasttime=time()
@@ -37,7 +36,6 @@ actors={}
 tiles={}
 crs={}
 scores={0, 0}
-
 jump_button_grace_interval=10
 jump_max_hold_time=15
 
@@ -67,7 +65,6 @@ function subclass(typ,parent,init)
  local c=class(typ,init)
  return setmetatable(c,parent)
 end
-
 
 
 -- vectors
@@ -128,7 +125,6 @@ function angle2vec(angle)
  return v2(cos(angle),sin(angle))
 end
 
-
 local bboxvt={}
 bboxvt.__index=bboxvt
 
@@ -173,7 +169,6 @@ function bboxvt:collide(other)
    other.aa.x < self.bb.x and
    other.aa.y < self.bb.y
 end
-
 
 
 local hitboxvt={}
@@ -268,7 +263,6 @@ function rspr(s,x,y,angle)
  end
 end
 
-
 -- tween routines from https://github.com/JoebRogers/PICO-Tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
@@ -308,7 +302,6 @@ function cr_move_to(obj,target,d,easetype)
   yield()
  end
 end
-
 function tick_crs()
  for cr in all(crs) do
   if costatus(cr)!='dead' then
@@ -404,7 +397,6 @@ function cls_actor:is_solid_at(offset)
 end
 
 function cls_actor:is_actor_at(offset)
-
  for player in all(players) do
   local bbox_other = player:bbox()
   if self!=player and bbox_other:collide(self:bbox(offset)) then
@@ -440,7 +432,6 @@ function update_actors(typ)
  end
 end
 
-
 cls_button=class(typ_button,function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
  self.input_port=input_port
@@ -475,7 +466,6 @@ end
 function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
-
 cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
  cls_actor._ctr(self,pos)
  self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
@@ -494,7 +484,6 @@ function cls_bubble:update()
   del(actors,self)
  end
 end
-
 function v_idx(pos)
  return pos.x+pos.y*128
 end
@@ -628,7 +617,6 @@ function tile_flag_at(bbox,flag)
  end
  return false
 end
-
 spr_wall_smoke=54
 spr_ground_smoke=51
 spr_full_smoke=48
@@ -660,7 +648,6 @@ function cls_smoke:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
  if (self.is_gore) pal()
 end
-
 cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(false,false)
@@ -737,8 +724,9 @@ function make_gore_explosion(pos)
   cls_gore.init(pos)
  end
 end
-
 players={}
+
+player_cnt=0
 
 cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
@@ -746,11 +734,14 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  del(actors,self)
  add(players,self)
 
+ self.nr=player_cnt
+ player_cnt+=1
+
  self.flip=v2(false,false)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
- self.hitbox=hitbox(v2(2,0),v2(4,8))
+ self.hitbox=hitbox(v2(2,0.5),v2(4,7))
  self.head_hitbox=hitbox(v2(2,-1),v2(4,1))
  self.feet_hitbox=hitbox(v2(2,7),v2(4,1))
 
@@ -782,8 +773,8 @@ function cls_player:update()
 
  local ground_bbox=self:bbox(vec_down)
  local on_ground,tile=solid_at(ground_bbox)
- local on_actor=self:is_actor_at(vec_down)
- on_ground=on_ground or on_actor
+ local on_actor=self:is_actor_at(v2(input,0))
+ -- on_ground=on_ground or on_actor
  local on_ice=ice_at(ground_bbox)
 
  if on_ground then
@@ -906,21 +897,23 @@ function cls_player:update()
  -- interact with players
  local feet_box=self.feet_hitbox:to_bbox_at(self.pos)
  for player in all(players) do
-  
-  -- attack
-  local head_box=player.head_hitbox:to_bbox_at(player.pos)
-  local can_attack=not on_ground and self.spd.y>0
+  if self!=player then
 
-  if player!=self and feet_box:collide(head_box) and can_attack then
-   make_gore_explosion(player.pos)
-   cls_smoke.init(self.pos,32,0)
-   self.spd.y=-2.0
-   player:kill()
-   scores[self.input_port+1]+=1
+   -- attack
+   local head_box=player.head_hitbox:to_bbox_at(player.pos)
+   local can_attack=not on_ground and self.spd.y>0
+   -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
+
+   if feet_box:collide(head_box) and can_attack then
+    make_gore_explosion(player.pos)
+    cls_smoke.init(self.pos,32,0)
+    self.spd.y=-2.0
+    player:kill()
+    scores[self.input_port+1]+=1
+   end
   end
-  
  end
- 
+
 end
 
 function cls_player:draw()
@@ -932,24 +925,22 @@ function cls_player:draw()
 
  pal(cols_face[1], cols_face[1])
  pal(cols_hair[1], cols_hair[1])
- 
 
- --[[
- local bbox=self:bbox()
- local bbox_col=8
- if self:is_solid_at(v2(0,0)) then
-  bbox_col=9
- end
- bbox:draw(bbox_col)
- --bbox=self.feet_hitbox:to_bbox_at(self.pos)
- --bbox:draw(12)
- --bbox=self.head_hitbox:to_bbox_at(self.pos)
- --bbox:draw(12)
- print(self.spd:str(),64,64)
- --]]
+ -- local bbox=self:bbox()
+ -- local bbox_col=8
+ -- if self:is_solid_at(v2(0,0)) then
+ --  bbox_col=9
+ -- end
+ -- if self:is_actor_at(v2(self.prev_input or 0,0)) then
+ --  bbox_col=10
+ -- end
+ -- bbox:draw(bbox_col)
+ -- bbox=self.feet_hitbox:to_bbox_at(self.pos)
+ -- bbox:draw(12)
+ -- bbox=self.head_hitbox:to_bbox_at(self.pos)
+ -- bbox:draw(12)
+ -- print(self.spd:str(),64,64)
 end
-
-
 
 spr_spring_sprung=66
 spr_spring_wound=67
@@ -983,7 +974,6 @@ function cls_spring:draw()
  if (self.sprung_time>0) spr_=spr_spring_sprung
  spr(spr_,self.pos.x,self.pos.y)
 end
-
 spr_spawn_point=1
 
 cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos,input_port)
@@ -1008,7 +998,6 @@ end
 function cls_spawn:draw()
  spr(spr_spawn_point,self.pos.x,self.pos.y)
 end
-
 spr_spikes=68
 
 cls_spikes=subclass(typ_spikes,cls_actor,function(self,pos)
@@ -1030,35 +1019,9 @@ end
 function cls_spikes:draw()
  spr(spr_spikes,self.pos.x,self.pos.y)
 end
-
 cls_moving_platform=subclass(typ_moving_platform,cls_actor,function(pos)
  cls_actor._ctr(self,pos)
 end)
-
---#include constants
---#include globals
---#include config
-
---#include oo
---#include v2
---#include bbox
---#include hitbox
-
---#include helpers
---#include tween
---#include coroutines
-
---#include actors
---#include button
---#include bubbles
---#include room
---#include smoke
---#include particle
---#include player
---#include spring
---#include spawn
---#include spikes
---#include moving_platform
 
 -- fade bubbles
 -- x gravity
@@ -1113,8 +1076,6 @@ end)
 -- x player colors
 -- score
 
---#include main
-
 function _init()
  room=cls_room.init(v2(0,0),v2(16,16))
  room:spawn_player(p1_input)
@@ -1137,7 +1098,7 @@ function _draw()
  end)
 
  local entry_length=50
- for i=0,#scores-1,1 do 
+ for i=0,#scores-1,1 do
   print(
    "Player "..tostr(i+1)..": "..tostr(scores[i+1]),
    i*entry_length,1,7
@@ -1350,7 +1311,7 @@ __map__
 6060606060606060606060606060606000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000818181810000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000420000000001000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000420000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4141414100000040404000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000005000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000404141000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -1358,7 +1319,7 @@ __map__
 0000004040000000000000000000000000000000004141410000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000004141414040400000000000000000000000414141000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0042000000000000000000004100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-4040000000400001000000004100000000000000000000004040404041414141404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+4040000000400001000100004100000000000000000000004040404041414141404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000400040404000004100404000005050500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000404000400000000000004105000000000000000041414100000000000000000041414141000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000404200000000004100050005000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

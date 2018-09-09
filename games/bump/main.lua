@@ -20,7 +20,7 @@ function _draw()
  end)
 
  local entry_length=50
- for i=0,#scores-1,1 do 
+ for i=0,#scores-1,1 do
   print(
    "Player "..tostr(i+1)..": "..tostr(scores[i+1]),
    i*entry_length,1,7
