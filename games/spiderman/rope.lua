@@ -14,11 +14,17 @@ dt=0
 frame=1
 tethers={}
 
+player_field_start=384
+player_field_end=player_field_start+128
+player_field_width=player_field_start
+cull_end=player_field_end+player_field_width
+cull_start=player_field_start-player_field_width
+
 function cull_elts()
  local off=0
- if player.pos.x>256 then
+ if player.pos.x>player_field_end then
   off=-128
- elseif player.pos.x<128 then
+ elseif player.pos.x<player_field_start then
   off=128
  else
   return
@@ -30,46 +36,56 @@ function cull_elts()
 
  for tether in all(tethers) do
   tether.pos.x+=off
-  if tether.pos.x>384 or tether.pos.x<0 then
+  if tether.pos.x>cull_end or tether.pos.x<cull_start then
    del(tethers,tether)
   end
  end
 
  for building in all(buildings) do
-  building.pos.x+=off
-  if building.pos.x>384 or building.pos.x<0 then
+  if building.row==row_foreground then
+   building.pos.x+=off/0.75
+  elseif building.row==row_background then
+   building.pos.x+=off/1.5
+  else
+   building.pos.x+=off
+  end
+  if building.pos.x>cull_end or building.pos.x<cull_start then
    del(buildings,building)
   end
  end
 
- if (off==128) add_elts(0)
- if (off==-128) add_elts(256)
+ if (off==128) add_elts(cull_start,128)
+ if (off==-128) add_elts(cull_end,128)
 end
 
-function add_elts(off)
- -- for i=1,5+flr(rnd(5)) do
- --  cls_building.init(v2(flr(rnd(128))+off,60+flr(rnd(60))),row_background)
- -- end
+function add_elts(off,w)
  local boff=0
- for i=1,3+flr(rnd(5)) do
+ while boff<w do
   local b=v2(boff+off,60+flr(rnd(60)))
   boff+=30+flr(rnd(50))
-  if b.x<off+128 then
-   cls_tether.init(v2(b.x,128-b.y))
-   cls_building.init(b,row_middleground)
-  end
+  cls_building.init(b,row_background)
  end
- -- for i=1,5+flr(rnd(5)) do
- --  cls_building.init(v2(flr(rnd(128))+off,20+flr(rnd(40))),row_foreground)
- -- end
+
+ boff=0
+ while boff<w do
+  local b=v2(boff+off,20+flr(rnd(40)))
+  boff+=30+flr(rnd(50))
+  cls_building.init(b,row_foreground)
+ end
+
+ boff=0
+ while boff<w do
+  local b=v2(boff+off,60+flr(rnd(60)))
+  boff+=20+flr(rnd(40))
+  cls_tether.init(v2(b.x,128-b.y))
+  cls_building.init(b,row_middleground)
+ end
 end
 
 function _init()
- player=cls_player.init(v2(160,10))
+ player=cls_player.init(v2(player_field_start+64,10))
 
- add_elts(0)
- add_elts(128)
- add_elts(256)
+ add_elts(0,player_field_width*2+128)
 
  main_camera=cls_camera.init()
  main_camera:set_target(player)
@@ -102,6 +118,7 @@ function _draw()
  -- parallax background
 
  camera(p.x,p.y)
+ rectfill(-128,120,player_field_width*2+256,128,13)
  for building in all(buildings) do
   if (building.row==row_middleground) building:draw()
  end
@@ -115,4 +132,6 @@ function _draw()
  for building in all(buildings) do
   if (building.row==row_foreground) building:draw()
  end
+
+ camera(0,0)
 end

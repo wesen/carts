@@ -18,17 +18,21 @@ cls_player=class(function(self,pos)
  self.prev=v2(10,28)
  self.frame_sensitive=5
  self.current_tether=nil
+ self.previous_tether=nil
  self.flip=v2(false,false)
 end)
 
 function cls_player:get_closest_tether()
  local d=10000
  local res=nil
+ local dir=self.spd.x>0 and 1 or -1
+ if (btn(0)) dir=-1
+ if (btn(1)) dir=1
  for tether in all(tethers) do
-  if (self.spd.x>0 and tether.pos.x>self.pos.x) or
-   (self.spd.x<=0 and tether.pos.x<self.pos.x) then
+  if (dir==1 and tether.pos.x>self.pos.x) or
+   (dir==-1 and tether.pos.x<self.pos.x) then
     local _d=abs(self.pos.x-tether.pos.x)
-    if _d<d then
+    if _d<d and d>50 and tether!=self.previous_tether then
      res=tether
      d=_d
     end
@@ -137,7 +141,7 @@ function cls_player:update()
  self.pos.y+=self.spd.y
  self.pos.x+=self.spd.x
 
- if btn(4) and not prevbtn then
+ if (btn(4) and not prevbtn) or self.pos.y>=100 then
   if self.mode==mode_free then
    self.mode=mode_pulling
    self.current_tether=self:get_closest_tether()
@@ -154,6 +158,7 @@ function cls_player:update()
 
   if not btn(4) and self.mode!=mode_free then
    self.mode=mode_free
+   self.previous_tether=self.current_tether
    self.current_tether=nil
   end
 

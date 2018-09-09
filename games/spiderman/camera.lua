@@ -28,10 +28,11 @@ function cls_camera:update()
  if (self.target==nil) return
  local b=self:pull_bbox()
  local p=self.target.pos
- if (b.bb.x<p.x) self.pos.x+=min(p.x-b.bb.x,4)
- if (b.aa.x>p.x) self.pos.x-=min(b.aa.x-p.x,4)
- if (b.bb.y<p.y) self.pos.y+=min(p.y-b.bb.y,4)
- if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,4)
+ local max_speed=10
+ if (b.bb.x<p.x) self.pos.x+=min(p.x-b.bb.x,max_speed)
+ if (b.aa.x>p.x) self.pos.x-=min(b.aa.x-p.x,max_speed)
+ if (b.bb.y<p.y) self.pos.y+=min(p.y-b.bb.y,max_speed)
+ if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,max_speed)
  if (self.pos.y>64) self.pos.y=64
  -- self.pos=room:bbox():shrink(64):clip(self.pos)
  self:update_shake()
