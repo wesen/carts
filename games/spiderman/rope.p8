@@ -282,61 +282,47 @@ function cls_player:draw()
   line(self.pos.x,self.pos.y,
   self.current_tether.pos.x,self.current_tether.pos.y,7)
  end
+  
+  if(self.pos.y>=118) then
+      --printh("stopped on ground")
+      spr(17,self.pos.x,self.pos.y,1,1,false, false)
 
- local tether=self.current_tether
-
- if(self.pos.y>=118) then
-  --printh("stopped on ground")
-  spr(17,self.pos.x,self.pos.y,1,1,false, false)
-
- elseif(true) then
-  if (self.spd.y < .2 and self.spd.x < .2 and (tether==nil or self.pos.y > tether.pos.y)) then
-   --printh("player is idle)
-   spr(37,self.pos.x-5,self.pos.y-1,1,1,false, false)
-
-  elseif (self.spd.y < .4 and self.prev.x > self.pos.x) then
-   --printh("player was moving left")
-   spr(35,self.pos.x-3,self.pos.y-2,1,1,true, false)
-
-  elseif (self.spd.y < .4 and self.prev.x < self.pos.x) then
-   --printh("player was moving right")
-   spr(35,self.pos.x-4,self.pos.y-2,1,1,false, false)
-
-  elseif (self.spd.x < .4 and self.prev.y < self.pos.y
-    and tether!=nil and self.pos.x <= tether.pos.x) then
-   --printh("player was moving down tether to right")
-   spr(33,self.pos.x-5,self.pos.y-3,1,1,false,false)
-
-  elseif (self.spd.x < .4 and self.prev.y < self.pos.y
-   and tether!=nil and self.pos.x > tether.pos.x) then
-   --printh("player was moving down and tehter to left")
-   spr(33,self.pos.x-2,self.pos.y-3,1,1,true, false)
-
-  elseif (self.spd.x < .4 and self.prev.y > self.pos.y
-  and tether!=nil and self.pos.x <= tether.pos.x) then
-   --printh("player was moving up, tether to the right")
-   -- spr(33,self.pos.x-5,self.pos.y-4,1,1,false,true)
-   spr(36,self.pos.x-5,self.pos.y-2,1,1,true, false)
-  elseif (self.spd.x < .4 and self.prev.y > self.pos.y
-  and tether!=nil and self.pos.x > tether.pos.x) then
-   --printh("player was moving up, tether to the left")
-   -- spr(33,self.pos.x-2,self.pos.y-4,1,1,true,true)
-   spr(36,self.pos.x-2,self.pos.y-2,1,1,false, false)
-  elseif (self.prev.x > self.pos.x and self.prev.y < self.pos.y) then
-   --printh("player was moving down and left")
-   spr(34,self.pos.x-1,self.pos.y-2,1,1,true, false)
-  elseif (self.prev.x < self.pos.x and self.prev.y < self.pos.y) then
-   --printh("player was moving down and right")
-   spr(34,self.pos.x-6,self.pos.y-2,1,1,false, false)
-  elseif (self.prev.x > self.pos.x and self.prev.y > self.pos.y) then
-   -- printh("player was moving up and left")
-   spr(36,self.pos.x-5,self.pos.y-2,1,1,true, false)
-  elseif (self.prev.x < self.pos.x and self.prev.y > self.pos.y) then
-   --printh("player was moving up and right")
-   spr(36,self.pos.x-2,self.pos.y-2,1,1,false, false)
+  elseif(true) then
+      local threshsm = .25
+      local threshbig = 1.5
+      if (self.spd.x > threshsm) then
+          if(self.spd.y > threshbig) then
+            --player going down+right
+            spr(34,self.pos.x-6,self.pos.y-2,1,1,false, false)
+          elseif(self.spd.y < threshbig*-1) then
+            --player going up+right
+            spr(36,self.pos.x-2,self.pos.y-2,1,1,false, false)
+          else
+            --player going right
+            spr(35,self.pos.x-4,self.pos.y-2,1,1,false, false)
+          end
+      elseif (self.spd.x < threshsm*-1) then
+          if(self.spd.y > threshbig) then
+            --player going down+left
+            spr(34,self.pos.x-1,self.pos.y-2,1,1,true, false)
+          elseif(self.spd.y < threshbig*-1) then
+            --player going up+left
+            spr(36,self.pos.x-5,self.pos.y-2,1,1,true, false)
+          else
+            --player going left
+            spr(35,self.pos.x-3,self.pos.y-2,1,1,true, false)
+          end
+      elseif(self.spd.y > threshsm) then
+        --player going down
+        spr(33,self.pos.x-5,self.pos.y-3,1,1,false,false) --temp, need to implement direction based on cur tether
+      elseif(self.spd.y < threshsm*-1) then
+        --player going up
+        spr(36,self.pos.x-2,self.pos.y-2,1,1,false, false) --temp, need to implement direction based on cur tether
+      else
+        --player is idle
+        spr(37,self.pos.x-5,self.pos.y-1,1,1,false, false)
+      end
   end
-
- end
 end
 
 function cls_player:update()
