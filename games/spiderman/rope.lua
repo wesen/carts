@@ -15,8 +15,8 @@ frame=1
 tethers={}
 
 function _init()
- player=cls_player.init(v2(10,10))
- cls_tether.init(v2(64,28))
+ player=cls_player.init(v2(160,10))
+ cls_tether.init(v2(204,28))
 
  cls_building.init(v2(0,80),row_background)
  cls_building.init(v2(90,40),row_background)

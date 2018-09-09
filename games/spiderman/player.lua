@@ -152,11 +152,15 @@ function cls_player:update()
 
   if self.mode!=mode_free then
    if self.mode==mode_pulling and l<normal_tether_length then
+    -- printh("Switch to swinging l "..tostr(l))
     self.mode=mode_swinging
    end
 
    if l>_normal_tether_length then
-    v*=_normal_tether_length/l
+    local _factor=_normal_tether_length/l
+    -- printh("mode "..tostr(self.mode).." normal_tether_length "..tostr(_normal_tether_length))
+    -- printh("resize tether pull by "..tostr(_factor).." l "..tostr(l))
+    v*=_factor
     self.pos=tether.pos+v
     self.spd=self.pos-self.prev
    end
