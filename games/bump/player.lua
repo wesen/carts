@@ -187,9 +187,19 @@ function cls_player:update()
   end
  end
 
+ if (not on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
+ if ((on_ground or #self.ghosts>7)) popend(self.ghosts)
 end
 
 function cls_player:draw()
+
+ local dark=0
+ for ghost in all(self.ghosts) do
+  dark+=10
+  darken(dark)
+  spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
+ end
+ pal()
 
  pal(cols_face[1], cols_face[self.input_port + 1])
  pal(cols_hair[1], cols_hair[self.input_port + 1])
@@ -214,4 +224,3 @@ function cls_player:draw()
  print(self.spd:str(),64,64)
  --]]
 end
-
