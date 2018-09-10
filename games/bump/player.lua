@@ -26,6 +26,7 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
 
  self.is_teleporting=false
  self.on_ground=false
+ self.is_bullet_time=false
 end)
 
 function cls_player:smoke(spr,dir)
@@ -49,7 +50,7 @@ function cls_player:kill()
 end
 
 function cls_player:update()
- if self.is_teleporting then
+ if self.is_teleporting or self.is_bullet_time then
  else
   self:update_normal()
  end
@@ -193,16 +194,25 @@ function cls_player:update_normal()
 
    if (feet_box:collide(head_box) and can_attack)
     or self:bbox():collide(player:bbox()) then
-    make_gore_explosion(player.pos)
-    cls_smoke.init(self.pos,32,0)
-    self.spd.y=-2.0
-    if player.input_port==self.input_port then
-     -- killed a doppelgaenger
-     -- scores[self.input_port+1]-=1
-    else
-     scores[self.input_port+1]+=1
-    end
-    player:kill()
+    add_cr(function ()
+     self.is_bullet_time=true
+     player.is_bullet_time=true
+     for i=0,5 do
+      yield()
+     end
+     self.is_bullet_time=false
+     player.is_bullet_time=false
+     make_gore_explosion(player.pos)
+     cls_smoke.init(self.pos,32,0)
+     self.spd.y=-2.0
+     if player.input_port==self.input_port then
+      -- killed a doppelgaenger
+      -- scores[self.input_port+1]-=1
+     else
+      scores[self.input_port+1]+=1
+     end
+     player:kill()
+    end)
    end
   end
  end
@@ -212,6 +222,10 @@ function cls_player:update_normal()
 end
 
 function cls_player:draw()
+ if self.is_bullet_time then
+  rectfill(self.pos.x,self.pos.y,self.pos.x+8,self.pos.y+8,10)
+  return
+ end
  if not self.is_teleporting then
   local dark=0
   for ghost in all(self.ghosts) do

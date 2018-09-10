@@ -20,6 +20,8 @@ function _draw()
    i*entry_length,1,7
   )
  end
+
+ print(tostr(stat(1)),0,120,1)
 end
 
 function _update60()
