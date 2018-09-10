@@ -7,4 +7,4 @@ spawn_idx=1
 actors={}
 tiles={}
 crs={}
-scores={0, 0}
+scores={0, 0, 0, 0}

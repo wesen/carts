@@ -17,17 +17,20 @@ flg_solid=0
 flg_ice=1
 
 --first value is default
-cols_face={ 7, 12 }
-cols_hair={ 13, 10 }
+cols_face={ 7, 12, 2, 11 }
+cols_hair={ 13, 10, 8, 12 }
 
 p1_input=0
 p2_input=1
+p3_input=2
+p4_input=3
 
 btn_right=1
 btn_up=2
 btn_down=3
 btn_left=0
 btn_jump=4
+
 
 frame=0
 dt=0
@@ -38,7 +41,8 @@ spawn_idx=1
 actors={}
 tiles={}
 crs={}
-scores={0, 0}
+scores={0, 0, 0, 0}
+
 jump_button_grace_interval=10
 jump_max_hold_time=15
 
@@ -68,6 +72,7 @@ function subclass(typ,parent,init)
  local c=class(typ,init)
  return setmetatable(c,parent)
 end
+
 
 
 -- vectors
@@ -128,6 +133,30 @@ function angle2vec(angle)
  return v2(cos(angle),sin(angle))
 end
 
+
+-- queues - *sigh*
+function insert(t,val)
+ for i=(#t+1),2,-1 do
+  t[i]=t[i-1]
+ end
+ t[1]=val
+end
+
+function popend(t)
+ local top=t[#t]
+ del(t,top)
+ return top
+end
+
+function reverse(t)
+ for i=1,(#t/2) do
+  local tmp=t[i]
+  local oi=#t-(i-1)
+  t[i]=t[oi]
+  t[oi]=tmp
+ end
+end
+
 local bboxvt={}
 bboxvt.__index=bboxvt
 
@@ -172,6 +201,7 @@ function bboxvt:collide(other)
    other.aa.x < self.bb.x and
    other.aa.y < self.bb.y
 end
+
 
 
 local hitboxvt={}
@@ -271,6 +301,7 @@ function rspr(s,x,y,angle)
  end
 end
 
+
 -- tween routines from https://github.com/JoebRogers/PICO-Tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
@@ -310,6 +341,7 @@ function cr_move_to(obj,target,d,easetype)
   yield()
  end
 end
+
 crs={}
 draw_crs={}
 
@@ -331,28 +363,7 @@ function add_cr(f,_crs)
  return cr
 end
 
--- queues - *sigh*
-function insert(t,val)
- for i=(#t+1),2,-1 do
-  t[i]=t[i-1]
- end
- t[1]=val
-end
 
-function popend(t)
- local top=t[#t]
- del(t,top)
- return top
-end
-
-function reverse(t)
- for i=1,(#t/2) do
-  local tmp=t[i]
-  local oi=#t-(i-1)
-  t[i]=t[oi]
-  t[oi]=tmp
- end
-end
 dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,13}
 
 function darken(p,_pal)
@@ -485,6 +496,7 @@ function update_actors(typ)
  end
 end
 
+
 cls_button=class(typ_button,function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
  self.input_port=input_port
@@ -519,6 +531,7 @@ end
 function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
+
 cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
  cls_actor._ctr(self,pos)
  self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
@@ -537,6 +550,7 @@ function cls_bubble:update()
   del(actors,self)
  end
 end
+
 function v_idx(pos)
  return pos.x+pos.y*128
 end
@@ -671,6 +685,7 @@ function tile_flag_at(bbox,flag)
  return false
 end
 
+
 spr_wall_smoke=54
 spr_ground_smoke=51
 spr_full_smoke=48
@@ -702,6 +717,7 @@ function cls_smoke:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
  if (self.is_gore) pal()
 end
+
 cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(false,false)
@@ -778,6 +794,7 @@ function make_gore_explosion(pos)
   cls_gore.init(pos)
  end
 end
+
 players={}
 
 player_cnt=0
@@ -1018,6 +1035,7 @@ function cls_player:draw()
  end
 end
 
+
 spr_spring_sprung=66
 spr_spring_wound=67
 
@@ -1050,6 +1068,7 @@ function cls_spring:draw()
  if (self.sprung_time>0) spr_=spr_spring_sprung
  spr(spr_,self.pos.x,self.pos.y)
 end
+
 spr_spawn_point=1
 
 cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos,input_port)
@@ -1074,6 +1093,7 @@ end
 function cls_spawn:draw()
  spr(spr_spawn_point,self.pos.x,self.pos.y)
 end
+
 spr_spikes=68
 
 cls_spikes=subclass(typ_spikes,cls_actor,function(self,pos)
@@ -1096,9 +1116,11 @@ function cls_spikes:draw()
  spr(spr_spikes,self.pos.x,self.pos.y)
 end
 
+
 cls_moving_platform=subclass(typ_moving_platform,cls_actor,function(pos)
  cls_actor._ctr(self,pos)
 end)
+
 spr_tele_enter=112
 spr_tele_exit=113
 tele_exits={}
@@ -1153,6 +1175,34 @@ function cls_tele_exit:draw()
  spr(spr_tele_exit,self.pos.x,self.pos.y)
 end
 
+
+--#include constants
+--#include globals
+--#include config
+
+--#include oo
+--#include v2
+--#include bbox
+--#include hitbox
+
+--#include helpers
+--#include tween
+--#include coroutines
+--#include queues
+--#include gfx
+
+--#include actors
+--#include button
+--#include bubbles
+--#include room
+--#include smoke
+--#include particle
+--#include player
+--#include spring
+--#include spawn
+--#include spikes
+--#include moving_platform
+--#include teleporter
 
 -- x gravity
 -- x downward collision
@@ -1233,10 +1283,15 @@ end
 -- x player kill
 -- x player colors
 
+--#include main
+
+
 function _init()
  room=cls_room.init(v2(16,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
+ room:spawn_player(p3_input)
+ room:spawn_player(p4_input)
 end
 
 function _draw()

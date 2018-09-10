@@ -14,11 +14,13 @@ flg_solid=0
 flg_ice=1
 
 --first value is default
-cols_face={ 7, 12 }
-cols_hair={ 13, 10 }
+cols_face={ 7, 12, 2, 11 }
+cols_hair={ 13, 10, 8, 12 }
 
 p1_input=0
 p2_input=1
+p3_input=2
+p4_input=3
 
 btn_right=1
 btn_up=2
