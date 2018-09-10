@@ -35,6 +35,7 @@ end
 function cls_player:kill()
  del(players,self)
  del(actors,self)
+ add_shake(3)
  sfx(1)
  if not self.is_doppelgaenger then
   room:spawn_player(self.input_port)

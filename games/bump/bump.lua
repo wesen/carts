@@ -6,6 +6,7 @@
 --#include v2
 --#include bbox
 --#include hitbox
+--#include camera
 
 --#include helpers
 --#include tween
@@ -65,7 +66,7 @@
 -- camera shake
 -- fades
 
--- remove typ code
+-- x remove typ code
 -- number of player selector menu
 -- title screen
 -- game end screen (kills or timer)

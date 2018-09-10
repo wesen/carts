@@ -192,6 +192,21 @@ function hitboxvt:str()
  return self.offset:str().."-("..self.dim:str()..")"
 end
 
+local camera_shake=v2(0,0)
+
+function add_shake(p)
+ camera_shake+=angle2vec(rnd(1))*p
+end
+
+function update_shake()
+ if abs(camera_shake.x)+abs(camera_shake.y)<1 then
+  camera_shake=v2(0,0)
+ end
+ if frame%4==0 then
+  camera_shake*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
+ end
+end
+
 
 -- functions
 function appr(val,target,amount)
@@ -749,6 +764,7 @@ end
 function cls_player:kill()
  del(players,self)
  del(actors,self)
+ add_shake(3)
  sfx(1)
  if not self.is_doppelgaenger then
   room:spawn_player(self.input_port)
@@ -1175,7 +1191,7 @@ tiles[spr_power_up]=cls_pwrup_doppelgaenger
 -- camera shake
 -- fades
 
--- remove typ code
+-- x remove typ code
 -- number of player selector menu
 -- title screen
 -- game end screen (kills or timer)
@@ -1225,10 +1241,7 @@ function _draw()
  frame+=1
 
  cls()
- -- if player!=nil then
- --  camera(flr(player.pos.x/128)*128,0)
- -- end
-
+ camera(camera_shake.x,camera_shake.y)
  room:draw()
  draw_actors()
  tick_crs(draw_crs)
@@ -1247,6 +1260,7 @@ function _update60()
  lasttime=time()
  tick_crs()
  update_actors()
+ update_shake()
 end
 
 

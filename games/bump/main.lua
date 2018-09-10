@@ -8,10 +8,7 @@ function _draw()
  frame+=1
 
  cls()
- -- if player!=nil then
- --  camera(flr(player.pos.x/128)*128,0)
- -- end
-
+ camera(camera_shake.x,camera_shake.y)
  room:draw()
  draw_actors()
  tick_crs(draw_crs)
@@ -30,4 +27,5 @@ function _update60()
  lasttime=time()
  tick_crs()
  update_actors()
+ update_shake()
 end
