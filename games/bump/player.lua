@@ -35,8 +35,16 @@ end
 function cls_player:kill()
  del(players,self)
  del(actors,self)
-  sfx(1)
- room:spawn_player(self.input_port)
+ sfx(1)
+ if not self.is_doppelgaenger then
+  room:spawn_player(self.input_port)
+  for player in all(players) do
+   if player.input_port==self.input_port and player.is_doppelgaenger then
+    make_gore_explosion(player.pos)
+    player:kill()
+   end
+  end
+ end
 end
 
 function cls_player:update()

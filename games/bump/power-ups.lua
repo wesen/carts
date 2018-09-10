@@ -28,6 +28,10 @@ cls_pwrup_doppelgaenger=subclass(nil,cls_pwrup,function(self,pos)
 end)
 
 function cls_pwrup_doppelgaenger:act_on_player(player)
+ for i=0,3 do
+  local spawn=room:spawn_player(player.input_port)
+  spawn.is_doppelgaenger=true
+ end
 end
 
 tiles[spr_power_up]=cls_pwrup_doppelgaenger

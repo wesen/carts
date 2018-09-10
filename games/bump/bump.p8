@@ -595,15 +595,11 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player(input_port)
- --local i = flr(rnd(#self.spawn_locations)) + 1
-
+ -- XXX potentially find better spawn locatiosn
  local spawn_pos = self.spawn_locations[spawn_idx]:clone()
- cls_spawn.init(spawn_pos, input_port)
-
- spawn_idx += 1
- if spawn_idx > #self.spawn_locations then
-  spawn_idx = 1
- end
+ local spawn=cls_spawn.init(spawn_pos, input_port)
+ spawn_idx = (spawn_idx%#self.spawn_locations)+1
+ return spawn
 end
 
 function cls_room:tile_at(pos)
@@ -784,8 +780,16 @@ end
 function cls_player:kill()
  del(players,self)
  del(actors,self)
-  sfx(1)
- room:spawn_player(self.input_port)
+ sfx(1)
+ if not self.is_doppelgaenger then
+  room:spawn_player(self.input_port)
+  for player in all(players) do
+   if player.input_port==self.input_port and player.is_doppelgaenger then
+    make_gore_explosion(player.pos)
+    player:kill()
+   end
+  end
+ end
 end
 
 function cls_player:update()
@@ -1020,6 +1024,7 @@ cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos,input_port)
  self.input_port=input_port
  self.pos=v2(self.target.x,128)
  self.spd.y=-2
+ self.is_doppelgaenger=false
  add_cr(function()
   self:cr_spawn()
  end)
@@ -1028,13 +1033,15 @@ end)
 function cls_spawn:cr_spawn()
  cr_move_to(self,self.target,1,inexpo)
  del(actors,self)
- cls_player.init(self.target, self.input_port)
+ local player=cls_player.init(self.target, self.input_port)
+ player.is_doppelgaenger=self.is_doppelgaenger
  cls_smoke.init(self.pos,spr_full_smoke,0)
 end
 
 function cls_spawn:draw()
  spr(spr_spawn_point,self.pos.x,self.pos.y)
 end
+
 spr_spikes=68
 
 cls_spikes=subclass(typ_spikes,cls_actor,function(self,pos)
@@ -1144,6 +1151,10 @@ cls_pwrup_doppelgaenger=subclass(nil,cls_pwrup,function(self,pos)
 end)
 
 function cls_pwrup_doppelgaenger:act_on_player(player)
+ for i=0,3 do
+  local spawn=room:spawn_player(player.input_port)
+  spawn.is_doppelgaenger=true
+ end
 end
 
 tiles[spr_power_up]=cls_pwrup_doppelgaenger
