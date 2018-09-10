@@ -23,6 +23,7 @@ function cls_projectile:update()
  if solid_at(self:bbox()) then
   main_camera:add_shake(4)
   cls_boom.init(self.pos,32,rnd_elt(bomb_colors))
+  sfx(12)
   del(actors,self)
  end
 end
