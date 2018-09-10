@@ -17,7 +17,10 @@ cls_room=class(typ_room,function(self,pos,dim)
     add(self.spawn_locations,p*8)
    end
    local t=tiles[tile]
-   if (t!=nil) t.init(p*8)
+   if t!=nil then
+    local a=t.init(p*8)
+    a.tile=tile
+   end
   end
  end
 end)

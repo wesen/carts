@@ -25,6 +25,7 @@
 --#include spikes
 --#include moving_platform
 --#include teleporter
+--#include power-ups
 
 -- x gravity
 -- x downward collision
