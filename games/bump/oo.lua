@@ -1,12 +1,10 @@
-function class (typ,init)
+function class (init)
   local c = {}
   c.__index = c
   c._ctr=init
-  c.typ=typ
   function c.init (...)
     local self = setmetatable({},c)
     c._ctr(self,...)
-    c.typ=typ
     self.destroyed=false
     return self
   end
@@ -16,8 +14,7 @@ function class (typ,init)
   return c
 end
 
-function subclass(typ,parent,init)
- local c=class(typ,init)
+function subclass(parent,init)
+ local c=class(init)
  return setmetatable(c,parent)
 end
-

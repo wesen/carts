@@ -1,18 +1,6 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
-typ_player=0
-typ_smoke=1
-typ_bubble=2
-typ_button=3
-typ_spring=4
-typ_spawn=5
-typ_spikes=6
-typ_room=7
-typ_moving_platform=8
-typ_particle=9
-typ_gore=10
-
 flg_solid=0
 flg_ice=1
 
@@ -31,6 +19,23 @@ btn_down=3
 btn_left=0
 btn_jump=4
 
+-- physics tweaking
+local maxrun=1
+local maxfall=2
+local gravity=0.12
+local in_air_accel=0.1
+local in_air_decel=0.05
+local apex_speed=0.15
+local fall_gravity_factor=2
+local apex_gravity_factor=0.5
+local wall_slide_maxfall=0.4
+local ice_wall_maxfall=1
+local jump_spd=1.2
+local wall_jump_spd=maxrun+0.6
+local spring_speed=3
+local jump_button_grace_interval=5
+local jump_max_hold_time=15
+local ground_grace_interval=6
 
 frame=0
 dt=0
@@ -50,15 +55,13 @@ ground_grace_interval=12
 
 
 
-function class (typ,init)
+function class (init)
   local c = {}
   c.__index = c
   c._ctr=init
-  c.typ=typ
   function c.init (...)
     local self = setmetatable({},c)
     c._ctr(self,...)
-    c.typ=typ
     self.destroyed=false
     return self
   end
@@ -68,11 +71,10 @@ function class (typ,init)
   return c
 end
 
-function subclass(typ,parent,init)
- local c=class(typ,init)
+function subclass(parent,init)
+ local c=class(init)
  return setmetatable(c,parent)
 end
-
 
 
 -- vectors
@@ -219,6 +221,21 @@ function hitboxvt:str()
  return self.offset:str().."-("..self.dim:str()..")"
 end
 
+local camera_shake=v2(0,0)
+
+function add_shake(p)
+ camera_shake+=angle2vec(rnd(1))*p
+end
+
+function update_shake()
+ if abs(camera_shake.x)+abs(camera_shake.y)<1 then
+  camera_shake=v2(0,0)
+ end
+ if frame%4==0 then
+  camera_shake*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
+ end
+end
+
 
 -- functions
 function appr(val,target,amount)
@@ -302,7 +319,6 @@ function rspr(s,x,y,angle)
 end
 
 
--- tween routines from https://github.com/JoebRogers/PICO-Tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
  if (t < 1) return c / 2 * pow(t, 5) + b
@@ -384,7 +400,7 @@ end
 
 actor_cnt=0
 
-cls_actor=class(typ_actor,function(self,pos)
+cls_actor=class(function(self,pos)
  self.pos=pos
  self.id=actor_cnt
  actor_cnt+=1
@@ -439,10 +455,7 @@ function cls_actor:move_y(amount)
 
    local solid=self:is_solid_at(v2(0,step))
    local actor=self:is_actor_at(v2(0,step))
-   --[[local actor=(
-    (step>0 and self:is_actor_at(v2(0,step-1))) or
-    (step<0 and self:is_actor_at(v2(0,step+1)))
-    )]]
+
    if solid or actor then
     self.spd.y=0
     break
@@ -461,10 +474,12 @@ function cls_actor:is_solid_at(offset)
 end
 
 function cls_actor:is_actor_at(offset)
- for player in all(players) do
-  local bbox_other = player:bbox()
-  if self!=player and bbox_other:collide(self:bbox(offset)) then
-   return true
+ for actor in all(actors) do
+  if actor.is_solid then
+   local bbox_other = actor:bbox()
+   if self!=actor and bbox_other:collide(self:bbox(offset)) then
+    return true
+   end
   end
  end
 
@@ -496,8 +511,7 @@ function update_actors(typ)
  end
 end
 
-
-cls_button=class(typ_button,function(self,btn_nr,input_port)
+cls_button=class(function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
  self.input_port=input_port
  self.is_down=false
@@ -532,80 +546,39 @@ function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
 
-cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
- cls_actor._ctr(self,pos)
- self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
- self.life=10
-end)
 
-function cls_bubble:draw()
- local size=4-self.life/3
- circ(self.pos.x,self.pos.y,size,1)
-end
-
-function cls_bubble:update()
- self.life*=0.9
- self:move(self.spd)
- if (self.life<0.1) then
-  del(actors,self)
- end
-end
 
 function v_idx(pos)
  return pos.x+pos.y*128
 end
 
-function gore_idx(pos,dir)
- return v_idx(pos)*4+dir
-end
-
-cls_room=class(typ_room,function(self,pos,dim)
+cls_room=class(function(self,pos,dim)
  self.pos=pos
  self.dim=dim
  self.spawn_locations={}
- self.gore={}
+ printh("init room")
 
  -- initialize tiles
  for i=0,self.dim.x-1 do
   for j=0,self.dim.y-1 do
    local p=v2(i,j)
    local tile=self:tile_at(p)
-   if fget(tile,flg_solid) then
-    for dir=-1,2 do
-     self.gore[gore_idx(p,dir)]=0
-    end
-   end
    if tile==spr_spawn_point then
     add(self.spawn_locations,p*8)
    end
    local t=tiles[tile]
-   if (t!=nil) t.init(p*8)
+   if t!=nil then
+    local a=t.init(p*8)
+    a.tile=tile
+   end
   end
  end
 end)
 
-function cls_room:get_gore(tile,dir)
- local v=gore_idx(tile,dir)
- local g=self.gore[v]
- if (g==nil) g=0
- return g
-end
-
 function cls_room:get_friction(tile,dir)
- local accel=0.3
- local decel=0.2
+ local accel=0.1
+ local decel=0.1
 
- local g=self:get_gore(tile,dir)
- if g>10 then
-  accel=0.08
-  decel=0.02
- elseif g>5 then
-  accel=0.15
-  decel=0.07
- else
-  accel=0.2
-  decel=0.15
- end
  if (fget(self:tile_at(tile),flg_ice)) accel,decel=min(accel,0.1),min(decel,0.03)
 
  return accel,decel
@@ -613,40 +586,14 @@ end
 
 function cls_room:draw()
  map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
-
- -- draw gore
---  for i=0,self.dim.x do
---   for j=0,self.dim.y do
---    for dir=-1,2 do
---     local v=gore_idx(v2(i,j),dir)
---     local g=self.gore[v]
---     if g!=nil then
---      self.gore[v]=min(15,self.gore[v]-0.001)
---      if g>10 then
---       rspr(83,i*8,j*8,dir)
---      elseif g>5 then
---       rspr(82,i*8,j*8,dir)
---      elseif g>0 then
---       rspr(81,i*8,j*8,dir)
---      else
---       self.gore[v]=0
---      end
---     end
---    end
---   end
---  end
 end
 
 function cls_room:spawn_player(input_port)
- --local i = flr(rnd(#self.spawn_locations)) + 1
-
+ -- XXX potentially find better spawn locatiosn
  local spawn_pos = self.spawn_locations[spawn_idx]:clone()
- cls_spawn.init(spawn_pos, input_port)
-
- spawn_idx += 1
- if spawn_idx > #self.spawn_locations then
-  spawn_idx = 1
- end
+ local spawn=cls_spawn.init(spawn_pos, input_port)
+ spawn_idx = (spawn_idx%#self.spawn_locations)+1
+ return spawn
 end
 
 function cls_room:tile_at(pos)
@@ -692,7 +639,7 @@ spr_full_smoke=48
 spr_ice_smoke=57
 spr_slide_smoke=60
 
-cls_smoke=subclass(typ_smoke,cls_actor,function(self,pos,start_spr,dir)
+cls_smoke=subclass(cls_actor,function(self,pos,start_spr,dir)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(maybe(),false)
  self.spr=start_spr
@@ -718,7 +665,7 @@ function cls_smoke:draw()
  if (self.is_gore) pal()
 end
 
-cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
+cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(false,false)
  self.t=0
@@ -756,7 +703,7 @@ function cls_particle:draw()
  spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end
 
-cls_gore=subclass(typ_gore,cls_particle,function(self,pos)
+cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
  self.hitbox=hitbox(v2(2,2),v2(3,3))
  self:random_angle(1)
@@ -778,13 +725,10 @@ function cls_gore:update()
  local hit_side,side_tile=solid_at(side_bbox)
  local gore_weight=1-self.t/self.lifetime
  if on_ground and ground_tile!=nil then
-  room.gore[gore_idx(ground_tile,0)]+=gore_weight
   self.spd.y*=-0.9
  elseif on_ceil and ceil_tile!=nil then
-  room.gore[gore_idx(ceil_tile,2)]+=.3*gore_weight
   self.spd.y*=-0.9
  elseif hit_side and side_tile!=nil then
-  room.gore[gore_idx(side_tile,-dir)]+=gore_weight
   self.spd.x*=-0.9
  end
 end
@@ -799,10 +743,9 @@ players={}
 
 player_cnt=0
 
-cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
+cls_player=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  -- players are handled separately
- del(actors,self)
  add(players,self)
 
  self.ghosts={}
@@ -824,6 +767,7 @@ cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
 
  self.is_teleporting=false
  self.on_ground=false
+ self.is_bullet_time=false
 end)
 
 function cls_player:smoke(spr,dir)
@@ -832,12 +776,22 @@ end
 
 function cls_player:kill()
  del(players,self)
-  sfx(1)
- room:spawn_player(self.input_port)
+ del(actors,self)
+ add_shake(3)
+ sfx(1)
+ if not self.is_doppelgaenger then
+  room:spawn_player(self.input_port)
+  for player in all(players) do
+   if player.input_port==self.input_port and player.is_doppelgaenger then
+    make_gore_explosion(player.pos)
+    player:kill()
+   end
+  end
+ end
 end
 
 function cls_player:update()
- if self.is_teleporting then
+ if self.is_teleporting or self.is_bullet_time then
  else
   self:update_normal()
  end
@@ -851,9 +805,9 @@ function cls_player:update_normal()
 
  self.jump_button:update()
 
- local maxrun=1
- local accel=0.3
- local decel=0.2
+ local gravity=gravity
+ local maxfall=maxfall
+ local accel,decel
 
  local ground_bbox=self:bbox(vec_down)
  self.on_ground,tile=solid_at(ground_bbox)
@@ -866,15 +820,13 @@ function cls_player:update_normal()
   self.on_ground_interval-=1
  end
  local on_ground_recently=self.on_ground_interval>0
- local on_gore=false
 
  if not self.on_ground then
-  accel=0.1
-  decel=0.05
+  accel=in_air_accel
+  decel=in_air_decel
  else
   if tile!=nil then
    accel,decel=room:get_friction(tile,dir_down)
-   on_gore=room:get_gore(tile,dir_down)>0
   end
 
   if input!=self.prev_input and input!=0 then
@@ -889,10 +841,7 @@ function cls_player:update_normal()
   -- add ice smoke when sliding on ice (after releasing input)
   if input==0 and abs(self.spd.x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
-   if on_gore then
-    local s=self:smoke(spr_slide_smoke,-input)
-    s.is_gore=true
-   elseif on_ice then
+   if on_ice then
     self:smoke(spr_slide_smoke,-input)
    end
   end
@@ -910,15 +859,13 @@ function cls_player:update_normal()
  if (self.spd.x!=0) self.flip.x=self.spd.x<0
 
  -- y movement
- local maxfall=2
- local gravity=0.12
 
  -- slow down at apex
- if abs(self.spd.y)<=0.15 then
-  gravity*=0.5
+ if abs(self.spd.y)<=apex_speed then
+  gravity*=apex_gravity_factor
  elseif self.spd.y>0 then
   -- fall down fas2er
-  gravity*=2
+  gravity*=fall_gravity_factor
  end
 
  -- wall slide
@@ -926,8 +873,8 @@ function cls_player:update_normal()
  if input!=0 and self:is_solid_at(v2(input,0))
     and not self.on_ground and self.spd.y>0 then
   is_wall_sliding=true
-  maxfall=0.4
-  if (ice_at(self:bbox(v2(input,0)))) maxfall=1.0
+  maxfall=wall_slide_maxfall
+  if (ice_at(self:bbox(v2(input,0)))) maxfall=ice_wall_maxfall
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
@@ -944,7 +891,7 @@ function cls_player:update_normal()
     sfx(0)
    end
    self.on_ground_interval=0
-   self.spd.y=-1.2
+   self.spd.y=-jump_spd
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
@@ -954,7 +901,7 @@ function cls_player:update_normal()
    if wall_dir!=0 then
     self.jump_interval=0
     self.spd.y=-1
-    self.spd.x=-wall_dir*(maxrun+.6)
+    self.spd.x=-wall_dir*wall_jump_spd
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     self.jump_button.hold_time+=1
    end
@@ -986,25 +933,44 @@ function cls_player:update_normal()
    local can_attack=not self.on_ground and self.spd.y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
-   if (feet_box:collide(head_box) and can_attack) or self:bbox():collide(player:bbox()) then
-    make_gore_explosion(player.pos)
-    cls_smoke.init(self.pos,32,0)
-    self.spd.y=-2.0
-    player:kill()
-    scores[self.input_port+1]+=1
+   if (feet_box:collide(head_box) and can_attack)
+    or self:bbox():collide(player:bbox()) then
+    add_cr(function ()
+     self.is_bullet_time=true
+     player.is_bullet_time=true
+     for i=0,5 do
+      yield()
+     end
+     self.is_bullet_time=false
+     player.is_bullet_time=false
+     make_gore_explosion(player.pos)
+     cls_smoke.init(self.pos,32,0)
+     self.spd.y=-2.0
+     if player.input_port==self.input_port then
+      -- killed a doppelgaenger
+      -- scores[self.input_port+1]-=1
+     else
+      scores[self.input_port+1]+=1
+     end
+     player:kill()
+    end)
    end
   end
  end
 
  if (not self.on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
- if ((self.on_ground or #self.ghosts>4)) popend(self.ghosts)
+ if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:draw()
+ if self.is_bullet_time then
+  rectfill(self.pos.x,self.pos.y,self.pos.x+8,self.pos.y+8,10)
+  return
+ end
  if not self.is_teleporting then
   local dark=0
   for ghost in all(self.ghosts) do
-   dark+=10
+   dark+=8
    darken(dark)
    spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
   end
@@ -1012,12 +978,9 @@ function cls_player:draw()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-
   spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
-
   pal(cols_face[1], cols_face[1])
   pal(cols_hair[1], cols_hair[1])
-
 
   --[[
   local bbox=self:bbox()
@@ -1039,10 +1002,11 @@ end
 spr_spring_sprung=66
 spr_spring_wound=67
 
-cls_spring=subclass(typ_spring,cls_actor,function(self,pos)
+cls_spring=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.hitbox=hitbox(v2(0,5),v2(8,3))
  self.sprung_time=0
+ self.is_solid=false
 end)
 tiles[spr_spring_sprung]=cls_spring
 
@@ -1054,7 +1018,7 @@ function cls_spring:update()
  else
   for player in all(players) do
    if bbox:collide(player:bbox()) then
-    player.spd.y=-3
+    player.spd.y=-spring_speed
     self.sprung_time=10
     local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
    end
@@ -1071,13 +1035,14 @@ end
 
 spr_spawn_point=1
 
-cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos,input_port)
+cls_spawn=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  self.target=self.pos
  self.input_port=input_port
  self.pos=v2(self.target.x,128)
  self.spd.y=-2
+ self.is_doppelgaenger=false
  add_cr(function()
   self:cr_spawn()
  end)
@@ -1086,7 +1051,8 @@ end)
 function cls_spawn:cr_spawn()
  cr_move_to(self,self.target,1,inexpo)
  del(actors,self)
- cls_player.init(self.target, self.input_port)
+ local player=cls_player.init(self.target, self.input_port)
+ player.is_doppelgaenger=self.is_doppelgaenger
  cls_smoke.init(self.pos,spr_full_smoke,0)
 end
 
@@ -1096,7 +1062,7 @@ end
 
 spr_spikes=68
 
-cls_spikes=subclass(typ_spikes,cls_actor,function(self,pos)
+cls_spikes=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.hitbox=hitbox(v2(0,3),v2(8,5))
 end)
@@ -1116,8 +1082,7 @@ function cls_spikes:draw()
  spr(spr_spikes,self.pos.x,self.pos.y)
 end
 
-
-cls_moving_platform=subclass(typ_moving_platform,cls_actor,function(pos)
+cls_moving_platform=subclass(cls_actor,function(pos)
  cls_actor._ctr(self,pos)
 end)
 
@@ -1125,7 +1090,7 @@ spr_tele_enter=112
 spr_tele_exit=113
 tele_exits={}
 
-cls_tele_enter=subclass(nil,cls_actor,function(self,pos)
+cls_tele_enter=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  self.hitbox=hitbox(v2(4,4),v2(1,1))
@@ -1140,7 +1105,7 @@ function cls_tele_enter:update()
     player.is_teleporting=true
     player.spd=v2(0,0)
     player.ghosts={}
-    
+
     local anim_length=10
     for i=0,anim_length do
      local w=i/anim_length*10
@@ -1164,7 +1129,7 @@ function cls_tele_enter:draw()
 end
 
 
-cls_tele_exit=subclass(nil,cls_actor,function(self,pos)
+cls_tele_exit=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  add(tele_exits, self)
@@ -1174,6 +1139,44 @@ tiles[spr_tele_exit]=cls_tele_exit
 function cls_tele_exit:draw()
  spr(spr_tele_exit,self.pos.x,self.pos.y)
 end
+
+spr_power_up=39
+
+cls_pwrup=subclass(cls_actor,function(self,pos)
+ cls_actor._ctr(self,pos)
+ self.is_solid=false
+end)
+
+function cls_pwrup:update()
+ local bb=self:bbox()
+ for player in all(players) do
+  if player:bbox():collide(bb) then
+   self:act_on_player(player)
+   del(actors,self)
+   return
+  end
+ end
+end
+
+function cls_pwrup:act_on_player(player)
+end
+
+function cls_pwrup:draw()
+ spr(self.tile,self.pos.x,self.pos.y)
+end
+
+cls_pwrup_doppelgaenger=subclass(cls_pwrup,function(self,pos)
+ cls_pwrup._ctr(self,pos)
+end)
+
+function cls_pwrup_doppelgaenger:act_on_player(player)
+ for i=0,3 do
+  local spawn=room:spawn_player(player.input_port)
+  spawn.is_doppelgaenger=true
+ end
+end
+
+tiles[spr_power_up]=cls_pwrup_doppelgaenger
 
 
 --#include constants
@@ -1240,10 +1243,14 @@ end
 -- x add multiple players / spawn points
 -- x add death mechanics
 -- x add score
--- camera shake
+-- x camera shake
+-- x doppelgangers
+-- x remove typ code
+-- bullet time on kill
+-- decrease score when dying on spikes
+
 -- fades
 
--- remove typ code
 -- number of player selector menu
 -- title screen
 -- game end screen (kills or timer)
@@ -1271,9 +1278,7 @@ end
 -- miniature mode
 -- lasers
 -- gun
--- doppelgangers
 -- rope
--- decrease score when dying on spikes
 -- selfbomber (on a timer)
 -- level design
 
@@ -1298,35 +1303,28 @@ function _draw()
  frame+=1
 
  cls()
- local player=players[1]
- -- if player!=nil then
- --  camera(flr(player.pos.x/128)*128,0)
- -- end
-
+ camera(camera_shake.x,camera_shake.y)
  room:draw()
  draw_actors()
- foreach(players,function(player)
-  player:draw()
- end)
  tick_crs(draw_crs)
 
  local entry_length=50
  for i=0,#scores-1,1 do
   print(
-   "Player "..tostr(i+1)..": "..tostr(scores[i+1]),
+   "player "..tostr(i+1)..": "..tostr(scores[i+1]),
    i*entry_length,1,7
   )
  end
+
+ print(tostr(stat(1)),0,120,1)
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
  tick_crs()
- foreach(players,function(player)
-  player:update()
- end)
  update_actors()
+ update_shake()
 end
 
 
@@ -1348,12 +1346,12 @@ __gfx__
 00099909f0ffff00f0fff0000fff00f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 009444900fffff400ff6f60005f5ff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000004000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000800088008408000008800000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0008480008400080000000000008e8000008e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-008888800d0000d00000000000888880008e8800000e000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00488480000000000000000000288280000882000088800000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000444000880000800000000000222000000200000020000000e0000000000000000000000000000000000000000000000000000000000000000000000000000
-000000000d800d808000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000008000880084080000088000008000000000000000000000000000eeeeee00000000000000000000000000000000000000000000000000000000000000000
+0008480008400080000000000008e8000008e00000000000000000000eeeeee00000000000000000000000000000000000000000000000000000000000000000
+008888800d0000d00000000000888880008e8800000e0000000000000eeeeee00000000000000000000000000000000000000000000000000000000000000000
+004884800000000000000000002882800008820000888000000000000eeeeee00000000000000000000000000000000000000000000000000000000000000000
+000444000880000800000000000222000000200000020000000e00000eeeeee00000000000000000000000000000000000000000000000000000000000000000
+000000000d800d8080000008000000000000000000000000000000000eeeeee00000000000000000000000000000000000000000000000000000000000000000
 0000000000d00d008800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000770700000770000000000000000000000000000000000077000000000000000000000000000000000000000000000000000000000000000000000000000
 70000600007700667000007000000000000000000000000000060000007700007000000000000000000000000000000000000000000000000000000000000000
@@ -1534,11 +1532,11 @@ __map__
 0000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000420000000000700000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4141414100000040404000004000000000010000000000000000000000000071000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000005000000004000000040400000000000000000000000004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000005000000004000000040402700000000000000000000004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000404141000000000000010000404000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4000000000000000000000414040404000000000420001704200400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000004040000000000000000000000000000000404141414100404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000004141414040400000000040010000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000004141414040400000000040000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0042000000000000000000004100000040404000000000000042000000004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4040000000400001000100004100000000000000000000000140404000000040404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000400040404000004100404000000000000040404040000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -1,4 +1,4 @@
-cls_button=class(typ_button,function(self,btn_nr,input_port)
+cls_button=class(function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
  self.input_port=input_port
  self.is_down=false

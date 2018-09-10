@@ -1,4 +1,4 @@
-cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
+cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(false,false)
  self.t=0
@@ -36,7 +36,7 @@ function cls_particle:draw()
  spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end
 
-cls_gore=subclass(typ_gore,cls_particle,function(self,pos)
+cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
  self.hitbox=hitbox(v2(2,2),v2(3,3))
  self:random_angle(1)
@@ -58,13 +58,10 @@ function cls_gore:update()
  local hit_side,side_tile=solid_at(side_bbox)
  local gore_weight=1-self.t/self.lifetime
  if on_ground and ground_tile!=nil then
-  room.gore[gore_idx(ground_tile,0)]+=gore_weight
   self.spd.y*=-0.9
  elseif on_ceil and ceil_tile!=nil then
-  room.gore[gore_idx(ceil_tile,2)]+=.3*gore_weight
   self.spd.y*=-0.9
  elseif hit_side and side_tile!=nil then
-  room.gore[gore_idx(side_tile,-dir)]+=gore_weight
   self.spd.x*=-0.9
  end
 end

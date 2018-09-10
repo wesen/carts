@@ -6,6 +6,7 @@
 --#include v2
 --#include bbox
 --#include hitbox
+--#include camera
 
 --#include helpers
 --#include tween
@@ -15,7 +16,6 @@
 
 --#include actors
 --#include button
---#include bubbles
 --#include room
 --#include smoke
 --#include particle
@@ -25,6 +25,7 @@
 --#include spikes
 --#include moving_platform
 --#include teleporter
+--#include power-ups
 
 -- x gravity
 -- x downward collision
@@ -62,10 +63,14 @@
 -- x add multiple players / spawn points
 -- x add death mechanics
 -- x add score
--- camera shake
+-- x camera shake
+-- x doppelgangers
+-- x remove typ code
+-- bullet time on kill
+-- decrease score when dying on spikes
+
 -- fades
 
--- remove typ code
 -- number of player selector menu
 -- title screen
 -- game end screen (kills or timer)
@@ -93,9 +98,7 @@
 -- miniature mode
 -- lasers
 -- gun
--- doppelgangers
 -- rope
--- decrease score when dying on spikes
 -- selfbomber (on a timer)
 -- level design
 

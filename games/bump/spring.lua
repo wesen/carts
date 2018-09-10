@@ -1,10 +1,11 @@
 spr_spring_sprung=66
 spr_spring_wound=67
 
-cls_spring=subclass(typ_spring,cls_actor,function(self,pos)
+cls_spring=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.hitbox=hitbox(v2(0,5),v2(8,3))
  self.sprung_time=0
+ self.is_solid=false
 end)
 tiles[spr_spring_sprung]=cls_spring
 
@@ -16,7 +17,7 @@ function cls_spring:update()
  else
   for player in all(players) do
    if bbox:collide(player:bbox()) then
-    player.spd.y=-3
+    player.spd.y=-spring_speed
     self.sprung_time=10
     local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
    end

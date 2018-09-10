@@ -48,6 +48,7 @@ function cls_player:update()
    self.spd.y=-1.2
    self.fly_button.hold_time+=1
   end
+  if (self.fly_button:was_just_pressed()) sfx(14)
  end
 
  self.spd.y=appr(self.spd.y,maxfall,gravity)
@@ -62,7 +63,7 @@ function cls_player:update()
  self.prev_input=input
 
  if btnp(btn_fire) then
-  printh("FIRE")
   cls_projectile.init(self.pos+v2(0,8),v2(self.spd.x+dir*0.5,0))
+  sfx(16)
  end
 end

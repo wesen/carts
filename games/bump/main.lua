@@ -10,33 +10,26 @@ function _draw()
  frame+=1
 
  cls()
- local player=players[1]
- -- if player!=nil then
- --  camera(flr(player.pos.x/128)*128,0)
- -- end
-
+ camera(camera_shake.x,camera_shake.y)
  room:draw()
  draw_actors()
- foreach(players,function(player)
-  player:draw()
- end)
  tick_crs(draw_crs)
 
  local entry_length=50
  for i=0,#scores-1,1 do
   print(
-   "Player "..tostr(i+1)..": "..tostr(scores[i+1]),
+   "player "..tostr(i+1)..": "..tostr(scores[i+1]),
    i*entry_length,1,7
   )
  end
+
+ print(tostr(stat(1)),0,120,1)
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
  tick_crs()
- foreach(players,function(player)
-  player:update()
- end)
  update_actors()
+ update_shake()
 end
