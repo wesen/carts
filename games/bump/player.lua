@@ -5,7 +5,6 @@ player_cnt=0
 cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  -- players are handled separately
- del(actors,self)
  add(players,self)
 
  self.ghosts={}
@@ -35,6 +34,7 @@ end
 
 function cls_player:kill()
  del(players,self)
+ del(actors,self)
   sfx(1)
  room:spawn_player(self.input_port)
 end
@@ -54,9 +54,9 @@ function cls_player:update_normal()
 
  self.jump_button:update()
 
- local maxrun=1
- local accel=0.3
- local decel=0.2
+ local gravity=gravity
+ local maxfall=maxfall
+ local accel,decel
 
  local ground_bbox=self:bbox(vec_down)
  self.on_ground,tile=solid_at(ground_bbox)
@@ -69,15 +69,13 @@ function cls_player:update_normal()
   self.on_ground_interval-=1
  end
  local on_ground_recently=self.on_ground_interval>0
- local on_gore=false
 
  if not self.on_ground then
-  accel=0.1
-  decel=0.05
+  accel=in_air_accel
+  decel=in_air_decel
  else
   if tile!=nil then
    accel,decel=room:get_friction(tile,dir_down)
-   on_gore=room:get_gore(tile,dir_down)>0
   end
 
   if input!=self.prev_input and input!=0 then
@@ -92,10 +90,7 @@ function cls_player:update_normal()
   -- add ice smoke when sliding on ice (after releasing input)
   if input==0 and abs(self.spd.x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
-   if on_gore then
-    local s=self:smoke(spr_slide_smoke,-input)
-    s.is_gore=true
-   elseif on_ice then
+   if on_ice then
     self:smoke(spr_slide_smoke,-input)
    end
   end
@@ -113,15 +108,13 @@ function cls_player:update_normal()
  if (self.spd.x!=0) self.flip.x=self.spd.x<0
 
  -- y movement
- local maxfall=2
- local gravity=0.12
 
  -- slow down at apex
- if abs(self.spd.y)<=0.15 then
-  gravity*=0.5
+ if abs(self.spd.y)<=apex_speed then
+  gravity*=apex_gravity_factor
  elseif self.spd.y>0 then
   -- fall down fas2er
-  gravity*=2
+  gravity*=fall_gravity_factor
  end
 
  -- wall slide
@@ -129,8 +122,8 @@ function cls_player:update_normal()
  if input!=0 and self:is_solid_at(v2(input,0))
     and not self.on_ground and self.spd.y>0 then
   is_wall_sliding=true
-  maxfall=0.4
-  if (ice_at(self:bbox(v2(input,0)))) maxfall=1.0
+  maxfall=wall_slide_maxfall
+  if (ice_at(self:bbox(v2(input,0)))) maxfall=ice_wall_maxfall
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
@@ -147,7 +140,7 @@ function cls_player:update_normal()
     sfx(0)
    end
    self.on_ground_interval=0
-   self.spd.y=-1.2
+   self.spd.y=-jump_spd
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
@@ -157,7 +150,7 @@ function cls_player:update_normal()
    if wall_dir!=0 then
     self.jump_interval=0
     self.spd.y=-1
-    self.spd.x=-wall_dir*(maxrun+.6)
+    self.spd.x=-wall_dir*wall_jump_spd
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     self.jump_button.hold_time+=1
    end
@@ -200,14 +193,14 @@ function cls_player:update_normal()
  end
 
  if (not self.on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
- if ((self.on_ground or #self.ghosts>4)) popend(self.ghosts)
+ if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:draw()
  if not self.is_teleporting then
   local dark=0
   for ghost in all(self.ghosts) do
-   dark+=10
+   dark+=8
    darken(dark)
    spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
   end
@@ -215,12 +208,9 @@ function cls_player:draw()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-
   spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
-
   pal(cols_face[1], cols_face[1])
   pal(cols_hair[1], cols_hair[1])
-
 
   --[[
   local bbox=self:bbox()

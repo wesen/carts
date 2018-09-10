@@ -17,7 +17,7 @@ function cls_tele_enter:update()
     player.is_teleporting=true
     player.spd=v2(0,0)
     player.ghosts={}
-    
+
     local anim_length=10
     for i=0,anim_length do
      local w=i/anim_length*10

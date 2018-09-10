@@ -1,4 +1,3 @@
--- tween routines from https://github.com/JoebRogers/PICO-Tween
 function inoutquint(t, b, c, d)
  t = t / d * 2
  if (t < 1) return c / 2 * pow(t, 5) + b

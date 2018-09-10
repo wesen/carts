@@ -55,10 +55,7 @@ function cls_actor:move_y(amount)
 
    local solid=self:is_solid_at(v2(0,step))
    local actor=self:is_actor_at(v2(0,step))
-   --[[local actor=(
-    (step>0 and self:is_actor_at(v2(0,step-1))) or
-    (step<0 and self:is_actor_at(v2(0,step+1)))
-    )]]
+
    if solid or actor then
     self.spd.y=0
     break
@@ -77,10 +74,12 @@ function cls_actor:is_solid_at(offset)
 end
 
 function cls_actor:is_actor_at(offset)
- for player in all(players) do
-  local bbox_other = player:bbox()
-  if self!=player and bbox_other:collide(self:bbox(offset)) then
-   return true
+ for actor in all(actors) do
+  if actor.is_solid then
+   local bbox_other = actor:bbox()
+   if self!=actor and bbox_other:collide(self:bbox(offset)) then
+    return true
+   end
   end
  end
 
