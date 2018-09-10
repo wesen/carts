@@ -2,7 +2,7 @@ players={}
 
 player_cnt=0
 
-cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
+cls_player=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  -- players are handled separately
  add(players,self)
@@ -190,12 +190,18 @@ function cls_player:update_normal()
    local can_attack=not self.on_ground and self.spd.y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
-   if (feet_box:collide(head_box) and can_attack) or self:bbox():collide(player:bbox()) then
+   if (feet_box:collide(head_box) and can_attack)
+    or self:bbox():collide(player:bbox()) then
     make_gore_explosion(player.pos)
     cls_smoke.init(self.pos,32,0)
     self.spd.y=-2.0
+    if player.input_port==self.input_port then
+     -- killed a doppelgaenger
+     -- scores[self.input_port+1]-=1
+    else
+     scores[self.input_port+1]+=1
+    end
     player:kill()
-    scores[self.input_port+1]+=1
    end
   end
  end

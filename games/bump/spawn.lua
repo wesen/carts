@@ -1,6 +1,6 @@
 spr_spawn_point=1
 
-cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos,input_port)
+cls_spawn=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  self.target=self.pos

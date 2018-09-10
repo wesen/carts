@@ -1,6 +1,6 @@
 actor_cnt=0
 
-cls_actor=class(typ_actor,function(self,pos)
+cls_actor=class(function(self,pos)
  self.pos=pos
  self.id=actor_cnt
  actor_cnt+=1

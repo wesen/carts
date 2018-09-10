@@ -2,7 +2,7 @@ function v_idx(pos)
  return pos.x+pos.y*128
 end
 
-cls_room=class(typ_room,function(self,pos,dim)
+cls_room=class(function(self,pos,dim)
  self.pos=pos
  self.dim=dim
  self.spawn_locations={}

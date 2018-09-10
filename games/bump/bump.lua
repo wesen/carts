@@ -15,7 +15,6 @@
 
 --#include actors
 --#include button
---#include bubbles
 --#include room
 --#include smoke
 --#include particle
@@ -94,7 +93,7 @@
 -- miniature mode
 -- lasers
 -- gun
--- doppelgangers
+-- x doppelgangers
 -- rope
 -- decrease score when dying on spikes
 -- selfbomber (on a timer)

@@ -1,6 +1,6 @@
 spr_power_up=39
 
-cls_pwrup=subclass(nil,cls_actor,function(self,pos)
+cls_pwrup=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
 end)
@@ -23,7 +23,7 @@ function cls_pwrup:draw()
  spr(self.tile,self.pos.x,self.pos.y)
 end
 
-cls_pwrup_doppelgaenger=subclass(nil,cls_pwrup,function(self,pos)
+cls_pwrup_doppelgaenger=subclass(cls_pwrup,function(self,pos)
  cls_pwrup._ctr(self,pos)
 end)
 

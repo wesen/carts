@@ -2,7 +2,7 @@ spr_tele_enter=112
 spr_tele_exit=113
 tele_exits={}
 
-cls_tele_enter=subclass(nil,cls_actor,function(self,pos)
+cls_tele_enter=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  self.hitbox=hitbox(v2(4,4),v2(1,1))
@@ -41,7 +41,7 @@ function cls_tele_enter:draw()
 end
 
 
-cls_tele_exit=subclass(nil,cls_actor,function(self,pos)
+cls_tele_exit=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  add(tele_exits, self)

@@ -1,4 +1,4 @@
-cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
+cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(false,false)
  self.t=0
@@ -36,7 +36,7 @@ function cls_particle:draw()
  spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end
 
-cls_gore=subclass(typ_gore,cls_particle,function(self,pos)
+cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
  self.hitbox=hitbox(v2(2,2),v2(3,3))
  self:random_angle(1)

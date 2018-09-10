@@ -1,6 +1,6 @@
 spr_spikes=68
 
-cls_spikes=subclass(typ_spikes,cls_actor,function(self,pos)
+cls_spikes=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.hitbox=hitbox(v2(0,3),v2(8,5))
 end)

@@ -1,18 +1,6 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
-typ_player=0
-typ_smoke=1
-typ_bubble=2
-typ_button=3
-typ_spring=4
-typ_spawn=5
-typ_spikes=6
-typ_room=7
-typ_moving_platform=8
-typ_particle=9
-typ_gore=10
-
 flg_solid=0
 flg_ice=1
 
@@ -64,15 +52,13 @@ ground_grace_interval=12
 
 
 
-function class (typ,init)
+function class (init)
   local c = {}
   c.__index = c
   c._ctr=init
-  c.typ=typ
   function c.init (...)
     local self = setmetatable({},c)
     c._ctr(self,...)
-    c.typ=typ
     self.destroyed=false
     return self
   end
@@ -82,11 +68,10 @@ function class (typ,init)
   return c
 end
 
-function subclass(typ,parent,init)
- local c=class(typ,init)
+function subclass(parent,init)
+ local c=class(init)
  return setmetatable(c,parent)
 end
-
 
 -- vectors
 local v2mt={}
@@ -391,7 +376,7 @@ end
 
 actor_cnt=0
 
-cls_actor=class(typ_actor,function(self,pos)
+cls_actor=class(function(self,pos)
  self.pos=pos
  self.id=actor_cnt
  actor_cnt+=1
@@ -502,7 +487,7 @@ function update_actors(typ)
  end
 end
 
-cls_button=class(typ_button,function(self,btn_nr,input_port)
+cls_button=class(function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
  self.input_port=input_port
  self.is_down=false
@@ -536,29 +521,12 @@ end
 function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
-cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
- cls_actor._ctr(self,pos)
- self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
- self.life=10
-end)
 
-function cls_bubble:draw()
- local size=4-self.life/3
- circ(self.pos.x,self.pos.y,size,1)
-end
-
-function cls_bubble:update()
- self.life*=0.9
- self:move(self.spd)
- if (self.life<0.1) then
-  del(actors,self)
- end
-end
 function v_idx(pos)
  return pos.x+pos.y*128
 end
 
-cls_room=class(typ_room,function(self,pos,dim)
+cls_room=class(function(self,pos,dim)
  self.pos=pos
  self.dim=dim
  self.spawn_locations={}
@@ -644,7 +612,7 @@ spr_full_smoke=48
 spr_ice_smoke=57
 spr_slide_smoke=60
 
-cls_smoke=subclass(typ_smoke,cls_actor,function(self,pos,start_spr,dir)
+cls_smoke=subclass(cls_actor,function(self,pos,start_spr,dir)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(maybe(),false)
  self.spr=start_spr
@@ -669,7 +637,8 @@ function cls_smoke:draw()
  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
  if (self.is_gore) pal()
 end
-cls_particle=subclass(typ_particle,cls_actor,function(self,pos,lifetime,sprs)
+
+cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(false,false)
  self.t=0
@@ -707,7 +676,7 @@ function cls_particle:draw()
  spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
 end
 
-cls_gore=subclass(typ_gore,cls_particle,function(self,pos)
+cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
  self.hitbox=hitbox(v2(2,2),v2(3,3))
  self:random_angle(1)
@@ -747,7 +716,7 @@ players={}
 
 player_cnt=0
 
-cls_player=subclass(typ_player,cls_actor,function(self,pos,input_port)
+cls_player=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  -- players are handled separately
  add(players,self)
@@ -935,12 +904,18 @@ function cls_player:update_normal()
    local can_attack=not self.on_ground and self.spd.y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
-   if (feet_box:collide(head_box) and can_attack) or self:bbox():collide(player:bbox()) then
+   if (feet_box:collide(head_box) and can_attack)
+    or self:bbox():collide(player:bbox()) then
     make_gore_explosion(player.pos)
     cls_smoke.init(self.pos,32,0)
     self.spd.y=-2.0
+    if player.input_port==self.input_port then
+     -- killed a doppelgaenger
+     -- scores[self.input_port+1]-=1
+    else
+     scores[self.input_port+1]+=1
+    end
     player:kill()
-    scores[self.input_port+1]+=1
    end
   end
  end
@@ -984,7 +959,7 @@ end
 spr_spring_sprung=66
 spr_spring_wound=67
 
-cls_spring=subclass(typ_spring,cls_actor,function(self,pos)
+cls_spring=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.hitbox=hitbox(v2(0,5),v2(8,3))
  self.sprung_time=0
@@ -1017,7 +992,7 @@ end
 
 spr_spawn_point=1
 
-cls_spawn=subclass(typ_spawn,cls_actor,function(self,pos,input_port)
+cls_spawn=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  self.target=self.pos
@@ -1044,7 +1019,7 @@ end
 
 spr_spikes=68
 
-cls_spikes=subclass(typ_spikes,cls_actor,function(self,pos)
+cls_spikes=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.hitbox=hitbox(v2(0,3),v2(8,5))
 end)
@@ -1064,14 +1039,15 @@ function cls_spikes:draw()
  spr(spr_spikes,self.pos.x,self.pos.y)
 end
 
-cls_moving_platform=subclass(typ_moving_platform,cls_actor,function(pos)
+cls_moving_platform=subclass(cls_actor,function(pos)
  cls_actor._ctr(self,pos)
 end)
+
 spr_tele_enter=112
 spr_tele_exit=113
 tele_exits={}
 
-cls_tele_enter=subclass(nil,cls_actor,function(self,pos)
+cls_tele_enter=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  self.hitbox=hitbox(v2(4,4),v2(1,1))
@@ -1110,7 +1086,7 @@ function cls_tele_enter:draw()
 end
 
 
-cls_tele_exit=subclass(nil,cls_actor,function(self,pos)
+cls_tele_exit=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
  add(tele_exits, self)
@@ -1123,7 +1099,7 @@ end
 
 spr_power_up=39
 
-cls_pwrup=subclass(nil,cls_actor,function(self,pos)
+cls_pwrup=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
 end)
@@ -1146,7 +1122,7 @@ function cls_pwrup:draw()
  spr(self.tile,self.pos.x,self.pos.y)
 end
 
-cls_pwrup_doppelgaenger=subclass(nil,cls_pwrup,function(self,pos)
+cls_pwrup_doppelgaenger=subclass(cls_pwrup,function(self,pos)
  cls_pwrup._ctr(self,pos)
 end)
 
@@ -1227,7 +1203,7 @@ tiles[spr_power_up]=cls_pwrup_doppelgaenger
 -- miniature mode
 -- lasers
 -- gun
--- doppelgangers
+-- x doppelgangers
 -- rope
 -- decrease score when dying on spikes
 -- selfbomber (on a timer)

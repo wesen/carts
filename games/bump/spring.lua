@@ -1,7 +1,7 @@
 spr_spring_sprung=66
 spr_spring_wound=67
 
-cls_spring=subclass(typ_spring,cls_actor,function(self,pos)
+cls_spring=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.hitbox=hitbox(v2(0,5),v2(8,3))
  self.sprung_time=0
