@@ -413,6 +413,12 @@ function cls_actor:bbox(x,y)
  x=x or 0
  y=y or 0
  return setmetatable({aax=self.aax+x,aay=self.aay+y,bbx=self.bbx+x,bby=self.bby+y},bboxvt)
+ -- return setmetatable({
+ --    aax=self.x+self.hitbox.x+x,
+ --    aay=self.y+self.hitbox.y+y,
+ --    bbx=self.x+self.hitbox.x+self.hitbox.dimx+x,
+ --    bby=self.y+self.hitbox.y+self.hitbox.dimy+y},
+  -- bboxvt)
 end
 
 function cls_actor:str()
@@ -426,6 +432,7 @@ function cls_actor:move_x(amount)
    if (abs(amount)>1) step=sign(amount)
    amount-=step
 
+   -- bbox needs to be updated here
    local solid=self:is_solid_at(step,0)
    local actor=self:is_actor_at(step,0)
    if solid or actor then
@@ -433,11 +440,15 @@ function cls_actor:move_x(amount)
     break
    else
     self.x+=step
+    self.aax+=step
+    self.bbx+=step
    end
 
   end
  else
   self.x+=amount
+  self.aax+=amount
+  self.bbx+=amount
  end
 end
 
@@ -456,11 +467,15 @@ function cls_actor:move_y(amount)
     break
    else
     self.y+=step
+    self.aay+=step
+    self.bby+=step
    end
 
   end
  else
   self.y+=amount
+  self.aay+=amount
+  self.bby+=amount
  end
 end
 
@@ -918,14 +933,13 @@ function cls_player:update_normal()
  local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
   if self!=player then
-
    -- attack
    local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
    local can_attack=not self.on_ground and self.spd_y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
    if (feet_box:collide(head_box) and can_attack)
-    or self:bbox():collide(player:bbox()) then
+    or do_bboxes_collide(self,player) then
     add_cr(function ()
      self.is_bullet_time=true
      player.is_bullet_time=true

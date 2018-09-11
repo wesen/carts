@@ -189,14 +189,13 @@ function cls_player:update_normal()
  local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
   if self!=player then
-
    -- attack
    local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
    local can_attack=not self.on_ground and self.spd_y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
    if (feet_box:collide(head_box) and can_attack)
-    or self:bbox():collide(player:bbox()) then
+    or do_bboxes_collide(self,player) then
     add_cr(function ()
      self.is_bullet_time=true
      player.is_bullet_time=true
