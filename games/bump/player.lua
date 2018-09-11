@@ -219,8 +219,8 @@ function cls_player:update_normal()
   end
  end
 
- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
+ -- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
+ -- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:draw()
@@ -229,12 +229,12 @@ function cls_player:draw()
   return
  end
  if not self.is_teleporting then
-  local dark=0
-  for ghost in all(self.ghosts) do
-   dark+=8
-   darken(dark)
-   spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
-  end
+  -- local dark=0
+  -- for ghost in all(self.ghosts) do
+  --  dark+=8
+  --  darken(dark)
+  --  spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
+  -- end
   pal()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
