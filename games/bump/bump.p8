@@ -190,6 +190,13 @@ function do_bboxes_collide(a,b)
    a.aay < b.bby
 end
 
+function do_bboxes_collide_offset(a,b,dx,dy)
+ return (a.bbx+dx) > b.aax and
+   (a.bby+dy) > b.aay and
+   (a.aax+dx) < b.bbx and
+   (a.aay+dy) < b.bby
+end
+
 local camera_shake=v2(0,0)
 
 function add_shake(p)
@@ -486,27 +493,15 @@ end
 function cls_actor:is_actor_at(x,y)
  for actor in all(actors) do
   if actor.is_solid then
-   local bbox_other = actor:bbox()
-   if self!=actor and bbox_other:collide(self:bbox(x,y)) then
+   -- XXX not sure if that workers
+   if self!=actor and
+      do_bboxes_collide_offset(self,actor,x,y) then
     return true
    end
   end
  end
 
  return false
-end
-
-function cls_actor:get_collisions(typ,offset)
- local res={}
-
- local bbox=self:bbox(offset.x,offset.y)
- for actor in all(actors) do
-  if actor!=self and actor.typ==typ then
-   if (bbox:collide(actor:bbox())) add(res,actor)
-  end
- end
-
- return res
 end
 
 function draw_actors(typ)
@@ -1016,12 +1011,11 @@ tiles[spr_spring_sprung]=cls_spring
 
 function cls_spring:update()
  -- collide with players
- local bbox=self:bbox()
  if self.sprung_time>0 then
   self.sprung_time-=1
  else
   for player in all(players) do
-   if bbox:collide(player:bbox()) then
+   if do_bboxes_collide(self,player) then
     player.spd_y=-spring_speed
     self.sprung_time=10
     local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)

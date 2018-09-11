@@ -11,12 +11,11 @@ tiles[spr_spring_sprung]=cls_spring
 
 function cls_spring:update()
  -- collide with players
- local bbox=self:bbox()
  if self.sprung_time>0 then
   self.sprung_time-=1
  else
   for player in all(players) do
-   if bbox:collide(player:bbox()) then
+   if do_bboxes_collide(self,player) then
     player.spd_y=-spring_speed
     self.sprung_time=10
     local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)

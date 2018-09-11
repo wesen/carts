@@ -97,27 +97,15 @@ end
 function cls_actor:is_actor_at(x,y)
  for actor in all(actors) do
   if actor.is_solid then
-   local bbox_other = actor:bbox()
-   if self!=actor and bbox_other:collide(self:bbox(x,y)) then
+   -- XXX not sure if that workers
+   if self!=actor and
+      do_bboxes_collide_offset(self,actor,x,y) then
     return true
    end
   end
  end
 
  return false
-end
-
-function cls_actor:get_collisions(typ,offset)
- local res={}
-
- local bbox=self:bbox(offset.x,offset.y)
- for actor in all(actors) do
-  if actor!=self and actor.typ==typ then
-   if (bbox:collide(actor:bbox())) add(res,actor)
-  end
- end
-
- return res
 end
 
 function draw_actors(typ)
