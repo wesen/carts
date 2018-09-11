@@ -37,9 +37,9 @@ end
 
 function bboxvt:to_tile_bbox()
  local x0=max(0,flr(self.aax/8))
- local x1=min(room.dim.x,(self.bbx-1)/8)
+ local x1=min(room.dim_x,(self.bbx-1)/8)
  local y0=max(0,flr(self.aay/8))
- local y1=min(room.dim.y,(self.bby-1)/8)
+ local y1=min(room.dim_y,(self.bby-1)/8)
  return bbox(v2(x0,y0),v2(x1,y1))
 end
 

@@ -3,60 +3,52 @@ function v_idx(pos)
 end
 
 cls_room=class(function(self,pos,dim)
- self.pos=pos
- self.dim=dim
+ self.x=pos.x
+ self.y=pos.y
+ self.dim_x=dim.x
+ self.dim_y=dim.y
  self.spawn_locations={}
  printh("init room")
 
  -- initialize tiles
- for i=0,self.dim.x-1 do
-  for j=0,self.dim.y-1 do
-   local p=v2(i,j)
-   local tile=self:tile_at(p)
+ for i=0,self.dim_x-1 do
+  for j=0,self.dim_y-1 do
+   local tile=self:tile_at(i,j)
+   local p={x=i*8,y=j*8}
    if tile==spr_spawn_point then
-    add(self.spawn_locations,p*8)
+    add(self.spawn_locations,p)
    end
    local t=tiles[tile]
    if t!=nil then
-    local a=t.init(p*8)
+    local a=t.init(p)
     a.tile=tile
    end
   end
  end
 end)
 
-function cls_room:get_friction(tile,dir)
- local accel=0.1
- local decel=0.1
-
- if (fget(self:tile_at(tile),flg_ice)) accel,decel=min(accel,0.1),min(decel,0.03)
-
- return accel,decel
-end
-
 function cls_room:draw()
- map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
+ map(self.x,self.y,0,0,self.dim_x,self.dim_y,flg_solid+1)
 end
 
 function cls_room:spawn_player(input_port)
- -- XXX potentially find better spawn locatiosn
- local spawn_pos = self.spawn_locations[spawn_idx]:clone()
+ -- xxx potentially find better spawn locatiosn
+ local spawn_pos = self.spawn_locations[spawn_idx]
  local spawn=cls_spawn.init(spawn_pos, input_port)
  spawn_idx = (spawn_idx%#self.spawn_locations)+1
  return spawn
 end
 
-function cls_room:tile_at(pos)
- local v=self.pos+pos
- return mget(v.x,v.y)
+function cls_room:tile_at(x,y)
+ return mget(self.x+x,self.y+y)
 end
 
 function solid_at(bbox)
  if bbox.aax<0
-  or bbox.bbx>room.dim.x*8
+  or bbox.bbx>room.dim_x*8
   or bbox.aay<0
-  or bbox.bby>room.dim.y*8 then
-   return true,nil
+  or bbox.bby>room.dim_y*8 then
+   return true
  else
   return tile_flag_at(bbox,flg_solid)
  end
@@ -67,15 +59,17 @@ function ice_at(bbox)
 end
 
 function tile_at(x,y)
- return room:tile_at(v2(x,y))
+ return room:tile_at(x,y)
 end
 
 function tile_flag_at(bbox,flag)
  local bb=bbox:to_tile_bbox()
+ local rx=room.x
+ local ry=room.y
  for i=bb.aax,bb.bbx do
   for j=bb.aay,bb.bby do
-   if fget(tile_at(i,j),flag) then
-    return true,v2(i,j)
+   if fget(mget(rx+i,ry+j),flag) then
+    return true
    end
   end
  end

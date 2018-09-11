@@ -66,10 +66,11 @@ function cls_player:update_normal()
 
  local gravity=gravity
  local maxfall=maxfall
- local accel,decel
+ local accel=0.1
+ local decel=0.1
 
  local ground_bbox=self:bbox(vec_down)
- self.on_ground,tile=solid_at(ground_bbox)
+ self.on_ground=solid_at(ground_bbox)
  local on_actor=self:is_actor_at(v2(input,0))
  local on_ice=ice_at(ground_bbox)
 
@@ -84,8 +85,9 @@ function cls_player:update_normal()
   accel=in_air_accel
   decel=in_air_decel
  else
-  if tile!=nil then
-   accel,decel=room:get_friction(tile,dir_down)
+  if on_ice then
+   accel=0.1
+   decel=0.03
   end
 
   if input!=self.prev_input and input!=0 then
