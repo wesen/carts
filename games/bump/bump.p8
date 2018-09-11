@@ -42,9 +42,11 @@ room=nil
 spawn_idx=1
 
 actors={}
+particles={}
 tiles={}
 crs={}
 scores={0, 0}
+
 jump_button_grace_interval=10
 jump_max_hold_time=15
 
@@ -134,62 +136,67 @@ end
 local bboxvt={}
 bboxvt.__index=bboxvt
 
+function hitbox_to_bbox(hb,off)
+ local lx=hb.x+off.x
+ local ly=hb.y+off.y
+
+ return bbox(v2(lx,ly),v2(lx+hb.dimx,ly+hb.dimy))
+end
+
 function bbox(aa,bb)
- return setmetatable({aa=aa,bb=bb},bboxvt)
+ return setmetatable({aax=aa.x,aay=aa.y,bbx=bb.x,bby=bb.y},bboxvt)
 end
 
 function bboxvt:w()
- return self.bb.x-self.aa.x
+ return self.bbx-self.aax
 end
 
 function bboxvt:h()
- return self.bb.y-self.aa.y
+ return self.bby-self.aay
 end
 
 function bboxvt:is_inside(v)
- return v.x>=self.aa.x
- and v.x<=self.bb.x
- and v.y>=self.aa.y
- and v.y<=self.bb.y
+ return v.x>=self.aax
+ and v.x<=self.bbx
+ and v.y>=self.aay
+ and v.y<=self.bby
 end
 
 function bboxvt:str()
- return self.aa:str().."-"..self.bb:str()
+ return tostr(self.aax)..","..tostr(self.aay).."-"..tostr(self.bbx)..","..tostr(self.bby)
 end
 
 function bboxvt:draw(col)
- rect(self.aa.x,self.aa.y,self.bb.x-1,self.bb.y-1,col)
+ rect(self.aax,self.aay,self.bbx-1,self.bby-1,col)
 end
 
 function bboxvt:to_tile_bbox()
- local x0=max(0,flr(self.aa.x/8))
- local x1=min(room.dim.x,(self.bb.x-1)/8)
- local y0=max(0,flr(self.aa.y/8))
- local y1=min(room.dim.y,(self.bb.y-1)/8)
+ local x0=max(0,flr(self.aax/8))
+ local x1=min(room.dim_x,(self.bbx-1)/8)
+ local y0=max(0,flr(self.aay/8))
+ local y1=min(room.dim_y,(self.bby-1)/8)
  return bbox(v2(x0,y0),v2(x1,y1))
 end
 
 function bboxvt:collide(other)
- return other.bb.x > self.aa.x and
-   other.bb.y > self.aa.y and
-   other.aa.x < self.bb.x and
-   other.aa.y < self.bb.y
+ return other.bbx > self.aax and
+   other.bby > self.aay and
+   other.aax < self.bbx and
+   other.aay < self.bby
 end
 
-
-local hitboxvt={}
-hitboxvt.__index=hitboxvt
-
-function hitbox(offset,dim)
- return setmetatable({offset=offset,dim=dim},hitboxvt)
+function do_bboxes_collide(a,b)
+ return a.bbx > b.aax and
+   a.bby > b.aay and
+   a.aax < b.bbx and
+   a.aay < b.bby
 end
 
-function hitboxvt:to_bbox_at(v)
- return bbox(self.offset+v,self.offset+v+self.dim)
-end
-
-function hitboxvt:str()
- return self.offset:str().."-("..self.dim:str()..")"
+function do_bboxes_collide_offset(a,b,dx,dy)
+ return (a.bbx+dx) > b.aax and
+   (a.bby+dy) > b.aay and
+   (a.aax+dx) < b.bbx and
+   (a.aay+dy) < b.bby
 end
 
 local camera_shake=v2(0,0)
@@ -313,17 +320,17 @@ function inoutexpo(t, b, c, d)
  return c / 2 * 1.0005 * (-pow(2, -10 * (t - 1)) + 2) + b
 end
 
-function cr_move_to(obj,target,d,easetype)
+function cr_move_to(obj,target_x,target_y,d,easetype)
  local t=0
- local bx=obj.pos.x
- local cx=target.x-obj.pos.x
- local by=obj.pos.y
- local cy=target.y-obj.pos.y
+ local bx=obj.x
+ local cx=target_x-obj.x
+ local by=obj.y
+ local cy=target_y-obj.y
  while t<d do
   t+=dt
   if (t>d) return
-  obj.pos.x=round(easetype(t,bx,cx,d))
-  obj.pos.y=round(easetype(t,by,cy,d))
+  obj.x=round(easetype(t,bx,cx,d))
+  obj.y=round(easetype(t,by,cy,d))
   yield()
  end
 end
@@ -392,27 +399,39 @@ end
 actor_cnt=0
 
 cls_actor=class(function(self,pos)
- self.pos=pos
+ self.x=pos.x
+ self.y=pos.y
  self.id=actor_cnt
  actor_cnt+=1
- self.spd=v2(0,0)
+ self.spd_x=0
+ self.spd_y=0
  self.is_solid=true
- self.hitbox=hitbox(v2(0,0),v2(8,8))
+ self.hitbox={x=0,y=0,dimx=8,dimy=8}
+ self:update_bbox()
  add(actors,self)
 end)
 
-function cls_actor:bbox(offset)
- if (offset==nil) offset=v2(0,0)
- return self.hitbox:to_bbox_at(self.pos+offset)
+function cls_actor:update_bbox()
+ self.aax=self.hitbox.x+self.x
+ self.aay=self.hitbox.y+self.y
+ self.bbx=self.aax+self.hitbox.dimx
+ self.bby=self.aay+self.hitbox.dimy
+end
+
+function cls_actor:bbox(x,y)
+ x=x or 0
+ y=y or 0
+ return setmetatable({aax=self.aax+x,aay=self.aay+y,bbx=self.bbx+x,bby=self.bby+y},bboxvt)
+ -- return setmetatable({
+ --    aax=self.x+self.hitbox.x+x,
+ --    aay=self.y+self.hitbox.y+y,
+ --    bbx=self.x+self.hitbox.x+self.hitbox.dimx+x,
+ --    bby=self.y+self.hitbox.y+self.hitbox.dimy+y},
+  -- bboxvt)
 end
 
 function cls_actor:str()
  return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
-end
-
-function cls_actor:move(o)
- self:move_x(o.x)
- self:move_y(o.y)
 end
 
 function cls_actor:move_x(amount)
@@ -422,18 +441,23 @@ function cls_actor:move_x(amount)
    if (abs(amount)>1) step=sign(amount)
    amount-=step
 
-   local solid=self:is_solid_at(v2(step,0))
-   local actor=self:is_actor_at(v2(step,0))
+   -- bbox needs to be updated here
+   local solid=self:is_solid_at(step,0)
+   local actor=self:is_actor_at(step,0)
    if solid or actor then
-    self.spd.x=0
+    self.spd_x=0
     break
    else
-    self.pos.x+=step
+    self.x+=step
+    self.aax+=step
+    self.bbx+=step
    end
 
   end
  else
-  self.pos.x+=amount
+  self.x+=amount
+  self.aax+=amount
+  self.bbx+=amount
  end
 end
 
@@ -444,50 +468,36 @@ function cls_actor:move_y(amount)
    if (abs(amount)>1) step=sign(amount)
    amount-=step
 
-   local solid=self:is_solid_at(v2(0,step))
-   local actor=self:is_actor_at(v2(0,step))
+   local solid=self:is_solid_at(0,step)
+   local actor=self:is_actor_at(0,step)
 
    if solid or actor then
-    self.spd.y=0
+    self.spd_y=0
     break
    else
-    self.pos.y+=step
+    self.y+=step
+    self.aay+=step
+    self.bby+=step
    end
 
   end
  else
-  self.pos.y+=amount
+  self.y+=amount
+  self.aay+=amount
+  self.bby+=amount
  end
 end
 
-function cls_actor:is_solid_at(offset)
- return solid_at(self:bbox(offset))
+function cls_actor:is_solid_at(x,y)
+ return solid_at(self:bbox(x,y))
 end
 
-function cls_actor:is_actor_at(offset)
+function cls_actor:is_actor_at(x,y)
  for actor in all(actors) do
-  if actor.is_solid then
-   local bbox_other = actor:bbox()
-   if self!=actor and bbox_other:collide(self:bbox(offset)) then
-    return true
-   end
-  end
+  if (actor.is_solid and self!=actor and do_bboxes_collide_offset(self,actor,x,y)) return true
  end
 
  return false
-end
-
-function cls_actor:get_collisions(typ,offset)
- local res={}
-
- local bbox=self:bbox(offset)
- for actor in all(actors) do
-  if actor!=self and actor.typ==typ then
-   if (bbox:collide(actor:bbox())) add(res,actor)
-  end
- end
-
- return res
 end
 
 function draw_actors(typ)
@@ -542,60 +552,51 @@ function v_idx(pos)
 end
 
 cls_room=class(function(self,pos,dim)
- self.pos=pos
- self.dim=dim
+ self.x=pos.x
+ self.y=pos.y
+ self.dim_x=dim.x
+ self.dim_y=dim.y
  self.spawn_locations={}
- printh("init room")
+ self.aax=0
+ self.aay=0
+ self.bbx=self.dim_x*8
+ self.bby=self.dim_y*8
 
  -- initialize tiles
- for i=0,self.dim.x-1 do
-  for j=0,self.dim.y-1 do
-   local p=v2(i,j)
-   local tile=self:tile_at(p)
+ for i=0,self.dim_x-1 do
+  for j=0,self.dim_y-1 do
+   local tile=mget(self.x+i,self.y+j)
+   local p={x=i*8,y=j*8}
    if tile==spr_spawn_point then
-    add(self.spawn_locations,p*8)
+    add(self.spawn_locations,p)
    end
    local t=tiles[tile]
    if t!=nil then
-    local a=t.init(p*8)
+    local a=t.init(p)
     a.tile=tile
    end
   end
  end
 end)
 
-function cls_room:get_friction(tile,dir)
- local accel=0.1
- local decel=0.1
-
- if (fget(self:tile_at(tile),flg_ice)) accel,decel=min(accel,0.1),min(decel,0.03)
-
- return accel,decel
-end
-
 function cls_room:draw()
- map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
+ map(self.x,self.y,0,0,self.dim_x,self.dim_y,flg_solid+1)
 end
 
 function cls_room:spawn_player(input_port)
- -- XXX potentially find better spawn locatiosn
- local spawn_pos = self.spawn_locations[spawn_idx]:clone()
+ -- xxx potentially find better spawn locatiosn
+ local spawn_pos = self.spawn_locations[spawn_idx]
  local spawn=cls_spawn.init(spawn_pos, input_port)
  spawn_idx = (spawn_idx%#self.spawn_locations)+1
  return spawn
 end
 
-function cls_room:tile_at(pos)
- local v=self.pos+pos
- return mget(v.x,v.y)
-end
-
 function solid_at(bbox)
- if bbox.aa.x<0
-  or bbox.bb.x>room.dim.x*8
-  or bbox.aa.y<0
-  or bbox.bb.y>room.dim.y*8 then
-   return true,nil
+ if bbox.aax<0
+  or bbox.bbx>room.bbx
+  or bbox.aay<0
+  or bbox.bby>room.bby then
+   return true
  else
   return tile_flag_at(bbox,flg_solid)
  end
@@ -605,16 +606,30 @@ function ice_at(bbox)
  return tile_flag_at(bbox,flg_ice)
 end
 
-function tile_at(x,y)
- return room:tile_at(v2(x,y))
+function tile_flag_at(bbox,flag)
+ local aax=max(0,flr(bbox.aax/8))+room.x
+ local aay=max(0,flr(bbox.aay/8))+room.y
+ local bbx=min(room.dim_x,(bbox.bbx-1)/8)+room.x
+ local bby=min(room.dim_y,(bbox.bby-1)/8)+room.y
+ for i=aax,bbx do
+  for j=aay,bby do
+   if fget(mget(i,j),flag) then
+    return true
+   end
+  end
+ end
+ return false
 end
 
-function tile_flag_at(bbox,flag)
- local bb=bbox:to_tile_bbox()
- for i=bb.aa.x,bb.bb.x do
-  for j=bb.aa.y,bb.bb.y do
-   if fget(tile_at(i,j),flag) then
-    return true,v2(i,j)
+function tile_flag_at_offset(bbox,flag,x,y)
+ local aax=max(0,flr((bbox.aax+x)/8))+room.x
+ local aay=max(0,flr((bbox.aay+y)/8))+room.y
+ local bbx=min(room.dim_x,(bbox.bbx+x-1)/8)+room.x
+ local bby=min(room.dim_y,(bbox.bby+y-1)/8)+room.y
+ for i=aax,bbx do
+  for j=aay,bby do
+   if fget(mget(i,j),flag) then
+    return true
    end
   end
  end
@@ -633,12 +648,12 @@ cls_smoke=subclass(cls_actor,function(self,pos,start_spr,dir)
  self.spr=start_spr
  self.start_spr=start_spr
  self.is_solid=false
- self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
+ self.spd_x=dir*(0.3+rnd(0.2))
  self.is_gore=false
 end)
 
 function cls_smoke:update()
- self:move(self.spd)
+ self:move_x(self.spd_x)
  self.spr+=0.2
  if (self.spr>self.start_spr+3) del(actors,self)
 end
@@ -649,19 +664,20 @@ function cls_smoke:draw()
   pal(7,14)
   pal(6,2)
  end
- spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
  if (self.is_gore) pal()
 end
 
 cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
+ del(actors,self)
+ add(particles,self)
  self.flip=v2(false,false)
  self.t=0
  self.lifetime=lifetime
  self.sprs=sprs
  self.is_solid=false
  self.weight=0
- self.spd=v2(0,0)
 end)
 
 function cls_particle:random_flip()
@@ -669,55 +685,58 @@ function cls_particle:random_flip()
 end
 
 function cls_particle:random_angle(spd)
- self.spd=angle2vec(rnd(1))*spd
+ local v=angle2vec(rnd(1))
+ self.spd_x=v.x*spd
+ self.spd_y=v.y*spd
 end
 
 function cls_particle:update()
+ self.aax=self.x+2
+ self.bbx=self.x+4
+ self.aay=self.y+2
+ self.bby=self.y+4
  self.t+=dt
+
  if self.t>self.lifetime then
-   del(actors,self)
+   del(particles,self)
    return
  end
 
- self:move(self.spd)
- local maxfall=2
- local gravity=0.12*self.weight
- self.spd.y=appr(self.spd.y,maxfall,gravity)
+ self.x+=self.spd_x
+ self.aax+=self.spd_x
+ self.bbx+=self.spd_x
+ self.y+=self.spd_y
+ self.aay+=self.spd_y
+ self.bby+=self.spd_y
+ self.spd_y=appr(self.spd_y,2,0.12)
 end
 
 function cls_particle:draw()
  local idx=flr(#self.sprs*(self.t/self.lifetime))
  local spr_=self.sprs[1+idx]
- spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(spr_,self.x,self.y,1,1)
 end
 
 cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
- self.hitbox=hitbox(v2(2,2),v2(3,3))
+ self.hitbox={x=2,y=2,dimx=3,dimy=3}
  self:random_angle(1)
- self.spd.x*=0.5+rnd(0.5)
+ self.spd_x*=0.5+rnd(0.5)
  self.weight=0.5+rnd(1)
- self:random_flip()
+ -- self:random_flip()
 end)
 
 function cls_gore:update()
  cls_particle.update(self)
 
  -- i tried generalizing this but it's just easier to write it out
- local dir=sign(self.spd.x)
- local ground_bbox=self:bbox(v2(0,1))
- local ceil_bbox=self:bbox(v2(0,-1))
- local side_bbox=self:bbox(v2(dir,0))
- local on_ground,ground_tile=solid_at(ground_bbox)
- local on_ceil,ceil_tile=solid_at(ceil_bbox)
- local hit_side,side_tile=solid_at(side_bbox)
- local gore_weight=1-self.t/self.lifetime
- if on_ground and ground_tile!=nil then
-  self.spd.y*=-0.9
- elseif on_ceil and ceil_tile!=nil then
-  self.spd.y*=-0.9
- elseif hit_side and side_tile!=nil then
-  self.spd.x*=-0.9
+ local dir=sign(self.spd_x)
+ if tile_flag_at_offset(self,flg_solid,0,1) then
+  self.spd_y*=-0.9
+--  elseif tile_flag_at_offset(self,flg_solid,0,-1) then
+--   self.spd_y*=-0.9
+elseif tile_flag_at_offset(self,flg_solid,dir,0) then
+  self.spd_x*=-0.9
  end
 end
 
@@ -745,9 +764,9 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
- self.hitbox=hitbox(v2(2,0.5),v2(4,7.5))
- self.head_hitbox=hitbox(v2(0,-1),v2(8,1))
- self.feet_hitbox=hitbox(v2(2,7),v2(4,1))
+ self.hitbox={x=2,y=0.5,dimx=4,dimy=7.5}
+ self.head_hitbox={x=0,y=-1,dimx=8,dimy=1}
+ self.feet_hitbox={x=2,y=7,dimx=4,dimy=1}
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -759,7 +778,7 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_player:smoke(spr,dir)
- return cls_smoke.init(self.pos,spr,dir)
+ return cls_smoke.init(v2(self.x,self.y),spr,dir)
 end
 
 function cls_player:kill()
@@ -771,7 +790,7 @@ function cls_player:kill()
   room:spawn_player(self.input_port)
   for player in all(players) do
    if player.input_port==self.input_port and player.is_doppelgaenger then
-    make_gore_explosion(player.pos)
+    make_gore_explosion(v2(player.x,player.y))
     player:kill()
    end
   end
@@ -795,11 +814,12 @@ function cls_player:update_normal()
 
  local gravity=gravity
  local maxfall=maxfall
- local accel,decel
+ local accel=0.1
+ local decel=0.1
 
- local ground_bbox=self:bbox(vec_down)
- self.on_ground,tile=solid_at(ground_bbox)
- local on_actor=self:is_actor_at(v2(input,0))
+ local ground_bbox=self:bbox(0,1)
+ self.on_ground=solid_at(ground_bbox)
+ local on_actor=self:is_actor_at(input,0)
  local on_ice=ice_at(ground_bbox)
 
  if self.on_ground then
@@ -813,8 +833,9 @@ function cls_player:update_normal()
   accel=in_air_accel
   decel=in_air_decel
  else
-  if tile!=nil then
-   accel,decel=room:get_friction(tile,dir_down)
+  if on_ice then
+   accel=0.1
+   decel=0.03
   end
 
   if input!=self.prev_input and input!=0 then
@@ -827,7 +848,7 @@ function cls_player:update_normal()
   end
 
   -- add ice smoke when sliding on ice (after releasing input)
-  if input==0 and abs(self.spd.x)>0.3
+  if input==0 and abs(self.spd_x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
    if on_ice then
     self:smoke(spr_slide_smoke,-input)
@@ -837,32 +858,32 @@ function cls_player:update_normal()
  self.prev_input=input
 
  -- x movement
- if abs(self.spd.x)>maxrun then
-  self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
+ if abs(self.spd_x)>maxrun then
+  self.spd_x=appr(self.spd_x,sign(self.spd_x)*maxrun,decel)
  elseif input != 0 then
-  self.spd.x=appr(self.spd.x,input*maxrun,accel)
+  self.spd_x=appr(self.spd_x,input*maxrun,accel)
  else
-  self.spd.x=appr(self.spd.x,0,decel)
+  self.spd_x=appr(self.spd_x,0,decel)
  end
- if (self.spd.x!=0) self.flip.x=self.spd.x<0
+ if (self.spd_x!=0) self.flip.x=self.spd_x<0
 
  -- y movement
 
  -- slow down at apex
- if abs(self.spd.y)<=apex_speed then
+ if abs(self.spd_y)<=apex_speed then
   gravity*=apex_gravity_factor
- elseif self.spd.y>0 then
+ elseif self.spd_y>0 then
   -- fall down fas2er
   gravity*=fall_gravity_factor
  end
 
  -- wall slide
  local is_wall_sliding=false
- if input!=0 and self:is_solid_at(v2(input,0))
-    and not self.on_ground and self.spd.y>0 then
+ if input!=0 and self:is_solid_at(input,0)
+    and not self.on_ground and self.spd_y>0 then
   is_wall_sliding=true
   maxfall=wall_slide_maxfall
-  if (ice_at(self:bbox(v2(input,0)))) maxfall=ice_wall_maxfall
+  if (ice_at(self:bbox(input,0))) maxfall=ice_wall_maxfall
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
@@ -879,26 +900,27 @@ function cls_player:update_normal()
     sfx(0)
    end
    self.on_ground_interval=0
-   self.spd.y=-jump_spd
+   self.spd_y=-jump_spd
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
-   local wall_dir=self:is_solid_at(v2(-3,0)) and -1
-        or self:is_solid_at(v2(3,0)) and 1
+   local wall_dir=self:is_solid_at(-3,0) and -1
+        or self:is_solid_at(3,0) and 1
         or 0
    if wall_dir!=0 then
     self.jump_interval=0
-    self.spd.y=-1
-    self.spd.x=-wall_dir*wall_jump_spd
+    self.spd_y=-1
+    self.spd_x=-wall_dir*wall_jump_spd
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     self.jump_button.hold_time+=1
    end
   end
  end
 
- if (not self.on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
+ if (not self.on_ground) self.spd_y=appr(self.spd_y,maxfall,gravity)
 
- self:move(self.spd)
+ self:move_x(self.spd_x)
+ self:move_y(self.spd_y)
 
  -- animation
  if input==0 then
@@ -912,28 +934,27 @@ function cls_player:update_normal()
  end
 
  -- interact with players
- local feet_box=self.feet_hitbox:to_bbox_at(self.pos)
+ local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
   if self!=player then
-
    -- attack
-   local head_box=player.head_hitbox:to_bbox_at(player.pos)
-   local can_attack=not self.on_ground and self.spd.y>0
+   local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
+   local can_attack=not self.on_ground and self.spd_y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
    if (feet_box:collide(head_box) and can_attack)
-    or self:bbox():collide(player:bbox()) then
+    or do_bboxes_collide(self,player) then
     add_cr(function ()
      self.is_bullet_time=true
      player.is_bullet_time=true
-     for i=0,5 do
+     for i=0,3 do
       yield()
      end
      self.is_bullet_time=false
      player.is_bullet_time=false
-     make_gore_explosion(player.pos)
-     cls_smoke.init(self.pos,32,0)
-     self.spd.y=-2.0
+     make_gore_explosion(v2(player.x,player.y))
+     cls_smoke.init(v2(self.x,self.y),32,0)
+     self.spd_y=-2.0
      if player.input_port==self.input_port then
       -- killed a doppelgaenger
       -- scores[self.input_port+1]-=1
@@ -946,27 +967,27 @@ function cls_player:update_normal()
   end
  end
 
- if (not self.on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
+ -- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
+ -- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:draw()
  if self.is_bullet_time then
-  rectfill(self.pos.x,self.pos.y,self.pos.x+8,self.pos.y+8,10)
+  rectfill(self.x,self.y,self.x+8,self.y+8,10)
   return
  end
  if not self.is_teleporting then
-  local dark=0
-  for ghost in all(self.ghosts) do
-   dark+=8
-   darken(dark)
-   spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
-  end
+  -- local dark=0
+  -- for ghost in all(self.ghosts) do
+  --  dark+=8
+  --  darken(dark)
+  --  spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
+  -- end
   pal()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+  spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
   pal(cols_face[1], cols_face[1])
   pal(cols_hair[1], cols_hair[1])
 
@@ -991,7 +1012,7 @@ spr_spring_wound=67
 
 cls_spring=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
- self.hitbox=hitbox(v2(0,5),v2(8,3))
+ self.hitbox={x=0,y=5,dimx=8,dimy=3}
  self.sprung_time=0
  self.is_solid=false
 end)
@@ -999,15 +1020,14 @@ tiles[spr_spring_sprung]=cls_spring
 
 function cls_spring:update()
  -- collide with players
- local bbox=self:bbox()
  if self.sprung_time>0 then
   self.sprung_time-=1
  else
   for player in all(players) do
-   if bbox:collide(player:bbox()) then
-    player.spd.y=-spring_speed
+   if do_bboxes_collide(self,player) then
+    player.spd_y=-spring_speed
     self.sprung_time=10
-    local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
+    local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
    end
   end
  end
@@ -1017,7 +1037,7 @@ function cls_spring:draw()
  -- self:bbox():draw(9)
  local spr_=spr_spring_wound
  if (self.sprung_time>0) spr_=spr_spring_sprung
- spr(spr_,self.pos.x,self.pos.y)
+ spr(spr_,self.x,self.y)
 end
 
 spr_spawn_point=1
@@ -1025,10 +1045,11 @@ spr_spawn_point=1
 cls_spawn=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  self.is_solid=false
- self.target=self.pos
+ self.target_x=self.x
+ self.target_y=self.y
+ self.y=128
  self.input_port=input_port
- self.pos=v2(self.target.x,128)
- self.spd.y=-2
+ self.spd_y=-2
  self.is_doppelgaenger=false
  add_cr(function()
   self:cr_spawn()
@@ -1036,22 +1057,22 @@ cls_spawn=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_spawn:cr_spawn()
- cr_move_to(self,self.target,1,inexpo)
+ cr_move_to(self,self.target_x,self.target_y,1,inexpo)
  del(actors,self)
- local player=cls_player.init(self.target, self.input_port)
+ local player=cls_player.init(v2(self.target_x,self.target_y), self.input_port)
  player.is_doppelgaenger=self.is_doppelgaenger
- cls_smoke.init(self.pos,spr_full_smoke,0)
+ cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
 end
 
 function cls_spawn:draw()
- spr(spr_spawn_point,self.pos.x,self.pos.y)
+ spr(spr_spawn_point,self.x,self.y)
 end
 
 spr_spikes=68
 
 cls_spikes=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
- self.hitbox=hitbox(v2(0,3),v2(8,5))
+ self.hitbox={x=0,y=3,dimx=8,dimy=5}
 end)
 tiles[spr_spikes]=cls_spikes
 
@@ -1060,13 +1081,13 @@ function cls_spikes:update()
  for player in all(players) do
   if bbox:collide(player:bbox()) then
    player:kill()
-   cls_smoke.init(self.pos,32,0)
+   cls_smoke.init(v2(self.x,self.y),32,0)
   end
  end
 end
 
 function cls_spikes:draw()
- spr(spr_spikes,self.pos.x,self.pos.y)
+ spr(spr_spikes,self.px,self.y)
 end
 
 cls_moving_platform=subclass(cls_actor,function(pos)
@@ -1080,7 +1101,7 @@ tele_exits={}
 cls_tele_enter=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
- self.hitbox=hitbox(v2(4,4),v2(1,1))
+ self.hitbox={x=4,y=4,dimx=1,dimy=1}
 end)
 tiles[spr_tele_enter]=cls_tele_enter
 
@@ -1096,13 +1117,14 @@ function cls_tele_enter:update()
     local anim_length=10
     for i=0,anim_length do
      local w=i/anim_length*10
-     rectfill(player.pos.x+4-w,player.pos.y+4-w,player.pos.x+4+w,player.pos.y+4+w,7)
+     rectfill(player.x+4-w,player.y+4-w,player.x+4+w,player.y+4+w,7)
      yield()
     end
-    player.pos = rnd_elt(tele_exits).pos:clone()
+    local exit=rnd_elt(tele_exits)
+    player.x,player.y=exit.x,exit.y
     for i=0,anim_length do
      local w=(anim_length-i)/anim_length*10
-     rectfill(player.pos.x+4-w,player.pos.y+4-w,player.pos.x+4+w,player.pos.y+4+w,7)
+     rectfill(player.x+4-w,player.y+4-w,player.x+4+w,player.y+4+w,7)
      yield()
     end
     player.is_teleporting=false
@@ -1112,7 +1134,7 @@ function cls_tele_enter:update()
 end
 
 function cls_tele_enter:draw()
- spr(spr_tele_enter,self.pos.x,self.pos.y)
+ spr(spr_tele_enter,self.x,self.y)
 end
 
 
@@ -1124,7 +1146,7 @@ end)
 tiles[spr_tele_exit]=cls_tele_exit
 
 function cls_tele_exit:draw()
- spr(spr_tele_exit,self.pos.x,self.pos.y)
+ spr(spr_tele_exit,self.x,self.y)
 end
 
 spr_power_up=39
@@ -1149,7 +1171,7 @@ function cls_pwrup:act_on_player(player)
 end
 
 function cls_pwrup:draw()
- spr(self.tile,self.pos.x,self.pos.y)
+ spr(self.tile,self.x,self.y)
 end
 
 cls_pwrup_doppelgaenger=subclass(cls_pwrup,function(self,pos)
@@ -1262,6 +1284,10 @@ function _draw()
  draw_actors()
  tick_crs(draw_crs)
 
+ for a in all(particles) do
+  a:draw()
+ end
+
  local entry_length=50
  for i=0,#scores-1,1 do
   print(
@@ -1270,14 +1296,21 @@ function _draw()
   )
  end
 
- print(tostr(stat(1)),0,120,1)
+ print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
+ print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+ for a in all(actors) do
+  a:update_bbox()
+ end
  tick_crs()
  update_actors()
+ foreach(particles, function(a)
+  a:update()
+ end)
  update_shake()
 end
 

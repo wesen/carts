@@ -10,12 +10,12 @@ cls_smoke=subclass(cls_actor,function(self,pos,start_spr,dir)
  self.spr=start_spr
  self.start_spr=start_spr
  self.is_solid=false
- self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
+ self.spd_x=dir*(0.3+rnd(0.2))
  self.is_gore=false
 end)
 
 function cls_smoke:update()
- self:move(self.spd)
+ self:move_x(self.spd_x)
  self.spr+=0.2
  if (self.spr>self.start_spr+3) del(actors,self)
 end
@@ -26,6 +26,6 @@ function cls_smoke:draw()
   pal(7,14)
   pal(6,2)
  end
- spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
  if (self.is_gore) pal()
 end
