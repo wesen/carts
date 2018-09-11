@@ -409,9 +409,10 @@ function cls_actor:update_bbox()
  self.bby=self.aay+self.hitbox.dimy
 end
 
-function cls_actor:bbox(offset)
- if (offset==nil) offset=v2(0,0)
- return hitbox_to_bbox(self.hitbox,v2(self.x,self.y)+offset)
+function cls_actor:bbox(x,y)
+ x=x or 0
+ y=y or 0
+ return setmetatable({aax=self.aax+x,aay=self.aay+y,bbx=self.bbx+x,bby=self.bby+y},bboxvt)
 end
 
 function cls_actor:str()
@@ -425,8 +426,8 @@ function cls_actor:move_x(amount)
    if (abs(amount)>1) step=sign(amount)
    amount-=step
 
-   local solid=self:is_solid_at(v2(step,0))
-   local actor=self:is_actor_at(v2(step,0))
+   local solid=self:is_solid_at(step,0)
+   local actor=self:is_actor_at(step,0)
    if solid or actor then
     self.spd_x=0
     break
@@ -447,8 +448,8 @@ function cls_actor:move_y(amount)
    if (abs(amount)>1) step=sign(amount)
    amount-=step
 
-   local solid=self:is_solid_at(v2(0,step))
-   local actor=self:is_actor_at(v2(0,step))
+   local solid=self:is_solid_at(0,step)
+   local actor=self:is_actor_at(0,step)
 
    if solid or actor then
     self.spd_y=0
@@ -463,15 +464,15 @@ function cls_actor:move_y(amount)
  end
 end
 
-function cls_actor:is_solid_at(offset)
- return solid_at(self:bbox(offset))
+function cls_actor:is_solid_at(x,y)
+ return solid_at(self:bbox(x,y))
 end
 
-function cls_actor:is_actor_at(offset)
+function cls_actor:is_actor_at(x,y)
  for actor in all(actors) do
   if actor.is_solid then
    local bbox_other = actor:bbox()
-   if self!=actor and bbox_other:collide(self:bbox(offset)) then
+   if self!=actor and bbox_other:collide(self:bbox(x,y)) then
     return true
    end
   end
@@ -483,7 +484,7 @@ end
 function cls_actor:get_collisions(typ,offset)
  local res={}
 
- local bbox=self:bbox(offset)
+ local bbox=self:bbox(offset.x,offset.y)
  for actor in all(actors) do
   if actor!=self and actor.typ==typ then
    if (bbox:collide(actor:bbox())) add(res,actor)
@@ -704,9 +705,9 @@ function cls_gore:update()
 
  -- i tried generalizing this but it's just easier to write it out
  local dir=sign(self.spd_x)
- local ground_bbox=self:bbox(v2(0,1))
- local ceil_bbox=self:bbox(v2(0,-1))
- local side_bbox=self:bbox(v2(dir,0))
+ local ground_bbox=self:bbox(0,1)
+ local ceil_bbox=self:bbox(0,-1)
+ local side_bbox=self:bbox(dir,0)
  local on_ground,ground_tile=solid_at(ground_bbox)
  local on_ceil,ceil_tile=solid_at(ceil_bbox)
  local hit_side,side_tile=solid_at(side_bbox)
@@ -797,9 +798,9 @@ function cls_player:update_normal()
  local accel=0.1
  local decel=0.1
 
- local ground_bbox=self:bbox(vec_down)
+ local ground_bbox=self:bbox(0,1)
  self.on_ground=solid_at(ground_bbox)
- local on_actor=self:is_actor_at(v2(input,0))
+ local on_actor=self:is_actor_at(input,0)
  local on_ice=ice_at(ground_bbox)
 
  if self.on_ground then
@@ -859,11 +860,11 @@ function cls_player:update_normal()
 
  -- wall slide
  local is_wall_sliding=false
- if input!=0 and self:is_solid_at(v2(input,0))
+ if input!=0 and self:is_solid_at(input,0)
     and not self.on_ground and self.spd_y>0 then
   is_wall_sliding=true
   maxfall=wall_slide_maxfall
-  if (ice_at(self:bbox(v2(input,0)))) maxfall=ice_wall_maxfall
+  if (ice_at(self:bbox(input,0))) maxfall=ice_wall_maxfall
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
@@ -884,8 +885,8 @@ function cls_player:update_normal()
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
-   local wall_dir=self:is_solid_at(v2(-3,0)) and -1
-        or self:is_solid_at(v2(3,0)) and 1
+   local wall_dir=self:is_solid_at(-3,0) and -1
+        or self:is_solid_at(3,0) and 1
         or 0
    if wall_dir!=0 then
     self.jump_interval=0

@@ -20,9 +20,10 @@ function cls_actor:update_bbox()
  self.bby=self.aay+self.hitbox.dimy
 end
 
-function cls_actor:bbox(offset)
- if (offset==nil) offset=v2(0,0)
- return hitbox_to_bbox(self.hitbox,v2(self.x,self.y)+offset)
+function cls_actor:bbox(x,y)
+ x=x or 0
+ y=y or 0
+ return setmetatable({aax=self.aax+x,aay=self.aay+y,bbx=self.bbx+x,bby=self.bby+y},bboxvt)
 end
 
 function cls_actor:str()
@@ -36,8 +37,8 @@ function cls_actor:move_x(amount)
    if (abs(amount)>1) step=sign(amount)
    amount-=step
 
-   local solid=self:is_solid_at(v2(step,0))
-   local actor=self:is_actor_at(v2(step,0))
+   local solid=self:is_solid_at(step,0)
+   local actor=self:is_actor_at(step,0)
    if solid or actor then
     self.spd_x=0
     break
@@ -58,8 +59,8 @@ function cls_actor:move_y(amount)
    if (abs(amount)>1) step=sign(amount)
    amount-=step
 
-   local solid=self:is_solid_at(v2(0,step))
-   local actor=self:is_actor_at(v2(0,step))
+   local solid=self:is_solid_at(0,step)
+   local actor=self:is_actor_at(0,step)
 
    if solid or actor then
     self.spd_y=0
@@ -74,15 +75,15 @@ function cls_actor:move_y(amount)
  end
 end
 
-function cls_actor:is_solid_at(offset)
- return solid_at(self:bbox(offset))
+function cls_actor:is_solid_at(x,y)
+ return solid_at(self:bbox(x,y))
 end
 
-function cls_actor:is_actor_at(offset)
+function cls_actor:is_actor_at(x,y)
  for actor in all(actors) do
   if actor.is_solid then
    local bbox_other = actor:bbox()
-   if self!=actor and bbox_other:collide(self:bbox(offset)) then
+   if self!=actor and bbox_other:collide(self:bbox(x,y)) then
     return true
    end
   end
@@ -94,7 +95,7 @@ end
 function cls_actor:get_collisions(typ,offset)
  local res={}
 
- local bbox=self:bbox(offset)
+ local bbox=self:bbox(offset.x,offset.y)
  for actor in all(actors) do
   if actor!=self and actor.typ==typ then
    if (bbox:collide(actor:bbox())) add(res,actor)

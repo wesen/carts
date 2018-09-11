@@ -52,9 +52,9 @@ function cls_gore:update()
 
  -- i tried generalizing this but it's just easier to write it out
  local dir=sign(self.spd_x)
- local ground_bbox=self:bbox(v2(0,1))
- local ceil_bbox=self:bbox(v2(0,-1))
- local side_bbox=self:bbox(v2(dir,0))
+ local ground_bbox=self:bbox(0,1)
+ local ceil_bbox=self:bbox(0,-1)
+ local side_bbox=self:bbox(dir,0)
  local on_ground,ground_tile=solid_at(ground_bbox)
  local on_ceil,ceil_tile=solid_at(ceil_bbox)
  local hit_side,side_tile=solid_at(side_bbox)
