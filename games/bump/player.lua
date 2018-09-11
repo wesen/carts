@@ -98,7 +98,7 @@ function cls_player:update_normal()
   end
 
   -- add ice smoke when sliding on ice (after releasing input)
-  if input==0 and abs(self.spd.x)>0.3
+  if input==0 and abs(self.spd_x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
    if on_ice then
     self:smoke(spr_slide_smoke,-input)
@@ -108,21 +108,21 @@ function cls_player:update_normal()
  self.prev_input=input
 
  -- x movement
- if abs(self.spd.x)>maxrun then
-  self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
+ if abs(self.spd_x)>maxrun then
+  self.spd_x=appr(self.spd_x,sign(self.spd_x)*maxrun,decel)
  elseif input != 0 then
-  self.spd.x=appr(self.spd.x,input*maxrun,accel)
+  self.spd_x=appr(self.spd_x,input*maxrun,accel)
  else
-  self.spd.x=appr(self.spd.x,0,decel)
+  self.spd_x=appr(self.spd_x,0,decel)
  end
- if (self.spd.x!=0) self.flip.x=self.spd.x<0
+ if (self.spd_x!=0) self.flip.x=self.spd_x<0
 
  -- y movement
 
  -- slow down at apex
- if abs(self.spd.y)<=apex_speed then
+ if abs(self.spd_y)<=apex_speed then
   gravity*=apex_gravity_factor
- elseif self.spd.y>0 then
+ elseif self.spd_y>0 then
   -- fall down fas2er
   gravity*=fall_gravity_factor
  end
@@ -130,7 +130,7 @@ function cls_player:update_normal()
  -- wall slide
  local is_wall_sliding=false
  if input!=0 and self:is_solid_at(v2(input,0))
-    and not self.on_ground and self.spd.y>0 then
+    and not self.on_ground and self.spd_y>0 then
   is_wall_sliding=true
   maxfall=wall_slide_maxfall
   if (ice_at(self:bbox(v2(input,0)))) maxfall=ice_wall_maxfall
@@ -150,7 +150,7 @@ function cls_player:update_normal()
     sfx(0)
    end
    self.on_ground_interval=0
-   self.spd.y=-jump_spd
+   self.spd_y=-jump_spd
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
@@ -159,17 +159,18 @@ function cls_player:update_normal()
         or 0
    if wall_dir!=0 then
     self.jump_interval=0
-    self.spd.y=-1
-    self.spd.x=-wall_dir*wall_jump_spd
+    self.spd_y=-1
+    self.spd_x=-wall_dir*wall_jump_spd
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     self.jump_button.hold_time+=1
    end
   end
  end
 
- if (not self.on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
+ if (not self.on_ground) self.spd_y=appr(self.spd_y,maxfall,gravity)
 
- self:move(self.spd)
+ self:move_x(self.spd_x)
+ self:move_y(self.spd_y)
 
  -- animation
  if input==0 then
@@ -189,7 +190,7 @@ function cls_player:update_normal()
 
    -- attack
    local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
-   local can_attack=not self.on_ground and self.spd.y>0
+   local can_attack=not self.on_ground and self.spd_y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
    if (feet_box:collide(head_box) and can_attack)
@@ -204,7 +205,7 @@ function cls_player:update_normal()
      player.is_bullet_time=false
      make_gore_explosion(v2(player.x,player.y))
      cls_smoke.init(v2(self.x,self.y),32,0)
-     self.spd.y=-2.0
+     self.spd_y=-2.0
      if player.input_port==self.input_port then
       -- killed a doppelgaenger
       -- scores[self.input_port+1]-=1

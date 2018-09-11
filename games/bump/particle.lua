@@ -6,7 +6,6 @@ cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  self.sprs=sprs
  self.is_solid=false
  self.weight=0
- self.spd=v2(0,0)
 end)
 
 function cls_particle:random_flip()
@@ -14,7 +13,9 @@ function cls_particle:random_flip()
 end
 
 function cls_particle:random_angle(spd)
- self.spd=angle2vec(rnd(1))*spd
+ local v=angle2vec(rnd(1))
+ self.spd_x=v.x*spd
+ self.spd_y=v.y*spd
 end
 
 function cls_particle:update()
@@ -24,10 +25,11 @@ function cls_particle:update()
    return
  end
 
- self:move(self.spd)
+ self:move_x(self.spd_x)
+ self:move_y(self.spd_y)
  local maxfall=2
  local gravity=0.12*self.weight
- self.spd.y=appr(self.spd.y,maxfall,gravity)
+ self.spd_y=appr(self.spd_y,maxfall,gravity)
 end
 
 function cls_particle:draw()
@@ -40,7 +42,7 @@ cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
  self.hitbox={x=2,y=2,dimx=3,dimy=3}
  self:random_angle(1)
- self.spd.x*=0.5+rnd(0.5)
+ self.spd_x*=0.5+rnd(0.5)
  self.weight=0.5+rnd(1)
  self:random_flip()
 end)
@@ -49,7 +51,7 @@ function cls_gore:update()
  cls_particle.update(self)
 
  -- i tried generalizing this but it's just easier to write it out
- local dir=sign(self.spd.x)
+ local dir=sign(self.spd_x)
  local ground_bbox=self:bbox(v2(0,1))
  local ceil_bbox=self:bbox(v2(0,-1))
  local side_bbox=self:bbox(v2(dir,0))
@@ -58,11 +60,11 @@ function cls_gore:update()
  local hit_side,side_tile=solid_at(side_bbox)
  local gore_weight=1-self.t/self.lifetime
  if on_ground and ground_tile!=nil then
-  self.spd.y*=-0.9
+  self.spd_y*=-0.9
  elseif on_ceil and ceil_tile!=nil then
-  self.spd.y*=-0.9
+  self.spd_y*=-0.9
  elseif hit_side and side_tile!=nil then
-  self.spd.x*=-0.9
+  self.spd_x*=-0.9
  end
 end
 

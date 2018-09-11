@@ -7,7 +7,7 @@ cls_spawn=subclass(cls_actor,function(self,pos,input_port)
  self.target_y=self.y
  self.y=128
  self.input_port=input_port
- self.spd.y=-2
+ self.spd_y=-2
  self.is_doppelgaenger=false
  add_cr(function()
   self:cr_spawn()

@@ -387,7 +387,8 @@ cls_actor=class(function(self,pos)
  self.y=pos.y
  self.id=actor_cnt
  actor_cnt+=1
- self.spd=v2(0,0)
+ self.spd_x=0
+ self.spd_y=0
  self.is_solid=true
  self.hitbox={x=0,y=0,dimx=8,dimy=8}
  add(actors,self)
@@ -402,11 +403,6 @@ function cls_actor:str()
  return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
 end
 
-function cls_actor:move(o)
- self:move_x(o.x)
- self:move_y(o.y)
-end
-
 function cls_actor:move_x(amount)
  if self.is_solid then
   while abs(amount)>0 do
@@ -417,7 +413,7 @@ function cls_actor:move_x(amount)
    local solid=self:is_solid_at(v2(step,0))
    local actor=self:is_actor_at(v2(step,0))
    if solid or actor then
-    self.spd.x=0
+    self.spd_x=0
     break
    else
     self.x+=step
@@ -440,7 +436,7 @@ function cls_actor:move_y(amount)
    local actor=self:is_actor_at(v2(0,step))
 
    if solid or actor then
-    self.spd.y=0
+    self.spd_y=0
     break
    else
     self.y+=step
@@ -570,7 +566,7 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player(input_port)
- -- xxx potentially find better spawn locatiosn
+ -- XXX potentially find better spawn locatiosn
  local spawn_pos = self.spawn_locations[spawn_idx]:clone()
  local spawn=cls_spawn.init(spawn_pos, input_port)
  spawn_idx = (spawn_idx%#self.spawn_locations)+1
@@ -625,12 +621,12 @@ cls_smoke=subclass(cls_actor,function(self,pos,start_spr,dir)
  self.spr=start_spr
  self.start_spr=start_spr
  self.is_solid=false
- self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
+ self.spd_x=dir*(0.3+rnd(0.2))
  self.is_gore=false
 end)
 
 function cls_smoke:update()
- self:move(self.spd)
+ self:move_x(self.spd_x)
  self.spr+=0.2
  if (self.spr>self.start_spr+3) del(actors,self)
 end
@@ -653,7 +649,6 @@ cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  self.sprs=sprs
  self.is_solid=false
  self.weight=0
- self.spd=v2(0,0)
 end)
 
 function cls_particle:random_flip()
@@ -661,7 +656,9 @@ function cls_particle:random_flip()
 end
 
 function cls_particle:random_angle(spd)
- self.spd=angle2vec(rnd(1))*spd
+ local v=angle2vec(rnd(1))
+ self.spd_x=v.x*spd
+ self.spd_y=v.y*spd
 end
 
 function cls_particle:update()
@@ -671,10 +668,11 @@ function cls_particle:update()
    return
  end
 
- self:move(self.spd)
+ self:move_x(self.spd_x)
+ self:move_y(self.spd_y)
  local maxfall=2
  local gravity=0.12*self.weight
- self.spd.y=appr(self.spd.y,maxfall,gravity)
+ self.spd_y=appr(self.spd_y,maxfall,gravity)
 end
 
 function cls_particle:draw()
@@ -687,7 +685,7 @@ cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
  self.hitbox={x=2,y=2,dimx=3,dimy=3}
  self:random_angle(1)
- self.spd.x*=0.5+rnd(0.5)
+ self.spd_x*=0.5+rnd(0.5)
  self.weight=0.5+rnd(1)
  self:random_flip()
 end)
@@ -696,7 +694,7 @@ function cls_gore:update()
  cls_particle.update(self)
 
  -- i tried generalizing this but it's just easier to write it out
- local dir=sign(self.spd.x)
+ local dir=sign(self.spd_x)
  local ground_bbox=self:bbox(v2(0,1))
  local ceil_bbox=self:bbox(v2(0,-1))
  local side_bbox=self:bbox(v2(dir,0))
@@ -705,11 +703,11 @@ function cls_gore:update()
  local hit_side,side_tile=solid_at(side_bbox)
  local gore_weight=1-self.t/self.lifetime
  if on_ground and ground_tile!=nil then
-  self.spd.y*=-0.9
+  self.spd_y*=-0.9
  elseif on_ceil and ceil_tile!=nil then
-  self.spd.y*=-0.9
+  self.spd_y*=-0.9
  elseif hit_side and side_tile!=nil then
-  self.spd.x*=-0.9
+  self.spd_x*=-0.9
  end
 end
 
@@ -819,7 +817,7 @@ function cls_player:update_normal()
   end
 
   -- add ice smoke when sliding on ice (after releasing input)
-  if input==0 and abs(self.spd.x)>0.3
+  if input==0 and abs(self.spd_x)>0.3
      and (maybe(0.15) or self.prev_input!=0) then
    if on_ice then
     self:smoke(spr_slide_smoke,-input)
@@ -829,21 +827,21 @@ function cls_player:update_normal()
  self.prev_input=input
 
  -- x movement
- if abs(self.spd.x)>maxrun then
-  self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
+ if abs(self.spd_x)>maxrun then
+  self.spd_x=appr(self.spd_x,sign(self.spd_x)*maxrun,decel)
  elseif input != 0 then
-  self.spd.x=appr(self.spd.x,input*maxrun,accel)
+  self.spd_x=appr(self.spd_x,input*maxrun,accel)
  else
-  self.spd.x=appr(self.spd.x,0,decel)
+  self.spd_x=appr(self.spd_x,0,decel)
  end
- if (self.spd.x!=0) self.flip.x=self.spd.x<0
+ if (self.spd_x!=0) self.flip.x=self.spd_x<0
 
  -- y movement
 
  -- slow down at apex
- if abs(self.spd.y)<=apex_speed then
+ if abs(self.spd_y)<=apex_speed then
   gravity*=apex_gravity_factor
- elseif self.spd.y>0 then
+ elseif self.spd_y>0 then
   -- fall down fas2er
   gravity*=fall_gravity_factor
  end
@@ -851,7 +849,7 @@ function cls_player:update_normal()
  -- wall slide
  local is_wall_sliding=false
  if input!=0 and self:is_solid_at(v2(input,0))
-    and not self.on_ground and self.spd.y>0 then
+    and not self.on_ground and self.spd_y>0 then
   is_wall_sliding=true
   maxfall=wall_slide_maxfall
   if (ice_at(self:bbox(v2(input,0)))) maxfall=ice_wall_maxfall
@@ -871,7 +869,7 @@ function cls_player:update_normal()
     sfx(0)
    end
    self.on_ground_interval=0
-   self.spd.y=-jump_spd
+   self.spd_y=-jump_spd
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
@@ -880,17 +878,18 @@ function cls_player:update_normal()
         or 0
    if wall_dir!=0 then
     self.jump_interval=0
-    self.spd.y=-1
-    self.spd.x=-wall_dir*wall_jump_spd
+    self.spd_y=-1
+    self.spd_x=-wall_dir*wall_jump_spd
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     self.jump_button.hold_time+=1
    end
   end
  end
 
- if (not self.on_ground) self.spd.y=appr(self.spd.y,maxfall,gravity)
+ if (not self.on_ground) self.spd_y=appr(self.spd_y,maxfall,gravity)
 
- self:move(self.spd)
+ self:move_x(self.spd_x)
+ self:move_y(self.spd_y)
 
  -- animation
  if input==0 then
@@ -910,7 +909,7 @@ function cls_player:update_normal()
 
    -- attack
    local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
-   local can_attack=not self.on_ground and self.spd.y>0
+   local can_attack=not self.on_ground and self.spd_y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
    if (feet_box:collide(head_box) and can_attack)
@@ -925,7 +924,7 @@ function cls_player:update_normal()
      player.is_bullet_time=false
      make_gore_explosion(v2(player.x,player.y))
      cls_smoke.init(v2(self.x,self.y),32,0)
-     self.spd.y=-2.0
+     self.spd_y=-2.0
      if player.input_port==self.input_port then
       -- killed a doppelgaenger
       -- scores[self.input_port+1]-=1
@@ -997,7 +996,7 @@ function cls_spring:update()
  else
   for player in all(players) do
    if bbox:collide(player:bbox()) then
-    player.spd.y=-spring_speed
+    player.spd_y=-spring_speed
     self.sprung_time=10
     local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
    end
@@ -1021,7 +1020,7 @@ cls_spawn=subclass(cls_actor,function(self,pos,input_port)
  self.target_y=self.y
  self.y=128
  self.input_port=input_port
- self.spd.y=-2
+ self.spd_y=-2
  self.is_doppelgaenger=false
  add_cr(function()
   self:cr_spawn()

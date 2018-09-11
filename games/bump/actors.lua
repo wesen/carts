@@ -5,7 +5,8 @@ cls_actor=class(function(self,pos)
  self.y=pos.y
  self.id=actor_cnt
  actor_cnt+=1
- self.spd=v2(0,0)
+ self.spd_x=0
+ self.spd_y=0
  self.is_solid=true
  self.hitbox={x=0,y=0,dimx=8,dimy=8}
  add(actors,self)
@@ -20,11 +21,6 @@ function cls_actor:str()
  return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
 end
 
-function cls_actor:move(o)
- self:move_x(o.x)
- self:move_y(o.y)
-end
-
 function cls_actor:move_x(amount)
  if self.is_solid then
   while abs(amount)>0 do
@@ -35,7 +31,7 @@ function cls_actor:move_x(amount)
    local solid=self:is_solid_at(v2(step,0))
    local actor=self:is_actor_at(v2(step,0))
    if solid or actor then
-    self.spd.x=0
+    self.spd_x=0
     break
    else
     self.x+=step
@@ -58,7 +54,7 @@ function cls_actor:move_y(amount)
    local actor=self:is_actor_at(v2(0,step))
 
    if solid or actor then
-    self.spd.y=0
+    self.spd_y=0
     break
    else
     self.y+=step
