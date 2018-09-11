@@ -42,9 +42,11 @@ room=nil
 spawn_idx=1
 
 actors={}
+particles={}
 tiles={}
 crs={}
 scores={0, 0}
+
 jump_button_grace_interval=10
 jump_max_hold_time=15
 
@@ -653,6 +655,8 @@ end
 
 cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
+ del(actors,self)
+ add(particles,self)
  self.flip=v2(false,false)
  self.t=0
  self.lifetime=lifetime
@@ -674,7 +678,7 @@ end
 function cls_particle:update()
  self.t+=dt
  if self.t>self.lifetime then
-   del(actors,self)
+   del(particles,self)
    return
  end
 
@@ -882,6 +886,7 @@ function cls_player:update_normal()
    end
    self.on_ground_interval=0
    self.spd_y=-jump_spd
+   make_gore_explosion(v2(self.x,self.y))
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
@@ -1265,6 +1270,10 @@ function _draw()
  draw_actors()
  tick_crs(draw_crs)
 
+ for a in all(particles) do
+  a:draw()
+ end
+
  local entry_length=50
  for i=0,#scores-1,1 do
   print(
@@ -1284,6 +1293,10 @@ function _update60()
  end
  tick_crs()
  update_actors()
+ for a in all(particles) do
+  a:update_bbox()
+  a:update()
+ end
  update_shake()
 end
 

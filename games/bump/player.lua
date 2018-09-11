@@ -153,6 +153,7 @@ function cls_player:update_normal()
    end
    self.on_ground_interval=0
    self.spd_y=-jump_spd
+   make_gore_explosion(v2(self.x,self.y))
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump

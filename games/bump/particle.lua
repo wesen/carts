@@ -1,5 +1,7 @@
 cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
+ del(actors,self)
+ add(particles,self)
  self.flip=v2(false,false)
  self.t=0
  self.lifetime=lifetime
@@ -21,7 +23,7 @@ end
 function cls_particle:update()
  self.t+=dt
  if self.t>self.lifetime then
-   del(actors,self)
+   del(particles,self)
    return
  end
 

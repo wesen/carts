@@ -13,6 +13,10 @@ function _draw()
  draw_actors()
  tick_crs(draw_crs)
 
+ for a in all(particles) do
+  a:draw()
+ end
+
  local entry_length=50
  for i=0,#scores-1,1 do
   print(
@@ -32,5 +36,9 @@ function _update60()
  end
  tick_crs()
  update_actors()
+ for a in all(particles) do
+  a:update_bbox()
+  a:update()
+ end
  update_shake()
 end
