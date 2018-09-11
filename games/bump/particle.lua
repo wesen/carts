@@ -28,7 +28,11 @@ function cls_particle:update()
  end
 
  self.x+=self.spd_x
+ self.aax+=self.spd_x
+ self.bbx+=self.spd_x
  self.y+=self.spd_y
+ self.aay+=self.spd_y
+ self.bby+=self.spd_y
  self.spd_y=appr(self.spd_y,2,0.12)
 end
 
@@ -54,8 +58,8 @@ function cls_gore:update()
  local dir=sign(self.spd_x)
  if tile_flag_at_offset(self,flg_solid,0,1) then
   self.spd_y*=-0.9
- -- elseif solid_at(self:bbox(0,-1)) then
- --  self.spd_y*=-0.9
+--  elseif tile_flag_at_offset(self,flg_solid,0,-1) then
+--   self.spd_y*=-0.9
 elseif tile_flag_at_offset(self,flg_solid,dir,0) then
   self.spd_x*=-0.9
  end
