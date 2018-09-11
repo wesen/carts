@@ -21,7 +21,12 @@ function cls_particle:random_angle(spd)
 end
 
 function cls_particle:update()
+ self.aax=self.x+2
+ self.bbx=self.x+4
+ self.aay=self.y+2
+ self.bby=self.y+4
  self.t+=dt
+
  if self.t>self.lifetime then
    del(particles,self)
    return

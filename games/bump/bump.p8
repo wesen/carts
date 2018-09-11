@@ -691,7 +691,12 @@ function cls_particle:random_angle(spd)
 end
 
 function cls_particle:update()
+ self.aax=self.x+2
+ self.bbx=self.x+4
+ self.aay=self.y+2
+ self.bby=self.y+4
  self.t+=dt
+
  if self.t>self.lifetime then
    del(particles,self)
    return
@@ -896,7 +901,6 @@ function cls_player:update_normal()
    end
    self.on_ground_interval=0
    self.spd_y=-jump_spd
-   make_gore_explosion(v2(self.x,self.y))
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
@@ -1305,7 +1309,6 @@ function _update60()
  tick_crs()
  update_actors()
  foreach(particles, function(a)
-  a:update_bbox()
   a:update()
  end)
  update_shake()
