@@ -8,7 +8,10 @@ cls_room=class(function(self,pos,dim)
  self.dim_x=dim.x
  self.dim_y=dim.y
  self.spawn_locations={}
- printh("init room")
+ self.aax=0
+ self.aay=0
+ self.bbx=self.dim_x*8
+ self.bby=self.dim_y*8
 
  -- initialize tiles
  for i=0,self.dim_x-1 do
@@ -45,9 +48,9 @@ end
 
 function solid_at(bbox)
  if bbox.aax<0
-  or bbox.bbx>room.dim_x*8
+  or bbox.bbx>room.bbx
   or bbox.aay<0
-  or bbox.bby>room.dim_y*8 then
+  or bbox.bby>room.bby then
    return true
  else
   return tile_flag_at(bbox,flg_solid)
