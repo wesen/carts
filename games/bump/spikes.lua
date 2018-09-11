@@ -2,7 +2,7 @@ spr_spikes=68
 
 cls_spikes=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
- self.hitbox=hitbox(v2(0,3),v2(8,5))
+ self.hitbox={x=0,y=3,dimx=8,dimy=5}
 end)
 tiles[spr_spikes]=cls_spikes
 

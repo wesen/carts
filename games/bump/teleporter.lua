@@ -5,7 +5,7 @@ tele_exits={}
 cls_tele_enter=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
- self.hitbox=hitbox(v2(4,4),v2(1,1))
+ self.hitbox={x=4,y=4,dimx=1,dimy=1}
 end)
 tiles[spr_tele_enter]=cls_tele_enter
 

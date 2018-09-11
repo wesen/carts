@@ -1,6 +1,13 @@
 local bboxvt={}
 bboxvt.__index=bboxvt
 
+function hitbox_to_bbox(hb,off)
+ local lx=hb.x+off.x
+ local ly=hb.y+off.y
+
+ return bbox(v2(lx,ly),v2(lx+hb.dimx,ly+hb.dimy))
+end
+
 function bbox(aa,bb)
  return setmetatable({aa=aa,bb=bb},bboxvt)
 end
@@ -42,4 +49,3 @@ function bboxvt:collide(other)
    other.aa.x < self.bb.x and
    other.aa.y < self.bb.y
 end
-

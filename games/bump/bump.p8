@@ -134,6 +134,13 @@ end
 local bboxvt={}
 bboxvt.__index=bboxvt
 
+function hitbox_to_bbox(hb,off)
+ local lx=hb.x+off.x
+ local ly=hb.y+off.y
+
+ return bbox(v2(lx,ly),v2(lx+hb.dimx,ly+hb.dimy))
+end
+
 function bbox(aa,bb)
  return setmetatable({aa=aa,bb=bb},bboxvt)
 end
@@ -174,22 +181,6 @@ function bboxvt:collide(other)
    other.bb.y > self.aa.y and
    other.aa.x < self.bb.x and
    other.aa.y < self.bb.y
-end
-
-
-local hitboxvt={}
-hitboxvt.__index=hitboxvt
-
-function hitbox(offset,dim)
- return setmetatable({offset=offset,dim=dim},hitboxvt)
-end
-
-function hitboxvt:to_bbox_at(v)
- return bbox(self.offset+v,self.offset+v+self.dim)
-end
-
-function hitboxvt:str()
- return self.offset:str().."-("..self.dim:str()..")"
 end
 
 local camera_shake=v2(0,0)
@@ -397,13 +388,13 @@ cls_actor=class(function(self,pos)
  actor_cnt+=1
  self.spd=v2(0,0)
  self.is_solid=true
- self.hitbox=hitbox(v2(0,0),v2(8,8))
+ self.hitbox={x=0,y=0,dimx=8,dimy=8}
  add(actors,self)
 end)
 
 function cls_actor:bbox(offset)
  if (offset==nil) offset=v2(0,0)
- return self.hitbox:to_bbox_at(self.pos+offset)
+ return hitbox_to_bbox(self.hitbox,self.pos+offset)
 end
 
 function cls_actor:str()
@@ -693,7 +684,7 @@ end
 
 cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
- self.hitbox=hitbox(v2(2,2),v2(3,3))
+ self.hitbox={x=2,y=2,dimx=3,dimy=3}
  self:random_angle(1)
  self.spd.x*=0.5+rnd(0.5)
  self.weight=0.5+rnd(1)
@@ -745,9 +736,9 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
- self.hitbox=hitbox(v2(2,0.5),v2(4,7.5))
- self.head_hitbox=hitbox(v2(0,-1),v2(8,1))
- self.feet_hitbox=hitbox(v2(2,7),v2(4,1))
+ self.hitbox={x=2,y=0.5,dimx=4,dimy=7.5}
+ self.head_hitbox={x=0,y=-1,dimx=8,dimy=1}
+ self.feet_hitbox={x=2,y=7,dimx=4,dimy=1}
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -912,12 +903,12 @@ function cls_player:update_normal()
  end
 
  -- interact with players
- local feet_box=self.feet_hitbox:to_bbox_at(self.pos)
+ local feet_box=hitbox_to_bbox(self.feet_hitbox,self.pos)
  for player in all(players) do
   if self!=player then
 
    -- attack
-   local head_box=player.head_hitbox:to_bbox_at(player.pos)
+   local head_box=hitbox_to_bbox(player.head_hitbox,player.pos)
    local can_attack=not self.on_ground and self.spd.y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
@@ -991,7 +982,7 @@ spr_spring_wound=67
 
 cls_spring=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
- self.hitbox=hitbox(v2(0,5),v2(8,3))
+ self.hitbox={x=0,y=5,dimx=8,dimy=3}
  self.sprung_time=0
  self.is_solid=false
 end)
@@ -1051,7 +1042,7 @@ spr_spikes=68
 
 cls_spikes=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
- self.hitbox=hitbox(v2(0,3),v2(8,5))
+ self.hitbox={x=0,y=3,dimx=8,dimy=5}
 end)
 tiles[spr_spikes]=cls_spikes
 
@@ -1080,7 +1071,7 @@ tele_exits={}
 cls_tele_enter=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
- self.hitbox=hitbox(v2(4,4),v2(1,1))
+ self.hitbox={x=4,y=4,dimx=1,dimy=1}
 end)
 tiles[spr_tele_enter]=cls_tele_enter
 

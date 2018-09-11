@@ -5,7 +5,6 @@
 --#include oo
 --#include v2
 --#include bbox
---#include hitbox
 --#include camera
 
 --#include helpers

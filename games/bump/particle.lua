@@ -38,7 +38,7 @@ end
 
 cls_gore=subclass(cls_particle,function(self,pos)
  cls_particle._ctr(self,pos,0.5+rnd(2),{35,36,37,38,38})
- self.hitbox=hitbox(v2(2,2),v2(3,3))
+ self.hitbox={x=2,y=2,dimx=3,dimy=3}
  self:random_angle(1)
  self.spd.x*=0.5+rnd(0.5)
  self.weight=0.5+rnd(1)

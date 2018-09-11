@@ -6,13 +6,13 @@ cls_actor=class(function(self,pos)
  actor_cnt+=1
  self.spd=v2(0,0)
  self.is_solid=true
- self.hitbox=hitbox(v2(0,0),v2(8,8))
+ self.hitbox={x=0,y=0,dimx=8,dimy=8}
  add(actors,self)
 end)
 
 function cls_actor:bbox(offset)
  if (offset==nil) offset=v2(0,0)
- return self.hitbox:to_bbox_at(self.pos+offset)
+ return hitbox_to_bbox(self.hitbox,self.pos+offset)
 end
 
 function cls_actor:str()

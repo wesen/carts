@@ -3,7 +3,7 @@ spr_spring_wound=67
 
 cls_spring=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
- self.hitbox=hitbox(v2(0,5),v2(8,3))
+ self.hitbox={x=0,y=5,dimx=8,dimy=3}
  self.sprung_time=0
  self.is_solid=false
 end)
