@@ -16,7 +16,7 @@ cls_room=class(function(self,pos,dim)
  -- initialize tiles
  for i=0,self.dim_x-1 do
   for j=0,self.dim_y-1 do
-   local tile=self:tile_at(i,j)
+   local tile=mget(self.x+i,self.y+j)
    local p={x=i*8,y=j*8}
    if tile==spr_spawn_point then
     add(self.spawn_locations,p)
@@ -42,10 +42,6 @@ function cls_room:spawn_player(input_port)
  return spawn
 end
 
-function cls_room:tile_at(x,y)
- return mget(self.x+x,self.y+y)
-end
-
 function solid_at(bbox)
  if bbox.aax<0
   or bbox.bbx>room.bbx
@@ -61,17 +57,14 @@ function ice_at(bbox)
  return tile_flag_at(bbox,flg_ice)
 end
 
-function tile_at(x,y)
- return room:tile_at(x,y)
-end
-
 function tile_flag_at(bbox,flag)
- local bb=bbox:to_tile_bbox()
- local rx=room.x
- local ry=room.y
- for i=bb.aax,bb.bbx do
-  for j=bb.aay,bb.bby do
-   if fget(mget(rx+i,ry+j),flag) then
+ local aax=max(0,flr(bbox.aax/8))+room.x
+ local aay=max(0,flr(bbox.aay/8))+room.y
+ local bbx=min(room.dim_x,(bbox.bbx-1)/8)+room.x
+ local bby=min(room.dim_y,(bbox.bby-1)/8)+room.y
+ for i=aax,bbx do
+  for j=aay,bby do
+   if fget(mget(i,j),flag) then
     return true
    end
   end
