@@ -25,7 +25,8 @@ function _draw()
   )
  end
 
- print(tostr(stat(1)),0,120,1)
+ print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
+ print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
 end
 
 function _update60()
@@ -36,9 +37,9 @@ function _update60()
  end
  tick_crs()
  update_actors()
- for a in all(particles) do
+ foreach(particles, function(a)
   a:update_bbox()
   a:update()
- end
+ end)
  update_shake()
 end

@@ -27,17 +27,15 @@ function cls_particle:update()
    return
  end
 
- self:move_x(self.spd_x)
- self:move_y(self.spd_y)
- local maxfall=2
- local gravity=0.12*self.weight
- self.spd_y=appr(self.spd_y,maxfall,gravity)
+ self.x+=self.spd_x
+ self.y+=self.spd_y
+ self.spd_y=appr(self.spd_y,2,0.12)
 end
 
 function cls_particle:draw()
  local idx=flr(#self.sprs*(self.t/self.lifetime))
  local spr_=self.sprs[1+idx]
- spr(spr_,self.x,self.y,1,1,self.flip.x,self.flip.y)
+ spr(spr_,self.x,self.y,1,1)
 end
 
 cls_gore=subclass(cls_particle,function(self,pos)
@@ -46,7 +44,7 @@ cls_gore=subclass(cls_particle,function(self,pos)
  self:random_angle(1)
  self.spd_x*=0.5+rnd(0.5)
  self.weight=0.5+rnd(1)
- self:random_flip()
+ -- self:random_flip()
 end)
 
 function cls_gore:update()
@@ -54,18 +52,11 @@ function cls_gore:update()
 
  -- i tried generalizing this but it's just easier to write it out
  local dir=sign(self.spd_x)
- local ground_bbox=self:bbox(0,1)
- local ceil_bbox=self:bbox(0,-1)
- local side_bbox=self:bbox(dir,0)
- local on_ground,ground_tile=solid_at(ground_bbox)
- local on_ceil,ceil_tile=solid_at(ceil_bbox)
- local hit_side,side_tile=solid_at(side_bbox)
- local gore_weight=1-self.t/self.lifetime
- if on_ground and ground_tile!=nil then
+ if solid_at(self:bbox(0,1)) then
   self.spd_y*=-0.9
- elseif on_ceil and ceil_tile!=nil then
-  self.spd_y*=-0.9
- elseif hit_side and side_tile!=nil then
+ -- elseif solid_at(self:bbox(0,-1)) then
+ --  self.spd_y*=-0.9
+ elseif solid_at(self:bbox(dir,0)) then
   self.spd_x*=-0.9
  end
 end
