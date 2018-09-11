@@ -9,8 +9,16 @@ cls_actor=class(function(self,pos)
  self.spd_y=0
  self.is_solid=true
  self.hitbox={x=0,y=0,dimx=8,dimy=8}
+ self:update_bbox()
  add(actors,self)
 end)
+
+function cls_actor:update_bbox()
+ self.aax=self.hitbox.x+self.x
+ self.aay=self.hitbox.y+self.y
+ self.bbx=self.aax+self.hitbox.dimx
+ self.bby=self.aay+self.hitbox.dimy
+end
 
 function cls_actor:bbox(offset)
  if (offset==nil) offset=v2(0,0)

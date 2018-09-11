@@ -27,6 +27,9 @@ end
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+ for a in all(actors) do
+  a:update_bbox()
+ end
  tick_crs()
  update_actors()
  update_shake()

@@ -183,6 +183,13 @@ function bboxvt:collide(other)
    other.aay < self.bby
 end
 
+function do_bboxes_collide(a,b)
+ return a.bbx > b.aax and
+   a.bby > b.aay and
+   a.aax < b.bbx and
+   a.aay < b.bby
+end
+
 local camera_shake=v2(0,0)
 
 function add_shake(p)
@@ -391,8 +398,16 @@ cls_actor=class(function(self,pos)
  self.spd_y=0
  self.is_solid=true
  self.hitbox={x=0,y=0,dimx=8,dimy=8}
+ self:update_bbox()
  add(actors,self)
 end)
+
+function cls_actor:update_bbox()
+ self.aax=self.hitbox.x+self.x
+ self.aay=self.hitbox.y+self.y
+ self.bbx=self.aax+self.hitbox.dimx
+ self.bby=self.aay+self.hitbox.dimy
+end
 
 function cls_actor:bbox(offset)
  if (offset==nil) offset=v2(0,0)
@@ -1265,6 +1280,9 @@ end
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+ for a in all(actors) do
+  a:update_bbox()
+ end
  tick_crs()
  update_actors()
  update_shake()

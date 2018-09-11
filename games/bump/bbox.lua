@@ -49,3 +49,10 @@ function bboxvt:collide(other)
    other.aax < self.bbx and
    other.aay < self.bby
 end
+
+function do_bboxes_collide(a,b)
+ return a.bbx > b.aax and
+   a.bby > b.aay and
+   a.aax < b.bbx and
+   a.aay < b.bby
+end
