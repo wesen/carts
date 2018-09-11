@@ -621,6 +621,21 @@ function tile_flag_at(bbox,flag)
  return false
 end
 
+function tile_flag_at_offset(bbox,flag,x,y)
+ local aax=max(0,flr((bbox.aax+x)/8))+room.x
+ local aay=max(0,flr((bbox.aay+y)/8))+room.y
+ local bbx=min(room.dim_x,(bbox.bbx+x-1)/8)+room.x
+ local bby=min(room.dim_y,(bbox.bby+y-1)/8)+room.y
+ for i=aax,bbx do
+  for j=aay,bby do
+   if fget(mget(i,j),flag) then
+    return true
+   end
+  end
+ end
+ return false
+end
+
 spr_wall_smoke=54
 spr_ground_smoke=51
 spr_full_smoke=48
@@ -707,11 +722,11 @@ function cls_gore:update()
 
  -- i tried generalizing this but it's just easier to write it out
  local dir=sign(self.spd_x)
- if solid_at(self:bbox(0,1)) then
+ if tile_flag_at_offset(self,flg_solid,0,1) then
   self.spd_y*=-0.9
  -- elseif solid_at(self:bbox(0,-1)) then
  --  self.spd_y*=-0.9
- elseif solid_at(self:bbox(dir,0)) then
+elseif tile_flag_at_offset(self,flg_solid,dir,0) then
   self.spd_x*=-0.9
  end
 end

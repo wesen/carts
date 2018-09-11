@@ -52,11 +52,11 @@ function cls_gore:update()
 
  -- i tried generalizing this but it's just easier to write it out
  local dir=sign(self.spd_x)
- if solid_at(self:bbox(0,1)) then
+ if tile_flag_at_offset(self,flg_solid,0,1) then
   self.spd_y*=-0.9
  -- elseif solid_at(self:bbox(0,-1)) then
  --  self.spd_y*=-0.9
- elseif solid_at(self:bbox(dir,0)) then
+elseif tile_flag_at_offset(self,flg_solid,dir,0) then
   self.spd_x*=-0.9
  end
 end

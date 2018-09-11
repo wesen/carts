@@ -71,3 +71,18 @@ function tile_flag_at(bbox,flag)
  end
  return false
 end
+
+function tile_flag_at_offset(bbox,flag,x,y)
+ local aax=max(0,flr((bbox.aax+x)/8))+room.x
+ local aay=max(0,flr((bbox.aay+y)/8))+room.y
+ local bbx=min(room.dim_x,(bbox.bbx+x-1)/8)+room.x
+ local bby=min(room.dim_y,(bbox.bby+y-1)/8)+room.y
+ for i=aax,bbx do
+  for j=aay,bby do
+   if fget(mget(i,j),flag) then
+    return true
+   end
+  end
+ end
+ return false
+end
