@@ -65,7 +65,9 @@
 -- x camera shake
 -- x doppelgangers
 -- x remove typ code
--- bullet time on kill
+-- x bullet time on kill
+-- better kill animations
+-- restore ghosts / particles on player
 -- decrease score when dying on spikes
 
 -- fades

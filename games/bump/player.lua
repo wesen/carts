@@ -10,6 +10,8 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.ghosts={}
 
  self.nr=player_cnt
+ self.power_up=nil
+ self.power_up_countdown=nil
  player_cnt+=1
 
  self.flip=v2(false,false)
@@ -57,6 +59,15 @@ function cls_player:update()
 end
 
 function cls_player:update_normal()
+ -- power up countdown
+ if self.power_up_countdown!=nil then
+  self.power_up_countdown-=dt
+  if self.power_up_countdown<0 then
+   self.power_up=nil
+   self.power_up_countdown=nil
+  end
+ end
+
  -- from celeste's player class
  local input=btn(btn_right, self.input_port) and 1
     or (btn(btn_left, self.input_port) and -1
@@ -239,7 +250,11 @@ function cls_player:draw()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-  spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
+  if self.power_up!=nil then
+   bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up])
+  else
+   spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
+  end
   pal(cols_face[1], cols_face[1])
   pal(cols_hair[1], cols_hair[1])
 
