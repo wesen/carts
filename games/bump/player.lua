@@ -199,7 +199,7 @@ function cls_player:update_normal()
     add_cr(function ()
      self.is_bullet_time=true
      player.is_bullet_time=true
-     for i=0,5 do
+     for i=0,3 do
       yield()
      end
      self.is_bullet_time=false
