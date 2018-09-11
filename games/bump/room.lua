@@ -52,10 +52,10 @@ function cls_room:tile_at(pos)
 end
 
 function solid_at(bbox)
- if bbox.aa.x<0
-  or bbox.bb.x>room.dim.x*8
-  or bbox.aa.y<0
-  or bbox.bb.y>room.dim.y*8 then
+ if bbox.aax<0
+  or bbox.bbx>room.dim.x*8
+  or bbox.aay<0
+  or bbox.bby>room.dim.y*8 then
    return true,nil
  else
   return tile_flag_at(bbox,flg_solid)
@@ -72,8 +72,8 @@ end
 
 function tile_flag_at(bbox,flag)
  local bb=bbox:to_tile_bbox()
- for i=bb.aa.x,bb.bb.x do
-  for j=bb.aa.y,bb.bb.y do
+ for i=bb.aax,bb.bbx do
+  for j=bb.aay,bb.bby do
    if fget(tile_at(i,j),flag) then
     return true,v2(i,j)
    end
