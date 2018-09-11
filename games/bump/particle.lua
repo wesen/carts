@@ -33,7 +33,7 @@ end
 function cls_particle:draw()
  local idx=flr(#self.sprs*(self.t/self.lifetime))
  local spr_=self.sprs[1+idx]
- spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(spr_,self.x,self.y,1,1,self.flip.x,self.flip.y)
 end
 
 cls_gore=subclass(cls_particle,function(self,pos)

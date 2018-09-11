@@ -26,6 +26,6 @@ function cls_smoke:draw()
   pal(7,14)
   pal(6,2)
  end
- spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
  if (self.is_gore) pal()
 end

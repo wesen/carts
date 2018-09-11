@@ -1,7 +1,8 @@
 actor_cnt=0
 
 cls_actor=class(function(self,pos)
- self.pos=pos
+ self.x=pos.x
+ self.y=pos.y
  self.id=actor_cnt
  actor_cnt+=1
  self.spd=v2(0,0)
@@ -12,7 +13,7 @@ end)
 
 function cls_actor:bbox(offset)
  if (offset==nil) offset=v2(0,0)
- return hitbox_to_bbox(self.hitbox,self.pos+offset)
+ return hitbox_to_bbox(self.hitbox,v2(self.x,self.y)+offset)
 end
 
 function cls_actor:str()
@@ -37,12 +38,12 @@ function cls_actor:move_x(amount)
     self.spd.x=0
     break
    else
-    self.pos.x+=step
+    self.x+=step
    end
 
   end
  else
-  self.pos.x+=amount
+  self.x+=amount
  end
 end
 
@@ -60,12 +61,12 @@ function cls_actor:move_y(amount)
     self.spd.y=0
     break
    else
-    self.pos.y+=step
+    self.y+=step
    end
 
   end
  else
-  self.pos.y+=amount
+  self.y+=amount
  end
 end
 

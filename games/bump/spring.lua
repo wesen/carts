@@ -19,7 +19,7 @@ function cls_spring:update()
    if bbox:collide(player:bbox()) then
     player.spd.y=-spring_speed
     self.sprung_time=10
-    local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
+    local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
    end
   end
  end
@@ -29,5 +29,5 @@ function cls_spring:draw()
  -- self:bbox():draw(9)
  local spr_=spr_spring_wound
  if (self.sprung_time>0) spr_=spr_spring_sprung
- spr(spr_,self.pos.x,self.pos.y)
+ spr(spr_,self.x,self.y)
 end

@@ -30,7 +30,7 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_player:smoke(spr,dir)
- return cls_smoke.init(self.pos,spr,dir)
+ return cls_smoke.init(v2(self.x,self.y),spr,dir)
 end
 
 function cls_player:kill()
@@ -42,7 +42,7 @@ function cls_player:kill()
   room:spawn_player(self.input_port)
   for player in all(players) do
    if player.input_port==self.input_port and player.is_doppelgaenger then
-    make_gore_explosion(player.pos)
+    make_gore_explosion(v2(player.x,player.y))
     player:kill()
    end
   end
@@ -183,12 +183,12 @@ function cls_player:update_normal()
  end
 
  -- interact with players
- local feet_box=hitbox_to_bbox(self.feet_hitbox,self.pos)
+ local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
   if self!=player then
 
    -- attack
-   local head_box=hitbox_to_bbox(player.head_hitbox,player.pos)
+   local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
    local can_attack=not self.on_ground and self.spd.y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
@@ -202,8 +202,8 @@ function cls_player:update_normal()
      end
      self.is_bullet_time=false
      player.is_bullet_time=false
-     make_gore_explosion(player.pos)
-     cls_smoke.init(self.pos,32,0)
+     make_gore_explosion(v2(player.x,player.y))
+     cls_smoke.init(v2(self.x,self.y),32,0)
      self.spd.y=-2.0
      if player.input_port==self.input_port then
       -- killed a doppelgaenger
@@ -217,13 +217,13 @@ function cls_player:update_normal()
   end
  end
 
- if (not self.on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
+ if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
  if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:draw()
  if self.is_bullet_time then
-  rectfill(self.pos.x,self.pos.y,self.pos.x+8,self.pos.y+8,10)
+  rectfill(self.x,self.y,self.x+8,self.y+8,10)
   return
  end
  if not self.is_teleporting then
@@ -237,7 +237,7 @@ function cls_player:draw()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+  spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
   pal(cols_face[1], cols_face[1])
   pal(cols_hair[1], cols_hair[1])
 

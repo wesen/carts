@@ -11,11 +11,11 @@ function cls_spikes:update()
  for player in all(players) do
   if bbox:collide(player:bbox()) then
    player:kill()
-   cls_smoke.init(self.pos,32,0)
+   cls_smoke.init(v2(self.x,self.y),32,0)
   end
  end
 end
 
 function cls_spikes:draw()
- spr(spr_spikes,self.pos.x,self.pos.y)
+ spr(spr_spikes,self.px,self.y)
 end

@@ -22,17 +22,17 @@ function inoutexpo(t, b, c, d)
  return c / 2 * 1.0005 * (-pow(2, -10 * (t - 1)) + 2) + b
 end
 
-function cr_move_to(obj,target,d,easetype)
+function cr_move_to(obj,target_x,target_y,d,easetype)
  local t=0
- local bx=obj.pos.x
- local cx=target.x-obj.pos.x
- local by=obj.pos.y
- local cy=target.y-obj.pos.y
+ local bx=obj.x
+ local cx=target_x-obj.x
+ local by=obj.y
+ local cy=target_y-obj.y
  while t<d do
   t+=dt
   if (t>d) return
-  obj.pos.x=round(easetype(t,bx,cx,d))
-  obj.pos.y=round(easetype(t,by,cy,d))
+  obj.x=round(easetype(t,bx,cx,d))
+  obj.y=round(easetype(t,by,cy,d))
   yield()
  end
 end

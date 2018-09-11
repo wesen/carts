@@ -304,17 +304,17 @@ function inoutexpo(t, b, c, d)
  return c / 2 * 1.0005 * (-pow(2, -10 * (t - 1)) + 2) + b
 end
 
-function cr_move_to(obj,target,d,easetype)
+function cr_move_to(obj,target_x,target_y,d,easetype)
  local t=0
- local bx=obj.pos.x
- local cx=target.x-obj.pos.x
- local by=obj.pos.y
- local cy=target.y-obj.pos.y
+ local bx=obj.x
+ local cx=target_x-obj.x
+ local by=obj.y
+ local cy=target_y-obj.y
  while t<d do
   t+=dt
   if (t>d) return
-  obj.pos.x=round(easetype(t,bx,cx,d))
-  obj.pos.y=round(easetype(t,by,cy,d))
+  obj.x=round(easetype(t,bx,cx,d))
+  obj.y=round(easetype(t,by,cy,d))
   yield()
  end
 end
@@ -383,7 +383,8 @@ end
 actor_cnt=0
 
 cls_actor=class(function(self,pos)
- self.pos=pos
+ self.x=pos.x
+ self.y=pos.y
  self.id=actor_cnt
  actor_cnt+=1
  self.spd=v2(0,0)
@@ -394,7 +395,7 @@ end)
 
 function cls_actor:bbox(offset)
  if (offset==nil) offset=v2(0,0)
- return hitbox_to_bbox(self.hitbox,self.pos+offset)
+ return hitbox_to_bbox(self.hitbox,v2(self.x,self.y)+offset)
 end
 
 function cls_actor:str()
@@ -419,12 +420,12 @@ function cls_actor:move_x(amount)
     self.spd.x=0
     break
    else
-    self.pos.x+=step
+    self.x+=step
    end
 
   end
  else
-  self.pos.x+=amount
+  self.x+=amount
  end
 end
 
@@ -442,12 +443,12 @@ function cls_actor:move_y(amount)
     self.spd.y=0
     break
    else
-    self.pos.y+=step
+    self.y+=step
    end
 
   end
  else
-  self.pos.y+=amount
+  self.y+=amount
  end
 end
 
@@ -569,7 +570,7 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player(input_port)
- -- XXX potentially find better spawn locatiosn
+ -- xxx potentially find better spawn locatiosn
  local spawn_pos = self.spawn_locations[spawn_idx]:clone()
  local spawn=cls_spawn.init(spawn_pos, input_port)
  spawn_idx = (spawn_idx%#self.spawn_locations)+1
@@ -640,7 +641,7 @@ function cls_smoke:draw()
   pal(7,14)
   pal(6,2)
  end
- spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
  if (self.is_gore) pal()
 end
 
@@ -679,7 +680,7 @@ end
 function cls_particle:draw()
  local idx=flr(#self.sprs*(self.t/self.lifetime))
  local spr_=self.sprs[1+idx]
- spr(spr_,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(spr_,self.x,self.y,1,1,self.flip.x,self.flip.y)
 end
 
 cls_gore=subclass(cls_particle,function(self,pos)
@@ -750,7 +751,7 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_player:smoke(spr,dir)
- return cls_smoke.init(self.pos,spr,dir)
+ return cls_smoke.init(v2(self.x,self.y),spr,dir)
 end
 
 function cls_player:kill()
@@ -762,7 +763,7 @@ function cls_player:kill()
   room:spawn_player(self.input_port)
   for player in all(players) do
    if player.input_port==self.input_port and player.is_doppelgaenger then
-    make_gore_explosion(player.pos)
+    make_gore_explosion(v2(player.x,player.y))
     player:kill()
    end
   end
@@ -903,12 +904,12 @@ function cls_player:update_normal()
  end
 
  -- interact with players
- local feet_box=hitbox_to_bbox(self.feet_hitbox,self.pos)
+ local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
   if self!=player then
 
    -- attack
-   local head_box=hitbox_to_bbox(player.head_hitbox,player.pos)
+   local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
    local can_attack=not self.on_ground and self.spd.y>0
    -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
 
@@ -922,8 +923,8 @@ function cls_player:update_normal()
      end
      self.is_bullet_time=false
      player.is_bullet_time=false
-     make_gore_explosion(player.pos)
-     cls_smoke.init(self.pos,32,0)
+     make_gore_explosion(v2(player.x,player.y))
+     cls_smoke.init(v2(self.x,self.y),32,0)
      self.spd.y=-2.0
      if player.input_port==self.input_port then
       -- killed a doppelgaenger
@@ -937,13 +938,13 @@ function cls_player:update_normal()
   end
  end
 
- if (not self.on_ground and frame%2==0) insert(self.ghosts,self.pos:clone())
+ if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
  if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:draw()
  if self.is_bullet_time then
-  rectfill(self.pos.x,self.pos.y,self.pos.x+8,self.pos.y+8,10)
+  rectfill(self.x,self.y,self.x+8,self.y+8,10)
   return
  end
  if not self.is_teleporting then
@@ -957,7 +958,7 @@ function cls_player:draw()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-  spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+  spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
   pal(cols_face[1], cols_face[1])
   pal(cols_hair[1], cols_hair[1])
 
@@ -998,7 +999,7 @@ function cls_spring:update()
    if bbox:collide(player:bbox()) then
     player.spd.y=-spring_speed
     self.sprung_time=10
-    local smoke=cls_smoke.init(self.pos,spr_full_smoke,0)
+    local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
    end
   end
  end
@@ -1008,7 +1009,7 @@ function cls_spring:draw()
  -- self:bbox():draw(9)
  local spr_=spr_spring_wound
  if (self.sprung_time>0) spr_=spr_spring_sprung
- spr(spr_,self.pos.x,self.pos.y)
+ spr(spr_,self.x,self.y)
 end
 
 spr_spawn_point=1
@@ -1016,9 +1017,10 @@ spr_spawn_point=1
 cls_spawn=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  self.is_solid=false
- self.target=self.pos
+ self.target_x=self.x
+ self.target_y=self.y
+ self.y=128
  self.input_port=input_port
- self.pos=v2(self.target.x,128)
  self.spd.y=-2
  self.is_doppelgaenger=false
  add_cr(function()
@@ -1027,15 +1029,15 @@ cls_spawn=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_spawn:cr_spawn()
- cr_move_to(self,self.target,1,inexpo)
+ cr_move_to(self,self.target_x,self.target_y,1,inexpo)
  del(actors,self)
- local player=cls_player.init(self.target, self.input_port)
+ local player=cls_player.init(v2(self.target_x,self.target_y), self.input_port)
  player.is_doppelgaenger=self.is_doppelgaenger
- cls_smoke.init(self.pos,spr_full_smoke,0)
+ cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
 end
 
 function cls_spawn:draw()
- spr(spr_spawn_point,self.pos.x,self.pos.y)
+ spr(spr_spawn_point,self.x,self.y)
 end
 
 spr_spikes=68
@@ -1051,13 +1053,13 @@ function cls_spikes:update()
  for player in all(players) do
   if bbox:collide(player:bbox()) then
    player:kill()
-   cls_smoke.init(self.pos,32,0)
+   cls_smoke.init(v2(self.x,self.y),32,0)
   end
  end
 end
 
 function cls_spikes:draw()
- spr(spr_spikes,self.pos.x,self.pos.y)
+ spr(spr_spikes,self.px,self.y)
 end
 
 cls_moving_platform=subclass(cls_actor,function(pos)
@@ -1087,13 +1089,14 @@ function cls_tele_enter:update()
     local anim_length=10
     for i=0,anim_length do
      local w=i/anim_length*10
-     rectfill(player.pos.x+4-w,player.pos.y+4-w,player.pos.x+4+w,player.pos.y+4+w,7)
+     rectfill(player.x+4-w,player.y+4-w,player.x+4+w,player.y+4+w,7)
      yield()
     end
-    player.pos = rnd_elt(tele_exits).pos:clone()
+    local exit=rnd_elt(tele_exits)
+    player.x,player.y=exit.x,exit.y
     for i=0,anim_length do
      local w=(anim_length-i)/anim_length*10
-     rectfill(player.pos.x+4-w,player.pos.y+4-w,player.pos.x+4+w,player.pos.y+4+w,7)
+     rectfill(player.x+4-w,player.y+4-w,player.x+4+w,player.y+4+w,7)
      yield()
     end
     player.is_teleporting=false
@@ -1103,7 +1106,7 @@ function cls_tele_enter:update()
 end
 
 function cls_tele_enter:draw()
- spr(spr_tele_enter,self.pos.x,self.pos.y)
+ spr(spr_tele_enter,self.x,self.y)
 end
 
 
@@ -1115,7 +1118,7 @@ end)
 tiles[spr_tele_exit]=cls_tele_exit
 
 function cls_tele_exit:draw()
- spr(spr_tele_exit,self.pos.x,self.pos.y)
+ spr(spr_tele_exit,self.x,self.y)
 end
 
 spr_power_up=39
@@ -1140,7 +1143,7 @@ function cls_pwrup:act_on_player(player)
 end
 
 function cls_pwrup:draw()
- spr(self.tile,self.pos.x,self.pos.y)
+ spr(self.tile,self.x,self.y)
 end
 
 cls_pwrup_doppelgaenger=subclass(cls_pwrup,function(self,pos)
