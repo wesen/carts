@@ -4,10 +4,7 @@ end)
 
 function cls_pwrup:on_player_collision(player)
  if player.power_up!=nil then
-  player.power_up:on_powerup_stop(player)
-  player.power_up=nil
-  player.power_up_type=nil
-  player.power_up_countdown=nil
+  player:clear_power_up()
  end
 
  self:on_powerup_start(player)

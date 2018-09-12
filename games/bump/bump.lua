@@ -28,6 +28,8 @@
 --#include teleporter
 --#include power-ups
 --#include mine
+--#include bomb
+--#include balloon
 
 -- x split into actors / particles / interactables
 -- x gravity
@@ -78,6 +80,7 @@
 -- x gravity tweak
 -- x suicide bomber
 -- x invisibility
+-- x bomb
 
 -- fades
 -- better kill animations
@@ -94,7 +97,6 @@
 -- refactor powerups to have a decent api
 -- visualize power ups
 -- different sprites for different players
--- bomb
 -- balloon pulling upwards
 -- double jump
 -- dash

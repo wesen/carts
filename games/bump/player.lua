@@ -67,10 +67,7 @@ function cls_player:update_normal()
  if self.power_up_countdown!=nil then
   self.power_up_countdown-=dt
   if self.power_up_countdown<0 then
-   self.power_up:on_powerup_stop(self)
-   self.power_up=nil
-   self.power_up_type=nil
-   self.power_up_countdown=nil
+   self:clear_power_up()
   end
  end
 
@@ -267,6 +264,15 @@ function cls_player:update_normal()
 
 -- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
 -- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
+end
+
+function cls_player:clear_power_up()
+ if self.power_up!=nil then
+  self.power_up:on_powerup_stop(self)
+  self.power_up=nil
+  self.power_up_type=nil
+  self.power_up_countdown=nil
+ end
 end
 
 function cls_player:draw()
