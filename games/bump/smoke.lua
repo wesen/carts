@@ -6,6 +6,8 @@ spr_slide_smoke=60
 
 cls_smoke=subclass(cls_actor,function(self,pos,start_spr,dir)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
+ del(actors,self)
+ add(particles,self)
  self.flip=v2(maybe(),false)
  self.spr=start_spr
  self.start_spr=start_spr
@@ -17,7 +19,7 @@ end)
 function cls_smoke:update()
  self:move_x(self.spd_x)
  self.spr+=0.2
- if (self.spr>self.start_spr+3) del(actors,self)
+ if (self.spr>self.start_spr+3) del(particles,self)
 end
 
 function cls_smoke:draw()
