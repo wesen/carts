@@ -225,6 +225,7 @@ function cls_player:update_normal()
 
     if (feet_box:collide(head_box) and can_attack)
     or do_bboxes_collide(self,player) then
+     self.spd_y=-2.0
      kill_player=true
     end
    end
@@ -240,7 +241,6 @@ function cls_player:update_normal()
      player.is_bullet_time=false
      make_gore_explosion(v2(player.x,player.y))
      cls_smoke.init(v2(self.x,self.y),32,0)
-     self.spd_y=-2.0
      if player.input_port==self.input_port then
       -- killed a doppelgaenger
       -- scores[self.input_port+1]-=1
