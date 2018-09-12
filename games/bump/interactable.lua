@@ -10,3 +10,7 @@ end)
 
 function cls_interactable:update()
 end
+
+function cls_interactable:draw()
+ spr(self.spr,self.x,self.y)
+end

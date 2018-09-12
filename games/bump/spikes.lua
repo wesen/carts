@@ -7,7 +7,7 @@ tiles[spr_spikes]=cls_spikes
 
 function cls_spikes:on_player_collision(player)
  player:kill()
- cls_smoke.init(v2(self.x,self.y),32,0)
+ make_gore_explosion(v2(player.x,player.y))
 end
 
 function cls_spikes:draw()
