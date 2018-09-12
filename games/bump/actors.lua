@@ -95,7 +95,7 @@ function cls_actor:is_actor_at(x,y)
   if (actor.is_solid and self!=actor and do_bboxes_collide_offset(self,actor,x,y)) return true,actor
  end
 
- return false
+ return false,nil
 end
 
 function draw_actors(typ)

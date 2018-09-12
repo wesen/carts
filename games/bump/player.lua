@@ -29,6 +29,7 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.is_teleporting=false
  self.on_ground=false
  self.is_bullet_time=false
+ self.is_dead=false
 end)
 
 function cls_player:smoke(spr,dir)
@@ -38,6 +39,7 @@ end
 function cls_player:kill()
  del(players,self)
  del(actors,self)
+ self.is_dead=true
  add_shake(3)
  sfx(1)
  if not self.is_doppelgaenger then
