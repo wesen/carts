@@ -25,7 +25,26 @@
 --#include moving_platform
 --#include teleporter
 --#include power-ups
+--#include mine
 
+--[[
+
+interactables:
+- spring
+- spikes
+- tele_enter
+- powerup
+- mine
+
+standalone
+- gore
+- smoke
+- spawn
+- tele exit
+
+]]
+
+-- split into actors / particles / interactables
 -- x gravity
 -- x downward collision
 -- x wall slide
@@ -83,6 +102,7 @@
 -- visualize power ups
 -- different sprites for different players
 -- bomb
+-- blast mine
 -- x superspeed
 -- x superjump
 -- x gravity tweak

@@ -163,7 +163,7 @@ function cls_player:update_normal()
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
-    smoke.flip.x=self.flip.x
+    smoke.flip_x=self.flip.x
   end
  end
 
