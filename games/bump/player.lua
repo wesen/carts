@@ -37,17 +37,19 @@ function cls_player:smoke(spr,dir)
 end
 
 function cls_player:kill()
- del(players,self)
- del(actors,self)
- self.is_dead=true
- add_shake(3)
- sfx(1)
- if not self.is_doppelgaenger then
-  room:spawn_player(self.input_port)
-  for player in all(players) do
-   if player.input_port==self.input_port and player.is_doppelgaenger then
-    make_gore_explosion(v2(player.x,player.y))
-    player:kill()
+ if not self.is_dead then
+  del(players,self)
+  del(actors,self)
+  self.is_dead=true
+  add_shake(3)
+  sfx(1)
+  if not self.is_doppelgaenger then
+   room:spawn_player(self.input_port)
+   for player in all(players) do
+    if player.input_port==self.input_port and player.is_doppelgaenger then
+     make_gore_explosion(v2(player.x,player.y))
+     player:kill()
+    end
    end
   end
  end

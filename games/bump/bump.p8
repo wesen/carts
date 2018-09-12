@@ -16,6 +16,7 @@ btn_up=2
 btn_down=3
 btn_left=0
 btn_jump=4
+btn_action=5
 
 -- physics tweaking
 local maxrun=1
@@ -821,17 +822,19 @@ function cls_player:smoke(spr,dir)
 end
 
 function cls_player:kill()
- del(players,self)
- del(actors,self)
- self.is_dead=true
- add_shake(3)
- sfx(1)
- if not self.is_doppelgaenger then
-  room:spawn_player(self.input_port)
-  for player in all(players) do
-   if player.input_port==self.input_port and player.is_doppelgaenger then
-    make_gore_explosion(v2(player.x,player.y))
-    player:kill()
+ if not self.is_dead then
+  del(players,self)
+  del(actors,self)
+  self.is_dead=true
+  add_shake(3)
+  sfx(1)
+  if not self.is_doppelgaenger then
+   room:spawn_player(self.input_port)
+   for player in all(players) do
+    if player.input_port==self.input_port and player.is_doppelgaenger then
+     make_gore_explosion(v2(player.x,player.y))
+     player:kill()
+    end
    end
   end
  end
@@ -1345,7 +1348,7 @@ cls_suicide_bomb=subclass(cls_pwrup,function(self,pos)
 end)
 
 function cls_suicide_bomb:on_powerup_stop(player)
- make_blast(player.x,player.y)
+ if (player.power_up_countdown<=0) make_blast(player.x,player.y)
 end
 
 spr_suicide_bomb=45
@@ -1360,33 +1363,39 @@ end)
 tiles[spr_bomb]=cls_bomb_pwrup
 
 function cls_bomb_pwrup:on_powerup_start(player)
- local bomb=cls_bomb.init(v2(64,64),player)
- bomb.spd_x=0.4
- bomb.is_thrown=true
+ local bomb=cls_bomb.init(player)
 end
 
-cls_bomb=subclass(cls_actor,function(self,pos,player)
- cls_actor._ctr(self,pos)
+cls_bomb=subclass(cls_actor,function(self,player)
+ cls_actor._ctr(self,v2(player.x,player.y))
  self.is_thrown=false
  self.is_solid=false
  self.player=player
 end)
 
 function cls_bomb:update()
- if self.is_thrown then
-  local solid=solid_at(self)
-  local actor=self:is_actor_at(0,0)
-  if solid or actor then
-   make_blast(self.x,self.y)
-   del(actors,self)
-  else
-   local gravity=0.12
-   local maxfall=2
-   self.x+=self.spd_x
-   self.spd_y=appr(self.spd_y,maxfall,gravity)
-   self.y+=self.spd_y
-  end
+ local solid=solid_at(self)
+ local is_actor,actor=self:is_actor_at(0,0)
+ if solid or (is_actor and actor!=self.player) then
+  printh("bomb blast")
+  make_blast(self.x,self.y)
+  del(actors,self)
+ elseif self.is_thrown then
+  local gravity=0.12
+  local maxfall=2
+  self.x+=self.spd_x
+  self.spd_y=appr(self.spd_y,maxfall,gravity)
+  self.y+=self.spd_y
+ elseif self.player.is_dead then
+  del(actors,self)
  else
+  self.x=self.player.x
+  self.y=self.player.y-8
+  if btnp(btn_action,self.player.input_port) then
+   self.is_thrown=true
+   self.spd_x=(self.player.flip_x and -1 or 1) + self.player.spd_x
+   self.spd_y=-1
+  end
  end
 end
 
