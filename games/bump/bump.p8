@@ -847,6 +847,7 @@ function cls_player:update_normal()
  if self.power_up_countdown!=nil then
   self.power_up_countdown-=dt
   if self.power_up_countdown<0 then
+   self.power_up:on_powerup_stop(self)
    self.power_up=nil
    self.power_up_countdown=nil
   end
@@ -866,15 +867,17 @@ function cls_player:update_normal()
  local decel=0.1
  local jump_spd=jump_spd
 
- if self.power_up==spr_power_up_superspeed then
-  maxrun*=1.5
-  decel*=2
-  accel*=2
- elseif self.power_up==spr_power_up_superjump then
-  jump_spd*=1.5
- elseif self.power_up==spr_power_up_gravitytweak then
-  gravity*=0.7
-  maxfall*=0.5
+ if self.power_up!=nil then
+  if self.power_up.tile==spr_power_up_superspeed then
+   maxrun*=1.5
+   decel*=2
+   accel*=2
+  elseif self.power_up.tile==spr_power_up_superjump then
+   jump_spd*=1.5
+  elseif self.power_up.tile==spr_power_up_gravitytweak then
+   gravity*=0.7
+   maxfall*=0.5
+  end
  end
 
  local ground_bbox=self:bbox(0,1)
@@ -996,10 +999,11 @@ function cls_player:update_normal()
  -- interact with players
  local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
-  if self!=player and player.power_up!=spr_power_up_invincibility then
+  if self!=player and
+  (player.power_up==nil or player.power_up!=spr_power_up_invincibility) then
    local kill_player=false
 
-   if self.power_up==spr_power_up_invincibility
+   if self.power_up!=nil and self.power_up.tile==spr_power_up_invincibility
     and do_bboxes_collide_offset(self,player,input,0) then
     kill_player=true
    else
@@ -1052,7 +1056,7 @@ function cls_player:draw()
   return
  end
  if not self.is_teleporting then
-  if (self.power_up==spr_power_up_invisibility and frame%60<50) return
+  if (self.power_up!=nil and self.power_up.tile==spr_power_up_invisibility and frame%60<50) return
   -- local dark=0
   -- for ghost in all(self.ghosts) do
   --  dark+=8
@@ -1064,7 +1068,7 @@ function cls_player:draw()
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
   if self.power_up!=nil then
-   bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up])
+   bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up.tile])
   else
    spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
   end
@@ -1221,43 +1225,58 @@ end
 
 cls_pwrup=subclass(cls_interactable,function(self,pos)
  cls_interactable._ctr(self,pos.x,pos.y,0,0,8,8)
+ self.countdown=powerup_countdowns[self.tile]
 end)
 
 function cls_pwrup:on_player_collision(player)
- -- clear previous power
- if player.power_up==spr_power_up_doppelgaenger then
-  for _p in all(players) do
-   if _p.input_port==player.input_port and _p.is_doppelgaenger then
-    del(players,_p)
-    del(actors,_p)
-    make_gore_explosion(v2(_p.x,_p.y))
-   end
-  end
+ if player.power_up!=nil then
+  player.power_up:on_powerup_stop(player)
+  player.power_up=nil
+  player.power_up_countdown=nil
  end
 
- -- add new power
- if self.tile==spr_power_up_doppelgaenger then
-  for i=0,3 do
-   local spawn=room:spawn_player(player.input_port)
-   spawn.is_doppelgaenger=true
-  end
- end
-
- player.power_up=self.tile
- player.power_up_countdown=powerup_countdowns[self.tile]
+ player.power_up=self
+ player.power_up_countdown=self.countdown
 
   del(interactables,self)
+end
+
+function cls_pwrup:on_powerup_start(player)
+end
+
+function cls_pwrup:on_powerup_stop(player)
 end
 
 function cls_pwrup:draw()
  spr(self.tile,self.x,self.y)
 end
 
+cls_pwrup_doppelgaenger=subclass(cls_pwrup,function(self,pos)
+ cls_pwrup._ctr(self,pos)
+end)
+
+function cls_pwrup_doppelgaenger:on_powerup_stop(player)
+ for _p in all(players) do
+  if _p.input_port==player.input_port and _p.is_doppelgaenger then
+   del(players,_p)
+   del(actors,_p)
+   make_gore_explosion(v2(_p.x,_p.y))
+  end
+ end
+end
+
+function cls_pwrup_doppelgaenger:on_powerup_start(player)
+ for i=0,3 do
+  local spawn=room:spawn_player(player.input_port)
+  spawn.is_doppelgaenger=true
+ end
+end
+
 powerup_colors={}
 powerup_countdowns={}
 
 spr_power_up_doppelgaenger=39
-tiles[spr_power_up_doppelgaenger]=cls_pwrup
+tiles[spr_power_up_doppelgaenger]=cls_pwrup_doppelgaenger
 powerup_colors[spr_power_up_doppelgaenger]=8
 
 spr_power_up_invincibility=40
@@ -1291,49 +1310,47 @@ cls_mine=subclass(cls_interactable,function(self,pos)
  self.spr=spr_mine
 end)
 
-function cls_mine:on_player_collision(player)
+function make_blast(x,y)
  add_cr(function ()
   for i=0,20 do
    local r=outexpo(i,50,-50,20)
-   circfill(self.x+4,self.y+6,r,7)
+   circfill(x+4,y+6,r,7)
    yield()
   end
  end, draw_crs)
  for p in all(players) do
-  if player.power_up!=spr_power_up_invincibility then
-   local dx=p.x-self.x
-   local dy=p.y-self.y
+  if p.power_up!=spr_power_up_invincibility then
+   local dx=p.x-x
+   local dy=p.y-y
    local d=sqrt(dx*dx+dy*dy)
    if d<50 then
-    player:kill()
-    make_gore_explosion(v2(player.x,player.y))
+    p:kill()
+    make_gore_explosion(v2(p.x,p.y))
    end
   end
  end
+end
+
+function cls_mine:on_player_collision(player)
+ make_blast(self.x,self.y)
+ del(interactables,self)
+end
+tiles[spr_mine]=cls_mine
+
+spr_suicide_bomb=45
+cls_suicide_bomb=subclass(cls_interactable,function(self,pos)
+ cls_interactable._ctr(self,pos.x,pos.y,0,0,8,8)
+ self.spr=spr_suicide_bomb
+end)
+tiles[spr_suicide_bomb]=cls_suicide_bomb
+
+function cls_suicide_bomb:on_player_collision(player)
+
  del(interactables,self)
 end
 
-tiles[spr_mine]=cls_mine
 
-
---[[
-
-interactables:
-- x spring
-- x spikes
-- tele_enter
-- powerup
-- mine
-
-standalone
-- gore
-- x smoke
-- spawn
-- tele exit
-
-]]
-
--- split into actors / particles / interactables
+-- x split into actors / particles / interactables
 -- x gravity
 -- x downward collision
 -- x wall slide
@@ -1387,11 +1404,12 @@ standalone
 -- pretty pass
 
 -- powerups - item dropper
+-- refactor powerups to have a decent API
 -- x invincibility
 -- visualize power ups
 -- different sprites for different players
 -- bomb
--- blast mine
+-- x blast mine
 -- x superspeed
 -- x superjump
 -- x gravity tweak
@@ -1492,12 +1510,12 @@ __gfx__
 00099909f0ffff00f0fff0000fff00f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 009444900fffff400ff6f60005f5ff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000004000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000008000880084080000088000008000000000000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb003333330022222200dddddd0
-0008480008400080000000000008e8000008e00000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb003333330022222200dddddd0
-008888800d0000d00000000000888880008e8800000e0000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb003333330022222200dddddd0
-004884800000000000000000002882800008820000888000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb003333330022222200dddddd0
-000444000880000800000000000222000000200000020000000e00000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb003333330022222200dddddd0
-000000000d800d8080000008000000000000000000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb003333330022222200dddddd0
+000008000880084080000088000008000000000000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb000000000022222200dddddd0
+0008480008400080000000000008e8000008e00000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb056056056022222200dddddd0
+008888800d0000d00000000000888880008e8800000e0000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb08e08e08e022222200dddddd0
+004884800000000000000000002882800008820000888000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb08e58e58e022222200dddddd0
+000444000880000800000000000222000000200000020000000e00000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb088088088022222200dddddd0
+000000000d800d8080000008000000000000000000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb055055055022222200dddddd0
 0000000000d00d008800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000770700000770000000000000000000000000000000000077000000000000000000000000000000000000000000000000000000000000000000000000000
 70000600007700667000007000000000000000000000000000060000007700007000000000000000000000000000000000000000000000000000000000000000
@@ -1687,7 +1705,7 @@ __map__
 4040000000400001000100004100000000000000000000000140404000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000400040404000004100404000000000000040404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000404000400000000000004105000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000000000040420000000000410005000570010000420000007100000001000042000001002c000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000000040420000000000410005000570010000420000007100000001000042000001002d000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4444444444404044414141444044444041414141414141414140404040404040404044404041414141404040404040404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 000100001a050180501a0500000012050120501105000000100501005010050100501005012050130501605000000190501a0501d0501e0502005023050270500000000000000000000000000000000000000000

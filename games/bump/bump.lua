@@ -29,24 +29,7 @@
 --#include power-ups
 --#include mine
 
---[[
-
-interactables:
-- x spring
-- x spikes
-- tele_enter
-- powerup
-- mine
-
-standalone
-- gore
-- x smoke
-- spawn
-- tele exit
-
-]]
-
--- split into actors / particles / interactables
+-- x split into actors / particles / interactables
 -- x gravity
 -- x downward collision
 -- x wall slide
@@ -100,11 +83,12 @@ standalone
 -- pretty pass
 
 -- powerups - item dropper
+-- refactor powerups to have a decent API
 -- x invincibility
 -- visualize power ups
 -- different sprites for different players
 -- bomb
--- blast mine
+-- x blast mine
 -- x superspeed
 -- x superjump
 -- x gravity tweak
