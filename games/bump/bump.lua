@@ -83,7 +83,7 @@
 -- pretty pass
 
 -- powerups - item dropper
--- refactor powerups to have a decent API
+-- refactor powerups to have a decent api
 -- x invincibility
 -- visualize power ups
 -- different sprites for different players

@@ -7,10 +7,13 @@ function cls_pwrup:on_player_collision(player)
  if player.power_up!=nil then
   player.power_up:on_powerup_stop(player)
   player.power_up=nil
+  player.power_up_type=nil
   player.power_up_countdown=nil
  end
 
+ self:on_powerup_start(player)
  player.power_up=self
+ player.power_up_type=self.tile
  player.power_up_countdown=self.countdown
 
   del(interactables,self)

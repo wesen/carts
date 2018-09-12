@@ -65,6 +65,7 @@ function cls_player:update_normal()
   if self.power_up_countdown<0 then
    self.power_up:on_powerup_stop(self)
    self.power_up=nil
+   self.power_up_type=nil
    self.power_up_countdown=nil
   end
  end
@@ -83,17 +84,15 @@ function cls_player:update_normal()
  local decel=0.1
  local jump_spd=jump_spd
 
- if self.power_up!=nil then
-  if self.power_up.tile==spr_power_up_superspeed then
-   maxrun*=1.5
-   decel*=2
-   accel*=2
-  elseif self.power_up.tile==spr_power_up_superjump then
-   jump_spd*=1.5
-  elseif self.power_up.tile==spr_power_up_gravitytweak then
-   gravity*=0.7
-   maxfall*=0.5
-  end
+ if self.power_up_type==spr_power_up_superspeed then
+  maxrun*=1.5
+  decel*=2
+  accel*=2
+ elseif self.power_up_type==spr_power_up_superjump then
+  jump_spd*=1.5
+ elseif self.power_up_type==spr_power_up_gravitytweak then
+  gravity*=0.7
+  maxfall*=0.5
  end
 
  local ground_bbox=self:bbox(0,1)
@@ -219,7 +218,7 @@ function cls_player:update_normal()
   (player.power_up==nil or player.power_up!=spr_power_up_invincibility) then
    local kill_player=false
 
-   if self.power_up!=nil and self.power_up.tile==spr_power_up_invincibility
+   if self.power_up_type==spr_power_up_invincibility
     and do_bboxes_collide_offset(self,player,input,0) then
     kill_player=true
    else
@@ -272,7 +271,7 @@ function cls_player:draw()
   return
  end
  if not self.is_teleporting then
-  if (self.power_up!=nil and self.power_up.tile==spr_power_up_invisibility and frame%60<50) return
+  if (self.power_up_type==spr_power_up_invisibility and frame%60<50) return
   -- local dark=0
   -- for ghost in all(self.ghosts) do
   --  dark+=8
@@ -284,7 +283,7 @@ function cls_player:draw()
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
   if self.power_up!=nil then
-   bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up.tile])
+   bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up_type])
   else
    spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
   end
