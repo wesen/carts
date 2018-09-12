@@ -77,8 +77,15 @@ function cls_player:update_normal()
 
  local gravity=gravity
  local maxfall=maxfall
+ local maxrun=maxrun
  local accel=0.1
  local decel=0.1
+
+ if self.power_up==spr_power_up_superspeed then
+  maxrun*=1.5
+  decel*=2
+  accel*=2
+ end
 
  local ground_bbox=self:bbox(0,1)
  self.on_ground=solid_at(ground_bbox)

@@ -79,11 +79,11 @@
 -- pretty pass
 
 -- powerups - item dropper
+-- x invincibility
 -- visualize power ups
 -- different sprites for different players
 -- bomb
--- superspeed
--- invincibility
+-- x superspeed
 -- superjump
 -- gravity tweak
 -- double jump

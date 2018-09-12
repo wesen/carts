@@ -1,6 +1,3 @@
-spr_power_up_doppelgaenger=39
-spr_power_up_invincibility=40
-
 cls_pwrup=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
@@ -35,20 +32,29 @@ function cls_pwrup:act_on_player(player)
    local spawn=room:spawn_player(player.input_port)
    spawn.is_doppelgaenger=true
   end
-  player.power_up=spr_power_up_doppelgaenger
-  player.power_up_countdown=nil
- elseif self.tile==spr_power_up_invincibility then
-  player.power_up=spr_power_up_invincibility
-  player.power_up_countdown=25
  end
+
+ player.power_up=self.tile
+ player.power_up_countdown=powerup_countdowns[self.tile]
 end
 
 function cls_pwrup:draw()
  spr(self.tile,self.x,self.y)
 end
 
-tiles[spr_power_up_doppelgaenger]=cls_pwrup
-tiles[spr_power_up_invincibility]=cls_pwrup
 powerup_colors={}
+powerup_countdowns={}
+
+spr_power_up_doppelgaenger=39
+tiles[spr_power_up_doppelgaenger]=cls_pwrup
 powerup_colors[spr_power_up_doppelgaenger]=8
+
+spr_power_up_invincibility=40
+tiles[spr_power_up_invincibility]=cls_pwrup
 powerup_colors[spr_power_up_invincibility]=9
+powerup_countdowns[spr_power_up_invincibility]=10
+
+spr_power_up_superspeed=41
+tiles[spr_power_up_superspeed]=cls_pwrup
+powerup_colors[spr_power_up_superspeed]=6
+powerup_countdowns[spr_power_up_superspeed]=30
