@@ -85,10 +85,11 @@
 -- bomb
 -- x superspeed
 -- x superjump
--- gravity tweak
+-- x gravity tweak
+-- balloon pulling upwards
 -- double jump
 -- dash
--- invisibility
+-- x invisibility
 -- meteors
 -- flamethrower
 -- bullet time

@@ -88,6 +88,9 @@ function cls_player:update_normal()
   accel*=2
  elseif self.power_up==spr_power_up_superjump then
   jump_spd*=1.5
+ elseif self.power_up==spr_power_up_gravitytweak then
+  gravity*=0.7
+  maxfall*=0.5
  end
 
  local ground_bbox=self:bbox(0,1)
@@ -260,6 +263,7 @@ function cls_player:draw()
   return
  end
  if not self.is_teleporting then
+  if (self.power_up==spr_power_up_invisibility and frame%60<50) return
   -- local dark=0
   -- for ghost in all(self.ghosts) do
   --  dark+=8

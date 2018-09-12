@@ -62,4 +62,13 @@ powerup_countdowns[spr_power_up_superspeed]=10
 spr_power_up_superjump=42
 tiles[spr_power_up_superjump]=cls_pwrup
 powerup_colors[spr_power_up_superjump]=12
-powerup_countdowns[spr_power_up_superjump]=30
+powerup_countdowns[spr_power_up_superjump]=15
+
+spr_power_up_gravitytweak=43
+tiles[spr_power_up_gravitytweak]=cls_pwrup
+powerup_colors[spr_power_up_gravitytweak]=9
+powerup_countdowns[spr_power_up_gravitytweak]=30
+
+spr_power_up_invisibility=44
+tiles[spr_power_up_invisibility]=cls_pwrup
+powerup_countdowns[spr_power_up_invisibility]=30
