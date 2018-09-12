@@ -76,3 +76,7 @@ powerup_countdowns[spr_power_up_gravitytweak]=30
 spr_power_up_invisibility=44
 tiles[spr_power_up_invisibility]=cls_pwrup
 powerup_countdowns[spr_power_up_invisibility]=30
+
+spr_power_up_shrink=46
+tiles[spr_power_up_shrink]=cls_pwrup
+powerup_countdowns[spr_power_up_shrink]=30

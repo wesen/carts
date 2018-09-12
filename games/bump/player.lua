@@ -42,20 +42,41 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_player:update_bbox()
- cls_actor.update_bbox(self)
- self.head_box={
-   aax=self.head_hitbox.x+self.x,
-   aay=self.head_hitbox.y+self.y
-  }
- self.head_box.bbx=self.head_box.aax+self.head_hitbox.dimx
- self.head_box.bby=self.head_box.aay+self.head_hitbox.dimy
+ if self.power_up_type!=spr_power_up_shrink then
+  cls_actor.update_bbox(self)
+  self.head_box={
+    aax=self.head_hitbox.x+self.x,
+    aay=self.head_hitbox.y+self.y
+   }
+  self.head_box.bbx=self.head_box.aax+self.head_hitbox.dimx
+  self.head_box.bby=self.head_box.aay+self.head_hitbox.dimy
 
- self.feet_box={
-   aax=self.feet_hitbox.x+self.x,
-   aay=self.feet_hitbox.y+self.y
-  }
- self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
- self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+  self.feet_box={
+    aax=self.feet_hitbox.x+self.x,
+    aay=self.feet_hitbox.y+self.y
+   }
+  self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
+  self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+ else
+  self.aax=self.x+3
+  self.aay=self.y+5
+  self.bbx=self.aax+3
+  self.bby=self.aay+3
+
+  self.head_box={
+    aax=self.x+2,
+    aay=self.y+5
+   }
+  self.head_box.bbx=self.head_box.aax+4
+  self.head_box.bby=self.head_box.aay+1
+
+  self.feet_box={
+    aax=self.feet_hitbox.x+self.x,
+    aay=self.feet_hitbox.y+self.y
+   }
+  self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
+  self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+ end
 end
 
 function cls_player:smoke(spr,dir)
@@ -237,6 +258,8 @@ function cls_player:update_normal()
  else
   self.spr=1+flr(frame/4)%3
  end
+
+ if (self.power_up_type==spr_power_up_shrink) self.spr+=4
 
  -- interact with players
  for player in all(players) do
