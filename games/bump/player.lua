@@ -253,6 +253,11 @@ function cls_player:update_normal()
   end
  end
 
+ for a in all(interactables) do
+  if (do_bboxes_collide(self,a)) a:on_player_collision(self)
+ end
+
+
 -- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
 -- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end

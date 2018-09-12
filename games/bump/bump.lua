@@ -13,6 +13,8 @@
 --#include queues
 --#include gfx
 
+--#include interactable
+
 --#include actors
 --#include button
 --#include room
@@ -31,7 +33,7 @@
 
 interactables:
 - x spring
-- spikes
+- x spikes
 - tele_enter
 - powerup
 - mine

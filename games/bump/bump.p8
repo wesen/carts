@@ -424,6 +424,20 @@ function darken(p,_pal)
 end
 
 
+cls_interactable=class(function(self,x,y,hitbox_x,hitbox_y,hitbox_dim_x,hitbox_dim_y)
+ add(interactables,self)
+ self.x=x
+ self.y=y
+ self.aax=self.x+hitbox_x
+ self.aay=self.y+hitbox_y
+ self.bbx=self.aax+hitbox_dim_x
+ self.bby=self.aay+hitbox_dim_y
+end)
+
+function cls_interactable:update()
+end
+
+
 cls_actor=class(function(self,pos)
  self.x=pos.x
  self.y=pos.y
@@ -1018,6 +1032,11 @@ function cls_player:update_normal()
   end
  end
 
+ for a in all(interactables) do
+  if (do_bboxes_collide(self,a)) a:on_player_collision(self)
+ end
+
+
 -- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
 -- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
@@ -1066,31 +1085,21 @@ end
 spr_spring_sprung=66
 spr_spring_wound=67
 
-cls_spring=class(function(self,pos)
- add(interactables,self)
- self.x=pos.x
- self.y=pos.y
- self.aax=self.x
- self.aay=self.y+5
- self.bbx=self.aax+8
- self.bby=self.aay+3
+cls_spring=subclass(cls_interactable,function(self,pos)
+ cls_interactable._ctr(self,pos.x,pos.y,0,5,8,3)
  self.sprung_time=0
 end)
 tiles[spr_spring_sprung]=cls_spring
 
 function cls_spring:update()
  -- collide with players
- if self.sprung_time>0 then
-  self.sprung_time-=1
- else
-  for player in all(players) do
-   if do_bboxes_collide(self,player) then
-    player.spd_y=-spring_speed
-    self.sprung_time=10
-    local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
-   end
-  end
- end
+ if (self.sprung_time>0) self.sprung_time-=1
+end
+
+function cls_spring:on_player_collision(player)
+ player.spd_y=-spring_speed
+ self.sprung_time=10
+ local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
 end
 
 function cls_spring:draw()
@@ -1133,24 +1142,14 @@ end
 
 spr_spikes=68
 
-cls_spikes=class(function(self,pos)
- add(interactables,self)
- self.x=pos.x
- self.y=pos.y
- self.aax=self.x
- self.aay=self.y+3
- self.bbx=self.aax+8
- self.bby=self.aay+5
+cls_spikes=subclass(cls_interactable,function(self,pos)
+ cls_interactable._ctr(self,pos.x,pos.y,0,3,8,5)
 end)
 tiles[spr_spikes]=cls_spikes
 
-function cls_spikes:update()
- for player in all(players) do
-  if do_bboxes_collide(self,player) then
-   player:kill()
-   cls_smoke.init(v2(self.x,self.y),32,0)
-  end
- end
+function cls_spikes:on_player_collision(player)
+ player:kill()
+ cls_smoke.init(v2(self.x,self.y),32,0)
 end
 
 function cls_spikes:draw()
@@ -1301,7 +1300,7 @@ end)
 
 interactables:
 - x spring
-- spikes
+- x spikes
 - tele_enter
 - powerup
 - mine
