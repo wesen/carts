@@ -39,7 +39,7 @@ function cls_pwrup:act_on_player(player)
   player.power_up_countdown=nil
  elseif self.tile==spr_power_up_invincibility then
   player.power_up=spr_power_up_invincibility
-  player.power_up_countdown=4
+  player.power_up_countdown=25
  end
 end
 
