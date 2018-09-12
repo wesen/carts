@@ -689,15 +689,14 @@ function cls_smoke:draw()
  spr(self.spr,self.x,self.y,1,1,self.flip_x,false)
 end
 
-cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
- cls_actor._ctr(self,pos+v2(mrnd(1),0))
- del(actors,self)
+cls_particle=class(function(self,pos,lifetime,sprs)
+ self.x=pos.x+mrnd(1)
+ self.y=pos.y
  add(particles,self)
  self.flip=v2(false,false)
  self.t=0
  self.lifetime=lifetime
  self.sprs=sprs
- self.is_solid=false
  self.weight=0
 end)
 
@@ -994,6 +993,7 @@ function cls_player:update_normal()
 
     if (feet_box:collide(head_box) and can_attack)
     or do_bboxes_collide(self,player) then
+     self.spd_y=-2.0
      kill_player=true
     end
    end
@@ -1009,7 +1009,6 @@ function cls_player:update_normal()
      player.is_bullet_time=false
      make_gore_explosion(v2(player.x,player.y))
      cls_smoke.init(v2(self.x,self.y),32,0)
-     self.spd_y=-2.0
      if player.input_port==self.input_port then
       -- killed a doppelgaenger
       -- scores[self.input_port+1]-=1
@@ -1304,7 +1303,7 @@ interactables:
 
 standalone
 - gore
-- smoke
+- x smoke
 - spawn
 - tele exit
 

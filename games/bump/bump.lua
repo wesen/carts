@@ -38,7 +38,7 @@ interactables:
 
 standalone
 - gore
-- smoke
+- x smoke
 - spawn
 - tele exit
 

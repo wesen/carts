@@ -1,12 +1,11 @@
-cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
- cls_actor._ctr(self,pos+v2(mrnd(1),0))
- del(actors,self)
+cls_particle=class(function(self,pos,lifetime,sprs)
+ self.x=pos.x+mrnd(1)
+ self.y=pos.y
  add(particles,self)
  self.flip=v2(false,false)
  self.t=0
  self.lifetime=lifetime
  self.sprs=sprs
- self.is_solid=false
  self.weight=0
 end)
 
