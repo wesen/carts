@@ -96,7 +96,7 @@ end
 
 function cls_actor:is_actor_at(x,y)
  for actor in all(actors) do
-  if (actor.is_solid and self!=actor and do_bboxes_collide_offset(self,actor,x,y)) return true
+  if (actor.is_solid and self!=actor and do_bboxes_collide_offset(self,actor,x,y)) return true,actor
  end
 
  return false
