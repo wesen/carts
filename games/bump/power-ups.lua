@@ -1,20 +1,8 @@
-cls_pwrup=subclass(cls_actor,function(self,pos)
- cls_actor._ctr(self,pos)
- self.is_solid=false
+cls_pwrup=subclass(cls_interactable,function(self,pos)
+ cls_interactable._ctr(self,pos.x,pos.y,0,0,8,8)
 end)
 
-function cls_pwrup:update()
- local bb=self:bbox()
- for player in all(players) do
-  if player:bbox():collide(bb) then
-   self:act_on_player(player)
-   del(actors,self)
-   return
-  end
- end
-end
-
-function cls_pwrup:act_on_player(player)
+function cls_pwrup:on_player_collision(player)
  -- clear previous power
  if player.power_up==spr_power_up_doppelgaenger then
   for _p in all(players) do
@@ -36,6 +24,8 @@ function cls_pwrup:act_on_player(player)
 
  player.power_up=self.tile
  player.power_up_countdown=powerup_countdowns[self.tile]
+
+  del(interactables,self)
 end
 
 function cls_pwrup:draw()
