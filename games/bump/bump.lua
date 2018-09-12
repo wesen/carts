@@ -84,7 +84,7 @@
 -- different sprites for different players
 -- bomb
 -- x superspeed
--- superjump
+-- x superjump
 -- gravity tweak
 -- double jump
 -- dash

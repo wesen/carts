@@ -57,4 +57,9 @@ powerup_countdowns[spr_power_up_invincibility]=10
 spr_power_up_superspeed=41
 tiles[spr_power_up_superspeed]=cls_pwrup
 powerup_colors[spr_power_up_superspeed]=6
-powerup_countdowns[spr_power_up_superspeed]=30
+powerup_countdowns[spr_power_up_superspeed]=10
+
+spr_power_up_superjump=42
+tiles[spr_power_up_superjump]=cls_pwrup
+powerup_colors[spr_power_up_superjump]=12
+powerup_countdowns[spr_power_up_superjump]=30
