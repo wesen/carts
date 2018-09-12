@@ -1,6 +1,15 @@
 players={}
-
+connected_players={}
 player_cnt=0
+
+function check_for_new_players()
+ for i=0,3 do
+  if (btnp(btn_jump,i) or btnp(btn_action,i)) and connected_players[i]==nil then
+   connected_players[i]=true
+   room:spawn_player(i)
+  end
+ end
+end
 
 cls_player=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)

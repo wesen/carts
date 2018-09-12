@@ -1,7 +1,5 @@
 function _init()
  room=cls_room.init(v2(32,0),v2(16,16))
- room:spawn_player(p1_input)
- room:spawn_player(p2_input)
 end
 
 function _draw()
@@ -38,6 +36,9 @@ end
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+ 
+ check_for_new_players()
+
  for a in all(actors) do
   a:update_bbox()
  end

@@ -81,6 +81,8 @@
 -- x suicide bomber
 -- x invisibility
 -- x bomb
+-- x have players join when pressing action
+-- make player selection screen
 
 -- fades
 -- better kill animations
