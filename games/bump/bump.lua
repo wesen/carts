@@ -70,11 +70,19 @@
 -- x doppelgangers
 -- x remove typ code
 -- x bullet time on kill
+
+-- x invincibility
+-- x blast mine
+-- x superspeed
+-- x superjump
+-- x gravity tweak
+-- x suicide bomber
+-- x invisibility
+
+-- fades
 -- better kill animations
 -- restore ghosts / particles on player
 -- decrease score when dying on spikes
-
--- fades
 
 -- number of player selector menu
 -- title screen
@@ -84,18 +92,12 @@
 
 -- powerups - item dropper
 -- refactor powerups to have a decent api
--- x invincibility
 -- visualize power ups
 -- different sprites for different players
 -- bomb
--- x blast mine
--- x superspeed
--- x superjump
--- x gravity tweak
 -- balloon pulling upwards
 -- double jump
 -- dash
--- x invisibility
 -- meteors
 -- flamethrower
 -- bullet time
@@ -107,7 +109,6 @@
 -- lasers
 -- gun
 -- rope
--- selfbomber (on a timer)
 -- level design
 
 -- x multiple players

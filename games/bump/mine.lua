@@ -32,14 +32,16 @@ function cls_mine:on_player_collision(player)
 end
 tiles[spr_mine]=cls_mine
 
-spr_suicide_bomb=45
-cls_suicide_bomb=subclass(cls_interactable,function(self,pos)
- cls_interactable._ctr(self,pos.x,pos.y,0,0,8,8)
- self.spr=spr_suicide_bomb
+cls_suicide_bomb=subclass(cls_pwrup,function(self,pos)
+ cls_pwrup._ctr(self,pos)
 end)
-tiles[spr_suicide_bomb]=cls_suicide_bomb
 
-function cls_suicide_bomb:on_player_collision(player)
-
- del(interactables,self)
+function cls_suicide_bomb:on_powerup_stop(player)
+ printh("MAKE BLAST")
+ make_blast(player.x,player.y)
 end
+
+spr_suicide_bomb=45
+powerup_colors[spr_suicide_bomb]=8
+powerup_countdowns[spr_suicide_bomb]=5
+tiles[spr_suicide_bomb]=cls_suicide_bomb

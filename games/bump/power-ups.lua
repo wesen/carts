@@ -1,6 +1,5 @@
 cls_pwrup=subclass(cls_interactable,function(self,pos)
  cls_interactable._ctr(self,pos.x,pos.y,0,0,8,8)
- self.countdown=powerup_countdowns[self.tile]
 end)
 
 function cls_pwrup:on_player_collision(player)
@@ -14,7 +13,7 @@ function cls_pwrup:on_player_collision(player)
  self:on_powerup_start(player)
  player.power_up=self
  player.power_up_type=self.tile
- player.power_up_countdown=self.countdown
+ player.power_up_countdown=powerup_countdowns[self.tile]
 
   del(interactables,self)
 end
