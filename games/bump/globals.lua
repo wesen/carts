@@ -6,6 +6,7 @@ spawn_idx=1
 
 actors={}
 particles={}
+interactables={}
 tiles={}
 crs={}
 scores={0, 0}

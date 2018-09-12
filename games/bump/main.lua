@@ -16,6 +16,9 @@ function _draw()
  for a in all(particles) do
   a:draw()
  end
+ for a in all(interactables) do
+  a:draw()
+ end
 
  local entry_length=50
  for i=0,#scores-1,1 do
@@ -38,6 +41,9 @@ function _update60()
  tick_crs()
  update_actors()
  foreach(particles, function(a)
+  a:update()
+ end)
+ foreach(interactables, function(a)
   a:update()
  end)
  update_shake()

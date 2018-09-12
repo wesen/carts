@@ -1,11 +1,15 @@
 spr_spring_sprung=66
 spr_spring_wound=67
 
-cls_spring=subclass(cls_actor,function(self,pos)
- cls_actor._ctr(self,pos)
- self.hitbox={x=0,y=5,dimx=8,dimy=3}
+cls_spring=class(function(self,pos)
+ add(interactables,self)
+ self.x=pos.x
+ self.y=pos.y
+ self.aax=self.x
+ self.aay=self.y+5
+ self.bbx=self.aax+8
+ self.bby=self.aay+3
  self.sprung_time=0
- self.is_solid=false
 end)
 tiles[spr_spring_sprung]=cls_spring
 

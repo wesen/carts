@@ -1,10 +1,6 @@
-actor_cnt=0
-
 cls_actor=class(function(self,pos)
  self.x=pos.x
  self.y=pos.y
- self.id=actor_cnt
- actor_cnt+=1
  self.spd_x=0
  self.spd_y=0
  self.is_solid=true
