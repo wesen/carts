@@ -1,5 +1,5 @@
 function _init()
- room=cls_room.init(v2(32,0),v2(16,16))
+ room=cls_room.init(v2(16,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
 end
@@ -10,13 +10,16 @@ function _draw()
  cls()
  camera(camera_shake.x,camera_shake.y)
  room:draw()
+ for a in all(interactables) do
+  a:draw()
+ end
+ for a in all(static_objects) do
+  a:draw()
+ end
  draw_actors()
  tick_crs(draw_crs)
 
  for a in all(particles) do
-  a:draw()
- end
- for a in all(interactables) do
   a:draw()
  end
 
