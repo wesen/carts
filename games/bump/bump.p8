@@ -372,7 +372,8 @@ function tick_crs(_crs)
  _crs=_crs or crs
  for cr in all(_crs) do
   if costatus(cr)!='dead' then
-   coresume(cr)
+   _,err=coresume(cr)
+   if (err!=nil) printh("error: "..err)
   else
    del(_crs,cr)
   end
@@ -450,7 +451,7 @@ cls_actor=class(function(self,pos)
  self.spd_x=0
  self.spd_y=0
  self.is_solid=true
- self.hitbox={x=0,y=0,dimx=8,dimy=8}
+ if (self.hitbox==nil) self.hitbox={x=0,y=0,dimx=8,dimy=8}
  self:update_bbox()
  add(actors,self)
 end)
@@ -797,6 +798,9 @@ function check_for_new_players()
 end
 
 cls_player=subclass(cls_actor,function(self,pos,input_port)
+ self.hitbox={x=2,y=0.5,dimx=4,dimy=7.5}
+ self.head_hitbox={x=0,y=-1,dimx=8,dimy=1}
+ self.feet_hitbox={x=2,y=7,dimx=4,dimy=1}
  cls_actor._ctr(self,pos)
  -- players are handled separately
  add(players,self)
@@ -812,9 +816,6 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
  self.spr=1
- self.hitbox={x=2,y=0.5,dimx=4,dimy=7.5}
- self.head_hitbox={x=0,y=-1,dimx=8,dimy=1}
- self.feet_hitbox={x=2,y=7,dimx=4,dimy=1}
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -828,6 +829,19 @@ end)
 
 function cls_player:update_bbox()
  cls_actor.update_bbox(self)
+ self.head_box={
+   aax=self.head_hitbox.x+self.x,
+   aay=self.head_hitbox.y+self.y
+  }
+ self.head_box.bbx=self.head_box.aax+self.head_hitbox.dimx
+ self.head_box.bby=self.head_box.aay+self.head_hitbox.dimy
+
+ self.feet_box={
+   aax=self.feet_hitbox.x+self.x,
+   aay=self.feet_hitbox.y+self.y
+  }
+ self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
+ self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
 end
 
 function cls_player:smoke(spr,dir)
@@ -1011,7 +1025,6 @@ function cls_player:update_normal()
  end
 
  -- interact with players
- local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
   if self!=player and player.power_up_type!=spr_power_up_invincibility then
    local kill_player=false
@@ -1021,11 +1034,10 @@ function cls_player:update_normal()
     kill_player=true
    else
     -- attack
-    local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
     local can_attack=not self.on_ground and self.spd_y>0
 
-    if (feet_box:collide(head_box) and can_attack)
-    or do_bboxes_collide(self,player) then
+    if (do_bboxes_collide(self.feet_box,player.head_box) and can_attack)
+       or do_bboxes_collide(self,player) then
      self.spd_y=-2.0
      kill_player=true
     end
