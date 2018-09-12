@@ -30,7 +30,7 @@
 --[[
 
 interactables:
-- spring
+- x spring
 - spikes
 - tele_enter
 - powerup
