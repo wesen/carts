@@ -41,6 +41,10 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.is_dead=false
 end)
 
+function cls_player:update_bbox()
+ cls_actor.update_bbox(self)
+end
+
 function cls_player:smoke(spr,dir)
  return cls_smoke.init(v2(self.x,self.y),spr,dir)
 end
@@ -224,8 +228,7 @@ function cls_player:update_normal()
  -- interact with players
  local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
-  if self!=player and
-  (player.power_up==nil or player.power_up!=spr_power_up_invincibility) then
+  if self!=player and player.power_up_type!=spr_power_up_invincibility then
    local kill_player=false
 
    if self.power_up_type==spr_power_up_invincibility

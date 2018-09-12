@@ -19,7 +19,6 @@ function cls_bomb:update()
  local solid=solid_at(self)
  local is_actor,actor=self:is_actor_at(0,0)
  if solid or (is_actor and actor!=self.player) then
-  printh("bomb blast")
   make_blast(self.x,self.y)
   del(actors,self)
  elseif self.is_thrown then
