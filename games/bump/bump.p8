@@ -521,7 +521,7 @@ end
 
 function cls_actor:is_actor_at(x,y)
  for actor in all(actors) do
-  if (actor.is_solid and self!=actor and do_bboxes_collide_offset(self,actor,x,y)) return true
+  if (actor.is_solid and self!=actor and do_bboxes_collide_offset(self,actor,x,y)) return true,actor
  end
 
  return false
@@ -671,6 +671,8 @@ spr_slide_smoke=60
 
 cls_smoke=subclass(cls_actor,function(self,pos,start_spr,dir)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
+ del(actors,self)
+ add(particles,self)
  self.flip=v2(maybe(),false)
  self.spr=start_spr
  self.start_spr=start_spr
@@ -682,7 +684,7 @@ end)
 function cls_smoke:update()
  self:move_x(self.spd_x)
  self.spr+=0.2
- if (self.spr>self.start_spr+3) del(actors,self)
+ if (self.spr>self.start_spr+3) del(particles,self)
 end
 
 function cls_smoke:draw()
@@ -974,14 +976,24 @@ function cls_player:update_normal()
  -- interact with players
  local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
-  if self!=player then
-   -- attack
-   local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
-   local can_attack=not self.on_ground and self.spd_y>0
-   -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
+  if self!=player and player.power_up!=spr_power_up_invincibility then
+   local kill_player=false
 
-   if (feet_box:collide(head_box) and can_attack)
+   if self.power_up==spr_power_up_invincibility
+    and do_bboxes_collide_offset(self,player,input,0) then
+    kill_player=true
+   else
+    -- attack
+    local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
+    local can_attack=not self.on_ground and self.spd_y>0
+
+    if (feet_box:collide(head_box) and can_attack)
     or do_bboxes_collide(self,player) then
+     kill_player=true
+    end
+   end
+
+   if kill_player then
     add_cr(function ()
      self.is_bullet_time=true
      player.is_bullet_time=true
@@ -1005,8 +1017,8 @@ function cls_player:update_normal()
   end
  end
 
- -- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
- -- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
+-- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
+-- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:draw()
@@ -1232,7 +1244,7 @@ function cls_pwrup:act_on_player(player)
   player.power_up_countdown=nil
  elseif self.tile==spr_power_up_invincibility then
   player.power_up=spr_power_up_invincibility
-  player.power_up_countdown=4
+  player.power_up_countdown=25
  end
 end
 

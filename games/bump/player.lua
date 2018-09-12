@@ -199,14 +199,24 @@ function cls_player:update_normal()
  -- interact with players
  local feet_box=hitbox_to_bbox(self.feet_hitbox,v2(self.x,self.y))
  for player in all(players) do
-  if self!=player then
-   -- attack
-   local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
-   local can_attack=not self.on_ground and self.spd_y>0
-   -- printh(tostr(self.nr).." attack on ground "..tostr(on_ground))
+  if self!=player and player.power_up!=spr_power_up_invincibility then
+   local kill_player=false
 
-   if (feet_box:collide(head_box) and can_attack)
+   if self.power_up==spr_power_up_invincibility
+    and do_bboxes_collide_offset(self,player,input,0) then
+    kill_player=true
+   else
+    -- attack
+    local head_box=hitbox_to_bbox(player.head_hitbox,v2(player.x,player.y))
+    local can_attack=not self.on_ground and self.spd_y>0
+
+    if (feet_box:collide(head_box) and can_attack)
     or do_bboxes_collide(self,player) then
+     kill_player=true
+    end
+   end
+
+   if kill_player then
     add_cr(function ()
      self.is_bullet_time=true
      player.is_bullet_time=true
@@ -230,8 +240,8 @@ function cls_player:update_normal()
   end
  end
 
- -- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
- -- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
+-- if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
+-- if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:draw()
