@@ -5,7 +5,6 @@
 --#include oo
 --#include v2
 --#include bbox
---#include hitbox
 --#include camera
 
 --#include helpers
@@ -13,6 +12,8 @@
 --#include coroutines
 --#include queues
 --#include gfx
+
+--#include interactable
 
 --#include actors
 --#include button
@@ -26,7 +27,11 @@
 --#include moving_platform
 --#include teleporter
 --#include power-ups
+--#include mine
+--#include bomb
+--#include balloon
 
+-- x split into actors / particles / interactables
 -- x gravity
 -- x downward collision
 -- x wall slide
@@ -66,10 +71,23 @@
 -- x camera shake
 -- x doppelgangers
 -- x remove typ code
--- bullet time on kill
--- decrease score when dying on spikes
+-- x bullet time on kill
+
+-- x invincibility
+-- x blast mine
+-- x superspeed
+-- x superjump
+-- x gravity tweak
+-- x suicide bomber
+-- x invisibility
+-- x bomb
+-- x have players join when pressing action
+-- make player selection screen
 
 -- fades
+-- better kill animations
+-- restore ghosts / particles on player
+-- decrease score when dying on spikes
 
 -- number of player selector menu
 -- title screen
@@ -78,16 +96,12 @@
 -- pretty pass
 
 -- powerups - item dropper
+-- refactor powerups to have a decent api
 -- visualize power ups
 -- different sprites for different players
--- bomb
--- superspeed
--- invincibility
--- superjump
--- gravity tweak
+-- balloon pulling upwards
 -- double jump
 -- dash
--- invisibility
 -- meteors
 -- flamethrower
 -- bullet time
@@ -99,7 +113,6 @@
 -- lasers
 -- gun
 -- rope
--- selfbomber (on a timer)
 -- level design
 
 -- x multiple players

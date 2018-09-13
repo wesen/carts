@@ -3,60 +3,51 @@ function v_idx(pos)
 end
 
 cls_room=class(function(self,pos,dim)
- self.pos=pos
- self.dim=dim
+ self.x=pos.x
+ self.y=pos.y
+ self.dim_x=dim.x
+ self.dim_y=dim.y
  self.spawn_locations={}
- printh("init room")
+ self.aax=0
+ self.aay=0
+ self.bbx=self.dim_x*8
+ self.bby=self.dim_y*8
 
  -- initialize tiles
- for i=0,self.dim.x-1 do
-  for j=0,self.dim.y-1 do
-   local p=v2(i,j)
-   local tile=self:tile_at(p)
+ for i=0,self.dim_x-1 do
+  for j=0,self.dim_y-1 do
+   local tile=mget(self.x+i,self.y+j)
+   local p={x=i*8,y=j*8}
    if tile==spr_spawn_point then
-    add(self.spawn_locations,p*8)
+    add(self.spawn_locations,p)
    end
    local t=tiles[tile]
    if t!=nil then
-    local a=t.init(p*8)
+    local a=t.init(p)
     a.tile=tile
    end
   end
  end
 end)
 
-function cls_room:get_friction(tile,dir)
- local accel=0.1
- local decel=0.1
-
- if (fget(self:tile_at(tile),flg_ice)) accel,decel=min(accel,0.1),min(decel,0.03)
-
- return accel,decel
-end
-
 function cls_room:draw()
- map(self.pos.x,self.pos.y,0,0,self.dim.x,self.dim.y,flg_solid+1)
+ map(self.x,self.y,0,0,self.dim_x,self.dim_y,flg_solid+1)
 end
 
 function cls_room:spawn_player(input_port)
- -- XXX potentially find better spawn locatiosn
- local spawn_pos = self.spawn_locations[spawn_idx]:clone()
+ -- xxx potentially find better spawn locatiosn
+ local spawn_pos = self.spawn_locations[spawn_idx]
  local spawn=cls_spawn.init(spawn_pos, input_port)
  spawn_idx = (spawn_idx%#self.spawn_locations)+1
  return spawn
 end
 
-function cls_room:tile_at(pos)
- local v=self.pos+pos
- return mget(v.x,v.y)
-end
-
 function solid_at(bbox)
- if bbox.aa.x<0
-  or bbox.bb.x>room.dim.x*8
-  or bbox.aa.y<0
-  or bbox.bb.y>room.dim.y*8 then
-   return true,nil
+ if bbox.aax<0
+  or bbox.bbx>room.bbx
+  or bbox.aay<0
+  or bbox.bby>room.bby then
+   return true
  else
   return tile_flag_at(bbox,flg_solid)
  end
@@ -66,16 +57,30 @@ function ice_at(bbox)
  return tile_flag_at(bbox,flg_ice)
 end
 
-function tile_at(x,y)
- return room:tile_at(v2(x,y))
+function tile_flag_at(bbox,flag)
+ local aax=max(0,flr(bbox.aax/8))+room.x
+ local aay=max(0,flr(bbox.aay/8))+room.y
+ local bbx=min(room.dim_x,(bbox.bbx-1)/8)+room.x
+ local bby=min(room.dim_y,(bbox.bby-1)/8)+room.y
+ for i=aax,bbx do
+  for j=aay,bby do
+   if fget(mget(i,j),flag) then
+    return true
+   end
+  end
+ end
+ return false
 end
 
-function tile_flag_at(bbox,flag)
- local bb=bbox:to_tile_bbox()
- for i=bb.aa.x,bb.bb.x do
-  for j=bb.aa.y,bb.bb.y do
-   if fget(tile_at(i,j),flag) then
-    return true,v2(i,j)
+function tile_flag_at_offset(bbox,flag,x,y)
+ local aax=max(0,flr((bbox.aax+x)/8))+room.x
+ local aay=max(0,flr((bbox.aay+y)/8))+room.y
+ local bbx=min(room.dim_x,(bbox.bbx+x-1)/8)+room.x
+ local bby=min(room.dim_y,(bbox.bby+y-1)/8)+room.y
+ for i=aax,bbx do
+  for j=aay,bby do
+   if fget(mget(i,j),flag) then
+    return true
    end
   end
  end

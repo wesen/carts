@@ -1,5 +1,5 @@
 function _init()
- room=cls_room.init(v2(16,0),v2(16,16))
+ room=cls_room.init(v2(32,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
  room:spawn_player(p3_input)
@@ -12,8 +12,18 @@ function _draw()
  cls()
  camera(camera_shake.x,camera_shake.y)
  room:draw()
+ for a in all(interactables) do
+  a:draw()
+ end
+ for a in all(static_objects) do
+  a:draw()
+ end
  draw_actors()
  tick_crs(draw_crs)
+
+ for a in all(particles) do
+  a:draw()
+ end
 
  local entry_length=50
  for i=0,#scores-1,1 do
@@ -23,13 +33,26 @@ function _draw()
   )
  end
 
- print(tostr(stat(1)),0,120,1)
+ print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
+ print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+ 
+ check_for_new_players()
+
+ for a in all(actors) do
+  a:update_bbox()
+ end
  tick_crs()
  update_actors()
+ foreach(particles, function(a)
+  a:update()
+ end)
+ foreach(interactables, function(a)
+  a:update()
+ end)
  update_shake()
 end

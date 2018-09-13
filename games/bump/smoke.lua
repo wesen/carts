@@ -4,28 +4,22 @@ spr_full_smoke=48
 spr_ice_smoke=57
 spr_slide_smoke=60
 
-cls_smoke=subclass(cls_actor,function(self,pos,start_spr,dir)
- cls_actor._ctr(self,pos+v2(mrnd(1),0))
- self.flip=v2(maybe(),false)
+cls_smoke=class(function(self,pos,start_spr,dir)
+ self.x=pos.x+mrnd(1)
+ self.y=pos.y
+ add(particles,self)
+ self.flip_x=maybe()
  self.spr=start_spr
  self.start_spr=start_spr
- self.is_solid=false
- self.spd=v2(dir*(0.3+rnd(0.2)),-0.0)
- self.is_gore=false
+ self.spd_x=dir*(0.3+rnd(0.2))
 end)
 
 function cls_smoke:update()
- self:move(self.spd)
+ self.x+=self.spd_x
  self.spr+=0.2
- if (self.spr>self.start_spr+3) del(actors,self)
+ if (self.spr>self.start_spr+3) del(particles,self)
 end
 
 function cls_smoke:draw()
- if self.is_gore then
-  pal(12,8)
-  pal(7,14)
-  pal(6,2)
- end
- spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
- if (self.is_gore) pal()
+ spr(self.spr,self.x,self.y,1,1,self.flip_x,false)
 end

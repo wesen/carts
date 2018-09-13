@@ -5,7 +5,8 @@ function tick_crs(_crs)
  _crs=_crs or crs
  for cr in all(_crs) do
   if costatus(cr)!='dead' then
-   coresume(cr)
+   _,err=coresume(cr)
+   if (err!=nil) printh("error: "..err)
   else
    del(_crs,cr)
   end

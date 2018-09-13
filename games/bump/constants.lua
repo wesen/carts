@@ -15,6 +15,7 @@ btn_up=2
 btn_down=3
 btn_left=0
 btn_jump=4
+btn_action=5
 
 -- physics tweaking
 local maxrun=1
