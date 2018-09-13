@@ -19,3 +19,10 @@ function add_cr(f,_crs)
  add(_crs,cr)
  return cr
 end
+
+function cr_wait_for(t)
+ while t>0 do
+  yield()
+  t-=dt
+ end
+end
