@@ -38,7 +38,7 @@ function cls_actor:move_x(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
 
-   local solid=self:is_solid_at(step,0)
+   local solid=solid_at_offset(self,step,0)
    local actor=self:is_actor_at(step,0)
 
    if solid or actor then
@@ -54,7 +54,6 @@ function cls_actor:move_x(amount)
     self.aax+=step
     self.bbx+=step
    end
-
   end
  else
   self.x+=amount
@@ -69,7 +68,7 @@ function cls_actor:move_y(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
 
-   local solid=self:is_solid_at(0,step)
+   local solid=solid_at_offset(self,0,step)
    local actor=self:is_actor_at(0,step)
 
    if solid or actor then
@@ -91,14 +90,6 @@ function cls_actor:move_y(amount)
   self.aay+=amount
   self.bby+=amount
  end
-end
-
-function cls_actor:is_solid_at(x,y)
- if (solid_at(self:bbox(x,y))) return true,nil
- for e in all(environments) do
-  if (e:collides_with(self,x,y)) return true,e
- end
- return false,nil
 end
 
 function cls_actor:is_actor_at(x,y)

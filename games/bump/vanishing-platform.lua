@@ -1,7 +1,6 @@
 spr_vanishing_platform=96
 
 cls_vanishing_platform=class(function(self,pos)
- printh("Create vanishing platform")
  self.x=pos.x
  self.y=pos.y
  self.aax=pos.x

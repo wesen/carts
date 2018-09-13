@@ -16,7 +16,7 @@ cls_bomb=subclass(cls_actor,function(self,player)
 end)
 
 function cls_bomb:update()
- local solid=solid_at(self)
+ local solid=solid_at_offset(self,0,0)
  local is_actor,actor=self:is_actor_at(0,0)
  if solid or (is_actor and actor!=self.player) then
   make_blast(self.x,self.y)

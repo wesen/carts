@@ -486,7 +486,7 @@ function cls_actor:move_x(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
 
-   local solid=self:is_solid_at(step,0)
+   local solid=solid_at_offset(self,step,0)
    local actor=self:is_actor_at(step,0)
 
    if solid or actor then
@@ -502,7 +502,6 @@ function cls_actor:move_x(amount)
     self.aax+=step
     self.bbx+=step
    end
-
   end
  else
   self.x+=amount
@@ -517,7 +516,7 @@ function cls_actor:move_y(amount)
    local step=amount
    if (abs(amount)>1) step=sign(amount)
 
-   local solid=self:is_solid_at(0,step)
+   local solid=solid_at_offset(self,0,step)
    local actor=self:is_actor_at(0,step)
 
    if solid or actor then
@@ -539,14 +538,6 @@ function cls_actor:move_y(amount)
   self.aay+=amount
   self.bby+=amount
  end
-end
-
-function cls_actor:is_solid_at(x,y)
- if (solid_at(self:bbox(x,y))) return true,nil
- for e in all(environments) do
-  if (e:collides_with(self,x,y)) return true,e
- end
- return false,nil
 end
 
 function cls_actor:is_actor_at(x,y)
@@ -645,37 +636,26 @@ function cls_room:spawn_player(input_port)
  local spawn_pos = self.spawn_locations[spawn_idx]
  local spawn=cls_spawn.init(spawn_pos, input_port)
  spawn_idx = (spawn_idx%#self.spawn_locations)+1
+ connected_players[input_port]=true
  return spawn
 end
 
-function solid_at(bbox)
- if bbox.aax<0
-  or bbox.bbx>room.bbx
-  or bbox.aay<0
-  or bbox.bby>room.bby then
-   return true
- else
-  return tile_flag_at(bbox,flg_solid)
+function solid_at_offset(bbox,x,y)
+ if bbox.aax+x<0
+  or bbox.bbx+x>room.bbx
+  or bbox.aay+y<0
+  or bbox.bby+y>room.bby then
+   return true,nil
  end
+ if (tile_flag_at_offset(bbox,flg_solid,x,y)) return true,nil
+ for e in all(environments) do
+  if (e:collides_with(bbox,x,y)) return true,e
+ end
+ return false,nil
 end
 
-function ice_at(bbox)
- return tile_flag_at(bbox,flg_ice)
-end
-
-function tile_flag_at(bbox,flag)
- local aax=max(0,flr(bbox.aax/8))+room.x
- local aay=max(0,flr(bbox.aay/8))+room.y
- local bbx=min(room.dim_x,(bbox.bbx-1)/8)+room.x
- local bby=min(room.dim_y,(bbox.bby-1)/8)+room.y
- for i=aax,bbx do
-  for j=aay,bby do
-   if fget(mget(i,j),flag) then
-    return true
-   end
-  end
- end
- return false
+function ice_at_offset(bbox,x,y)
+ return tile_flag_at_offset(bbox,flg_ice,x,y)
 end
 
 function tile_flag_at_offset(bbox,flag,x,y)
@@ -803,7 +783,6 @@ player_cnt=0
 function check_for_new_players()
  for i=0,3 do
   if (btnp(btn_jump,i) or btnp(btn_action,i)) and connected_players[i]==nil then
-   connected_players[i]=true
    room:spawn_player(i)
   end
  end
@@ -939,9 +918,8 @@ function cls_player:update_normal()
   maxfall*=0.5
  end
 
- local ground_bbox=self:bbox(0,1)
- self.on_ground=self:is_solid_at(0,1)
- local on_ice=ice_at(ground_bbox)
+ self.on_ground=solid_at_offset(self,0,1)
+ local on_ice=ice_at_offset(self,0,1)
 
  if self.on_ground then
   self.on_ground_interval=ground_grace_interval
@@ -1000,11 +978,11 @@ function cls_player:update_normal()
 
  -- wall slide
  local is_wall_sliding=false
- if input!=0 and self:is_solid_at(input,0)
+ if input!=0 and solid_at_offset(self,input,0)
     and not self.on_ground and self.spd_y>0 then
   is_wall_sliding=true
   maxfall=wall_slide_maxfall
-  if (ice_at(self:bbox(input,0))) maxfall=ice_wall_maxfall
+  if (ice_at_offset(self,input,0)) maxfall=ice_wall_maxfall
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
@@ -1025,8 +1003,8 @@ function cls_player:update_normal()
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
-   local wall_dir=self:is_solid_at(-3,0) and -1
-        or self:is_solid_at(3,0) and 1
+   local wall_dir=solid_at_offset(self,-3,0) and -1
+        or solid_at_offset(self,3,0) and 1
         or 0
    if wall_dir!=0 then
     self.jump_interval=0
@@ -1437,7 +1415,7 @@ cls_bomb=subclass(cls_actor,function(self,player)
 end)
 
 function cls_bomb:update()
- local solid=solid_at(self)
+ local solid=solid_at_offset(self,0,0)
  local is_actor,actor=self:is_actor_at(0,0)
  if solid or (is_actor and actor!=self.player) then
   make_blast(self.x,self.y)
@@ -1486,7 +1464,7 @@ end)
 function cls_balloon:update()
  self.t+=dt
 
- local solid=solid_at(self)
+ local solid=solid_at_offset(self,0,0)
  local is_actor,actor=self:is_actor_at(0,0)
 
  if solid or (is_actor and actor!=self.player) then
@@ -1514,7 +1492,6 @@ end
 spr_vanishing_platform=96
 
 cls_vanishing_platform=class(function(self,pos)
- printh("Create vanishing platform")
  self.x=pos.x
  self.y=pos.y
  self.aax=pos.x

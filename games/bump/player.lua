@@ -5,7 +5,6 @@ player_cnt=0
 function check_for_new_players()
  for i=0,3 do
   if (btnp(btn_jump,i) or btnp(btn_action,i)) and connected_players[i]==nil then
-   connected_players[i]=true
    room:spawn_player(i)
   end
  end
@@ -141,9 +140,8 @@ function cls_player:update_normal()
   maxfall*=0.5
  end
 
- local ground_bbox=self:bbox(0,1)
- self.on_ground=self:is_solid_at(0,1)
- local on_ice=ice_at(ground_bbox)
+ self.on_ground=solid_at_offset(self,0,1)
+ local on_ice=ice_at_offset(self,0,1)
 
  if self.on_ground then
   self.on_ground_interval=ground_grace_interval
@@ -202,11 +200,11 @@ function cls_player:update_normal()
 
  -- wall slide
  local is_wall_sliding=false
- if input!=0 and self:is_solid_at(input,0)
+ if input!=0 and solid_at_offset(self,input,0)
     and not self.on_ground and self.spd_y>0 then
   is_wall_sliding=true
   maxfall=wall_slide_maxfall
-  if (ice_at(self:bbox(input,0))) maxfall=ice_wall_maxfall
+  if (ice_at_offset(self,input,0)) maxfall=ice_wall_maxfall
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
@@ -227,8 +225,8 @@ function cls_player:update_normal()
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
-   local wall_dir=self:is_solid_at(-3,0) and -1
-        or self:is_solid_at(3,0) and 1
+   local wall_dir=solid_at_offset(self,-3,0) and -1
+        or solid_at_offset(self,3,0) and 1
         or 0
    if wall_dir!=0 then
     self.jump_interval=0
