@@ -1569,16 +1569,8 @@ end
 -- x add gore on vertical surfaces
 -- x make gore slippery
 -- x add gore when dying
--- moving platforms
--- laser beam
--- add water
--- add butterflies
--- add flies
--- vanishing platforms
--- lookup / lookdown sprites
--- go through right and come back left (?)
+-- x vanishing platforms
 -- x add second player
--- add trailing smoke particles when springing up
 -- x add multiple players / spawn points
 -- x add death mechanics
 -- x add score
@@ -1595,8 +1587,19 @@ end
 -- x suicide bomber
 -- x invisibility
 -- x bomb
+-- x miniature mode
 -- x have players join when pressing action
+-- x balloon pulling upwards
+
 -- make player selection screen
+
+-- moving platforms
+-- laser beam
+-- add water
+-- add butterflies
+-- add flies
+-- lookup / lookdown sprites
+-- add trailing smoke particles when springing up
 
 -- fades
 -- better kill animations
@@ -1613,7 +1616,6 @@ end
 -- refactor powerups to have a decent api
 -- visualize power ups
 -- different sprites for different players
--- balloon pulling upwards
 -- double jump
 -- dash
 -- meteors
@@ -1621,9 +1623,6 @@ end
 -- bullet time
 -- whip
 -- jetpack
--- moving platforms
--- vanishing platforms
--- miniature mode
 -- lasers
 -- gun
 -- rope
@@ -1634,6 +1633,8 @@ end
 -- x player collision
 -- x player kill
 -- x player colors
+
+-- go through right and come back left (?)
 
 function _init()
  room=cls_room.init(v2(32,0),v2(16,16))
