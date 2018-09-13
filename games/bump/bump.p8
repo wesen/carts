@@ -799,8 +799,6 @@ end
 
 cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.hitbox={x=2,y=0.5,dimx=4,dimy=7.5}
- self.head_hitbox={x=0,y=-1,dimx=8,dimy=1}
- self.feet_hitbox={x=2,y=7,dimx=4,dimy=1}
  cls_actor._ctr(self,pos)
  -- players are handled separately
  add(players,self)
@@ -831,23 +829,23 @@ function cls_player:update_bbox()
  if self.power_up_type!=spr_power_up_shrink then
   cls_actor.update_bbox(self)
   self.head_box={
-    aax=self.head_hitbox.x+self.x,
-    aay=self.head_hitbox.y+self.y
+    aax=self.x+0,
+    aay=self.y-1
    }
-  self.head_box.bbx=self.head_box.aax+self.head_hitbox.dimx
-  self.head_box.bby=self.head_box.aay+self.head_hitbox.dimy
+  self.head_box.bbx=self.head_box.aax+8
+  self.head_box.bby=self.head_box.aay+1
 
   self.feet_box={
-    aax=self.feet_hitbox.x+self.x,
-    aay=self.feet_hitbox.y+self.y
+    aax=self.x+2,
+    aay=self.y+7
    }
-  self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
-  self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+  self.feet_box.bbx=self.feet_box.aax+4
+  self.feet_box.bby=self.feet_box.aay+1
  else
   self.aax=self.x+3
-  self.aay=self.y+5
+  self.aay=self.y+4.5
   self.bbx=self.aax+3
-  self.bby=self.aay+3
+  self.bby=self.aay+3.5
 
   self.head_box={
     aax=self.x+2,
@@ -857,11 +855,11 @@ function cls_player:update_bbox()
   self.head_box.bby=self.head_box.aay+1
 
   self.feet_box={
-    aax=self.feet_hitbox.x+self.x,
-    aay=self.feet_hitbox.y+self.y
+    aax=self.x+2,
+    aay=self.y+7
    }
-  self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
-  self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+  self.feet_box.bbx=self.feet_box.aax+4
+  self.feet_box.bby=self.feet_box.aay+1
  end
 end
 
@@ -1124,7 +1122,7 @@ function cls_player:draw()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-  if self.power_up!=nil then
+  if powerup_colors[self.power_up_type]!=nil then
    bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up_type])
   else
    spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
