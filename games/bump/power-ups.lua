@@ -1,4 +1,40 @@
 spr_power_up=39
+pwrup_drop_interval=60*10
+
+
+cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
+ cls_actor._ctr(self,pos)
+ self.is_solid=false
+ self.time=0
+ self.item=nil
+end)
+
+function cls_pwrup_dropper:update()
+ if self.item==nil then
+
+  -- Increment time. Spawn when time's up
+  self.time=(self.time%(pwrup_drop_interval))+1
+  if self.time==pwrup_drop_interval then
+   self.item=rnd_elt(pwrups).init(self.pos)
+  end
+
+ else
+
+  -- Check that item has been used before allowing another drop
+  local exists=false
+  for actor in all(actors) do
+   if actor==self.item then
+    exists=true
+   end
+  end
+
+  if not exists then
+   self.item=nil
+  end
+
+ end
+end
+
 
 cls_pwrup=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
@@ -34,4 +70,6 @@ function cls_pwrup_doppelgaenger:act_on_player(player)
  end
 end
 
-tiles[spr_power_up]=cls_pwrup_doppelgaenger
+
+pwrups={ cls_pwrup_doppelgaenger }
+tiles[spr_power_up]=cls_pwrup_dropper

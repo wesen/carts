@@ -37,6 +37,7 @@ local jump_button_grace_interval=5
 local jump_max_hold_time=15
 local ground_grace_interval=6
 
+
 frame=0
 dt=0
 lasttime=time()
@@ -221,21 +222,6 @@ function hitboxvt:str()
  return self.offset:str().."-("..self.dim:str()..")"
 end
 
-local camera_shake=v2(0,0)
-
-function add_shake(p)
- camera_shake+=angle2vec(rnd(1))*p
-end
-
-function update_shake()
- if abs(camera_shake.x)+abs(camera_shake.y)<1 then
-  camera_shake=v2(0,0)
- end
- if frame%4==0 then
-  camera_shake*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
- end
-end
-
 
 -- functions
 function appr(val,target,amount)
@@ -357,6 +343,7 @@ function cr_move_to(obj,target,d,easetype)
   yield()
  end
 end
+
 
 crs={}
 draw_crs={}
@@ -511,6 +498,23 @@ function update_actors(typ)
  end
 end
 
+
+local camera_shake=v2(0,0)
+
+function add_shake(p)
+ camera_shake+=angle2vec(rnd(1))*p
+end
+
+function update_shake()
+ if abs(camera_shake.x)+abs(camera_shake.y)<1 then
+  camera_shake=v2(0,0)
+ end
+ if frame%4==0 then
+  camera_shake*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
+ end
+end
+
+
 cls_button=class(function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
  self.input_port=input_port
@@ -547,6 +551,24 @@ function cls_button:is_held()
 end
 
 
+cls_bubble=subclass(typ_bubble,cls_actor,function(self,pos,dir)
+ cls_actor._ctr(self,pos)
+ self.spd=v2(-dir*rnd(0.2),-rnd(0.2))
+ self.life=10
+end)
+
+function cls_bubble:draw()
+ local size=4-self.life/3
+ circ(self.pos.x,self.pos.y,size,1)
+end
+
+function cls_bubble:update()
+ self.life*=0.9
+ self:move(self.spd)
+ if (self.life<0.1) then
+  del(actors,self)
+ end
+end
 
 function v_idx(pos)
  return pos.x+pos.y*128
@@ -665,6 +687,7 @@ function cls_smoke:draw()
  if (self.is_gore) pal()
 end
 
+
 cls_particle=subclass(cls_actor,function(self,pos,lifetime,sprs)
  cls_actor._ctr(self,pos+v2(mrnd(1),0))
  self.flip=v2(false,false)
@@ -738,6 +761,7 @@ function make_gore_explosion(pos)
   cls_gore.init(pos)
  end
 end
+
 
 players={}
 
@@ -1033,6 +1057,7 @@ function cls_spring:draw()
  spr(spr_,self.pos.x,self.pos.y)
 end
 
+
 spr_spawn_point=1
 
 cls_spawn=subclass(cls_actor,function(self,pos,input_port)
@@ -1060,6 +1085,7 @@ function cls_spawn:draw()
  spr(spr_spawn_point,self.pos.x,self.pos.y)
 end
 
+
 spr_spikes=68
 
 cls_spikes=subclass(cls_actor,function(self,pos)
@@ -1082,9 +1108,11 @@ function cls_spikes:draw()
  spr(spr_spikes,self.pos.x,self.pos.y)
 end
 
+
 cls_moving_platform=subclass(cls_actor,function(pos)
  cls_actor._ctr(self,pos)
 end)
+
 
 spr_tele_enter=112
 spr_tele_exit=113
@@ -1140,7 +1168,44 @@ function cls_tele_exit:draw()
  spr(spr_tele_exit,self.pos.x,self.pos.y)
 end
 
+
 spr_power_up=39
+pwrup_drop_interval=60*10
+
+
+cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
+ cls_actor._ctr(self,pos)
+ self.is_solid=false
+ self.time=0
+ self.item=nil
+end)
+
+function cls_pwrup_dropper:update()
+ if self.item==nil then
+
+  -- Increment time. Spawn when time's up
+  self.time=(self.time%(pwrup_drop_interval))+1
+  if self.time==pwrup_drop_interval then
+   self.item=rnd_elt(pwrups).init(self.pos)
+  end
+
+ else
+
+  -- Check that item has been used before allowing another drop
+  local exists=false
+  for actor in all(actors) do
+   if actor==self.item then
+    exists=true
+   end
+  end
+
+  if not exists then
+   self.item=nil
+  end
+
+ end
+end
+
 
 cls_pwrup=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
@@ -1176,7 +1241,9 @@ function cls_pwrup_doppelgaenger:act_on_player(player)
  end
 end
 
-tiles[spr_power_up]=cls_pwrup_doppelgaenger
+
+pwrups={ cls_pwrup_doppelgaenger }
+tiles[spr_power_up]=cls_pwrup_dropper
 
 
 --#include constants
@@ -1187,6 +1254,7 @@ tiles[spr_power_up]=cls_pwrup_doppelgaenger
 --#include v2
 --#include bbox
 --#include hitbox
+--#include camera
 
 --#include helpers
 --#include tween
@@ -1196,7 +1264,6 @@ tiles[spr_power_up]=cls_pwrup_doppelgaenger
 
 --#include actors
 --#include button
---#include bubbles
 --#include room
 --#include smoke
 --#include particle
@@ -1206,6 +1273,7 @@ tiles[spr_power_up]=cls_pwrup_doppelgaenger
 --#include spikes
 --#include moving_platform
 --#include teleporter
+--#include power-ups
 
 -- x gravity
 -- x downward collision

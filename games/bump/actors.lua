@@ -110,4 +110,3 @@ function update_actors(typ)
   if ((typ==nil or a.typ==typ) and a.update!=nil) a:update()
  end
 end
-end
