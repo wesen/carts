@@ -142,8 +142,7 @@ function cls_player:update_normal()
  end
 
  local ground_bbox=self:bbox(0,1)
- self.on_ground=solid_at(ground_bbox)
- local on_actor=self:is_actor_at(input,0)
+ self.on_ground=self:is_solid_at(0,1)
  local on_ice=ice_at(ground_bbox)
 
  if self.on_ground then

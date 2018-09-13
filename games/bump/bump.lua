@@ -30,6 +30,7 @@
 --#include mine
 --#include bomb
 --#include balloon
+--#include vanishing-platform
 
 -- x split into actors / particles / interactables
 -- x gravity
