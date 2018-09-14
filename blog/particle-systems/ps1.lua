@@ -1,6 +1,7 @@
 --#include oo
 --#include coroutines
 --#include easing
+--#include helpers
 
 parts_1={}
 parts_2={}
@@ -11,7 +12,7 @@ cls_particle=class(function(self)
  self.y=64
  self.lifetime=1
  self.t=0
- self.radius=10
+ self.radius=20
 end)
 
 function cls_particle:update()
@@ -23,27 +24,65 @@ function cls_particle:update()
   end
 end
 
+band_pal={7,7,7,7,6,6,6,5,5,5,1,1,1,1}
 cls_p_band=subclass(cls_particle,function(self)
  cls_particle._ctr(self)
 end)
 function cls_p_band:draw()
- local v=incirc(1,self.radius,self.t,self.lifetime)
- circ(self.x,self.y,v,7)
+ local v=inoutcubic(1,self.radius,self.t,self.lifetime)
+ local col=flr(self.t/self.lifetime*#band_pal)
+ circ(self.x,self.y,v,band_pal[col])
 end
 
+disc_pal={1,1,13,13,12,12,12,7}
 cls_p_disc=subclass(cls_particle,function(self)
   cls_particle._ctr(self)
   self.lifetime=2
-  self.radius=20
+  self.radius=30
 end)
 function cls_p_disc:draw()
  -- local v=inoutcubic(1,self.radius,self.t,self.lifetime)
  local v=incirc(1,self.radius,self.t,self.lifetime)
- circfill(self.x,self.y,v,12)
+ local col=disc_pal[flr(self.t/self.lifetime*#disc_pal)]
+ circfill(self.x,self.y,v,col)
 end
 
+pal={7,10,10,9,9,9,8,8,8,8,4,4,4,2,2,2,2}
+cls_p_fly=class(function(self,angle)
+ self.x=64
+ self.y=64
+ self.spd_x,self.spd_y=angle2vec(angle)
+ self.spd_x*=2
+ self.spd_y*=2
+ self.lifetime=1
+ self.t=0
+end)
+
+function cls_p_fly:update()
+ cls_particle.update(self)
+ self.x+=self.spd_x
+ self.y+=self.spd_y
+ self.spd_x*=0.95
+ self.spd_y*=0.95
+end
+
+function cls_p_fly:draw()
+ local v=flr(self.t/self.lifetime*#pal)
+ circ(self.x,self.y,.5,pal[v+1])
+end
 
 function _init()
+ add_cr(function()
+  local a=0
+  while true do
+   a+=0.4
+   for i=a,10+a do
+    add(parts_3,cls_p_fly.init(i/10))
+   end
+   cr_wait_for(.4)
+  end
+ end)
+
  add_cr(function()
   while true do
    add(parts_1,cls_p_disc.init())
