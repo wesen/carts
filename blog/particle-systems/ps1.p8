@@ -132,7 +132,10 @@ pal={7,10,10,9,9,9,8,8,8,8,4,4,4,2,2,2,2}
 cls_p_fly=class(function(self,angle)
  self.x=64
  self.y=64
+ self.radius=15
  self.spd_x,self.spd_y=angle2vec(angle)
+ self.x+=self.spd_x*self.radius
+ self.y+=self.spd_y*self.radius
  self.spd_x*=2
  self.spd_y*=2
  self.lifetime=1
@@ -156,23 +159,24 @@ function _init()
  add_cr(function()
   local a=0
   while true do
-   a+=0.4
-   for i=a,10+a do
-    add(parts_3,cls_p_fly.init(i/10))
-   end
    cr_wait_for(.4)
   end
  end)
 
  add_cr(function()
+  local a=0
   while true do
    add(parts_1,cls_p_disc.init())
    cr_wait_for(2)
+   a+=0.4
+   for i=a,30+a do
+    add(parts_3,cls_p_fly.init(i/30))
+   end
   end
  end)
  add_cr(function()
   while true do
-   add(parts_2,cls_p_band.init())
+   -- add(parts_2,cls_p_band.init())
    cr_wait_for(.5)
   end
  end)
