@@ -12,7 +12,7 @@ cls_particle=class(function(self)
  self.y=64
  self.lifetime=1
  self.t=0
- self.radius=20
+ self.radius=15
 end)
 
 function cls_particle:update()
@@ -24,7 +24,7 @@ function cls_particle:update()
   end
 end
 
-band_pal={7,7,7,7,6,6,6,5,5,5,1,1,1,1}
+band_pal={7,7,7,15,15,10,10,9,9,8,8,8,2,2,2}
 cls_p_band=subclass(cls_particle,function(self)
  cls_particle._ctr(self)
 end)
@@ -34,16 +34,16 @@ function cls_p_band:draw()
  circ(self.x,self.y,v,band_pal[col])
 end
 
-disc_pal={1,1,13,13,12,12,12,7}
+disc_pal={2,2,5,5,8,8,9,9,10,10,10}
 cls_p_disc=subclass(cls_particle,function(self)
   cls_particle._ctr(self)
   self.lifetime=2
-  self.radius=30
+  self.radius=20
 end)
 function cls_p_disc:draw()
  -- local v=inoutcubic(1,self.radius,self.t,self.lifetime)
  local v=incirc(1,self.radius,self.t,self.lifetime)
- local col=disc_pal[flr(self.t/self.lifetime*#disc_pal)]
+ local col=disc_pal[flr((self.t/self.lifetime)*#disc_pal)]
  circfill(self.x,self.y,v,col)
 end
 
