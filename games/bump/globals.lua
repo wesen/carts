@@ -7,6 +7,7 @@ spawn_idx=1
 actors={}
 particles={}
 interactables={}
+environments={}
 static_objects={}
 tiles={}
 crs={}

@@ -5,7 +5,6 @@ player_cnt=0
 function check_for_new_players()
  for i=0,3 do
   if (btnp(btn_jump,i) or btnp(btn_action,i)) and connected_players[i]==nil then
-   connected_players[i]=true
    room:spawn_player(i)
   end
  end
@@ -13,8 +12,6 @@ end
 
 cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.hitbox={x=2,y=0.5,dimx=4,dimy=7.5}
- self.head_hitbox={x=0,y=-1,dimx=8,dimy=1}
- self.feet_hitbox={x=2,y=7,dimx=4,dimy=1}
  cls_actor._ctr(self,pos)
  -- players are handled separately
  add(players,self)
@@ -45,23 +42,23 @@ function cls_player:update_bbox()
  if self.power_up_type!=spr_power_up_shrink then
   cls_actor.update_bbox(self)
   self.head_box={
-    aax=self.head_hitbox.x+self.x,
-    aay=self.head_hitbox.y+self.y
+    aax=self.x+0,
+    aay=self.y-1
    }
-  self.head_box.bbx=self.head_box.aax+self.head_hitbox.dimx
-  self.head_box.bby=self.head_box.aay+self.head_hitbox.dimy
+  self.head_box.bbx=self.head_box.aax+8
+  self.head_box.bby=self.head_box.aay+1
 
   self.feet_box={
-    aax=self.feet_hitbox.x+self.x,
-    aay=self.feet_hitbox.y+self.y
+    aax=self.x+2,
+    aay=self.y+7
    }
-  self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
-  self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+  self.feet_box.bbx=self.feet_box.aax+4
+  self.feet_box.bby=self.feet_box.aay+1
  else
   self.aax=self.x+3
-  self.aay=self.y+5
+  self.aay=self.y+4.5
   self.bbx=self.aax+3
-  self.bby=self.aay+3
+  self.bby=self.aay+3.5
 
   self.head_box={
     aax=self.x+2,
@@ -71,11 +68,11 @@ function cls_player:update_bbox()
   self.head_box.bby=self.head_box.aay+1
 
   self.feet_box={
-    aax=self.feet_hitbox.x+self.x,
-    aay=self.feet_hitbox.y+self.y
+    aax=self.x+2,
+    aay=self.y+7
    }
-  self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
-  self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+  self.feet_box.bbx=self.feet_box.aax+4
+  self.feet_box.bby=self.feet_box.aay+1
  end
 end
 
@@ -143,10 +140,8 @@ function cls_player:update_normal()
   maxfall*=0.5
  end
 
- local ground_bbox=self:bbox(0,1)
- self.on_ground=solid_at(ground_bbox)
- local on_actor=self:is_actor_at(input,0)
- local on_ice=ice_at(ground_bbox)
+ self.on_ground=solid_at_offset(self,0,1)
+ local on_ice=ice_at_offset(self,0,1)
 
  if self.on_ground then
   self.on_ground_interval=ground_grace_interval
@@ -205,11 +200,11 @@ function cls_player:update_normal()
 
  -- wall slide
  local is_wall_sliding=false
- if input!=0 and self:is_solid_at(input,0)
+ if input!=0 and solid_at_offset(self,input,0)
     and not self.on_ground and self.spd_y>0 then
   is_wall_sliding=true
   maxfall=wall_slide_maxfall
-  if (ice_at(self:bbox(input,0))) maxfall=ice_wall_maxfall
+  if (ice_at_offset(self,input,0)) maxfall=ice_wall_maxfall
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
@@ -230,8 +225,8 @@ function cls_player:update_normal()
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
-   local wall_dir=self:is_solid_at(-3,0) and -1
-        or self:is_solid_at(3,0) and 1
+   local wall_dir=solid_at_offset(self,-3,0) and -1
+        or solid_at_offset(self,3,0) and 1
         or 0
    if wall_dir!=0 then
     self.jump_interval=0
@@ -338,7 +333,7 @@ function cls_player:draw()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-  if self.power_up!=nil then
+  if powerup_colors[self.power_up_type]!=nil then
    bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up_type])
   else
    spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)

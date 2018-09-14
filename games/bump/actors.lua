@@ -37,20 +37,23 @@ function cls_actor:move_x(amount)
   while abs(amount)>0 do
    local step=amount
    if (abs(amount)>1) step=sign(amount)
-   amount-=step
 
-   -- bbox needs to be updated here
-   local solid=self:is_solid_at(step,0)
+   local solid=solid_at_offset(self,step,0)
    local actor=self:is_actor_at(step,0)
+
    if solid or actor then
-    self.spd_x=0
-    break
+    if abs(step)<0.1 then
+     self.spd_x=0
+     break
+    else
+     amount/=2
+    end
    else
+    amount-=step
     self.x+=step
     self.aax+=step
     self.bbx+=step
    end
-
   end
  else
   self.x+=amount
@@ -64,30 +67,29 @@ function cls_actor:move_y(amount)
   while abs(amount)>0 do
    local step=amount
    if (abs(amount)>1) step=sign(amount)
-   amount-=step
 
-   local solid=self:is_solid_at(0,step)
+   local solid=solid_at_offset(self,0,step)
    local actor=self:is_actor_at(0,step)
 
    if solid or actor then
-    self.spd_y=0
-    break
+    if abs(step)<0.1 then
+     self.spd_y=0
+     break
+    else
+     amount/=2
+    end
    else
+    amount-=step
     self.y+=step
     self.aay+=step
     self.bby+=step
    end
-
   end
  else
   self.y+=amount
   self.aay+=amount
   self.bby+=amount
  end
-end
-
-function cls_actor:is_solid_at(x,y)
- return solid_at(self:bbox(x,y))
 end
 
 function cls_actor:is_actor_at(x,y)

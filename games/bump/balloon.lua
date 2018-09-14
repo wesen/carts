@@ -19,7 +19,7 @@ end)
 function cls_balloon:update()
  self.t+=dt
 
- local solid=solid_at(self)
+ local solid=solid_at_offset(self,0,0)
  local is_actor,actor=self:is_actor_at(0,0)
 
  if solid or (is_actor and actor!=self.player) then

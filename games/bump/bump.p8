@@ -48,6 +48,7 @@ spawn_idx=1
 actors={}
 particles={}
 interactables={}
+environments={}
 static_objects={}
 tiles={}
 crs={}
@@ -403,6 +404,29 @@ function add_cr(f,_crs)
  return cr
 end
 
+<<<<<<< HEAD
+=======
+function cr_wait_for(t)
+ while t>0 do
+  yield()
+  t-=dt
+ end
+end
+
+-- queues - *sigh*
+function insert(t,val)
+ for i=(#t+1),2,-1 do
+  t[i]=t[i-1]
+ end
+ t[1]=val
+end
+
+function popend(t)
+ local top=t[#t]
+ del(t,top)
+ return top
+end
+>>>>>>> upstream/master
 
 dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,13}
 
@@ -479,20 +503,23 @@ function cls_actor:move_x(amount)
   while abs(amount)>0 do
    local step=amount
    if (abs(amount)>1) step=sign(amount)
-   amount-=step
 
-   -- bbox needs to be updated here
-   local solid=self:is_solid_at(step,0)
+   local solid=solid_at_offset(self,step,0)
    local actor=self:is_actor_at(step,0)
+
    if solid or actor then
-    self.spd_x=0
-    break
+    if abs(step)<0.1 then
+     self.spd_x=0
+     break
+    else
+     amount/=2
+    end
    else
+    amount-=step
     self.x+=step
     self.aax+=step
     self.bbx+=step
    end
-
   end
  else
   self.x+=amount
@@ -506,30 +533,29 @@ function cls_actor:move_y(amount)
   while abs(amount)>0 do
    local step=amount
    if (abs(amount)>1) step=sign(amount)
-   amount-=step
 
-   local solid=self:is_solid_at(0,step)
+   local solid=solid_at_offset(self,0,step)
    local actor=self:is_actor_at(0,step)
 
    if solid or actor then
-    self.spd_y=0
-    break
+    if abs(step)<0.1 then
+     self.spd_y=0
+     break
+    else
+     amount/=2
+    end
    else
+    amount-=step
     self.y+=step
     self.aay+=step
     self.bby+=step
    end
-
   end
  else
   self.y+=amount
   self.aay+=amount
   self.bby+=amount
  end
-end
-
-function cls_actor:is_solid_at(x,y)
- return solid_at(self:bbox(x,y))
 end
 
 function cls_actor:is_actor_at(x,y)
@@ -646,37 +672,26 @@ function cls_room:spawn_player(input_port)
  local spawn_pos = self.spawn_locations[spawn_idx]
  local spawn=cls_spawn.init(spawn_pos, input_port)
  spawn_idx = (spawn_idx%#self.spawn_locations)+1
+ connected_players[input_port]=true
  return spawn
 end
 
-function solid_at(bbox)
- if bbox.aax<0
-  or bbox.bbx>room.bbx
-  or bbox.aay<0
-  or bbox.bby>room.bby then
-   return true
- else
-  return tile_flag_at(bbox,flg_solid)
+function solid_at_offset(bbox,x,y)
+ if bbox.aax+x<0
+  or bbox.bbx+x>room.bbx
+  or bbox.aay+y<0
+  or bbox.bby+y>room.bby then
+   return true,nil
  end
+ if (tile_flag_at_offset(bbox,flg_solid,x,y)) return true,nil
+ for e in all(environments) do
+  if (e:collides_with(bbox,x,y)) return true,e
+ end
+ return false,nil
 end
 
-function ice_at(bbox)
- return tile_flag_at(bbox,flg_ice)
-end
-
-function tile_flag_at(bbox,flag)
- local aax=max(0,flr(bbox.aax/8))+room.x
- local aay=max(0,flr(bbox.aay/8))+room.y
- local bbx=min(room.dim_x,(bbox.bbx-1)/8)+room.x
- local bby=min(room.dim_y,(bbox.bby-1)/8)+room.y
- for i=aax,bbx do
-  for j=aay,bby do
-   if fget(mget(i,j),flag) then
-    return true
-   end
-  end
- end
- return false
+function ice_at_offset(bbox,x,y)
+ return tile_flag_at_offset(bbox,flg_ice,x,y)
 end
 
 function tile_flag_at_offset(bbox,flag,x,y)
@@ -807,7 +822,6 @@ player_cnt=0
 function check_for_new_players()
  for i=0,3 do
   if (btnp(btn_jump,i) or btnp(btn_action,i)) and connected_players[i]==nil then
-   connected_players[i]=true
    room:spawn_player(i)
   end
  end
@@ -815,8 +829,6 @@ end
 
 cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.hitbox={x=2,y=0.5,dimx=4,dimy=7.5}
- self.head_hitbox={x=0,y=-1,dimx=8,dimy=1}
- self.feet_hitbox={x=2,y=7,dimx=4,dimy=1}
  cls_actor._ctr(self,pos)
  -- players are handled separately
  add(players,self)
@@ -847,23 +859,23 @@ function cls_player:update_bbox()
  if self.power_up_type!=spr_power_up_shrink then
   cls_actor.update_bbox(self)
   self.head_box={
-    aax=self.head_hitbox.x+self.x,
-    aay=self.head_hitbox.y+self.y
+    aax=self.x+0,
+    aay=self.y-1
    }
-  self.head_box.bbx=self.head_box.aax+self.head_hitbox.dimx
-  self.head_box.bby=self.head_box.aay+self.head_hitbox.dimy
+  self.head_box.bbx=self.head_box.aax+8
+  self.head_box.bby=self.head_box.aay+1
 
   self.feet_box={
-    aax=self.feet_hitbox.x+self.x,
-    aay=self.feet_hitbox.y+self.y
+    aax=self.x+2,
+    aay=self.y+7
    }
-  self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
-  self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+  self.feet_box.bbx=self.feet_box.aax+4
+  self.feet_box.bby=self.feet_box.aay+1
  else
   self.aax=self.x+3
-  self.aay=self.y+5
+  self.aay=self.y+4.5
   self.bbx=self.aax+3
-  self.bby=self.aay+3
+  self.bby=self.aay+3.5
 
   self.head_box={
     aax=self.x+2,
@@ -873,11 +885,11 @@ function cls_player:update_bbox()
   self.head_box.bby=self.head_box.aay+1
 
   self.feet_box={
-    aax=self.feet_hitbox.x+self.x,
-    aay=self.feet_hitbox.y+self.y
+    aax=self.x+2,
+    aay=self.y+7
    }
-  self.feet_box.bbx=self.feet_box.aax+self.feet_hitbox.dimx
-  self.feet_box.bby=self.feet_box.aay+self.feet_hitbox.dimy
+  self.feet_box.bbx=self.feet_box.aax+4
+  self.feet_box.bby=self.feet_box.aay+1
  end
 end
 
@@ -945,10 +957,8 @@ function cls_player:update_normal()
   maxfall*=0.5
  end
 
- local ground_bbox=self:bbox(0,1)
- self.on_ground=solid_at(ground_bbox)
- local on_actor=self:is_actor_at(input,0)
- local on_ice=ice_at(ground_bbox)
+ self.on_ground=solid_at_offset(self,0,1)
+ local on_ice=ice_at_offset(self,0,1)
 
  if self.on_ground then
   self.on_ground_interval=ground_grace_interval
@@ -1007,11 +1017,11 @@ function cls_player:update_normal()
 
  -- wall slide
  local is_wall_sliding=false
- if input!=0 and self:is_solid_at(input,0)
+ if input!=0 and solid_at_offset(self,input,0)
     and not self.on_ground and self.spd_y>0 then
   is_wall_sliding=true
   maxfall=wall_slide_maxfall
-  if (ice_at(self:bbox(input,0))) maxfall=ice_wall_maxfall
+  if (ice_at_offset(self,input,0)) maxfall=ice_wall_maxfall
   local smoke_dir = self.flip.x and .3 or -.3
   if maybe(.1) then
     local smoke=self:smoke(spr_wall_smoke,smoke_dir)
@@ -1032,8 +1042,8 @@ function cls_player:update_normal()
    self.jump_button.hold_time+=1
   elseif self.jump_button:was_just_pressed() then
    -- check for wall jump
-   local wall_dir=self:is_solid_at(-3,0) and -1
-        or self:is_solid_at(3,0) and 1
+   local wall_dir=solid_at_offset(self,-3,0) and -1
+        or solid_at_offset(self,3,0) and 1
         or 0
    if wall_dir!=0 then
     self.jump_interval=0
@@ -1140,7 +1150,7 @@ function cls_player:draw()
 
   pal(cols_face[1], cols_face[self.input_port + 1])
   pal(cols_hair[1], cols_hair[self.input_port + 1])
-  if self.power_up!=nil then
+  if powerup_colors[self.power_up_type]!=nil then
    bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up_type])
   else
    spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
@@ -1491,6 +1501,7 @@ powerup_colors[spr_suicide_bomb]=8
 powerup_countdowns[spr_suicide_bomb]=5
 tiles[spr_suicide_bomb]=cls_suicide_bomb
 
+<<<<<<< HEAD
 
 --#include constants
 --#include globals
@@ -1524,6 +1535,148 @@ tiles[spr_suicide_bomb]=cls_suicide_bomb
 --#include mine
 --#include bomb
 --#include balloon
+=======
+spr_bomb=23
+cls_bomb_pwrup=subclass(cls_pwrup,function(self,pos)
+ cls_pwrup._ctr(self,pos)
+end)
+tiles[spr_bomb]=cls_bomb_pwrup
+
+function cls_bomb_pwrup:on_powerup_start(player)
+ local bomb=cls_bomb.init(player)
+end
+
+cls_bomb=subclass(cls_actor,function(self,player)
+ cls_actor._ctr(self,v2(player.x,player.y))
+ self.is_thrown=false
+ self.is_solid=false
+ self.player=player
+end)
+
+function cls_bomb:update()
+ local solid=solid_at_offset(self,0,0)
+ local is_actor,actor=self:is_actor_at(0,0)
+ if solid or (is_actor and actor!=self.player) then
+  make_blast(self.x,self.y)
+  del(actors,self)
+ elseif self.is_thrown then
+  local gravity=0.12
+  local maxfall=2
+  self.x+=self.spd_x
+  self.spd_y=appr(self.spd_y,maxfall,gravity)
+  self.y+=self.spd_y
+ elseif self.player.is_dead then
+  del(actors,self)
+ else
+  self.x=self.player.x
+  self.y=self.player.y-8
+  if btnp(btn_action,self.player.input_port) then
+   self.is_thrown=true
+   self.spd_x=(self.player.flip.x and -1 or 1) + self.player.spd_x
+   self.spd_y=-1
+  end
+ end
+end
+
+function cls_bomb:draw()
+ spr(spr_bomb,self.x,self.y)
+end
+
+spr_balloon=24
+cls_balloon_pwrup=subclass(cls_pwrup,function(self,pos)
+ cls_pwrup._ctr(self,pos)
+end)
+tiles[spr_balloon]=cls_balloon_pwrup
+
+function cls_balloon_pwrup:on_powerup_start(player)
+ local balloon=cls_balloon.init(player)
+end
+
+cls_balloon=subclass(cls_actor,function(self,player)
+ cls_actor._ctr(self,v2(player.x,player.y))
+ self.is_released=false
+ self.is_solid=false
+ self.player=player
+ self.t=0
+end)
+
+function cls_balloon:update()
+ self.t+=dt
+
+ local solid=solid_at_offset(self,0,0)
+ local is_actor,actor=self:is_actor_at(0,0)
+
+ if solid or (is_actor and actor!=self.player) then
+  self.player:clear_power_up()
+  del(actors,self)
+ elseif not self.is_released then
+  if (self.player.is_dead) del(actors,self)
+  self.x=self.player.x+sin(self.t)*3
+  self.player.y=self.y+12
+  if btnp(btn_action,self.player.input_port) then
+   self.is_released=true
+  end
+ end
+
+ self.y-=.5
+end
+
+function cls_balloon:draw()
+ spr(spr_balloon,self.x,self.y)
+ if not self.is_released then
+  line(self.player.x+4,self.player.y,self.x+4,self.y+7,7)
+ end
+end
+
+spr_vanishing_platform=96
+
+vp_state_visible=0
+vp_state_vanishing=1
+vp_state_vanished=2
+
+cls_vanishing_platform=class(function(self,pos)
+ self.x=pos.x
+ self.y=pos.y
+ self.aax=pos.x
+ self.aay=pos.y+0.5
+ self.bbx=self.aax+8
+ self.bby=self.aay+3.5
+ self.state=vp_state_visible
+ self.spr=spr_vanishing_platform
+ add(environments,self)
+end)
+tiles[spr_vanishing_platform]=cls_vanishing_platform
+
+function cls_vanishing_platform:collides_with(o,x,y)
+ return self.state!=vp_state_vanished and do_bboxes_collide_offset(o,self,x,y)
+end
+
+function cls_vanishing_platform:draw()
+ if (self.state!=vp_state_vanished) spr(self.spr,self.x,self.y)
+end
+
+function cls_vanishing_platform:update()
+ if self.state==vp_state_visible then
+  for p in all(players) do
+   if do_bboxes_collide_offset(p,self,0,1) then
+    self.state=vp_state_vanishing
+    add_cr(function()
+     cr_wait_for(.2)
+     self.spr=spr_vanishing_platform+1
+     cr_wait_for(.5)
+     self.spr=spr_vanishing_platform+2
+     cr_wait_for(.5)
+     self.state=vp_state_vanished
+     cr_wait_for(2)
+     self.state=vp_state_visible
+     self.spr=spr_vanishing_platform
+    end)
+   end
+  end
+ end
+end
+
+>>>>>>> upstream/master
 
 -- x split into actors / particles / interactables
 -- x gravity
@@ -1549,16 +1702,8 @@ tiles[spr_suicide_bomb]=cls_suicide_bomb
 -- x add gore on vertical surfaces
 -- x make gore slippery
 -- x add gore when dying
--- moving platforms
--- laser beam
--- add water
--- add butterflies
--- add flies
--- vanishing platforms
--- lookup / lookdown sprites
--- go through right and come back left (?)
+-- x vanishing platforms
 -- x add second player
--- add trailing smoke particles when springing up
 -- x add multiple players / spawn points
 -- x add death mechanics
 -- x add score
@@ -1575,8 +1720,19 @@ tiles[spr_suicide_bomb]=cls_suicide_bomb
 -- x suicide bomber
 -- x invisibility
 -- x bomb
+-- x miniature mode
 -- x have players join when pressing action
+-- x balloon pulling upwards
+
 -- make player selection screen
+
+-- moving platforms
+-- laser beam
+-- add water
+-- add butterflies
+-- add flies
+-- lookup / lookdown sprites
+-- add trailing smoke particles when springing up
 
 -- fades
 -- better kill animations
@@ -1593,7 +1749,6 @@ tiles[spr_suicide_bomb]=cls_suicide_bomb
 -- refactor powerups to have a decent api
 -- visualize power ups
 -- different sprites for different players
--- balloon pulling upwards
 -- double jump
 -- dash
 -- meteors
@@ -1601,9 +1756,6 @@ tiles[spr_suicide_bomb]=cls_suicide_bomb
 -- bullet time
 -- whip
 -- jetpack
--- moving platforms
--- vanishing platforms
--- miniature mode
 -- lasers
 -- gun
 -- rope
@@ -1615,15 +1767,22 @@ tiles[spr_suicide_bomb]=cls_suicide_bomb
 -- x player kill
 -- x player colors
 
+<<<<<<< HEAD
 --#include main
 
+=======
+-- go through right and come back left (?)
+>>>>>>> upstream/master
 
 function _init()
  room=cls_room.init(v2(16,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
+<<<<<<< HEAD
  --room:spawn_player(p3_input)
  --room:spawn_player(p4_input)
+=======
+>>>>>>> upstream/master
 end
 
 function _draw()
@@ -1633,6 +1792,9 @@ function _draw()
  camera(camera_shake.x,camera_shake.y)
  room:draw()
  for a in all(interactables) do
+  a:draw()
+ end
+ for a in all(environments) do
   a:draw()
  end
  for a in all(static_objects) do
@@ -1653,20 +1815,23 @@ function _draw()
   )
  end
 
- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
- print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
+ -- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
+ -- print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
- 
+
  check_for_new_players()
 
  for a in all(actors) do
   a:update_bbox()
  end
  tick_crs()
+ foreach(environments, function(a)
+  a:update()
+ end)
  update_actors()
  foreach(particles, function(a)
   a:update()
@@ -1882,17 +2047,29 @@ __map__
 0000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000420000000000700000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4141414100000040404000004000000045010000000000000000000000000071000040404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+<<<<<<< HEAD
 0000000000000005000000004000000040402700000000000000270000004040000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+=======
+0000000000000005000000000100000040402700000000000000000000004040000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+>>>>>>> upstream/master
 0000000000404141000000000000010000404000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4000000000000000000000414040404000000000002801704200400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000004040000000000000000000000000000000404141414100404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000004141414040400000000040000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0042000000000000000000004100000040404000000000000042000000004040000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+<<<<<<< HEAD
 4040000000400001000100004100000000000000000027000140404000000040000000006060604040400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000400040404000004100404000000000000040404040000000000000000000180000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000404000400000000000004100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000000040420000000000410000000070014500420000007100002701000042000000002e000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 4444444444404044414141444044444041414141414141414140404040404040404044404041414141404040404040404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+=======
+4040000000400001000100004100000000000000180000000140404000000040000000006060604040400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000400040404000004100404000000000000040404040000000000000000000180000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000404000400000000000004100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000000040420000000000410000001770014500420000007100000001000042000000002e00000000000001000000012700280029002a002b002c002d012e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+4444444444404044414141444044444041414141414141414140404040404040404044404041414141404040404040404040404040404040404040404040404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+>>>>>>> upstream/master
 __sfx__
 000100001a050180501a0500000012050120501105000000100501005010050100501005012050130501605000000190501a0501d0501e0502005023050270500000000000000000000000000000000000000000
 0003000000000142101325012250112500f2500c250092500a2400724005240032400121001210052000420001200032000320016200162001620016200162001b2001d2001f2002b20030200352003520000000

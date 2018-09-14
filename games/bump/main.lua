@@ -15,6 +15,9 @@ function _draw()
  for a in all(interactables) do
   a:draw()
  end
+ for a in all(environments) do
+  a:draw()
+ end
  for a in all(static_objects) do
   a:draw()
  end
@@ -33,20 +36,23 @@ function _draw()
   )
  end
 
- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
- print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
+ -- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
+ -- print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
- 
+
  check_for_new_players()
 
  for a in all(actors) do
   a:update_bbox()
  end
  tick_crs()
+ foreach(environments, function(a)
+  a:update()
+ end)
  update_actors()
  foreach(particles, function(a)
   a:update()
