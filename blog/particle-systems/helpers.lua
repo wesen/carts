@@ -11,5 +11,6 @@ function copy_table(a)
  for k,v in pairs(a) do
   res[k]=v
  end
+ setmetatable(res,getmetatable(a))
  return res
 end

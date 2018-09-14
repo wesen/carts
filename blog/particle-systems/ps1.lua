@@ -58,11 +58,24 @@ cls_p_fly=class(function(self,angle)
  self.spd_x*=2
  self.spd_y*=2
  self.lifetime=1
+ self.trail_interval=.1
+ self.t_trail=0
  self.t=0
 end)
 
 function cls_p_fly:update()
  cls_particle.update(self)
+ self.t_trail+=dt
+ if self.t_trail>self.trail_interval then
+  self.t_trail=0
+  local p=copy_table(self)
+  p.spd_x*=0.3
+  p.spd_y*=0.3
+  p.trail_interval*=2
+  p.lifetime/=2
+  p.t/=2
+  add(parts_3,p)
+ end
  self.x+=self.spd_x
  self.y+=self.spd_y
  self.spd_x*=0.95
@@ -85,8 +98,10 @@ function _init()
  add_cr(function()
   local a=0
   while true do
-   add(parts_1,cls_p_disc.init())
-   cr_wait_for(2)
+   local disc=cls_p_disc.init()
+   disc.lifetime=1
+   add(parts_1,disc)
+   cr_wait_for(1)
    a+=0.4
    for i=a,30+a do
     add(parts_3,cls_p_fly.init(i/30))
