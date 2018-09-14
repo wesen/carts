@@ -144,6 +144,7 @@ function cls_p_fly:update()
  cls_particle.update(self)
  self.t_trail+=dt
  if self.t_trail>self.trail_interval then
+  -- this is stupid, we should just reate particles with no speed and a lifetime
   self.t_trail=0
   local p=copy_table(self)
   local spd_factor=slider_vals.spd_factor
@@ -304,6 +305,8 @@ function _draw()
 
  spr(1,mx,my)
  print(tostr(stat(1)),100,100)
+
+ print(tostr(peek(0x5f80)),100,110)
 end
 
 __gfx__

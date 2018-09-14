@@ -56,4 +56,6 @@ function _draw()
 
  spr(1,mx,my)
  print(tostr(stat(1)),100,100)
+
+ print(tostr(peek(0x5f80)),100,110)
 end
