@@ -217,14 +217,8 @@ end
 
 function cls_slider:update(mx,my,mb)
  -- bounding box for the knob
- if mb then
-  local sx=self.x+(self.val-self.min_v)/(self.max_v-self.min_v)*20
-  local bbox={
-   aax=sx-1,
-   bbx=sx+1,
-   aay=self.y-3,
-   bby=self.y+3
-  }
+ if mb and in_bbox(self.bbox,mx,my) then
+  self.val=(mx-self.x)/20*(self.max_v-self.min_v)+self.min_v
  end
 end
 
