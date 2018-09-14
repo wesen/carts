@@ -1,9 +1,12 @@
-pwrup_drop_interval=60*10
+drop_min_time=60*5
+drop_max_time=60*30
 
 
 cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
+ -- Set spawn time between min time and max time
+ self.interval=flr(drop_min_time+(rnd(1)*(drop_max_time-drop_min_time)))
  self.time=0
  self.item=nil
 end)
@@ -12,23 +15,27 @@ function cls_pwrup_dropper:update()
  if self.item==nil then
 
   -- Increment time. Spawn when time's up
-  self.time=(self.time%(pwrup_drop_interval))+1
-  if self.time==pwrup_drop_interval then
-   self.item=rnd_elt(power_ups).init(self.pos)
+  self.time=(self.time%(self.interval))+1
+  if self.time==self.interval then
+   local cls_idx=flr(rnd(#power_ups))
+   local spr_idx=cls_idx+spr_idx_start
+   self.item=power_ups[cls_idx+1].init(v2(self.x,self.y))
+   self.item.tile=spr_idx
   end
 
  else
 
   -- Check that item has been used before allowing another drop
   local exists=false
-  for actor in all(actors) do
-   if actor==self.item then
+  for interactable in all(interactables) do
+   if interactable==self.item then
     exists=true
    end
   end
 
   if not exists then
    self.item=nil
+   self.interval=flr(drop_min_time+(rnd(1)*(drop_max_time-drop_min_time)))
   end
 
  end
@@ -119,13 +126,16 @@ spr_power_up_shrink=46
 powerup_countdowns[spr_power_up_shrink]=30
 
 
+-- Start offset for the item sprite values
+spr_idx_start=39
+-- Associate sprite value with class
 power_ups={ 
- spr_power_up_doppelgaenger,
- spr_power_up_invincibility,
- spr_power_up_superspeed,
- spr_power_up_superjump,
- spr_power_up_gravitytweak,
- spr_power_up_invisibility,
- spr_power_up_shrink
+ cls_pwrup_doppelgaenger,
+ cls_pwrup,
+ cls_pwrup,
+ cls_pwrup,
+ cls_pwrup,
+ cls_pwrup,
+ cls_pwrup
 }
 tiles[spr_power_up_doppelgaenger]=cls_pwrup_dropper
