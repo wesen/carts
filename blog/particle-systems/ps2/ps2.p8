@@ -134,8 +134,8 @@ cls_p_fly=class(function(self,angle)
  self.spd_y*=0.5
  self.x+=self.spd_x*self.radius
  self.y+=self.spd_y*self.radius
- self.lifetime=1
- self.trail_interval=.1
+ self.lifetime=slider_vals.lifetime
+ self.trail_interval=slider_vals.trail_interval
  self.t_trail=0
  self.t=0
 end)
@@ -146,17 +146,19 @@ function cls_p_fly:update()
  if self.t_trail>self.trail_interval then
   self.t_trail=0
   local p=copy_table(self)
-  p.spd_x*=0.3
-  p.spd_y*=0.3
-  p.trail_interval*=2
-  p.lifetime/=2
-  p.t/=2
+  local spd_factor=slider_vals.spd_factor
+  p.spd_x*=spd_factor
+  p.spd_y*=spd_factor
+  p.trail_interval*=(self.lifetime*slider_vals.trail_interval_scale)
+  p.t_trail=0
+  p.lifetime/=slider_vals.lifetime_scale
+  p.t/=(self.lifetime*3)
   add(parts_3,p)
  end
  self.x+=self.spd_x
  self.y+=self.spd_y
- self.spd_x*=0.95
- self.spd_y*=0.95
+ self.spd_x*=slider_vals.spd_scale
+ self.spd_y*=slider_vals.spd_scale
 end
 
 function cls_p_fly:draw()
@@ -176,10 +178,11 @@ function particles_init()
  add_cr(function()
   local a=0
   while true do
-   cr_wait_for(1)
+   cr_wait_for(slider_vals.lifetime*2)
    a+=0.4
-   for i=a,30+a do
-    add(parts_3,cls_p_fly.init(i/30))
+   local cnt=slider_vals.count
+   for i=a,cnt+a do
+    add(parts_3,cls_p_fly.init(i/cnt))
    end
   end
  end)
@@ -194,10 +197,10 @@ end
 dragged_slider=nil
 slider_vals={}
 
-cls_slider=class(function(self,name,x,y,val,min_v,max_v)
+cls_slider=class(function(self,name,val,min_v,max_v)
  self.name=name
- self.x=x
- self.y=y
+ self.x=0
+ self.y=#sliders*10+10
  self.val=val
  self.min_v=min_v
  self.max_v=max_v
@@ -206,6 +209,7 @@ cls_slider=class(function(self,name,x,y,val,min_v,max_v)
   aay=self.y-3,bby=self.y+3
  }
  self.is_dragging=false
+ printh("minv "..tostr(self.min_v))
  self:update()
 end)
 
@@ -213,7 +217,7 @@ function fmt_dec(v)
  local fv=flr(v)
  local dec=flr((v-fv)*100)
  local res=tostr(fv)
- if (dec!=0) res=res.."."..tostr(dec)
+ if (dec!=0) res=res.."."..(dec<10 and "0" or "")..tostr(dec)
  return res
 end
 
@@ -256,11 +260,13 @@ sliders={}
 
 function _init()
  poke(0x5f2d, 1)
- add(sliders,cls_slider.init("slider1",20,20,0.5,0,1))
- add(sliders,cls_slider.init("slider2",20,30,12,2,24))
- add(sliders,cls_slider.init("slider3",20,40,50,0,100))
- add(sliders,cls_slider.init("slider4",20,50,-80,-100,100))
- printh("foobar")
+ add(sliders,cls_slider.init("count",30,1,40))
+ add(sliders,cls_slider.init("spd_factor",0.3,0,3))
+ add(sliders,cls_slider.init("lifetime",1,0,5))
+ add(sliders,cls_slider.init("spd_scale",0.99,0.93,1.1))
+ add(sliders,cls_slider.init("trail_interval",0.1,0.1,.5))
+ add(sliders,cls_slider.init("trail_interval_scale",2,1.4,3))
+ add(sliders,cls_slider.init("lifetime_scale",2,1,5))
  particles_init()
 end
 
@@ -297,6 +303,7 @@ function _draw()
  foreach(sliders,function(s) s:draw(mx,my,mb) end)
 
  spr(1,mx,my)
+ print(tostr(stat(1)),100,100)
 end
 
 __gfx__

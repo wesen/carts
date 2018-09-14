@@ -48,8 +48,8 @@ cls_p_fly=class(function(self,angle)
  self.spd_y*=0.5
  self.x+=self.spd_x*self.radius
  self.y+=self.spd_y*self.radius
- self.lifetime=1
- self.trail_interval=.1
+ self.lifetime=slider_vals.lifetime
+ self.trail_interval=slider_vals.trail_interval
  self.t_trail=0
  self.t=0
 end)
@@ -60,17 +60,19 @@ function cls_p_fly:update()
  if self.t_trail>self.trail_interval then
   self.t_trail=0
   local p=copy_table(self)
-  p.spd_x*=0.3
-  p.spd_y*=0.3
-  p.trail_interval*=2
-  p.lifetime/=2
-  p.t/=2
+  local spd_factor=slider_vals.spd_factor
+  p.spd_x*=spd_factor
+  p.spd_y*=spd_factor
+  p.trail_interval*=(self.lifetime*slider_vals.trail_interval_scale)
+  p.t_trail=0
+  p.lifetime/=slider_vals.lifetime_scale
+  p.t/=(self.lifetime*3)
   add(parts_3,p)
  end
  self.x+=self.spd_x
  self.y+=self.spd_y
- self.spd_x*=0.95
- self.spd_y*=0.95
+ self.spd_x*=slider_vals.spd_scale
+ self.spd_y*=slider_vals.spd_scale
 end
 
 function cls_p_fly:draw()
@@ -90,10 +92,11 @@ function particles_init()
  add_cr(function()
   local a=0
   while true do
-   cr_wait_for(1)
+   cr_wait_for(slider_vals.lifetime*2)
    a+=0.4
-   for i=a,30+a do
-    add(parts_3,cls_p_fly.init(i/30))
+   local cnt=slider_vals.count
+   for i=a,cnt+a do
+    add(parts_3,cls_p_fly.init(i/cnt))
    end
   end
  end)

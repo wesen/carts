@@ -12,11 +12,13 @@ sliders={}
 
 function _init()
  poke(0x5f2d, 1)
- add(sliders,cls_slider.init("slider1",20,20,0.5,0,1))
- add(sliders,cls_slider.init("slider2",20,30,12,2,24))
- add(sliders,cls_slider.init("slider3",20,40,50,0,100))
- add(sliders,cls_slider.init("slider4",20,50,-80,-100,100))
- printh("foobar")
+ add(sliders,cls_slider.init("count",30,1,40))
+ add(sliders,cls_slider.init("spd_factor",0.3,0,3))
+ add(sliders,cls_slider.init("lifetime",1,0,5))
+ add(sliders,cls_slider.init("spd_scale",0.99,0.93,1.1))
+ add(sliders,cls_slider.init("trail_interval",0.1,0.1,.5))
+ add(sliders,cls_slider.init("trail_interval_scale",2,1.4,3))
+ add(sliders,cls_slider.init("lifetime_scale",2,1,5))
  particles_init()
 end
 
@@ -53,4 +55,5 @@ function _draw()
  foreach(sliders,function(s) s:draw(mx,my,mb) end)
 
  spr(1,mx,my)
+ print(tostr(stat(1)),100,100)
 end

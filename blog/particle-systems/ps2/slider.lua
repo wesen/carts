@@ -1,10 +1,10 @@
 dragged_slider=nil
 slider_vals={}
 
-cls_slider=class(function(self,name,x,y,val,min_v,max_v)
+cls_slider=class(function(self,name,val,min_v,max_v)
  self.name=name
- self.x=x
- self.y=y
+ self.x=0
+ self.y=#sliders*10+10
  self.val=val
  self.min_v=min_v
  self.max_v=max_v
@@ -13,6 +13,7 @@ cls_slider=class(function(self,name,x,y,val,min_v,max_v)
   aay=self.y-3,bby=self.y+3
  }
  self.is_dragging=false
+ printh("minv "..tostr(self.min_v))
  self:update()
 end)
 
@@ -20,7 +21,7 @@ function fmt_dec(v)
  local fv=flr(v)
  local dec=flr((v-fv)*100)
  local res=tostr(fv)
- if (dec!=0) res=res.."."..tostr(dec)
+ if (dec!=0) res=res.."."..(dec<10 and "0" or "")..tostr(dec)
  return res
 end
 
