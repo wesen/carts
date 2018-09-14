@@ -1,5 +1,5 @@
 function _init()
- room=cls_room.init(v2(32,0),v2(16,16))
+ room=cls_room.init(v2(16,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
 end
@@ -34,8 +34,8 @@ function _draw()
   )
  end
 
- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
- print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
+ -- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
+ -- print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
 end
 
 function _update60()
