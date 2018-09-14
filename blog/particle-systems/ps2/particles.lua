@@ -79,6 +79,7 @@ function cls_p_fly:draw()
 end
 
 function particles_init()
+ printh("particles init")
  add_cr(function()
   local a=0
   while true do

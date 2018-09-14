@@ -11,12 +11,13 @@ parts_3={}
 sliders={}
 
 function _init()
- -- particles_init()
  poke(0x5f2d, 1)
  add(sliders,cls_slider.init("slider1",20,20,0.5,0,1))
  add(sliders,cls_slider.init("slider2",20,30,12,2,24))
  add(sliders,cls_slider.init("slider3",20,40,50,0,100))
  add(sliders,cls_slider.init("slider4",20,50,-80,-100,100))
+ printh("foobar")
+ particles_init()
 end
 
 lasttime=time()
@@ -50,6 +51,6 @@ function _draw()
  foreach(parts_2,function(p) p:draw() end)
  foreach(parts_3,function(p) p:draw() end)
  foreach(sliders,function(s) s:draw(mx,my,mb) end)
- 
+
  spr(1,mx,my)
 end
