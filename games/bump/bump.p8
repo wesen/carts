@@ -5,11 +5,13 @@ flg_solid=0
 flg_ice=1
 
 --first value is default
-cols_face={ 7, 12 }
-cols_hair={ 13, 10 }
+cols_face={ 7, 12, 2, 11 }
+cols_hair={ 13, 10, 8, 12 }
 
 p1_input=0
 p2_input=1
+p3_input=2
+p4_input=3
 
 btn_right=1
 btn_up=2
@@ -36,6 +38,7 @@ local jump_button_grace_interval=5
 local jump_max_hold_time=15
 local ground_grace_interval=6
 
+
 frame=0
 dt=0
 lasttime=time()
@@ -49,7 +52,8 @@ environments={}
 static_objects={}
 tiles={}
 crs={}
-scores={0, 0}
+scores={0, 0, 0, 0}
+
 
 jump_button_grace_interval=10
 jump_max_hold_time=15
@@ -78,6 +82,7 @@ function subclass(parent,init)
  local c=class(init)
  return setmetatable(c,parent)
 end
+
 
 -- vectors
 local v2mt={}
@@ -135,6 +140,30 @@ end
 
 function angle2vec(angle)
  return v2(cos(angle),sin(angle))
+end
+
+
+-- queues - *sigh*
+function insert(t,val)
+ for i=(#t+1),2,-1 do
+  t[i]=t[i-1]
+ end
+ t[1]=val
+end
+
+function popend(t)
+ local top=t[#t]
+ del(t,top)
+ return top
+end
+
+function reverse(t)
+ for i=1,(#t/2) do
+  local tmp=t[i]
+  local oi=#t-(i-1)
+  t[i]=t[oi]
+  t[oi]=tmp
+ end
 end
 
 local bboxvt={}
@@ -201,21 +230,6 @@ function do_bboxes_collide_offset(a,b,dx,dy)
    (a.bby+dy) > b.aay and
    (a.aax+dx) < b.bbx and
    (a.aay+dy) < b.bby
-end
-
-local camera_shake=v2(0,0)
-
-function add_shake(p)
- camera_shake+=angle2vec(rnd(1))*p
-end
-
-function update_shake()
- if abs(camera_shake.x)+abs(camera_shake.y)<1 then
-  camera_shake=v2(0,0)
- end
- if frame%4==0 then
-  camera_shake*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
- end
 end
 
 
@@ -327,6 +341,7 @@ function bstr(s,x,y,c1,c2)
 	print(s,x+1,y+1,c2)
 end
 
+
 function inoutquint(t, b, c, d)
  t = t / d * 2
  if (t < 1) return c / 2 * pow(t, 5) + b
@@ -366,6 +381,7 @@ function cr_move_to(obj,target_x,target_y,d,easetype)
  end
 end
 
+
 crs={}
 draw_crs={}
 
@@ -395,28 +411,7 @@ function cr_wait_for(t)
  end
 end
 
--- queues - *sigh*
-function insert(t,val)
- for i=(#t+1),2,-1 do
-  t[i]=t[i-1]
- end
- t[1]=val
-end
 
-function popend(t)
- local top=t[#t]
- del(t,top)
- return top
-end
-
-function reverse(t)
- for i=1,(#t/2) do
-  local tmp=t[i]
-  local oi=#t-(i-1)
-  t[i]=t[oi]
-  t[oi]=tmp
- end
-end
 dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,13}
 
 function darken(p,_pal)
@@ -567,6 +562,23 @@ function update_actors(typ)
  end
 end
 
+
+local camera_shake=v2(0,0)
+
+function add_shake(p)
+ camera_shake+=angle2vec(rnd(1))*p
+end
+
+function update_shake()
+ if abs(camera_shake.x)+abs(camera_shake.y)<1 then
+  camera_shake=v2(0,0)
+ end
+ if frame%4==0 then
+  camera_shake*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
+ end
+end
+
+
 cls_button=class(function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
  self.input_port=input_port
@@ -601,6 +613,7 @@ end
 function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
+
 
 function v_idx(pos)
  return pos.x+pos.y*128
@@ -680,6 +693,7 @@ function tile_flag_at_offset(bbox,flag,x,y)
  return false
 end
 
+
 spr_wall_smoke=54
 spr_ground_smoke=51
 spr_full_smoke=48
@@ -705,6 +719,7 @@ end
 function cls_smoke:draw()
  spr(self.spr,self.x,self.y,1,1,self.flip_x,false)
 end
+
 
 cls_particle=class(function(self,pos,lifetime,sprs)
  self.x=pos.x+mrnd(1)
@@ -782,6 +797,7 @@ function make_gore_explosion(pos)
   cls_gore.init(pos)
  end
 end
+
 
 players={}
 connected_players={}
@@ -1142,6 +1158,7 @@ function cls_player:draw()
  end
 end
 
+
 spr_spring_sprung=66
 spr_spring_wound=67
 
@@ -1168,6 +1185,7 @@ function cls_spring:draw()
  if (self.sprung_time>0) spr_=spr_spring_sprung
  spr(spr_,self.x,self.y)
 end
+
 
 spr_spawn_point=1
 
@@ -1200,6 +1218,7 @@ function cls_spawn:draw()
  spr(spr_spawn_point,self.x,self.y)
 end
 
+
 spr_spikes=68
 
 cls_spikes=subclass(cls_interactable,function(self,pos)
@@ -1216,9 +1235,11 @@ function cls_spikes:draw()
  spr(spr_spikes,self.x,self.y)
 end
 
+
 cls_moving_platform=subclass(cls_actor,function(pos)
  cls_actor._ctr(self,pos)
 end)
+
 
 spr_tele_enter=112
 spr_tele_exit=113
@@ -1274,6 +1295,51 @@ function cls_tele_exit:draw()
  spr(spr_tele_exit,self.x,self.y)
 end
 
+
+drop_min_time=60*5
+drop_max_time=60*30
+
+
+cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
+ cls_actor._ctr(self,pos)
+ self.is_solid=false
+ -- Set spawn time between min time and max time
+ self.interval=flr(drop_min_time+(rnd(1)*(drop_max_time-drop_min_time)))
+ self.time=0
+ self.item=nil
+end)
+
+function cls_pwrup_dropper:update()
+ if self.item==nil then
+
+  -- Increment time. Spawn when time's up
+  self.time=(self.time%(self.interval))+1
+  if self.time==self.interval then
+   local cls_idx=flr(rnd(#power_ups))
+   local spr_idx=cls_idx+spr_idx_start
+   self.item=power_ups[cls_idx+1].init(v2(self.x,self.y))
+   self.item.tile=spr_idx
+  end
+
+ else
+
+  -- Check that item has been used before allowing another drop
+  local exists=false
+  for interactable in all(interactables) do
+   if interactable==self.item then
+    exists=true
+   end
+  end
+
+  if not exists then
+   self.item=nil
+   self.interval=flr(drop_min_time+(rnd(1)*(drop_max_time-drop_min_time)))
+  end
+
+ end
+end
+
+
 cls_pwrup=subclass(cls_interactable,function(self,pos)
  cls_interactable._ctr(self,pos.x,pos.y,0,0,8,8)
 end)
@@ -1326,36 +1392,51 @@ powerup_colors={}
 powerup_countdowns={}
 
 spr_power_up_doppelgaenger=39
-tiles[spr_power_up_doppelgaenger]=cls_pwrup_doppelgaenger
+--tiles[spr_power_up_doppelgaenger]=cls_pwrup_doppelgaenger
 powerup_colors[spr_power_up_doppelgaenger]=8
 
 spr_power_up_invincibility=40
-tiles[spr_power_up_invincibility]=cls_pwrup
+--tiles[spr_power_up_invincibility]=cls_pwrup
 powerup_colors[spr_power_up_invincibility]=9
 powerup_countdowns[spr_power_up_invincibility]=10
 
 spr_power_up_superspeed=41
-tiles[spr_power_up_superspeed]=cls_pwrup
+--tiles[spr_power_up_superspeed]=cls_pwrup
 powerup_colors[spr_power_up_superspeed]=6
 powerup_countdowns[spr_power_up_superspeed]=10
 
 spr_power_up_superjump=42
-tiles[spr_power_up_superjump]=cls_pwrup
+--tiles[spr_power_up_superjump]=cls_pwrup
 powerup_colors[spr_power_up_superjump]=12
 powerup_countdowns[spr_power_up_superjump]=15
 
 spr_power_up_gravitytweak=43
-tiles[spr_power_up_gravitytweak]=cls_pwrup
+--tiles[spr_power_up_gravitytweak]=cls_pwrup
 powerup_colors[spr_power_up_gravitytweak]=9
 powerup_countdowns[spr_power_up_gravitytweak]=30
 
 spr_power_up_invisibility=44
-tiles[spr_power_up_invisibility]=cls_pwrup
+--tiles[spr_power_up_invisibility]=cls_pwrup
 powerup_countdowns[spr_power_up_invisibility]=30
 
 spr_power_up_shrink=46
-tiles[spr_power_up_shrink]=cls_pwrup
+--tiles[spr_power_up_shrink]=cls_pwrup
 powerup_countdowns[spr_power_up_shrink]=30
+
+
+-- Start offset for the item sprite values
+spr_idx_start=39
+-- Associate sprite value with class
+power_ups={ 
+ cls_pwrup_doppelgaenger,
+ cls_pwrup,
+ cls_pwrup,
+ cls_pwrup,
+ cls_pwrup,
+ cls_pwrup,
+ cls_pwrup
+}
+tiles[spr_power_up_doppelgaenger]=cls_pwrup_dropper
 
 spr_mine=69
 
@@ -1404,146 +1485,40 @@ powerup_colors[spr_suicide_bomb]=8
 powerup_countdowns[spr_suicide_bomb]=5
 tiles[spr_suicide_bomb]=cls_suicide_bomb
 
-spr_bomb=23
-cls_bomb_pwrup=subclass(cls_pwrup,function(self,pos)
- cls_pwrup._ctr(self,pos)
-end)
-tiles[spr_bomb]=cls_bomb_pwrup
 
-function cls_bomb_pwrup:on_powerup_start(player)
- local bomb=cls_bomb.init(player)
-end
+--#include constants
+--#include globals
+--#include config
 
-cls_bomb=subclass(cls_actor,function(self,player)
- cls_actor._ctr(self,v2(player.x,player.y))
- self.is_thrown=false
- self.is_solid=false
- self.player=player
-end)
+--#include oo
+--#include v2
+--#include bbox
+--#include camera
 
-function cls_bomb:update()
- local solid=solid_at_offset(self,0,0)
- local is_actor,actor=self:is_actor_at(0,0)
- if solid or (is_actor and actor!=self.player) then
-  make_blast(self.x,self.y)
-  del(actors,self)
- elseif self.is_thrown then
-  local gravity=0.12
-  local maxfall=2
-  self.x+=self.spd_x
-  self.spd_y=appr(self.spd_y,maxfall,gravity)
-  self.y+=self.spd_y
- elseif self.player.is_dead then
-  del(actors,self)
- else
-  self.x=self.player.x
-  self.y=self.player.y-8
-  if btnp(btn_action,self.player.input_port) then
-   self.is_thrown=true
-   self.spd_x=(self.player.flip.x and -1 or 1) + self.player.spd_x
-   self.spd_y=-1
-  end
- end
-end
+--#include helpers
+--#include tween
+--#include coroutines
+--#include queues
+--#include gfx
 
-function cls_bomb:draw()
- spr(spr_bomb,self.x,self.y)
-end
+--#include interactable
 
-spr_balloon=24
-cls_balloon_pwrup=subclass(cls_pwrup,function(self,pos)
- cls_pwrup._ctr(self,pos)
-end)
-tiles[spr_balloon]=cls_balloon_pwrup
-
-function cls_balloon_pwrup:on_powerup_start(player)
- local balloon=cls_balloon.init(player)
-end
-
-cls_balloon=subclass(cls_actor,function(self,player)
- cls_actor._ctr(self,v2(player.x,player.y))
- self.is_released=false
- self.is_solid=false
- self.player=player
- self.t=0
-end)
-
-function cls_balloon:update()
- self.t+=dt
-
- local solid=solid_at_offset(self,0,0)
- local is_actor,actor=self:is_actor_at(0,0)
-
- if solid or (is_actor and actor!=self.player) then
-  self.player:clear_power_up()
-  del(actors,self)
- elseif not self.is_released then
-  if (self.player.is_dead) del(actors,self)
-  self.x=self.player.x+sin(self.t)*3
-  self.player.y=self.y+12
-  if btnp(btn_action,self.player.input_port) then
-   self.is_released=true
-  end
- end
-
- self.y-=.5
-end
-
-function cls_balloon:draw()
- spr(spr_balloon,self.x,self.y)
- if not self.is_released then
-  line(self.player.x+4,self.player.y,self.x+4,self.y+7,7)
- end
-end
-
-spr_vanishing_platform=96
-
-vp_state_visible=0
-vp_state_vanishing=1
-vp_state_vanished=2
-
-cls_vanishing_platform=class(function(self,pos)
- self.x=pos.x
- self.y=pos.y
- self.aax=pos.x
- self.aay=pos.y+0.5
- self.bbx=self.aax+8
- self.bby=self.aay+3.5
- self.state=vp_state_visible
- self.spr=spr_vanishing_platform
- add(environments,self)
-end)
-tiles[spr_vanishing_platform]=cls_vanishing_platform
-
-function cls_vanishing_platform:collides_with(o,x,y)
- return self.state!=vp_state_vanished and do_bboxes_collide_offset(o,self,x,y)
-end
-
-function cls_vanishing_platform:draw()
- if (self.state!=vp_state_vanished) spr(self.spr,self.x,self.y)
-end
-
-function cls_vanishing_platform:update()
- if self.state==vp_state_visible then
-  for p in all(players) do
-   if do_bboxes_collide_offset(p,self,0,1) then
-    self.state=vp_state_vanishing
-    add_cr(function()
-     cr_wait_for(.2)
-     self.spr=spr_vanishing_platform+1
-     cr_wait_for(.5)
-     self.spr=spr_vanishing_platform+2
-     cr_wait_for(.5)
-     self.state=vp_state_vanished
-     cr_wait_for(2)
-     self.state=vp_state_visible
-     self.spr=spr_vanishing_platform
-    end)
-   end
-  end
- end
-end
-
+--#include actors
+--#include button
+--#include room
+--#include smoke
+--#include particle
+--#include player
+--#include spring
+--#include spawn
+--#include spikes
+--#include moving_platform
+--#include teleporter
+--#include power-ups
+--#include mine
+--#include bomb
+--#include balloon
+--#include vanishing-platform
 
 -- x split into actors / particles / interactables
 -- x gravity
@@ -1636,10 +1611,15 @@ end
 
 -- go through right and come back left (?)
 
+--#include main
+
+
 function _init()
  room=cls_room.init(v2(16,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
+ --room:spawn_player(p3_input)
+ --room:spawn_player(p4_input)
 end
 
 function _draw()
