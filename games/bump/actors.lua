@@ -4,7 +4,7 @@ cls_actor=class(function(self,pos)
  self.spd_x=0
  self.spd_y=0
  self.is_solid=true
- if (self.hitbox==nil) self.hitbox={x=0,y=0,dimx=8,dimy=8}
+ if (self.hitbox==nil) self.hitbox={x=0.5,y=0.5,dimx=7,dimy=7}
  self:update_bbox()
  add(actors,self)
 end)
