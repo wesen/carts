@@ -243,6 +243,11 @@ function cls_player:update_normal()
  self:move_x(self.spd_x)
  self:move_y(self.spd_y)
 
+ -- avoid ceiling sliding
+ if self.spd_y==0 then
+  self.jump_button.hold_time=0
+ end
+
  -- animation
  if input==0 then
   self.spr=1
