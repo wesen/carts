@@ -41,6 +41,8 @@ function cls_actor:move_x(amount)
    local solid=solid_at_offset(self,step,0)
    local actor=self:is_actor_at(step,0)
 
+   printh("self.x "..tostr(self.x).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+
    if solid or actor then
     if abs(step)<0.1 then
      self.spd_x=0
@@ -69,7 +71,9 @@ function cls_actor:move_y(amount)
    if (abs(amount)>1) step=sign(amount)
 
    local solid=solid_at_offset(self,0,step)
-   local actor=self:is_actor_at(0,step)
+   local actor,a=self:is_actor_at(0,step)
+
+   printh(tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
 
    if solid or actor then
     if abs(step)<0.1 then
