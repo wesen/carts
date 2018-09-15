@@ -38,7 +38,6 @@ local jump_button_grace_interval=5
 local jump_max_hold_time=15
 local ground_grace_interval=6
 
-
 frame=0
 dt=0
 lasttime=time()
@@ -54,12 +53,10 @@ tiles={}
 crs={}
 scores={0, 0, 0, 0}
 
-
-jump_button_grace_interval=10
+jump_button_grace_interval=6
 jump_max_hold_time=15
 
-ground_grace_interval=12
-
+ground_grace_interval=6
 
 
 function class (init)
@@ -82,7 +79,6 @@ function subclass(parent,init)
  local c=class(init)
  return setmetatable(c,parent)
 end
-
 
 -- vectors
 local v2mt={}
@@ -140,30 +136,6 @@ end
 
 function angle2vec(angle)
  return v2(cos(angle),sin(angle))
-end
-
-
--- queues - *sigh*
-function insert(t,val)
- for i=(#t+1),2,-1 do
-  t[i]=t[i-1]
- end
- t[1]=val
-end
-
-function popend(t)
- local top=t[#t]
- del(t,top)
- return top
-end
-
-function reverse(t)
- for i=1,(#t/2) do
-  local tmp=t[i]
-  local oi=#t-(i-1)
-  t[i]=t[oi]
-  t[oi]=tmp
- end
 end
 
 local bboxvt={}
@@ -230,6 +202,21 @@ function do_bboxes_collide_offset(a,b,dx,dy)
    (a.bby+dy) > b.aay and
    (a.aax+dx) < b.bbx and
    (a.aay+dy) < b.bby
+end
+
+local camera_shake=v2(0,0)
+
+function add_shake(p)
+ camera_shake+=angle2vec(rnd(1))*p
+end
+
+function update_shake()
+ if abs(camera_shake.x)+abs(camera_shake.y)<1 then
+  camera_shake=v2(0,0)
+ end
+ if frame%4==0 then
+  camera_shake*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
+ end
 end
 
 
@@ -341,7 +328,6 @@ function bstr(s,x,y,c1,c2)
 	print(s,x+1,y+1,c2)
 end
 
-
 function inoutquint(t, b, c, d)
  t = t / d * 2
  if (t < 1) return c / 2 * pow(t, 5) + b
@@ -381,7 +367,6 @@ function cr_move_to(obj,target_x,target_y,d,easetype)
  end
 end
 
-
 crs={}
 draw_crs={}
 
@@ -411,7 +396,28 @@ function cr_wait_for(t)
  end
 end
 
+-- queues - *sigh*
+function insert(t,val)
+ for i=(#t+1),2,-1 do
+  t[i]=t[i-1]
+ end
+ t[1]=val
+end
 
+function popend(t)
+ local top=t[#t]
+ del(t,top)
+ return top
+end
+
+function reverse(t)
+ for i=1,(#t/2) do
+  local tmp=t[i]
+  local oi=#t-(i-1)
+  t[i]=t[oi]
+  t[oi]=tmp
+ end
+end
 dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,13}
 
 function darken(p,_pal)
@@ -454,7 +460,7 @@ cls_actor=class(function(self,pos)
  self.spd_x=0
  self.spd_y=0
  self.is_solid=true
- if (self.hitbox==nil) self.hitbox={x=0,y=0,dimx=8,dimy=8}
+ if (self.hitbox==nil) self.hitbox={x=0.5,y=0.5,dimx=7,dimy=7}
  self:update_bbox()
  add(actors,self)
 end)
@@ -491,6 +497,8 @@ function cls_actor:move_x(amount)
    local solid=solid_at_offset(self,step,0)
    local actor=self:is_actor_at(step,0)
 
+   printh("self.x "..tostr(self.x).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+
    if solid or actor then
     if abs(step)<0.1 then
      self.spd_x=0
@@ -519,7 +527,9 @@ function cls_actor:move_y(amount)
    if (abs(amount)>1) step=sign(amount)
 
    local solid=solid_at_offset(self,0,step)
-   local actor=self:is_actor_at(0,step)
+   local actor,a=self:is_actor_at(0,step)
+
+   printh(tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
 
    if solid or actor then
     if abs(step)<0.1 then
@@ -562,23 +572,6 @@ function update_actors(typ)
  end
 end
 
-
-local camera_shake=v2(0,0)
-
-function add_shake(p)
- camera_shake+=angle2vec(rnd(1))*p
-end
-
-function update_shake()
- if abs(camera_shake.x)+abs(camera_shake.y)<1 then
-  camera_shake=v2(0,0)
- end
- if frame%4==0 then
-  camera_shake*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
- end
-end
-
-
 cls_button=class(function(self,btn_nr,input_port)
  self.btn_nr=btn_nr
  self.input_port=input_port
@@ -613,7 +606,6 @@ end
 function cls_button:is_held()
  return self.hold_time>0 and self.hold_time<jump_max_hold_time
 end
-
 
 function v_idx(pos)
  return pos.x+pos.y*128
@@ -693,7 +685,6 @@ function tile_flag_at_offset(bbox,flag,x,y)
  return false
 end
 
-
 spr_wall_smoke=54
 spr_ground_smoke=51
 spr_full_smoke=48
@@ -719,7 +710,6 @@ end
 function cls_smoke:draw()
  spr(self.spr,self.x,self.y,1,1,self.flip_x,false)
 end
-
 
 cls_particle=class(function(self,pos,lifetime,sprs)
  self.x=pos.x+mrnd(1)
@@ -798,7 +788,6 @@ function make_gore_explosion(pos)
  end
 end
 
-
 players={}
 connected_players={}
 player_cnt=0
@@ -816,6 +805,8 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  cls_actor._ctr(self,pos)
  -- players are handled separately
  add(players,self)
+
+ self.name="player:"..tostr(input_port)..":"..tostr(player_cnt)
 
  self.ghosts={}
 
@@ -840,7 +831,7 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_player:update_bbox()
- if self.power_up_type!=spr_power_up_shrink then
+ if self.power_up_type!=spr_pwrup_shrink then
   cls_actor.update_bbox(self)
   self.head_box={
     aax=self.x+0,
@@ -930,13 +921,13 @@ function cls_player:update_normal()
  local decel=0.1
  local jump_spd=jump_spd
 
- if self.power_up_type==spr_power_up_superspeed then
+ if self.power_up_type==spr_pwrup_superspeed then
   maxrun*=1.5
   decel*=2
   accel*=2
- elseif self.power_up_type==spr_power_up_superjump then
+ elseif self.power_up_type==spr_pwrup_superjump then
   jump_spd*=1.5
- elseif self.power_up_type==spr_power_up_gravitytweak then
+ elseif self.power_up_type==spr_pwrup_gravitytweak then
   gravity*=0.7
   maxfall*=0.5
  end
@@ -950,6 +941,14 @@ function cls_player:update_normal()
   self.on_ground_interval-=1
  end
  local on_ground_recently=self.on_ground_interval>0
+
+   local solid=solid_at_offset(self,0,0)
+   local actor,a=self:is_actor_at(0,0)
+
+   if solid then
+   printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+    foobar="a"..nil
+   end
 
  if not self.on_ground then
   accel=in_air_accel
@@ -1044,6 +1043,11 @@ function cls_player:update_normal()
  self:move_x(self.spd_x)
  self:move_y(self.spd_y)
 
+ -- avoid ceiling sliding
+ if self.spd_y==0 then
+  self.jump_button.hold_time=0
+ end
+
  -- animation
  if input==0 then
   self.spr=1
@@ -1055,14 +1059,14 @@ function cls_player:update_normal()
   self.spr=1+flr(frame/4)%3
  end
 
- if (self.power_up_type==spr_power_up_shrink) self.spr+=4
+ if (self.power_up_type==spr_pwrup_shrink) self.spr+=4
 
  -- interact with players
  for player in all(players) do
-  if self!=player and player.power_up_type!=spr_power_up_invincibility then
+  if self!=player and player.power_up_type!=spr_pwrup_invincibility then
    local kill_player=false
 
-   if self.power_up_type==spr_power_up_invincibility
+   if self.power_up_type==spr_pwrup_invincibility
     and do_bboxes_collide_offset(self,player,input,0) then
     kill_player=true
    else
@@ -1123,7 +1127,7 @@ function cls_player:draw()
   return
  end
  if not self.is_teleporting then
-  if (self.power_up_type==spr_power_up_invisibility and frame%60<50) return
+  if (self.power_up_type==spr_pwrup_invisibility and frame%60<50) return
   -- local dark=0
   -- for ghost in all(self.ghosts) do
   --  dark+=8
@@ -1158,7 +1162,6 @@ function cls_player:draw()
  end
 end
 
-
 spr_spring_sprung=66
 spr_spring_wound=67
 
@@ -1185,7 +1188,6 @@ function cls_spring:draw()
  if (self.sprung_time>0) spr_=spr_spring_sprung
  spr(spr_,self.x,self.y)
 end
-
 
 spr_spawn_point=1
 
@@ -1218,7 +1220,6 @@ function cls_spawn:draw()
  spr(spr_spawn_point,self.x,self.y)
 end
 
-
 spr_spikes=68
 
 cls_spikes=subclass(cls_interactable,function(self,pos)
@@ -1227,19 +1228,19 @@ end)
 tiles[spr_spikes]=cls_spikes
 
 function cls_spikes:on_player_collision(player)
- player:kill()
- make_gore_explosion(v2(player.x,player.y))
+ if player.power_up!=spr_pwrup_invincibility then
+  player:kill()
+  make_gore_explosion(v2(player.x,player.y))
+ end
 end
 
 function cls_spikes:draw()
  spr(spr_spikes,self.x,self.y)
 end
 
-
 cls_moving_platform=subclass(cls_actor,function(pos)
  cls_actor._ctr(self,pos)
 end)
-
 
 spr_tele_enter=112
 spr_tele_exit=113
@@ -1295,35 +1296,44 @@ function cls_tele_exit:draw()
  spr(spr_tele_exit,self.x,self.y)
 end
 
+drop_min_time=60*4
+drop_max_time=60*10
 
-drop_min_time=60*5
-drop_max_time=60*30
+max_count=2
 
+power_up_droppers={}
 
 cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
  cls_actor._ctr(self,pos)
  self.is_solid=false
- -- Set spawn time between min time and max time
- self.interval=flr(drop_min_time+(rnd(1)*(drop_max_time-drop_min_time)))
+ -- set spawn time between min time and max time
  self.time=0
  self.item=nil
+ self.interval=1
+ add(power_up_droppers,self)
 end)
+
+local pwrup_counts=0
 
 function cls_pwrup_dropper:update()
  if self.item==nil then
-
-  -- Increment time. Spawn when time's up
+  -- increment time. spawn when time's up
   self.time=(self.time%(self.interval))+1
-  if self.time==self.interval then
-   local cls_idx=flr(rnd(#power_ups))
-   local spr_idx=cls_idx+spr_idx_start
-   self.item=power_ups[cls_idx+1].init(v2(self.x,self.y))
-   self.item.tile=spr_idx
+  if self.time>=self.interval then
+   printh("dropper time interval "..tostr(self.time).." "..tostr(self.interval))
+   if pwrup_counts<max_count then
+    local spr_idx=power_up_tiles[flr(rnd(#power_up_tiles))+1]
+    printh("load spr "..tostr(spr_idx).." "..tostr(pwrup_counts))
+    self.item=tiles[spr_idx].init(v2(self.x,self.y))
+    self.item.tile=spr_idx
+    pwrup_counts+=1
+   end
+   self.interval=flr(drop_min_time+(rnd(1)*(drop_max_time-drop_min_time)))
   end
 
  else
 
-  -- Check that item has been used before allowing another drop
+  -- check that item has been used before allowing another drop
   local exists=false
   for interactable in all(interactables) do
    if interactable==self.item then
@@ -1332,12 +1342,21 @@ function cls_pwrup_dropper:update()
   end
 
   if not exists then
+   printh("decreasing")
+   pwrup_counts-=1
    self.item=nil
    self.interval=flr(drop_min_time+(rnd(1)*(drop_max_time-drop_min_time)))
+   if pwrup_counts<max_count then
+    for dropper in all(power_up_droppers) do
+     dropper.time=0
+    end
+   end
   end
-
  end
 end
+
+spr_pwrup_dropper=25
+tiles[spr_pwrup_dropper]=cls_pwrup_dropper
 
 
 cls_pwrup=subclass(cls_interactable,function(self,pos)
@@ -1391,52 +1410,61 @@ end
 powerup_colors={}
 powerup_countdowns={}
 
-spr_power_up_doppelgaenger=39
---tiles[spr_power_up_doppelgaenger]=cls_pwrup_doppelgaenger
-powerup_colors[spr_power_up_doppelgaenger]=8
 
-spr_power_up_invincibility=40
---tiles[spr_power_up_invincibility]=cls_pwrup
-powerup_colors[spr_power_up_invincibility]=9
-powerup_countdowns[spr_power_up_invincibility]=10
+spr_pwrup_doppelgaenger=39
+--tiles[spr_pwrup_doppelgaenger]=cls_pwrup_doppelgaenger
+powerup_colors[spr_pwrup_doppelgaenger]=8
 
-spr_power_up_superspeed=41
---tiles[spr_power_up_superspeed]=cls_pwrup
-powerup_colors[spr_power_up_superspeed]=6
-powerup_countdowns[spr_power_up_superspeed]=10
+spr_pwrup_invincibility=40
+--tiles[spr_pwrup_invincibility]=cls_pwrup
+powerup_colors[spr_pwrup_invincibility]=9
+powerup_countdowns[spr_pwrup_invincibility]=10
 
-spr_power_up_superjump=42
---tiles[spr_power_up_superjump]=cls_pwrup
-powerup_colors[spr_power_up_superjump]=12
-powerup_countdowns[spr_power_up_superjump]=15
+spr_pwrup_superspeed=41
+--tiles[spr_pwrup_superspeed]=cls_pwrup
+powerup_colors[spr_pwrup_superspeed]=6
+powerup_countdowns[spr_pwrup_superspeed]=10
 
-spr_power_up_gravitytweak=43
---tiles[spr_power_up_gravitytweak]=cls_pwrup
-powerup_colors[spr_power_up_gravitytweak]=9
-powerup_countdowns[spr_power_up_gravitytweak]=30
+spr_pwrup_superjump=42
+--tiles[spr_pwrup_superjump]=cls_pwrup
+powerup_colors[spr_pwrup_superjump]=12
+powerup_countdowns[spr_pwrup_superjump]=15
 
-spr_power_up_invisibility=44
---tiles[spr_power_up_invisibility]=cls_pwrup
-powerup_countdowns[spr_power_up_invisibility]=30
+spr_pwrup_gravitytweak=43
+--tiles[spr_pwrup_gravitytweak]=cls_pwrup
+powerup_colors[spr_pwrup_gravitytweak]=9
+powerup_countdowns[spr_pwrup_gravitytweak]=30
 
-spr_power_up_shrink=46
---tiles[spr_power_up_shrink]=cls_pwrup
-powerup_countdowns[spr_power_up_shrink]=30
+spr_pwrup_invisibility=44
+--tiles[spr_pwrup_invisibility]=cls_pwrup
+powerup_countdowns[spr_pwrup_invisibility]=5
 
+spr_pwrup_shrink=46
+--tiles[spr_pwrup_shrink]=cls_pwrup
+powerup_countdowns[spr_pwrup_shrink]=10
 
--- Start offset for the item sprite values
+-- start offset for the item sprite values
 spr_idx_start=39
--- Associate sprite value with class
-power_ups={ 
- cls_pwrup_doppelgaenger,
- cls_pwrup,
- cls_pwrup,
- cls_pwrup,
- cls_pwrup,
- cls_pwrup,
- cls_pwrup
+-- associate sprite value with class
+tiles[spr_pwrup_doppelgaenger]=cls_pwrup_doppelgaenger
+tiles[spr_pwrup_invisibility]=cls_pwrup
+tiles[spr_pwrup_shrink]=cls_pwrup
+tiles[spr_pwrup_invincibility]=cls_pwrup
+tiles[spr_pwrup_superjump]=cls_pwrup
+tiles[spr_pwrup_superspeed]=cls_pwrup
+tiles[spr_pwrup_gravitytweak]=cls_pwrup
+
+power_up_tiles={
+ spr_pwrup_doppelgaenger,
+ -- spr_pwrup_invincibility,
+ -- spr_pwrup_superjump,
+ spr_pwrup_invisibility,
+ spr_pwrup_invisibility,
+ spr_pwrup_invisibility,
+ -- spr_pwrup_superspeed,
+ -- spr_pwrup_gravitytweak,
+ spr_pwrup_shrink
 }
-tiles[spr_power_up_doppelgaenger]=cls_pwrup_dropper
 
 spr_mine=69
 
@@ -1445,20 +1473,20 @@ cls_mine=subclass(cls_interactable,function(self,pos)
  self.spr=spr_mine
 end)
 
-function make_blast(x,y)
+function make_blast(x,y,radius)
  add_cr(function ()
   for i=0,20 do
-   local r=outexpo(i,50,-50,20)
+   local r=outexpo(i,radius,-radius,20)
    circfill(x+4,y+6,r,7)
    yield()
   end
  end, draw_crs)
  for p in all(players) do
-  if p.power_up!=spr_power_up_invincibility then
+  if p.power_up!=spr_pwrup_invincibility then
    local dx=p.x-x
    local dy=p.y-y
    local d=sqrt(dx*dx+dy*dy)
-   if d<50 then
+   if d<radius then
     p:kill()
     make_gore_explosion(v2(p.x,p.y))
    end
@@ -1467,7 +1495,7 @@ function make_blast(x,y)
 end
 
 function cls_mine:on_player_collision(player)
- make_blast(self.x,self.y)
+ make_blast(self.x,self.y,30)
  del(interactables,self)
 end
 tiles[spr_mine]=cls_mine
@@ -1477,7 +1505,7 @@ cls_suicide_bomb=subclass(cls_pwrup,function(self,pos)
 end)
 
 function cls_suicide_bomb:on_powerup_stop(player)
- if (player.power_up_countdown<=0) make_blast(player.x,player.y)
+ if (player.power_up_countdown<=0) make_blast(player.x,player.y,30)
 end
 
 spr_suicide_bomb=45
@@ -1485,40 +1513,166 @@ powerup_colors[spr_suicide_bomb]=8
 powerup_countdowns[spr_suicide_bomb]=5
 tiles[spr_suicide_bomb]=cls_suicide_bomb
 
+spr_balloon=24
+cls_balloon_pwrup=subclass(cls_pwrup,function(self,pos)
+ cls_pwrup._ctr(self,pos)
+end)
+tiles[spr_balloon]=cls_balloon_pwrup
 
---#include constants
---#include globals
---#include config
+function cls_balloon_pwrup:on_powerup_start(player)
+ local balloon=cls_balloon.init(player)
+end
 
---#include oo
---#include v2
---#include bbox
---#include camera
+cls_balloon=subclass(cls_actor,function(self,player)
+ cls_actor._ctr(self,v2(player.x,player.y))
+ self.is_released=false
+ self.is_solid=false
+ self.player=player
+ self.t=0
+end)
 
---#include helpers
---#include tween
---#include coroutines
---#include queues
---#include gfx
+function cls_balloon:update()
+ self.t+=dt
 
---#include interactable
+ local solid=solid_at_offset(self,0,0)
+ local is_actor,actor=self:is_actor_at(0,0)
 
---#include actors
---#include button
---#include room
---#include smoke
---#include particle
---#include player
---#include spring
---#include spawn
---#include spikes
---#include moving_platform
---#include teleporter
---#include power-ups
---#include mine
---#include bomb
---#include balloon
---#include vanishing-platform
+ if solid or (is_actor and actor!=self.player) then
+  self.player:clear_power_up()
+  del(actors,self)
+ elseif not self.is_released then
+  if (self.player.is_dead) del(actors,self)
+  self.x=self.player.x+sin(self.t)*3
+  self.player.y=self.y+12
+  if btnp(btn_action,self.player.input_port) then
+   self.is_released=true
+  end
+ end
+
+ self.y-=.5
+end
+
+function cls_balloon:draw()
+ spr(spr_balloon,self.x,self.y)
+ if not self.is_released then
+  line(self.player.x+4,self.player.y,self.x+4,self.y+7,7)
+ end
+end
+
+spr_vanishing_platform=96
+
+vp_state_visible=0
+vp_state_vanishing=1
+vp_state_vanished=2
+
+cls_vanishing_platform=class(function(self,pos)
+ self.x=pos.x
+ self.y=pos.y
+ self.aax=pos.x
+ self.aay=pos.y+0.5
+ self.bbx=self.aax+8
+ self.bby=self.aay+3.5
+ self.state=vp_state_visible
+ self.spr=spr_vanishing_platform
+ add(environments,self)
+end)
+tiles[spr_vanishing_platform]=cls_vanishing_platform
+
+function cls_vanishing_platform:collides_with(o,x,y)
+ return self.state!=vp_state_vanished and do_bboxes_collide_offset(o,self,x,y)
+end
+
+function cls_vanishing_platform:draw()
+ if (self.state!=vp_state_vanished) spr(self.spr,self.x,self.y)
+end
+
+function cls_vanishing_platform:update()
+ if self.state==vp_state_visible then
+  for p in all(players) do
+   if do_bboxes_collide_offset(p,self,0,1) then
+    self.state=vp_state_vanishing
+    add_cr(function()
+     cr_wait_for(.2)
+     self.spr=spr_vanishing_platform+1
+     cr_wait_for(.5)
+     self.spr=spr_vanishing_platform+2
+     cr_wait_for(.5)
+     self.state=vp_state_vanished
+     cr_wait_for(2)
+     self.state=vp_state_visible
+     self.spr=spr_vanishing_platform
+    end)
+   end
+  end
+ end
+end
+
+spr_bomb=23
+cls_bomb_pwrup=subclass(cls_pwrup,function(self,pos)
+ cls_pwrup._ctr(self,pos)
+end)
+tiles[spr_bomb]=cls_bomb_pwrup
+
+function cls_bomb_pwrup:on_powerup_start(player)
+ local bomb=cls_bomb.init(player)
+end
+
+cls_bomb=subclass(cls_actor,function(self,player)
+ cls_actor._ctr(self,v2(player.x,player.y))
+ self.is_thrown=false
+ self.is_solid=false
+ self.player=player
+ self.time=5
+ self.name="bomb"
+end)
+
+function cls_bomb:update()
+ local solid=solid_at_offset(self,0,0)
+ local is_actor,actor=self:is_actor_at(0,0)
+
+ self.time-=dt
+ if self.time<0 then
+  make_blast(self.x,self.y,45)
+  del(actors,self)
+ end
+
+ if self.is_thrown then
+  local actor,a=self:is_actor_at(0,0)
+  if actor then
+   make_blast(self.x,self.y,45)
+   del(actors,self)
+  end
+
+  local gravity=0.12
+  local maxfall=2
+  self.spd_y=appr(self.spd_y,maxfall,gravity)
+  cls_actor.move_x(self,self.spd_x)
+  cls_actor.move_y(self,self.spd_y)
+ elseif self.player.is_dead then
+  del(actors,self)
+ else
+  self.x=self.player.x
+  self.y=self.player.y-8
+  if btnp(btn_action,self.player.input_port) then
+   self.is_thrown=true
+   self.spd_x=(self.player.flip.x and -1 or 1) + self.player.spd_x
+   self.spd_y=-1
+   self.is_solid=true
+  end
+ end
+end
+
+function cls_bomb:draw()
+ spr(spr_bomb,self.x,self.y)
+end
+
+add(power_up_tiles,spr_bomb)
+add(power_up_tiles,spr_bomb)
+add(power_up_tiles,spr_bomb)
+add(power_up_tiles,spr_bomb)
+add(power_up_tiles,spr_bomb)
+add(power_up_tiles,spr_bomb)
+
 
 -- x split into actors / particles / interactables
 -- x gravity
@@ -1611,13 +1765,17 @@ tiles[spr_suicide_bomb]=cls_suicide_bomb
 
 -- go through right and come back left (?)
 
---#include main
-
-
 function _init()
- room=cls_room.init(v2(16,0),v2(16,16))
+ room=cls_room.init(v2(64,0),v2(16,16))
  room:spawn_player(p1_input)
- room:spawn_player(p2_input)
+ room:spawn_player(p1_input)
+ room:spawn_player(p1_input)
+ room:spawn_player(p1_input)
+ room:spawn_player(p1_input)
+ room:spawn_player(p1_input)
+ room:spawn_player(p1_input)
+ room:spawn_player(p1_input)
+ -- room:spawn_player(p2_input)
  --room:spawn_player(p3_input)
  --room:spawn_player(p4_input)
 end
@@ -1689,22 +1847,22 @@ __gfx__
 007007000009900000777700000440000009996000d171000001710000d1710000d1710000000000000000000000000000000000000000000000000000000000
 00000000000440000004400000600600000446000009990000099000000999000004496000000000000000000000000000000000000000000000000000000000
 00000000000660000006060000000000000000000006060000066000006000600000000000000000000000000000000000000000000000000000000000000000
-000000000ff0ff0000000000f000f000000000000000000000000000000079000028882000000000000000000000000000000000000000000000000000000000
-0990009900f00f0000f00f000fff0000000000000000000000000000000760a00288878200000000000000000000000000000000000000000000000000000000
-0095959000ffff0000ffff000cfc00000000000000000000000000000155110008888e8e00000000000000000000000000000000000000000000000000000000
-0009990000fcfc00f0fcfc0066e66000000000000000000000000000166551100888888800000000000000000000000000000000000000000000000000000000
-0009e900f0ffffe0f0fffef00f6f00f0000000000000000000000000566555100288888200000000000000000000000000000000000000000000000000000000
-00000009f0099000f0044f000fff00f0000000000000000000000000555555100088888000000000000000000000000000000000000000000000000000000000
+000000000ff0ff0000000000f000f0000000000000000000000000000000790000288820000dd000000000000000000000000000000000000000000000000000
+0990009900f00f0000f00f000fff0000000000000000000000000000000760a00288878200d00d00000000000000000000000000000000000000000000000000
+0095959000ffff0000ffff000cfc00000000000000000000000000000155110008888e8e0d0000d0000000000000000000000000000000000000000000000000
+0009990000fcfc00f0fcfc0066e6600000000000000000000000000016655110088888880d000d00000000000000000000000000000000000000000000000000
+0009e900f0ffffe0f0fffef00f6f00f0000000000000000000000000566555100288888200d0d000000000000000000000000000000000000000000000000000
+00000009f0099000f0044f000fff00f000000000000000000000000055555510008888800000d000000000000000000000000000000000000000000000000000
 00099909f0ffff00f0fff0000fff00f0000000000000000000000000155551100008880000000000000000000000000000000000000000000000000000000000
-009444900fffff400ff6f60005f5ff00000000000000000000000000015511000000800000000000000000000000000000000000000000000000000000000000
-00000000004000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000008000880084080000088000008000000000000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb000000000022222200dddddd0
-0008480008400080000000000008e8000008e00000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb056056056022222200dddddd0
-008888800d0000d00000000000888880008e8800000e0000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb08e08e08e022222200dddddd0
-004884800000000000000000002882800008820000888000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb08e58e58e022222200dddddd0
-000444000880000800000000000222000000200000020000000e00000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb088088088022222200dddddd0
-000000000d800d8080000008000000000000000000000000000000000eeeeee00aaaaaa0066666600cccccc0099999900bbbbbb055055055022222200dddddd0
-0000000000d00d008800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+009444900fffff400ff6f60005f5ff0000000000000000000000000001551100000080000000d000000000000000000000000000000000000000000000000000
+0000000000400000800000000000000000000000000000000000000000000000000aa00000000000000000000000000000000000000000000000000000000000
+000008000880084080000088000008000000000000000000000000000000060600aaaa00066666600cccccc0099999900bbbbbb000000000022222200dddddd0
+0008480008400080000000000008e8000008e0000000000000000000000006060aaaaaa0066666600cccccc0099999900bbbbbb056056056022222200dddddd0
+008888800d0000d00000000000888880008e8800000e00000000000060600666aaaaaaaa066666600cccccc0099999900bbbbbb08e08e08e022222200dddddd0
+0048848000000000000000000028828000088200008880000000000006000006000aa000066666600cccccc0099999900bbbbbb08e58e58e022222200dddddd0
+000444000880000800000000000222000000200000020000000e000060600006000aa000066666600cccccc0099999900bbbbbb088088088022222200dddddd0
+000000000d800d80800000080000000000000000000000000000000000000000000aa000066666600cccccc0099999900bbbbbb055055055022222200dddddd0
+0000000000d00d00880000000000000000000000000000000000000000000000000aa00000000000000000000000000000000000000000000000000000000000
 00000770700000770000000000000000000000000000000000077000000000000000000000000000000000000000000000000000000000000000000000000000
 70000600007700667000007000000000000000000000000000060000007700007000000000000000000000000000000000000000000000000000000000000000
 00770000006600000000006700000000000000000000000000000700006000006600000000000000000000000000000000000000000000000000000000000000
@@ -1880,21 +2038,21 @@ __gff__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 6060606060606060606060606060606000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000818181810000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000420000000000700000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-4141414100000040404000004000000045010000000000000000000000000071000040404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000005000000000100000040402700000000000000000000004040000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000404141000000000000010000404000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-4000000000000000000000414040404000000000002801704200400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000004040000000000000000000000000000000404141414100404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000004141414040400000000040000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0042000000000000000000004100000040404000000000000042000000004040000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-4040000000400001000100004100000000000000180000000140404000000040000000006060604040400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000400040404000004100404000000000000040404040000000000000000000180000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000404000400000000000004100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000000000040420000000000410000001770014500420000007100000001000042000000002e00000000000001000000012700280029002a002b002c002d012e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-4444444444404044414141444044444041414141414141414140404040404040404044404041414141404040404040404040404040404040404040404040404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000818181810000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001710000001900007101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040400000000000004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000420000000000700000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070010000000000000000000000000170000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+4141414100000040404000004000000045010000000000000000000000000071000040404040000000000000000000000000000000000000000000000000000040400000000042000042000000004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000005000000000100000040402700000000000000000000004040000040000000000000000000000000000000000000000000000000000000000000000000001740404040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000404141000000000000010000404000000000000000400000000000000000000000000000000000000000000000000000000000000000000000170000001700004141414141410000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+4000000000000000000000414040404000000000002801704200400000000000000000000000000000000000000000000000000000000000000000000040404000000119000000000000000019010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000004040000000000000000000000000000000404141414100404040000000000000000000000000000000000000000000000000000000000000000000000000004141000000000000000041410000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000004141414040400000000040000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000017119000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0042000000000000000000004100000040404000000000000042000000004040000000000000000100000000000000000000000000000000000000000000000000000000000041414141000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+4040000000400001000100004100000000000000180000000140404000000040000000006060604040400000000000000000000000000000000000000000000000000071000000000000000071000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000400040404000004100404000000000000040404040000000000000000000180000000000000000000000000000000000000000000000000000000000004040400000190000004040400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000404000400000000000004100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000404000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000000040420000000000410000001770014500420000007100000001000042000000002e00000000000001000000012700280029002a002b002c002d012e70000001004200000000420001000070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+4444444444404044414141444044444041414141414141414140404040404040404044404041414141404040404040404040404040404040404040404040404040404040404040404040404040404040400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 000100001a050180501a0500000012050120501105000000100501005010050100501005012050130501605000000190501a0501d0501e0502005023050270500000000000000000000000000000000000000000
 0003000000000142101325012250112500f2500c250092500a2400724005240032400121001210052000420001200032000320016200162001620016200162001b2001d2001f2002b20030200352003520000000
