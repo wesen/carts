@@ -6,8 +6,10 @@ end)
 tiles[spr_spikes]=cls_spikes
 
 function cls_spikes:on_player_collision(player)
- player:kill()
- make_gore_explosion(v2(player.x,player.y))
+ if player.power_up!=spr_pwrup_invincibility then
+  player:kill()
+  make_gore_explosion(v2(player.x,player.y))
+ end
 end
 
 function cls_spikes:draw()
