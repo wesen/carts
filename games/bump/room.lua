@@ -31,7 +31,7 @@ cls_room=class(function(self,pos,dim)
 end)
 
 function cls_room:draw()
- map(self.x,self.y,0,0,self.dim_x,self.dim_y,flg_solid+1)
+ map(self.x,self.y,0,0,self.dim_x,self.dim_y,flg_solid+1+16)
 end
 
 function cls_room:spawn_player(input_port)
