@@ -33,10 +33,10 @@ function _draw()
   a:draw()
  end
 
- local entry_length=50
+ local entry_length=30
  for i=0,#scores-1,1 do
   print(
-   "player "..tostr(i+1)..": "..tostr(scores[i+1]),
+   "p"..tostr(i+1)..": "..tostr(scores[i+1]),
    i*entry_length,1,7
   )
  end
