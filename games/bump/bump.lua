@@ -32,6 +32,8 @@
 --#include vanishing-platform
 --#include bomb
 
+--#include fireflies
+
 -- x split into actors / particles / interactables
 -- x gravity
 -- x downward collision

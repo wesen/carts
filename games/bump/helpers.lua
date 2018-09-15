@@ -20,6 +20,10 @@ function mrnd(x)
  return rnd(x*2)-x
 end
 
+function rndsign()
+ return rnd(1)>0.5 and 1 or -1
+end
+
 function rnd_elt(arr)
  local idx=flr(rnd(#arr))+1
  return arr[idx]

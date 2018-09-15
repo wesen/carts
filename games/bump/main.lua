@@ -1,7 +1,11 @@
 function _init()
  room=cls_room.init(v2(0,16),v2(16,16))
  room:spawn_player(p1_input)
- room:spawn_player(p2_input)
+ room:spawn_player(p1_input)
+ room:spawn_player(p1_input)
+ room:spawn_player(p1_input)
+ fireflies_init(v2(16,16))
+ -- room:spawn_player(p2_input)
  --room:spawn_player(p3_input)
  --room:spawn_player(p4_input)
 end
@@ -23,6 +27,7 @@ function _draw()
  end
  draw_actors()
  tick_crs(draw_crs)
+ fireflies_draw()
 
  for a in all(particles) do
   a:draw()
@@ -61,4 +66,6 @@ function _update60()
   a:update()
  end)
  update_shake()
+
+ fireflies_update()
 end
