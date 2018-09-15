@@ -23,14 +23,14 @@ function cls_bomb:update()
 
  self.time-=dt
  if self.time<0 then
-  -- make_blast(self.x,self.y,45)
+  make_blast(self.x,self.y,45)
   del(actors,self)
  end
 
  if self.is_thrown then
   local actor,a=self:is_actor_at(0,0)
   if actor then
-   -- make_blast(self.x,self.y,45)
+   make_blast(self.x,self.y,45)
    del(actors,self)
   end
 
