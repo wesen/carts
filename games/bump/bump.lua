@@ -28,9 +28,9 @@
 --#include teleporter
 --#include power-ups
 --#include mine
---#include bomb
 --#include balloon
 --#include vanishing-platform
+--#include bomb
 
 -- x split into actors / particles / interactables
 -- x gravity

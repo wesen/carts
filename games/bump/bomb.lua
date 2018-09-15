@@ -13,20 +13,32 @@ cls_bomb=subclass(cls_actor,function(self,player)
  self.is_thrown=false
  self.is_solid=false
  self.player=player
+ self.time=5
+ self.name="bomb"
 end)
 
 function cls_bomb:update()
  local solid=solid_at_offset(self,0,0)
  local is_actor,actor=self:is_actor_at(0,0)
- if solid or (is_actor and actor!=self.player) then
-  make_blast(self.x,self.y)
+
+ self.time-=dt
+ if self.time<0 then
+  -- make_blast(self.x,self.y,45)
   del(actors,self)
- elseif self.is_thrown then
+ end
+
+ if self.is_thrown then
+  local actor,a=self:is_actor_at(0,0)
+  if actor then
+   -- make_blast(self.x,self.y,45)
+   del(actors,self)
+  end
+
   local gravity=0.12
   local maxfall=2
-  self.x+=self.spd_x
   self.spd_y=appr(self.spd_y,maxfall,gravity)
-  self.y+=self.spd_y
+  cls_actor.move_x(self,self.spd_x)
+  cls_actor.move_y(self,self.spd_y)
  elseif self.player.is_dead then
   del(actors,self)
  else
@@ -36,6 +48,7 @@ function cls_bomb:update()
    self.is_thrown=true
    self.spd_x=(self.player.flip.x and -1 or 1) + self.player.spd_x
    self.spd_y=-1
+   self.is_solid=true
   end
  end
 end
