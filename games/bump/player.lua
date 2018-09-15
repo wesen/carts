@@ -39,7 +39,7 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_player:update_bbox()
- if self.power_up_type!=spr_power_up_shrink then
+ if self.power_up_type!=spr_pwrup_shrink then
   cls_actor.update_bbox(self)
   self.head_box={
     aax=self.x+0,
@@ -129,13 +129,13 @@ function cls_player:update_normal()
  local decel=0.1
  local jump_spd=jump_spd
 
- if self.power_up_type==spr_power_up_superspeed then
+ if self.power_up_type==spr_pwrup_superspeed then
   maxrun*=1.5
   decel*=2
   accel*=2
- elseif self.power_up_type==spr_power_up_superjump then
+ elseif self.power_up_type==spr_pwrup_superjump then
   jump_spd*=1.5
- elseif self.power_up_type==spr_power_up_gravitytweak then
+ elseif self.power_up_type==spr_pwrup_gravitytweak then
   gravity*=0.7
   maxfall*=0.5
  end
@@ -254,14 +254,14 @@ function cls_player:update_normal()
   self.spr=1+flr(frame/4)%3
  end
 
- if (self.power_up_type==spr_power_up_shrink) self.spr+=4
+ if (self.power_up_type==spr_pwrup_shrink) self.spr+=4
 
  -- interact with players
  for player in all(players) do
-  if self!=player and player.power_up_type!=spr_power_up_invincibility then
+  if self!=player and player.power_up_type!=spr_pwrup_invincibility then
    local kill_player=false
 
-   if self.power_up_type==spr_power_up_invincibility
+   if self.power_up_type==spr_pwrup_invincibility
     and do_bboxes_collide_offset(self,player,input,0) then
     kill_player=true
    else
@@ -322,7 +322,7 @@ function cls_player:draw()
   return
  end
  if not self.is_teleporting then
-  if (self.power_up_type==spr_power_up_invisibility and frame%60<50) return
+  if (self.power_up_type==spr_pwrup_invisibility and frame%60<50) return
   -- local dark=0
   -- for ghost in all(self.ghosts) do
   --  dark+=8
