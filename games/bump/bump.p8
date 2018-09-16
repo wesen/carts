@@ -784,10 +784,10 @@ function cls_score_particle:draw()
  bstr(self.val,self.x,self.y,7,1)
 end
 
-pwrup_cols={10,9,8,2}
-cls_pwrup_particle=class(function(self,x,y,a)
- self.spd_x=cos(a)*.5
- self.spd_y=sin(a)*.5
+cls_pwrup_particle=class(function(self,x,y,a,cols)
+ self.spd_x=cos(a)*.8
+ self.cols=cols
+ self.spd_y=sin(a)*.8
  self.x=x+self.spd_x*5
  self.y=y+self.spd_y*5
  self.t=0
@@ -805,8 +805,8 @@ function cls_pwrup_particle:update()
 end
 
 function cls_pwrup_particle:draw()
- local col=pwrup_cols[flr(#pwrup_cols*self.t/self.lifetime)+1]
- circ(self.x,self.y,.5,col)
+ local col=self.cols[flr(#self.cols*self.t/self.lifetime)+1]
+ circ(self.x,self.y,(2-self.t/self.lifetime*2),col)
 end
 
 players={}
@@ -1391,6 +1391,24 @@ function cls_pwrup:on_player_collision(player)
  player.power_up_type=self.tile
  player.power_up_countdown=powerup_countdowns[self.tile]
 
+ if self.tile!=spr_bomb then
+  local x=self.x
+  local y=self.y
+  local radius=20
+  add_cr(function ()
+   for i=0,1,0.1 do
+    local p=cls_pwrup_particle.init(self.x+4,self.y+4,i,powerup_colors[self.tile])
+    p.spd_x*=3
+    p.spd_y*=3
+   end
+   for i=0,20 do
+    local r=outexpo(i,radius,-radius,20)
+    circfill(x+4,y+6,r,powerup_colors[self.tile][1])
+    yield()
+   end
+  end, draw_crs)
+ end
+
   del(interactables,self)
 end
 
@@ -1408,7 +1426,7 @@ function cls_pwrup:draw()
   spr(self.tile+(frame/8)%3,self.x,self.y)
   if (frame+self.offset)%40==0 then
    for i=0,1,0.1 do
-    cls_pwrup_particle.init(self.x+4,self.y+4,i)
+    cls_pwrup_particle.init(self.x+4,self.y+4,i,powerup_colors[self.tile])
    end
   end
  end
@@ -1438,29 +1456,31 @@ end
 powerup_colors={}
 powerup_countdowns={}
 
-
 spr_pwrup_doppelgaenger=197
+powerup_colors[spr_pwrup_doppelgaenger]={8,2,1}
 
 spr_pwrup_invincibility=155
-powerup_colors[spr_pwrup_invincibility]=9
+powerup_colors[spr_pwrup_invincibility]={9,8,7,2}
 powerup_countdowns[spr_pwrup_invincibility]=10
 
 spr_pwrup_superspeed=41
-powerup_colors[spr_pwrup_superspeed]=6
+powerup_colors[spr_pwrup_superspeed]={6,6,5,1}
 powerup_countdowns[spr_pwrup_superspeed]=10
 
 spr_pwrup_superjump=42
-powerup_colors[spr_pwrup_superjump]=12
+powerup_colors[spr_pwrup_superjump]={12,13,2,1}
 powerup_countdowns[spr_pwrup_superjump]=15
 
 spr_pwrup_gravitytweak=43
-powerup_colors[spr_pwrup_gravitytweak]=9
+powerup_colors[spr_pwrup_gravitytweak]={9,8,2,1}
 powerup_countdowns[spr_pwrup_gravitytweak]=30
 
 spr_pwrup_invisibility=178
+powerup_colors[spr_pwrup_invisibility]={9,8,2,1}
 powerup_countdowns[spr_pwrup_invisibility]=5
 
 spr_pwrup_shrink=139
+powerup_colors[spr_pwrup_shrink]={11,3,6,1}
 powerup_countdowns[spr_pwrup_shrink]=10
 
 -- start offset for the item sprite values
@@ -1500,6 +1520,7 @@ function make_blast(x,y,radius)
    yield()
   end
  end, draw_crs)
+  add_shake(5)
  for p in all(players) do
   if p.power_up!=spr_pwrup_invincibility then
    local dx=p.x-x
@@ -1669,9 +1690,6 @@ function cls_bomb:draw()
  spr(spr_bomb,self.x,self.y)
 end
 
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
 add(power_up_tiles,spr_bomb)
 add(power_up_tiles,spr_bomb)
 add(power_up_tiles,spr_bomb)

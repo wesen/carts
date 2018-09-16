@@ -14,6 +14,24 @@ function cls_pwrup:on_player_collision(player)
  player.power_up_type=self.tile
  player.power_up_countdown=powerup_countdowns[self.tile]
 
+ if self.tile!=spr_bomb then
+  local x=self.x
+  local y=self.y
+  local radius=20
+  add_cr(function ()
+   for i=0,1,0.1 do
+    local p=cls_pwrup_particle.init(self.x+4,self.y+4,i,powerup_colors[self.tile])
+    p.spd_x*=3
+    p.spd_y*=3
+   end
+   for i=0,20 do
+    local r=outexpo(i,radius,-radius,20)
+    circfill(x+4,y+6,r,powerup_colors[self.tile][1])
+    yield()
+   end
+  end, draw_crs)
+ end
+
   del(interactables,self)
 end
 
@@ -31,7 +49,7 @@ function cls_pwrup:draw()
   spr(self.tile+(frame/8)%3,self.x,self.y)
   if (frame+self.offset)%40==0 then
    for i=0,1,0.1 do
-    cls_pwrup_particle.init(self.x+4,self.y+4,i)
+    cls_pwrup_particle.init(self.x+4,self.y+4,i,powerup_colors[self.tile])
    end
   end
  end
@@ -61,29 +79,31 @@ end
 powerup_colors={}
 powerup_countdowns={}
 
-
 spr_pwrup_doppelgaenger=197
+powerup_colors[spr_pwrup_doppelgaenger]={8,2,1}
 
 spr_pwrup_invincibility=155
-powerup_colors[spr_pwrup_invincibility]=9
+powerup_colors[spr_pwrup_invincibility]={9,8,7,2}
 powerup_countdowns[spr_pwrup_invincibility]=10
 
 spr_pwrup_superspeed=41
-powerup_colors[spr_pwrup_superspeed]=6
+powerup_colors[spr_pwrup_superspeed]={6,6,5,1}
 powerup_countdowns[spr_pwrup_superspeed]=10
 
 spr_pwrup_superjump=42
-powerup_colors[spr_pwrup_superjump]=12
+powerup_colors[spr_pwrup_superjump]={12,13,2,1}
 powerup_countdowns[spr_pwrup_superjump]=15
 
 spr_pwrup_gravitytweak=43
-powerup_colors[spr_pwrup_gravitytweak]=9
+powerup_colors[spr_pwrup_gravitytweak]={9,8,2,1}
 powerup_countdowns[spr_pwrup_gravitytweak]=30
 
 spr_pwrup_invisibility=178
+powerup_colors[spr_pwrup_invisibility]={9,8,2,1}
 powerup_countdowns[spr_pwrup_invisibility]=5
 
 spr_pwrup_shrink=139
+powerup_colors[spr_pwrup_shrink]={11,3,6,1}
 powerup_countdowns[spr_pwrup_shrink]=10
 
 -- start offset for the item sprite values

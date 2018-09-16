@@ -91,6 +91,3 @@ end
 add(power_up_tiles,spr_bomb)
 add(power_up_tiles,spr_bomb)
 add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)

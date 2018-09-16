@@ -13,6 +13,7 @@ function make_blast(x,y,radius)
    yield()
   end
  end, draw_crs)
+  add_shake(5)
  for p in all(players) do
   if p.power_up!=spr_pwrup_invincibility then
    local dx=p.x-x

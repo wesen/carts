@@ -97,10 +97,10 @@ function cls_score_particle:draw()
  bstr(self.val,self.x,self.y,7,1)
 end
 
-pwrup_cols={10,9,8,2}
-cls_pwrup_particle=class(function(self,x,y,a)
- self.spd_x=cos(a)*.5
- self.spd_y=sin(a)*.5
+cls_pwrup_particle=class(function(self,x,y,a,cols)
+ self.spd_x=cos(a)*.8
+ self.cols=cols
+ self.spd_y=sin(a)*.8
  self.x=x+self.spd_x*5
  self.y=y+self.spd_y*5
  self.t=0
@@ -118,6 +118,6 @@ function cls_pwrup_particle:update()
 end
 
 function cls_pwrup_particle:draw()
- local col=pwrup_cols[flr(#pwrup_cols*self.t/self.lifetime)+1]
- circ(self.x,self.y,.5,col)
+ local col=self.cols[flr(#self.cols*self.t/self.lifetime)+1]
+ circ(self.x,self.y,(2-self.t/self.lifetime*2),col)
 end
