@@ -2,6 +2,8 @@ players={}
 connected_players={}
 player_cnt=0
 
+start_sprites={1,130,146}
+
 function check_for_new_players()
  for i=0,3 do
   if (btnp(btn_jump,i) or btnp(btn_action,i)) and connected_players[i]==nil then
@@ -28,7 +30,8 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.flip=v2(false,false)
  self.input_port=input_port
  self.jump_button=cls_button.init(btn_jump, input_port)
- self.spr=1
+ self.start_spr=start_sprites[self.input_port+1]
+ self.spr=self.start_spr
 
  self.prev_input=0
  -- we consider we are on the ground for 12 frames
@@ -260,13 +263,13 @@ function cls_player:update_normal()
 
  -- animation
  if input==0 then
-  self.spr=1
+  self.spr=self.start_spr
  elseif is_wall_sliding then
-  self.spr=4
+  self.spr=self.start_spr+3
  elseif not self.on_ground then
-  self.spr=3
+  self.spr=self.start_spr+2
  else
-  self.spr=1+flr(frame/4)%3
+  self.spr=self.start_spr+flr(frame/4)%3
  end
 
  if (self.power_up_type==spr_pwrup_shrink) self.spr+=4
@@ -346,15 +349,11 @@ function cls_player:draw()
   end
   pal()
 
-  pal(cols_face[1], cols_face[self.input_port + 1])
-  pal(cols_hair[1], cols_hair[self.input_port + 1])
   if powerup_colors[self.power_up_type]!=nil then
    bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up_type])
   else
    spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
   end
-  pal(cols_face[1], cols_face[1])
-  pal(cols_hair[1], cols_hair[1])
 
   --[[
   local bbox=self:bbox()
