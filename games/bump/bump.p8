@@ -762,6 +762,28 @@ function make_gore_explosion(pos)
  end
 end
 
+cls_score_particle=class(function(self,pos,val)
+ self.x=pos.x
+ self.y=pos.y
+ self.spd_x=mrnd(0.2)
+ self.spd_y=-rnd(0.2)-0.2
+ self.val=val
+ self.t=0
+ self.lifetime=2
+ add(particles,self)
+end)
+
+function cls_score_particle:update()
+ self.t+=dt
+ self.x+=self.spd_x+rnd(.1)
+ self.y+=self.spd_y
+ if (self.t>self.lifetime) del(particles,self)
+end
+
+function cls_score_particle:draw()
+ bstr(self.val,self.x,self.y,1,7)
+end
+
 players={}
 connected_players={}
 player_cnt=0
@@ -1072,7 +1094,7 @@ function cls_player:update_normal()
       -- killed a doppelgaenger
       -- scores[self.input_port+1]-=1
      else
-      scores[self.input_port+1]+=1
+      self:add_score(1)
      end
      player:kill()
     end)
@@ -1087,6 +1109,11 @@ function cls_player:update_normal()
 
 if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
 if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
+end
+
+function cls_player:add_score(add)
+ scores[self.input_port+1]+=add
+ cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]))
 end
 
 function cls_player:clear_power_up()
@@ -1203,6 +1230,7 @@ tiles[spr_spikes]=cls_spikes
 function cls_spikes:on_player_collision(player)
  if player.power_up!=spr_pwrup_invincibility then
   player:kill()
+  player:add_score(-1)
   make_gore_explosion(v2(player.x,player.y))
  end
 end
@@ -1447,6 +1475,7 @@ function make_blast(x,y,radius)
    local dy=p.y-y
    local d=sqrt(dx*dx+dy*dy)
    if d<radius then
+    p:add_score(-1)
     p:kill()
     make_gore_explosion(v2(p.x,p.y))
    end

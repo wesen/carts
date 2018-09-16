@@ -19,6 +19,7 @@ function make_blast(x,y,radius)
    local dy=p.y-y
    local d=sqrt(dx*dx+dy*dy)
    if d<radius then
+    p:add_score(-1)
     p:kill()
     make_gore_explosion(v2(p.x,p.y))
    end

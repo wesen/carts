@@ -74,3 +74,25 @@ function make_gore_explosion(pos)
   cls_gore.init(pos)
  end
 end
+
+cls_score_particle=class(function(self,pos,val)
+ self.x=pos.x
+ self.y=pos.y
+ self.spd_x=mrnd(0.2)
+ self.spd_y=-rnd(0.2)-0.2
+ self.val=val
+ self.t=0
+ self.lifetime=2
+ add(particles,self)
+end)
+
+function cls_score_particle:update()
+ self.t+=dt
+ self.x+=self.spd_x+rnd(.1)
+ self.y+=self.spd_y
+ if (self.t>self.lifetime) del(particles,self)
+end
+
+function cls_score_particle:draw()
+ bstr(self.val,self.x,self.y,1,7)
+end

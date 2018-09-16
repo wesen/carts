@@ -308,7 +308,7 @@ function cls_player:update_normal()
       -- killed a doppelgaenger
       -- scores[self.input_port+1]-=1
      else
-      scores[self.input_port+1]+=1
+      self:add_score(1)
      end
      player:kill()
     end)
@@ -323,6 +323,11 @@ function cls_player:update_normal()
 
 if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
 if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
+end
+
+function cls_player:add_score(add)
+ scores[self.input_port+1]+=add
+ cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]))
 end
 
 function cls_player:clear_power_up()
