@@ -343,7 +343,7 @@ function cls_player:draw()
   if (self.power_up_type==spr_pwrup_invisibility and frame%60<50) return
   local dark=0
   for ghost in all(self.ghosts) do
-   dark+=8
+   dark+=12
    darken(dark)
    spr(self.spr,ghost.x,ghost.y,1,1,self.flip.x,self.flip.y)
   end
