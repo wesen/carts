@@ -1533,26 +1533,25 @@ end
 
 fuse_cols={8,9,10,7}
 cls_fuse_particle=class(function(self,pos)
- self.x=pos.x
- self.y=pos.y
- local v=angle2vec(rnd(1.0))
+ self.x=pos.x+6
+ self.y=pos.y+1
+ local v=angle2vec(mrnd(0.5))*0.2
  self.spd_x=v.x
  self.spd_y=v.y
  self.t=0
- self.lifetime=rnd(2)
+ self.lifetime=rnd(1)
  add(particles,self)
 end)
 
 function cls_fuse_particle:update()
  self.t+=dt
- self.x+=self.spd_x+mrnd(1)
- self.y+=self.spd_y+mrnd(1)
+ self.x+=self.spd_x+rnd(.5)
+ self.y+=self.spd_y+mrnd(.3)
  if (self.t>self.lifetime) del(particles,self)
 end
 
 function cls_fuse_particle:draw()
- circfill(self.x,self.y,3,fuse_cols[flr(#fuse_cols*self.t/self.lifetime)])
- printh("fuse particle draw")
+ circfill(self.x,self.y,.5,fuse_cols[flr(#fuse_cols*self.t/self.lifetime)+1])
 end
 
 cls_bomb=subclass(cls_actor,function(self,player)
@@ -1568,8 +1567,7 @@ function cls_bomb:update()
  local solid=solid_at_offset(self,0,0)
  local is_actor,actor=self:is_actor_at(0,0)
 
- printh("update bomb")
- if (rnd(1)<0.1) cls_fuse_particle.init(v2(self.x,self.y))
+ if (rnd(1)<0.3) cls_fuse_particle.init(v2(self.x,self.y))
 
  self.time-=dt
  if self.time<0 then
