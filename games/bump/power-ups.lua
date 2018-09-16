@@ -1,6 +1,7 @@
 
 cls_pwrup=subclass(cls_interactable,function(self,pos)
  cls_interactable._ctr(self,pos.x,pos.y,0,0,8,8)
+ self.offset=flr(rnd(30))
 end)
 
 function cls_pwrup:on_player_collision(player)
@@ -28,6 +29,11 @@ function cls_pwrup:draw()
   spr(self.tile,self.x,self.y)
  else
   spr(self.tile+(frame/8)%3,self.x,self.y)
+  if (frame+self.offset)%40==0 then
+   for i=0,1,0.1 do
+    cls_pwrup_particle.init(self.x+4,self.y+4,i)
+   end
+  end
  end
 end
 
