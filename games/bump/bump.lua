@@ -24,12 +24,11 @@
 --#include spring
 --#include spawn
 --#include spikes
---#include moving_platform
 --#include teleporter
+--#include power-up-dropper
 --#include power-ups
 --#include mine
 --#include balloon
---#include vanishing-platform
 --#include bomb
 
 --#include fireflies

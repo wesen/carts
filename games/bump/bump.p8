@@ -273,34 +273,6 @@ function pow(x,a)
   return ret
 end
 
-function rspr(s,x,y,angle)
- angle=(angle+4)%4
- local x_=(s%16)*8
- local y_=flr(s/16)*8
- local f=function(i,j,p)
-   pset(x+i,y+j,p)
- end
- if angle==1 then
-  f=function(i,j,p)
-   pset(x+7-j,y+i,p)
-  end
- elseif angle==2 then
-  f=function(i,j,p)
-   pset(x+7-i,y+7-j,p)
-  end
- elseif angle==3 then
-  f=function(i,j,p)
-   pset(x+j,y+7-i,p)
-  end
- end
- for i=0,7 do
-  for j=0,7 do
-   local p=sget(x_+i,y_+j)
-   if (p!=0) f(i,j,p)
-  end
- end
-end
-
 function palbg(col)
  for i=1,16 do
   pal(i,col)
@@ -1237,10 +1209,6 @@ function cls_spikes:draw()
  spr(spr_spikes,self.x,self.y)
 end
 
-cls_moving_platform=subclass(cls_actor,function(pos)
- cls_actor._ctr(self,pos)
-end)
-
 spr_tele_enter=112
 spr_tele_exit=113
 tele_exits={}
@@ -1297,9 +1265,7 @@ end
 
 drop_min_time=60*4
 drop_max_time=60*10
-
 max_count=2
-
 power_up_droppers={}
 
 cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
@@ -1319,10 +1285,8 @@ function cls_pwrup_dropper:update()
   -- increment time. spawn when time's up
   self.time=(self.time%(self.interval))+1
   if self.time>=self.interval then
-   printh("dropper time interval "..tostr(self.time).." "..tostr(self.interval))
    if pwrup_counts<max_count then
     local spr_idx=power_up_tiles[flr(rnd(#power_up_tiles))+1]
-    printh("load spr "..tostr(spr_idx).." "..tostr(pwrup_counts))
     self.item=tiles[spr_idx].init(v2(self.x,self.y))
     self.item.tile=spr_idx
     pwrup_counts+=1
@@ -1341,7 +1305,6 @@ function cls_pwrup_dropper:update()
   end
 
   if not exists then
-   printh("decreasing")
    pwrup_counts-=1
    self.item=nil
    self.interval=flr(drop_min_time+(rnd(1)*(drop_max_time-drop_min_time)))
@@ -1558,54 +1521,6 @@ function cls_balloon:draw()
  end
 end
 
-spr_vanishing_platform=96
-
-vp_state_visible=0
-vp_state_vanishing=1
-vp_state_vanished=2
-
-cls_vanishing_platform=class(function(self,pos)
- self.x=pos.x
- self.y=pos.y
- self.aax=pos.x
- self.aay=pos.y+0.5
- self.bbx=self.aax+8
- self.bby=self.aay+3.5
- self.state=vp_state_visible
- self.spr=spr_vanishing_platform
- add(environments,self)
-end)
-tiles[spr_vanishing_platform]=cls_vanishing_platform
-
-function cls_vanishing_platform:collides_with(o,x,y)
- return self.state!=vp_state_vanished and do_bboxes_collide_offset(o,self,x,y)
-end
-
-function cls_vanishing_platform:draw()
- if (self.state!=vp_state_vanished) spr(self.spr,self.x,self.y)
-end
-
-function cls_vanishing_platform:update()
- if self.state==vp_state_visible then
-  for p in all(players) do
-   if do_bboxes_collide_offset(p,self,0,1) then
-    self.state=vp_state_vanishing
-    add_cr(function()
-     cr_wait_for(.2)
-     self.spr=spr_vanishing_platform+1
-     cr_wait_for(.5)
-     self.spr=spr_vanishing_platform+2
-     cr_wait_for(.5)
-     self.state=vp_state_vanished
-     cr_wait_for(2)
-     self.state=vp_state_visible
-     self.spr=spr_vanishing_platform
-    end)
-   end
-  end
- end
-end
-
 spr_bomb=23
 cls_bomb_pwrup=subclass(cls_pwrup,function(self,pos)
  cls_pwrup._ctr(self,pos)
@@ -1614,6 +1529,30 @@ tiles[spr_bomb]=cls_bomb_pwrup
 
 function cls_bomb_pwrup:on_powerup_start(player)
  local bomb=cls_bomb.init(player)
+end
+
+fuse_cols={8,9,10,7}
+cls_fuse_particle=class(function(self,pos)
+ self.x=pos.x
+ self.y=pos.y
+ local v=angle2vec(rnd(1.0))
+ self.spd_x=v.x
+ self.spd_y=v.y
+ self.t=0
+ self.lifetime=rnd(2)
+ add(particles,self)
+end)
+
+function cls_fuse_particle:update()
+ self.t+=dt
+ self.x+=self.spd_x+mrnd(1)
+ self.y+=self.spd_y+mrnd(1)
+ if (self.t>self.lifetime) del(particles,self)
+end
+
+function cls_fuse_particle:draw()
+ circfill(self.x,self.y,3,fuse_cols[flr(#fuse_cols*self.t/self.lifetime)])
+ printh("fuse particle draw")
 end
 
 cls_bomb=subclass(cls_actor,function(self,player)
@@ -1628,6 +1567,9 @@ end)
 function cls_bomb:update()
  local solid=solid_at_offset(self,0,0)
  local is_actor,actor=self:is_actor_at(0,0)
+
+ printh("update bomb")
+ if (rnd(1)<0.1) cls_fuse_particle.init(v2(self.x,self.y))
 
  self.time-=dt
  if self.time<0 then
