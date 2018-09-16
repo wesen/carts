@@ -1,5 +1,5 @@
-spr_tele_enter=112
-spr_tele_exit=113
+spr_tele_enter=216
+spr_tele_exit=200
 tele_exits={}
 
 cls_tele_enter=subclass(cls_interactable,function(self,pos)
@@ -33,7 +33,7 @@ function cls_tele_enter:on_player_collision(player)
 end
 
 function cls_tele_enter:draw()
- spr(spr_tele_enter,self.x,self.y)
+ spr(self.tile+(frame/4)%3,self.x,self.y)
 end
 
 
@@ -49,5 +49,5 @@ function cls_tele_exit:update()
 end
 
 function cls_tele_exit:draw()
- spr(spr_tele_exit,self.x,self.y)
+ spr(self.tile+(frame/4)%3,self.x,self.y)
 end

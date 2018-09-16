@@ -155,13 +155,13 @@ function cls_player:update_normal()
  end
  local on_ground_recently=self.on_ground_interval>0
 
-   local solid=solid_at_offset(self,0,0)
-   local actor,a=self:is_actor_at(0,0)
+ local solid=solid_at_offset(self,0,0)
+ local actor,a=self:is_actor_at(0,0)
 
-   if solid then
-   printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
-    foobar="a"..nil
-   end
+ if solid then
+ printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+  foobar="a"..nil
+ end
 
  if not self.on_ground then
   accel=in_air_accel

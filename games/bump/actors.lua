@@ -74,6 +74,8 @@ function cls_actor:move_y(amount)
    local actor,a=self:is_actor_at(0,step)
 
    printh(tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+   printh(tostr(self.name).." aabb "..tostr(self.aax)..","..tostr(self.aay)..
+    "-"..tostr(self.bbx)..","..tostr(self.bby))
 
    if solid or actor then
     if abs(step)<0.1 then
