@@ -1152,7 +1152,7 @@ end
 
 function cls_player:draw()
  if self.is_bullet_time then
-  rectfill(self.x,self.y,self.x+8,self.y+8,10)
+  rectfill(0,0,128,128,8)
   return
  end
  if not self.is_teleporting then
@@ -1780,6 +1780,15 @@ end
 -- x have players join when pressing action
 -- x balloon pulling upwards
 
+--[[
+ SFX:
+ 00 jumping
+01 killing sound
+02 springboard
+03 power up
+04 explosion
+]]
+
 -- make player selection screen
 
 -- moving platforms
@@ -1792,19 +1801,19 @@ end
 
 -- fades
 -- better kill animations
--- restore ghosts / particles on player
--- decrease score when dying on spikes
+-- x restore ghosts / particles on player
+-- x decrease score when dying on spikes
 
 -- number of player selector menu
 -- title screen
 -- game end screen (kills or timer)
--- prettier score display
--- pretty pass
+-- x prettier score display
+-- x pretty pass
 
--- powerups - item dropper
--- refactor powerups to have a decent api
--- visualize power ups
--- different sprites for different players
+-- x powerups - item dropper
+-- x refactor powerups to have a decent api
+-- x visualize power ups
+-- x different sprites for different players
 -- double jump
 -- dash
 -- meteors
