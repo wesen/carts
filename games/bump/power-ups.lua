@@ -13,6 +13,7 @@ function cls_pwrup:on_player_collision(player)
  player.power_up=self
  player.power_up_type=self.tile
  player.power_up_countdown=powerup_countdowns[self.tile]
+ sfx(3)
 
  if self.tile!=spr_bomb then
   local x=self.x

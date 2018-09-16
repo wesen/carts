@@ -902,7 +902,6 @@ function cls_player:kill()
   del(actors,self)
   self.is_dead=true
   add_shake(3)
-  sfx(1)
   if not self.is_doppelgaenger then
    room:spawn_player(self.input_port)
    for player in all(players) do
@@ -1055,6 +1054,7 @@ function cls_player:update_normal()
    if wall_dir!=0 then
     self.jump_interval=0
     self.spd_y=-1
+    sfx(0)
     self.spd_x=-wall_dir*wall_jump_spd
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     self.jump_button.hold_time+=1
@@ -1122,6 +1122,7 @@ function cls_player:update_normal()
       self:add_score(1)
      end
      player:kill()
+     sfx(1)
     end)
    end
   end
@@ -1203,6 +1204,7 @@ end
 
 function cls_spring:on_player_collision(player)
  player.spd_y=-spring_speed
+ sfx(2)
  self.sprung_time=10
  local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
 end
@@ -1255,6 +1257,7 @@ tiles[spr_spikes]=cls_spikes
 function cls_spikes:on_player_collision(player)
  if player.power_up!=spr_pwrup_invincibility then
   player:kill()
+  sfx(1)
   player:add_score(-1)
   make_gore_explosion(v2(player.x,player.y))
  end
@@ -1390,6 +1393,7 @@ function cls_pwrup:on_player_collision(player)
  player.power_up=self
  player.power_up_type=self.tile
  player.power_up_countdown=powerup_countdowns[self.tile]
+ sfx(3)
 
  if self.tile!=spr_bomb then
   local x=self.x
@@ -1528,6 +1532,7 @@ function make_blast(x,y,radius)
    local d=sqrt(dx*dx+dy*dy)
    if d<radius then
     p:add_score(-1)
+    sfx(4)
     p:kill()
     make_gore_explosion(v2(p.x,p.y))
    end
@@ -1840,6 +1845,7 @@ function _init()
  room:spawn_player(p2_input)
  room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
+ music(0)
 end
 
 function _draw()

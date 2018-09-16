@@ -14,6 +14,7 @@ end
 
 function cls_spring:on_player_collision(player)
  player.spd_y=-spring_speed
+ sfx(2)
  self.sprung_time=10
  local smoke=cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)
 end

@@ -91,7 +91,6 @@ function cls_player:kill()
   del(actors,self)
   self.is_dead=true
   add_shake(3)
-  sfx(1)
   if not self.is_doppelgaenger then
    room:spawn_player(self.input_port)
    for player in all(players) do
@@ -244,6 +243,7 @@ function cls_player:update_normal()
    if wall_dir!=0 then
     self.jump_interval=0
     self.spd_y=-1
+    sfx(0)
     self.spd_x=-wall_dir*wall_jump_spd
     self:smoke(spr_wall_smoke,-wall_dir*.3)
     self.jump_button.hold_time+=1
@@ -311,6 +311,7 @@ function cls_player:update_normal()
       self:add_score(1)
      end
      player:kill()
+     sfx(1)
     end)
    end
   end

@@ -4,6 +4,7 @@ function _init()
  room:spawn_player(p2_input)
  room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
+ music(0)
 end
 
 function _draw()
