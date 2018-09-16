@@ -44,7 +44,7 @@ function cls_bomb:update()
  local solid=solid_at_offset(self,0,0)
  local is_actor,actor=self:is_actor_at(0,0)
 
- if (rnd(1)<0.3) cls_fuse_particle.init(v2(self.x,self.y))
+ if (rnd(1)<0.5) cls_fuse_particle.init(v2(self.x,self.y))
 
  self.time-=dt
  if self.time<0 then

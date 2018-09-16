@@ -23,6 +23,7 @@ function cls_pwrup:on_powerup_stop(player)
 end
 
 function cls_pwrup:draw()
+ if (self.tile==spr_bomb and rnd(1)<0.3) cls_fuse_particle.init(v2(self.x,self.y))
  spr(self.tile,self.x,self.y)
 end
 
@@ -52,35 +53,27 @@ powerup_countdowns={}
 
 
 spr_pwrup_doppelgaenger=39
---tiles[spr_pwrup_doppelgaenger]=cls_pwrup_doppelgaenger
-powerup_colors[spr_pwrup_doppelgaenger]=8
 
 spr_pwrup_invincibility=40
---tiles[spr_pwrup_invincibility]=cls_pwrup
 powerup_colors[spr_pwrup_invincibility]=9
 powerup_countdowns[spr_pwrup_invincibility]=10
 
 spr_pwrup_superspeed=41
---tiles[spr_pwrup_superspeed]=cls_pwrup
 powerup_colors[spr_pwrup_superspeed]=6
 powerup_countdowns[spr_pwrup_superspeed]=10
 
 spr_pwrup_superjump=42
---tiles[spr_pwrup_superjump]=cls_pwrup
 powerup_colors[spr_pwrup_superjump]=12
 powerup_countdowns[spr_pwrup_superjump]=15
 
 spr_pwrup_gravitytweak=43
---tiles[spr_pwrup_gravitytweak]=cls_pwrup
 powerup_colors[spr_pwrup_gravitytweak]=9
 powerup_countdowns[spr_pwrup_gravitytweak]=30
 
 spr_pwrup_invisibility=44
---tiles[spr_pwrup_invisibility]=cls_pwrup
 powerup_countdowns[spr_pwrup_invisibility]=5
 
 spr_pwrup_shrink=46
---tiles[spr_pwrup_shrink]=cls_pwrup
 powerup_countdowns[spr_pwrup_shrink]=10
 
 -- start offset for the item sprite values
