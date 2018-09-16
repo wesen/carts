@@ -23,8 +23,12 @@ function cls_pwrup:on_powerup_stop(player)
 end
 
 function cls_pwrup:draw()
- if (self.tile==spr_bomb and rnd(1)<0.3) cls_fuse_particle.init(v2(self.x,self.y))
- spr(self.tile,self.x,self.y)
+ if self.tile==spr_bomb then
+  if (rnd(1)<0.3) cls_fuse_particle.init(v2(self.x,self.y))
+  spr(self.tile,self.x,self.y)
+ else
+  spr(self.tile+(frame/8)%3,self.x,self.y)
+ end
 end
 
 cls_pwrup_doppelgaenger=subclass(cls_pwrup,function(self,pos)
@@ -52,9 +56,9 @@ powerup_colors={}
 powerup_countdowns={}
 
 
-spr_pwrup_doppelgaenger=39
+spr_pwrup_doppelgaenger=197
 
-spr_pwrup_invincibility=40
+spr_pwrup_invincibility=155
 powerup_colors[spr_pwrup_invincibility]=9
 powerup_countdowns[spr_pwrup_invincibility]=10
 
@@ -70,14 +74,13 @@ spr_pwrup_gravitytweak=43
 powerup_colors[spr_pwrup_gravitytweak]=9
 powerup_countdowns[spr_pwrup_gravitytweak]=30
 
-spr_pwrup_invisibility=44
+spr_pwrup_invisibility=178
 powerup_countdowns[spr_pwrup_invisibility]=5
 
-spr_pwrup_shrink=46
+spr_pwrup_shrink=139
 powerup_countdowns[spr_pwrup_shrink]=10
 
 -- start offset for the item sprite values
-spr_idx_start=39
 -- associate sprite value with class
 tiles[spr_pwrup_doppelgaenger]=cls_pwrup_doppelgaenger
 tiles[spr_pwrup_invisibility]=cls_pwrup
