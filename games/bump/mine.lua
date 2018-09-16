@@ -14,6 +14,7 @@ function make_blast(x,y,radius)
   end
  end, draw_crs)
   add_shake(5)
+    sfx(4)
  for p in all(players) do
   if p.power_up!=spr_pwrup_invincibility then
    local dx=p.x-x
@@ -21,7 +22,6 @@ function make_blast(x,y,radius)
    local d=sqrt(dx*dx+dy*dy)
    if d<radius then
     p:add_score(-1)
-    sfx(4)
     p:kill()
     make_gore_explosion(v2(p.x,p.y))
    end

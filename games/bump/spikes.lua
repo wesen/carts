@@ -6,7 +6,7 @@ end)
 tiles[spr_spikes]=cls_spikes
 
 function cls_spikes:on_player_collision(player)
- if player.power_up!=spr_pwrup_invincibility then
+ if player.power_up!=spr_pwrup_invincibility and not player.is_dead then
   player:kill()
   sfx(1)
   player:add_score(-1)
