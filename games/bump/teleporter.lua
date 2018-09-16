@@ -9,6 +9,7 @@ tiles[spr_tele_enter]=cls_tele_enter
 
 function cls_tele_enter:on_player_collision(player)
  if player.on_ground and not player.is_teleporting then
+  sfx(33)
   add_cr(function()
    player.is_teleporting=true
    player.spd=v2(0,0)
