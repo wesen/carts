@@ -41,8 +41,6 @@ cls_bomb=subclass(cls_actor,function(self,player)
 end)
 
 function cls_bomb:update()
- local solid=solid_at_offset(self,0,0)
- local is_actor,actor=self:is_actor_at(0,0)
 
  if (rnd(1)<0.5) cls_fuse_particle.init(v2(self.x,self.y))
 
@@ -53,17 +51,26 @@ function cls_bomb:update()
  end
 
  if self.is_thrown then
-  local actor,a=self:is_actor_at(0,0)
-  if actor then
-   make_blast(self.x,self.y,45)
-   del(actors,self)
+  local solid=solid_at_offset(self,0,0)
+  if not self.is_solid and not solid then
+   -- avoid a bomb getting stuck on a wall when thrown
+   self.is_solid=true
   end
+  local actor,a=self:is_actor_at(0,0)
 
   local gravity=0.12
   local maxfall=2
   self.spd_y=appr(self.spd_y,maxfall,gravity)
   cls_actor.move_x(self,self.spd_x)
   cls_actor.move_y(self,self.spd_y)
+
+  if self.is_solid then
+   if tile_flag_at_offset(self,flg_solid,0,1) then
+    self.spd_y*=-0.8
+   elseif tile_flag_at_offset(self,flg_solid,sign(self.spd_x),0) then
+    self.spd_x*=-0.9
+   end
+  end
  elseif self.player.is_dead then
   del(actors,self)
  else
@@ -73,7 +80,6 @@ function cls_bomb:update()
    self.is_thrown=true
    self.spd_x=(self.player.flip.x and -1 or 1) + self.player.spd_x
    self.spd_y=-1
-   self.is_solid=true
   end
  end
 end
