@@ -54,6 +54,8 @@ jump_max_hold_time=15
 
 ground_grace_interval=6
 
+win_threshold=0
+
 
 function class (init)
   local c = {}
@@ -469,7 +471,7 @@ function cls_actor:move_x(amount)
    local solid=solid_at_offset(self,step,0)
    local actor=self:is_actor_at(step,0)
 
-   printh("self.x "..tostr(self.x).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+   -- printh("self.x "..tostr(self.x).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
 
    if solid or actor then
     if abs(step)<0.1 then
@@ -501,9 +503,9 @@ function cls_actor:move_y(amount)
    local solid=solid_at_offset(self,0,step)
    local actor,a=self:is_actor_at(0,step)
 
-   printh(tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
-   printh(tostr(self.name).." aabb "..tostr(self.aax)..","..tostr(self.aay)..
-    "-"..tostr(self.bbx)..","..tostr(self.bby))
+   -- -- -- printh(tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+   -- -- printh(tostr(self.name).." aabb "..tostr(self.aax)..","..tostr(self.aay)..
+   --  "-"..tostr(self.bbx)..","..tostr(self.bby))
 
    if solid or actor then
     if abs(step)<0.1 then
@@ -813,7 +815,7 @@ players={}
 connected_players={}
 player_cnt=0
 
-start_sprites={1,130,146}
+start_sprites={1,130,146,226}
 
 function check_for_new_players()
  for i=0,3 do
@@ -969,8 +971,8 @@ function cls_player:update_normal()
  local actor,a=self:is_actor_at(0,0)
 
  if solid then
- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
-  foobar="a"..nil
+ -- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+ --  foobar="a"..nil
  end
 
  if not self.on_ground then
@@ -1140,6 +1142,23 @@ end
 function cls_player:add_score(add)
  scores[self.input_port+1]+=add
  cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]))
+ if scores[self.input_port+1]>win_threshold then
+  winning_player=self.input_port+1
+  printh("WINNNI")
+  add_cr(function()
+   for i=0,30 do
+    palt(0,false)
+    circfill(64,64,inexpo(i,0,80,30),8)
+    palt()
+    yield()
+   end
+   while true do
+    rectfill(0,0,128,128,8)
+    bstr("player "..tostr(winning_player).." won!",38,64,7,1)
+    yield()
+   end
+  end, draw_crs)
+ end
 end
 
 function cls_player:clear_power_up()
@@ -1840,44 +1859,52 @@ end
 
 -- go through right and come back left (?)
 
+winning_player=nil
+
 function _init()
  room=cls_room.init(v2(0,16),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
- room:spawn_player(p3_input)
+ -- room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
- music(0)
+ -- music(0)
 end
 
 function _draw()
  frame+=1
 
  cls()
- camera(camera_shake.x,camera_shake.y)
- room:draw()
- for a in all(interactables) do
-  a:draw()
- end
- for a in all(environments) do
-  a:draw()
- end
- for a in all(static_objects) do
-  a:draw()
- end
- draw_actors()
- tick_crs(draw_crs)
- fireflies_draw()
 
- for a in all(particles) do
-  a:draw()
- end
+  camera(camera_shake.x,camera_shake.y)
+  room:draw()
+  for a in all(interactables) do
+   a:draw()
+  end
+  for a in all(environments) do
+   a:draw()
+  end
+  for a in all(static_objects) do
+   a:draw()
+  end
+  draw_actors()
 
- local entry_length=30
- for i=0,#scores-1,1 do
-  print(
+ if winning_player!=nil then
+  tick_crs(draw_crs)
+ else
+  tick_crs(draw_crs)
+  fireflies_draw()
+
+  for a in all(particles) do
+   a:draw()
+  end
+
+  local entry_length=30
+  for i=0,#scores-1,1 do
+   print(
    "p"..tostr(i+1)..": "..tostr(scores[i+1]),
    i*entry_length,1,7
-  )
+   )
+  end
  end
 
  -- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
@@ -2023,6 +2050,14 @@ ddddddddd0d0d0d0d0d0d0d01111011001010100d50011010000000150001100010110d600100100
 00000000000000003bbbbbb30bb77bb0003bb30003bbbb30003bb30003b77b300aa0aaa00aaaa0a00a0aaaa00000000000000000000000000000000000000000
 000000000000000003bbbb3000bbbb00000000000033330000033000003bb3000999999009999990099999900000000000000000000000000000000000000000
 00000000000000000033330000000000000000000000000000000000000330005777555557775555577755550000000000000000000000000000000000000000
+000000000000000000aaa0000000000000aaa00000aaa00000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000aafaf0000aaa0000aafaf000aafaf0000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000aaf5f5f00aafaf00aaf5f5f0aaf5f5f000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000ff5f5f0aaf5f5f00ff5f5f00ff5f5f000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000000000000000ffff000ff5f5f000ffff0000ffff00000aaa00000aaa0000aaaa00000aaa00000000000000000000000000000000000000000000000000
+0000000000000000000bb00000ffff0000033000000bbb6000a1f1000001f10000a1f10000a1f100000000000000000000000000000000000000000000000000
+000000000000000000033000000330000060060000033600000bbb00000bb000000bbb0000033b60000000000000000000000000000000000000000000000000
+00000000000000000006600000060600000000000000000000060600000660000060006000000000000000000000000000000000000000000000000000000000
 __label__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -1,41 +1,49 @@
+winning_player=nil
+
 function _init()
  room=cls_room.init(v2(0,16),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
- room:spawn_player(p3_input)
+ -- room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
- music(0)
+ -- music(0)
 end
 
 function _draw()
  frame+=1
 
  cls()
- camera(camera_shake.x,camera_shake.y)
- room:draw()
- for a in all(interactables) do
-  a:draw()
- end
- for a in all(environments) do
-  a:draw()
- end
- for a in all(static_objects) do
-  a:draw()
- end
- draw_actors()
- tick_crs(draw_crs)
- fireflies_draw()
 
- for a in all(particles) do
-  a:draw()
- end
+  camera(camera_shake.x,camera_shake.y)
+  room:draw()
+  for a in all(interactables) do
+   a:draw()
+  end
+  for a in all(environments) do
+   a:draw()
+  end
+  for a in all(static_objects) do
+   a:draw()
+  end
+  draw_actors()
 
- local entry_length=30
- for i=0,#scores-1,1 do
-  print(
+ if winning_player!=nil then
+  tick_crs(draw_crs)
+ else
+  tick_crs(draw_crs)
+  fireflies_draw()
+
+  for a in all(particles) do
+   a:draw()
+  end
+
+  local entry_length=30
+  for i=0,#scores-1,1 do
+   print(
    "p"..tostr(i+1)..": "..tostr(scores[i+1]),
    i*entry_length,1,7
-  )
+   )
+  end
  end
 
  -- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)

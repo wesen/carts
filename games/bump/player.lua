@@ -2,7 +2,7 @@ players={}
 connected_players={}
 player_cnt=0
 
-start_sprites={1,130,146}
+start_sprites={1,130,146,226}
 
 function check_for_new_players()
  for i=0,3 do
@@ -158,8 +158,8 @@ function cls_player:update_normal()
  local actor,a=self:is_actor_at(0,0)
 
  if solid then
- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
-  foobar="a"..nil
+ -- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+ --  foobar="a"..nil
  end
 
  if not self.on_ground then
@@ -329,6 +329,23 @@ end
 function cls_player:add_score(add)
  scores[self.input_port+1]+=add
  cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]))
+ if scores[self.input_port+1]>win_threshold then
+  winning_player=self.input_port+1
+  printh("WINNNI")
+  add_cr(function()
+   for i=0,30 do
+    palt(0,false)
+    circfill(64,64,inexpo(i,0,80,30),8)
+    palt()
+    yield()
+   end
+   while true do
+    rectfill(0,0,128,128,8)
+    bstr("player "..tostr(winning_player).." won!",38,64,7,1)
+    yield()
+   end
+  end, draw_crs)
+ end
 end
 
 function cls_player:clear_power_up()
