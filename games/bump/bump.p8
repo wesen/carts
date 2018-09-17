@@ -54,7 +54,7 @@ jump_max_hold_time=15
 
 ground_grace_interval=6
 
-win_threshold=0
+win_threshold=14
 
 
 function class (init)
@@ -764,11 +764,13 @@ function make_gore_explosion(pos)
  end
 end
 
-cls_score_particle=class(function(self,pos,val)
+cls_score_particle=class(function(self,pos,val,c2,c1)
  self.x=pos.x
  self.y=pos.y
  self.spd_x=mrnd(0.2)
  self.spd_y=-rnd(0.2)-0.2
+ self.c2=c2
+ self.c1=c1
  self.val=val
  self.t=0
  self.lifetime=2
@@ -783,7 +785,7 @@ function cls_score_particle:update()
 end
 
 function cls_score_particle:draw()
- bstr(self.val,self.x,self.y,7,1)
+ bstr(self.val,self.x,self.y,self.c1,self.c2)
 end
 
 cls_pwrup_particle=class(function(self,x,y,a,cols)
@@ -854,6 +856,9 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.on_ground=false
  self.is_bullet_time=false
  self.is_dead=false
+
+ self.combo_kill_timer=0
+ self.combo_kills=0
 end)
 
 function cls_player:update_bbox()
@@ -924,6 +929,12 @@ function cls_player:update()
 end
 
 function cls_player:update_normal()
+ if self.combo_kill_timer>0 then
+  self.combo_kill_timer-=dt
+ else
+  self.combo_kills=0
+ end
+
  -- power up countdown
  if self.power_up_countdown!=nil then
   self.power_up_countdown-=dt
@@ -1141,10 +1152,20 @@ end
 
 function cls_player:add_score(add)
  scores[self.input_port+1]+=add
- cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]))
+ self.combo_kill_timer=1
+ self.combo_kills+=1
+ if self.combo_kills==1 then
+  cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]),1,7)
+ elseif self.combo_kills==2 then
+  cls_score_particle.init(v2(self.x,self.y),"double kill",10,1)
+ elseif self.combo_kills==3 then
+  cls_score_particle.init(v2(self.x,self.y),"triple kill",9,1)
+ elseif self.combo_kills==4 then
+  cls_score_particle.init(v2(self.x,self.y),"killing spree",8,7)
+ end
+
  if scores[self.input_port+1]>win_threshold then
   winning_player=self.input_port+1
-  printh("WINNNI")
   add_cr(function()
    for i=0,30 do
     palt(0,false)
