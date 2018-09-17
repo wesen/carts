@@ -337,7 +337,7 @@ end
 
 function cls_player:add_score(add)
  scores[self.input_port+1]+=add
- self.combo_kill_timer=1
+ self.combo_kill_timer=2
  self.combo_kills+=1
  if self.combo_kills==1 then
   cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]),1,7)
