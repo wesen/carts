@@ -1,0 +1,87 @@
+player:0:164 pos 18.6505,20.3942 amount -1.08 solid false actor false
+player:0:164 aabb 20.6505,20.8942-24.6505,28.3942
+player:0:164 pos 18.6505,19.3942 amount -0.08 solid false actor false
+player:0:164 aabb 20.6505,19.8942-24.6505,27.3942
+self.x 69.4996 amount 0.3 solid false actor false
+player:3:165 pos 69.7996,-0.13 amount 0.42 solid false actor false
+player:3:165 aabb 71.7996,0.37-75.7996,7.87
+self.x 74.1044 amount 0.2 solid false actor false
+player:2:154 pos 74.3044,61.976 amount -0 solid false actor false
+player:2:154 aabb 76.3044,62.476-80.3044,69.976
+self.x 76.9222 amount -0.2 solid false actor false
+player:1:161 pos 76.7222,53.1801 amount -1.08 solid false actor false
+player:1:161 aabb 79.7222,57.6801-82.7222,61.1801
+player:1:161 pos 76.7222,52.1801 amount -0.08 solid false actor false
+player:1:161 aabb 79.7222,56.6801-82.7222,60.1801
+self.x 18.6505 amount 1.45 solid false actor false
+self.x 19.6505 amount 0.45 solid false actor false
+player:0:164 pos 20.1005,19.3142 amount -1.08 solid false actor false
+player:0:164 aabb 22.1005,19.8142-26.1005,27.3142
+player:0:164 pos 20.1005,18.3142 amount -0.08 solid false actor false
+player:0:164 aabb 22.1005,18.8142-26.1005,26.3142
+self.x 69.7996 amount 0.2 solid false actor false
+player:3:165 pos 69.9996,0.29 amount 0.66 solid false actor false
+player:3:165 aabb 71.9996,0.79-75.9996,8.29
+self.x 74.3044 amount 0.3 solid false actor false
+player:2:154 pos 74.6044,61.976 amount 0.06 solid false actor false
+player:2:154 aabb 76.6044,62.476-80.6044,69.976
+self.x 76.7222 amount -0.3 solid false actor false
+player:1:161 pos 76.4223,52.1001 amount -1.08 solid true actor false
+player:1:161 aabb 79.4223,56.6001-82.4223,60.1001
+player:1:161 pos 76.4223,52.1001 amount -0.54 solid false actor false
+player:1:161 aabb 79.4223,56.6001-82.4223,60.1001
+self.x 20.1005 amount 1.4 solid false actor false
+self.x 21.1005 amount 0.4 solid false actor false
+player:0:164 pos 21.5006,18.2342 amount -1.08 solid false actor false
+player:0:164 aabb 23.5006,18.7342-27.5006,26.2342
+player:0:164 pos 21.5006,17.2342 amount -0.08 solid false actor false
+player:0:164 aabb 23.5006,17.7342-27.5006,25.2342
+self.x 69.9996 amount 0.1 solid false actor false
+player:3:165 pos 70.0996,0.95 amount 0.9 solid false actor false
+player:3:165 aabb 72.0996,1.45-76.0996,8.95
+self.x 74.6044 amount 0.4 solid false actor false
+player:2:154 pos 75.0043,62.0359 amount 0.1199 solid false actor false
+player:2:154 aabb 77.0043,62.5359-81.0043,70.0359
+self.x 76.4223 amount -0.4 solid false actor false
+player:1:161 pos 76.0223,51.5601 amount -1.08 solid true actor false
+player:1:161 aabb 79.0223,56.0601-82.0223,59.5601
+player:1:161 pos 76.0223,51.5601 amount -0.54 solid true actor false
+player:1:161 aabb 79.0223,56.0601-82.0223,59.5601
+player:1:161 pos 76.0223,51.5601 amount -0.27 solid true actor false
+player:1:161 aabb 79.0223,56.0601-82.0223,59.5601
+player:1:161 pos 76.0223,51.5601 amount -0.135 solid true actor false
+player:1:161 aabb 79.0223,56.0601-82.0223,59.5601
+player:1:161 pos 76.0223,51.5601 amount -0.0675 solid true actor false
+player:1:161 aabb 79.0223,56.0601-82.0223,59.5601
+self.x 21.5006 amount 1.3501 solid false actor false
+self.x 22.5006 amount 0.3501 solid false actor false
+player:0:164 pos 22.8506,17.1542 amount -1.08 solid false actor false
+player:0:164 aabb 24.8506,17.6542-28.8506,25.1542
+player:0:164 pos 22.8506,16.1542 amount -0.08 solid false actor false
+player:0:164 aabb 24.8506,16.6542-28.8506,24.1542
+self.x 70.0996 amount 0 solid false actor false
+player:3:165 pos 70.0997,1.8499 amount 1.14 solid false actor false
+player:3:165 aabb 72.0997,2.3499-76.0997,9.8499
+player:3:165 pos 70.0997,2.8499 amount 0.14 solid false actor false
+player:3:165 aabb 72.0997,3.3499-76.0997,10.8499
+self.x 75.0043 amount 0.5 solid false actor false
+player:2:154 pos 75.5043,62.1559 amount 0.1799 solid false actor false
+player:2:154 aabb 77.5043,62.6559-81.5043,70.1559
+self.x 76.0223 amount -0.5 solid false actor false
+player:1:161 pos 75.5223,51.5601 amount 0.06 solid false actor false
+player:1:161 aabb 78.5223,56.0601-81.5223,59.5601
+self.x 22.8506 amount 1.3001 solid false actor false
+self.x 23.8506 amount 0.3001 solid false actor false
+player:0:164 pos 24.1507,16.0742 amount -1.08 solid false actor false
+player:0:164 aabb 26.1507,16.5742-30.1507,24.0742
+player:0:164 pos 24.1507,15.0742 amount -0.08 solid false actor false
+player:0:164 aabb 26.1507,15.5742-30.1507,23.0742
+self.x 70.0997 amount -0.1 solid false actor false
+player:3:165 pos 69.9997,2.9899 amount 1.3799 solid false actor false
+player:3:165 aabb 71.9997,3.4899-75.9997,10.9899
+player:3:165 pos 69.9997,3.9899 amount 0.3799 solid false actor false
+player:3:165 aabb 71.9997,4.4899-75.9997,11.9899
+self.x 75.5043 amount 0.5999 solid false actor false
+player:2:154 pos 76.1042,62.3358 amount 0.4199 solid false actor false
+player:2:154 aabb 78.1042,62.8358-82.1042,70.3358
+foobar player:1:161 pos 75.5223,51.6201 amount [nil] solid true actor false
