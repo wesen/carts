@@ -71,9 +71,9 @@ function _init()
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
  room:spawn_player(p3_input)
+ room:spawn_player(p4_input)
  fireflies_init(v2(16,16))
  music(0)
- start_game()
 end
 
 function update_a(a) a:update() end
@@ -122,7 +122,6 @@ function _draw()
    sspr(sx,sy,8,8,64-16,68,32,32)
 
    if is_space_pressed() then
-    printh("restart game")
     run()
    end
   end

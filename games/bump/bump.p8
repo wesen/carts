@@ -894,6 +894,8 @@ end
 
 players={}
 connected_players={}
+combo_kills={0,0,0,0}
+combo_kill_timer={0,0,0,0}
 player_cnt=0
 
 start_sprites={1,130,146,226}
@@ -935,9 +937,6 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  self.on_ground=false
  self.is_bullet_time=false
  self.is_dead=false
-
- self.combo_kill_timer=0
- self.combo_kills=0
 end)
 
 function cls_player:update_bbox()
@@ -1023,11 +1022,12 @@ function cls_player:update()
 end
 
 function cls_player:update_normal()
+ local nr=self.input_port+1
 
- if self.combo_kill_timer>0 then
-  self.combo_kill_timer-=dt
+ if combo_kill_timer[nr]>0 then
+  combo_kill_timer[nr]-=dt
  else
-  self.combo_kills=0
+  combo_kills[nr]=0
  end
 
  -- power up countdown
@@ -1249,23 +1249,25 @@ function cls_player:update_normal()
 end
 
 function cls_player:add_score(add)
- scores[self.input_port+1]+=add
+ local nr=self.input_port+1
+ printh("add score for player "..tostr(nr).." score "..tostr(scores[nr]))
+ scores[nr]+=add
  if add>=0 then
-  self.combo_kill_timer=3
-  self.combo_kills+=1
-  if self.combo_kills==1 then
+  combo_kill_timer[nr]=3
+  combo_kills[nr]+=1
+  if combo_kills[nr]==1 then
    cls_score_particle.init(v2(self.x,self.y),"kill",1,7)
-  elseif self.combo_kills==2 then
+  elseif combo_kills[nr]==2 then
    cls_score_particle.init(v2(self.x,self.y),"double kill",10,1)
-  elseif self.combo_kills==3 then
+  elseif combo_kills[nr]==3 then
    cls_score_particle.init(v2(self.x,self.y),"triple kill",9,1)
-  elseif self.combo_kills==4 then
+  elseif combo_kills[nr]==4 then
    cls_score_particle.init(v2(self.x,self.y),"killing spree",8,7)
   end
  end
 
- if mode==mode_game and scores[self.input_port+1]>win_threshold then
-  winning_player=self.input_port+1
+ if mode==mode_game and scores[nr]>win_threshold then
+  winning_player=nr
   end_game()
  end
 end
@@ -1868,9 +1870,9 @@ function _init()
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
  room:spawn_player(p3_input)
+ room:spawn_player(p4_input)
  fireflies_init(v2(16,16))
  music(0)
- start_game()
 end
 
 function update_a(a) a:update() end
@@ -1919,7 +1921,6 @@ function _draw()
    sspr(sx,sy,8,8,64-16,68,32,32)
 
    if is_space_pressed() then
-    printh("restart game")
     run()
    end
   end
