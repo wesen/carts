@@ -13,7 +13,7 @@ cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
  add(power_up_droppers,self)
 end)
 
-local pwrup_counts=0
+pwrup_counts=0
 
 function cls_pwrup_dropper:update()
  if self.item==nil then

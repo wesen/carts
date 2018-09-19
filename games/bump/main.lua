@@ -73,6 +73,7 @@ function _init()
  room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
  music(0)
+ start_game()
 end
 
 function update_a(a) a:update() end

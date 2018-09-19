@@ -4,7 +4,9 @@ cls_bomb_pwrup=subclass(cls_pwrup,function(self,pos)
 end)
 tiles[spr_bomb]=cls_bomb_pwrup
 
-function make_blast(x,y,radius)
+function make_blast(obj,radius)
+ local x=obj.x
+ local y=obj.y
  add_cr(function ()
   for i=0,20 do
    local r=outexpo(i,radius,-radius,20)
@@ -20,7 +22,13 @@ function make_blast(x,y,radius)
    local dy=p.y-y
    local d=sqrt(dx*dx+dy*dy)
    if d<radius then
-    p:add_score(-1)
+    if obj.player!=nil then
+     if p.input_port!=obj.player.input_port then
+      obj.player:add_score(1)
+     else
+      obj.player:add_score(-1)
+     end
+    end
     p:kill()
     make_gore_explosion(v2(p.x,p.y))
    end
@@ -69,7 +77,7 @@ function cls_bomb:update()
 
  self.time-=dt
  if self.time<0 then
-  make_blast(self.x,self.y,45)
+  make_blast(self,45)
   del(actors,self)
  end
 

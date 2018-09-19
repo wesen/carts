@@ -6,7 +6,7 @@ cls_mine=subclass(cls_interactable,function(self,pos)
 end)
 
 function cls_mine:on_player_collision(player)
- make_blast(self.x,self.y,30)
+ make_blast(self,30)
  del(interactables,self)
 end
 tiles[spr_mine]=cls_mine
@@ -16,7 +16,7 @@ cls_suicide_bomb=subclass(cls_pwrup,function(self,pos)
 end)
 
 function cls_suicide_bomb:on_powerup_stop(player)
- if (player.power_up_countdown<=0) make_blast(player.x,player.y,30)
+ if (player.power_up_countdown<=0) make_blast(player,30)
 end
 
 spr_suicide_bomb=45

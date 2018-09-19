@@ -54,7 +54,7 @@ jump_max_hold_time=15
 
 ground_grace_interval=6
 
-win_threshold=0
+win_threshold=10
 
 
 function class (init)
@@ -1461,7 +1461,7 @@ cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
  add(power_up_droppers,self)
 end)
 
-local pwrup_counts=0
+pwrup_counts=0
 
 function cls_pwrup_dropper:update()
  if self.item==nil then
@@ -1637,7 +1637,9 @@ cls_bomb_pwrup=subclass(cls_pwrup,function(self,pos)
 end)
 tiles[spr_bomb]=cls_bomb_pwrup
 
-function make_blast(x,y,radius)
+function make_blast(obj,radius)
+ local x=obj.x
+ local y=obj.y
  add_cr(function ()
   for i=0,20 do
    local r=outexpo(i,radius,-radius,20)
@@ -1653,7 +1655,13 @@ function make_blast(x,y,radius)
    local dy=p.y-y
    local d=sqrt(dx*dx+dy*dy)
    if d<radius then
-    p:add_score(-1)
+    if obj.player!=nil then
+     if p.input_port!=obj.player.input_port then
+      obj.player:add_score(1)
+     else
+      obj.player:add_score(-1)
+     end
+    end
     p:kill()
     make_gore_explosion(v2(p.x,p.y))
    end
@@ -1702,7 +1710,7 @@ function cls_bomb:update()
 
  self.time-=dt
  if self.time<0 then
-  make_blast(self.x,self.y,45)
+  make_blast(self,45)
   del(actors,self)
  end
 
@@ -1862,6 +1870,7 @@ function _init()
  room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
  music(0)
+ start_game()
 end
 
 function update_a(a) a:update() end
