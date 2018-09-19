@@ -73,15 +73,20 @@
 
 -- x title screen
 -- x shrunk player can't seem to teleport
--- kills by clones should go towards combo count
 -- x spawn shows wrong character sprite
 -- x avoid killing text going beyond screen boundaries
+-- x when picking up 2 bombs, they can get stuck on each other
+-- kills by clones should go towards combo count
 
 -- x press start to start game
--- fade across mode transitions
+-- x fade across start transitions
+-- proper transition and end of game handling
+-- spawn locations don't seem to be reset correctly when loading the actual level
 -- game end screen (kills or timer) -- restart game
 
 --- later later later later -----
+
+-- add back ice tiles
 
 -- double jump
 -- dash
