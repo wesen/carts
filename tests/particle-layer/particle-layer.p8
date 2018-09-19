@@ -110,6 +110,7 @@ end
 
 -->8
 cls_layer=class(function(self)
+ self.target=nil
  self.particles={}
  self.emit_interval=.2
  self.t=0
@@ -143,8 +144,21 @@ cls_layer=class(function(self)
 end)
 
 function cls_layer:emit(x,y)
- if (x==nil) x=self.x
- if (y==nil) y=self.y
+ if x==nil then
+  if self.target!=nil then
+   x=self.target.x
+  else
+   x=self.x
+  end
+ end
+ if y==nil then
+  if self.target!=nil then
+   y=self.target.y
+  else
+   y=self.y
+  end
+ end
+
  local angle=self.min_angle+rnd(self.max_angle-self.min_angle)
  local spd_x=cos(angle)*self.default_speed_x+mrnd(self.speed_jitter_x)
  local spd_y=sin(angle)*self.default_speed_y+mrnd(self.speed_jitter_y)
@@ -249,7 +263,12 @@ dt=0
 
 layers={}
 
+mouse_pos={x=0,y=0}
+
 function _init()
+
+ poke(0x5f2d,1)
+
  local layer
 
  local blast_layer=cls_layer.init()
@@ -275,7 +294,7 @@ function _init()
  layer.col=nil
  layer.cols={8,9,10,10,7}
  layer.min_angle=-0.5
- layer.x_jitter=20
+ -- layer.x_jitter=20
  layer.max_angle=0
  layer.default_weight=2
  layer.weight_jitter=2
@@ -310,11 +329,16 @@ function _init()
    local _p=dust_layer:emit(p.x,p.y)
   end
  end
+
+ layer.target=mouse_pos
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+
+ mouse_pos.x=stat(32)
+ mouse_pos.y=stat(33)
 
  for p in all(layers) do
   p:update()
@@ -325,6 +349,7 @@ function _draw()
  frame+=1
 
  cls()
+ rectfill(mouse_pos.x-2,mouse_pos.y-2,mouse_pos.x+2,mouse_pos.y+2,7)
  for p in all(layers) do
   p:draw()
  end

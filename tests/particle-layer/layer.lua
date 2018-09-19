@@ -1,4 +1,5 @@
 cls_layer=class(function(self)
+ self.target=nil
  self.particles={}
  self.emit_interval=.2
  self.t=0
@@ -32,8 +33,21 @@ cls_layer=class(function(self)
 end)
 
 function cls_layer:emit(x,y)
- if (x==nil) x=self.x
- if (y==nil) y=self.y
+ if x==nil then
+  if self.target!=nil then
+   x=self.target.x
+  else
+   x=self.x
+  end
+ end
+ if y==nil then
+  if self.target!=nil then
+   y=self.target.y
+  else
+   y=self.y
+  end
+ end
+
  local angle=self.min_angle+rnd(self.max_angle-self.min_angle)
  local spd_x=cos(angle)*self.default_speed_x+mrnd(self.speed_jitter_x)
  local spd_y=sin(angle)*self.default_speed_y+mrnd(self.speed_jitter_y)

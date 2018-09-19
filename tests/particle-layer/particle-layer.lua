@@ -21,7 +21,12 @@ dt=0
 
 layers={}
 
+mouse_pos={x=0,y=0}
+
 function _init()
+
+ poke(0x5f2d,1)
+
  local layer
 
  local blast_layer=cls_layer.init()
@@ -47,7 +52,7 @@ function _init()
  layer.col=nil
  layer.cols={8,9,10,10,7}
  layer.min_angle=-0.5
- layer.x_jitter=20
+ -- layer.x_jitter=20
  layer.max_angle=0
  layer.default_weight=2
  layer.weight_jitter=2
@@ -82,11 +87,16 @@ function _init()
    local _p=dust_layer:emit(p.x,p.y)
   end
  end
+
+ layer.target=mouse_pos
 end
 
 function _update60()
  dt=time()-lasttime
  lasttime=time()
+
+ mouse_pos.x=stat(32)
+ mouse_pos.y=stat(33)
 
  for p in all(layers) do
   p:update()
@@ -97,6 +107,7 @@ function _draw()
  frame+=1
 
  cls()
+ rectfill(mouse_pos.x-2,mouse_pos.y-2,mouse_pos.x+2,mouse_pos.y+2,7)
  for p in all(layers) do
   p:draw()
  end
