@@ -11,6 +11,10 @@
     slider code from w3schools.com - https://www.w3schools.com/howto/howto_js_rangeslider.asp
     -->
 
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
     <STYLE TYPE="text/css">
         <!--
         canvas#canvas {
@@ -119,46 +123,8 @@
             -ms-interpolation-mode: nearest-neighbor;
         }
 
-        .slidecontainer {
-            width: 100%; /* Width of the outside container */
-            clear: both;
-            display: block;
-        }
-
-        /* The slider itself */
-
         .slider {
-            -webkit-appearance: none; /* Override default CSS styles */
-            appearance: none;
-            width: 150px; /* Full-width */
-            height: 25px; /* Specified height */
-            background: #d3d3d3; /* Grey background */
-            outline: none; /* Remove outline */
-            opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
-            transition: opacity .2s;
-        }
-
-        /* Mouse-over effects */
-        .slider:hover {
-            opacity: 1; /* Fully shown on mouse-over */
-        }
-
-        /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none; /* Override default look */
-            appearance: none;
-            width: 25px; /* Set a specific slider handle width */
-            height: 25px; /* Slider handle height */
-            background: #4CAF50; /* Green background */
-            cursor: pointer; /* Cursor on hover */
-        }
-
-        .slider::-moz-range-thumb {
-            width: 25px; /* Set a specific slider handle width */
-            height: 25px; /* Slider handle height */
-            background: #4CAF50; /* Green background */
-            cursor: pointer; /* Cursor on hover */
+            width: 100px;
         }
 
         -->
@@ -170,18 +136,15 @@
 <!-- margins for chrome (defaults on 8) -->
 
 <div class="slidercontainer">
-    <div style="clear: left">
-        <input type="range" min="1" max="100" value="50" class="slider" id="myRange4">
-    </div>
-    <div style="clear: left">
-        <input type="range" min="1" max="100" value="50" class="slider" id="myRange3">
-    </div>
-    <div style="clear: left">
-        <input type="range" min="1" max="100" value="50" class="slider" id="myRange2">
-    </div>
-    <div style="clear: left">
-        <input type="range" min="1" max="100" value="50" class="slider" id="myRange1">
-    </div>
+
+    <button>A button element</button>
+
+    <table>
+        <tr>
+            <td>Value:</td>
+            <td><div class="slider" data-min="0" data-max="255" data-id="4"/></td>
+        </tr>
+    </table>
 </div>
 
 <div class="center">
@@ -235,6 +198,39 @@
 
 </body>
 </html>
+
+<script type="text/javascript">
+  // ===== pico8 gpio / slider code
+  var pico8_gpio = new Array(128);
+
+  $(function () {
+    $("button").button();
+    $("button").click(function (event) {
+      console.log("button event ", event, this);
+      event.preventDefault();
+    });
+    $(".slider").slider({
+      min: $(this).data("min"),
+      max: $(this).data("max"),
+      slide: function (event, ui) {
+        console.log($(this).data("id"), $(this).value);
+        pico8_gpio[$(this).data("id")] = $(this).slider("option", "value");
+      }
+    });
+  });
+
+  requestAnimationFrame(handleGpios);
+  pico8_gpio[0] = 1;
+
+  function handleGpios() {
+    if (pico8_gpio[0] === 1) {
+    } else {
+      // do nothing
+    }
+    requestAnimationFrame(handleGpios);
+  }
+
+</script>
 
 <script type="text/javascript">
 
@@ -313,27 +309,6 @@
       frame.requestFullscreen = frame.requestFullscreen || frame.mozRequestFullScreen || frame.webkitRequestFullScreen;
       frame.requestFullscreen();
     }
-  }
-
-  // ===== pico8 gpio / slider code
-
-  var sliders = document.getElementsByClassName("slider");
-  for (var i = 0; i < sliders.length; i++) {
-    sliders.item(i).oninput = function () {
-      pico8_gpio[3] = parseInt(this.value);
-    };
-  }
-
-  var pico8_gpio = new Array(128);
-  requestAnimationFrame(handleGpios);
-  pico8_gpio[0] = 1;
-
-  function handleGpios() {
-    if (pico8_gpio[0] === 1) {
-    } else {
-      // do nothing
-    }
-    requestAnimationFrame(handleGpios);
   }
 
   // ==========================================================================================
