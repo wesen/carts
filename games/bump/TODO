@@ -75,10 +75,10 @@
 -- x shrunk player can't seem to teleport
 -- kills by clones should go towards combo count
 -- x spawn shows wrong character sprite
+-- x avoid killing text going beyond screen boundaries
 
--- press start to start game
+-- x press start to start game
 -- fade across mode transitions
--- selector menu
 -- game end screen (kills or timer) -- restart game
 
 --- later later later later -----

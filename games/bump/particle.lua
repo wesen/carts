@@ -91,6 +91,7 @@ end)
 function cls_score_particle:update()
  self.t+=dt
  self.x+=self.spd_x+rnd(.1)
+ self.x=mid(rnd(5),self.x,128-rnd(5)-4*#self.val)
  self.y+=self.spd_y
  if (self.t>self.lifetime) del(particles,self)
 end
