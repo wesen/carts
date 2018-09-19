@@ -80,7 +80,7 @@
 -- x balloon pulling upwards
 
 --[[
- SFX:
+ sfx:
  00 jumping
 01 killing sound
 02 springboard
