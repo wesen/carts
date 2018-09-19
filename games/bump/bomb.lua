@@ -12,8 +12,8 @@ function make_blast(x,y,radius)
    yield()
   end
  end, draw_crs)
-  add_shake(5)
-    sfx(4)
+ add_shake(5)
+ sfx(4)
  for p in all(players) do
   if p.power_up!=spr_pwrup_invincibility then
    local dx=p.x-x
@@ -65,7 +65,6 @@ cls_bomb=subclass(cls_actor,function(self,player)
 end)
 
 function cls_bomb:update()
-
  if (rnd(1)<0.5) cls_fuse_particle.init(v2(self.x,self.y))
 
  self.time-=dt
@@ -92,7 +91,7 @@ function cls_bomb:update()
    if tile_flag_at_offset(self,flg_solid,0,1) then
     self.spd_y*=-0.8
    elseif tile_flag_at_offset(self,flg_solid,sign(self.spd_x),0) then
-    self.spd_x*=-0.9
+    self.spd_x*=-0.85
    end
   end
  elseif self.player.is_dead then
