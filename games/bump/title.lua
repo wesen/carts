@@ -5,7 +5,7 @@ title_dy=10
 title_ssx=11*8
 title_ssy=12*8
 
-function draw_title()
+function draw_title(s)
  cls()
  local f=flr(frame/6)%3
 
@@ -42,9 +42,14 @@ function draw_title()
  palt(0,true)
 
  fillp()
+ glitch_str(s)
+end
+
+function glitch_str(s)
  if (frame%10)<3 then
-  aberration_str("- pixelgore 2018 -",title_dx+5,title_dy+39)
-  aberration_str("- press space to start -",title_dx-7,title_dy+48)
+  aberration_str("- pixelgore 2018 -",title_dy+39)
+  aberration_str("- press space to start -",title_dy+48)
+  if (s!=nil) aberration_str(s,title_dy+96)
   for i=0,1 do
    draw_random_line(0,title_dx+15,title_dy+33,1)
    draw_random_line(7,title_dx+15,title_dy+33,1)
@@ -52,15 +57,25 @@ function draw_title()
    draw_random_line(8,title_dx+15,title_dy+33,1)
   end
  elseif (frame%10<8) then
-  print("- pixelgore 2018 -",title_dx+5,title_dy+39,7)
-  print("- press space to start -",title_dx-7,title_dy+48,7)
+  center_print("- pixelgore 2018 -",title_dy+39)
+  center_print("- press space to start -",title_dy+48)
+  if (s!=nil) center_print(s,title_dy+96)
  end
 end
 
-function aberration_str(s,x,y)
-  print(s,x+mrnd(2),y+mrnd(2)+1,12)
-  print(s,x+mrnd(2),y+mrnd(2),8)
-  print(s,x,y,7)
+function center_str_x(s)
+ return 64-(#s*4)/2
+end
+
+function center_print(s,y)
+ print(s,center_str_x(s),y,7)
+end
+
+function aberration_str(s,y)
+ local x=center_str_x(s)
+ print(s,x+mrnd(2),y+mrnd(2)+1,12)
+ print(s,x+mrnd(2),y+mrnd(2),8)
+ print(s,x,y,7)
 end
 
 function draw_title_frame1()

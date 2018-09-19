@@ -370,7 +370,7 @@ function cls_player:add_score(add)
   end
  end
 
- if mode==mode_title and scores[self.input_port+1]>win_threshold then
+ if mode==mode_game and scores[self.input_port+1]>win_threshold then
   winning_player=self.input_port+1
   end_game()
  end

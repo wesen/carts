@@ -18,7 +18,7 @@ function make_transition(mid_cb,end_cb)
    palt()
    yield()
   end
-  mid_cb()
+  if (mid_cb!=nil) mid_cb()
   for i=0,duration do
    palt(col,false)
    local radius=128-inexpo(i,0,128,duration)
@@ -26,7 +26,7 @@ function make_transition(mid_cb,end_cb)
    palt()
    yield()
   end
- end_cb()
+ if (end_cb!=nil) end_cb()
  end, draw_crs)
 end
 
@@ -56,15 +56,9 @@ function start_game()
 end
 
 function end_game()
-  add_cr(function()
-   for i=0,30 do
-    palt(0,false)
-    circfill(64,64,inexpo(i,0,80,30),8)
-    palt()
-    yield()
-   end
-   mode=mode_end
-  end, draw_crs)
+ make_transition(function()
+  mode=mode_end
+ end)
 end
 
 function is_space_pressed()
@@ -79,7 +73,6 @@ function _init()
  room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
  music(0)
- -- start_game()
 end
 
 function update_a(a) a:update() end
@@ -121,8 +114,16 @@ function _draw()
     end
    end
   else
-   rectfill(0,0,128,128,8)
-   bstr("player "..tostr(winning_player).." won!",38,64,7,1)
+   draw_title("player "..tostr(winning_player).." won!")
+   local _spr=start_sprites[winning_player]+flr(frame/8)%3
+   local sx=_spr%16*8
+   local sy=flr(_spr/16)*8
+   sspr(sx,sy,8,8,64-16,68,32,32)
+
+   if is_space_pressed() then
+    printh("restart game")
+    run()
+   end
   end
  end
 end
