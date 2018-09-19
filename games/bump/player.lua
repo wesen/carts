@@ -302,7 +302,7 @@ function cls_player:update_normal()
     kill_player=true
    else
     -- attack
-    local can_attack=not self.on_ground and self.spd_y>0
+    local can_attack=not self.on_ground
 
     if (do_bboxes_collide(self.feet_box,player.head_box) and can_attack)
        or do_bboxes_collide(self,player) then
