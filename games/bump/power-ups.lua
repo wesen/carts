@@ -105,7 +105,7 @@ powerup_countdowns[spr_pwrup_invisibility]=5
 
 spr_pwrup_shrink=139
 powerup_colors[spr_pwrup_shrink]={11,3,6,1}
-powerup_countdowns[spr_pwrup_shrink]=3
+powerup_countdowns[spr_pwrup_shrink]=10
 
 -- start offset for the item sprite values
 -- associate sprite value with class
@@ -118,13 +118,10 @@ tiles[spr_pwrup_superspeed]=cls_pwrup
 tiles[spr_pwrup_gravitytweak]=cls_pwrup
 
 power_up_tiles={
- -- spr_pwrup_doppelgaenger,
+ spr_pwrup_doppelgaenger,
  -- spr_pwrup_invisibility,
- -- spr_pwrup_invisibility,
- -- spr_pwrup_invisibility,
+ spr_pwrup_invisibility,
+ spr_pwrup_invisibility,
  spr_pwrup_shrink,
  spr_pwrup_shrink,
- spr_pwrup_shrink,
- spr_pwrup_shrink,
- spr_pwrup_shrink
 }

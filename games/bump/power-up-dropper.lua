@@ -1,6 +1,6 @@
 drop_min_time=60*4
 drop_max_time=60*10
-max_count=10
+max_count=2
 power_up_droppers={}
 
 cls_pwrup_dropper=subclass(cls_actor,function(self,pos)

@@ -87,3 +87,7 @@ end
 function cls_bomb:draw()
  spr(spr_bomb,self.x,self.y)
 end
+
+for i=0,4 do
+ add(power_up_tiles,spr_bomb)
+end
