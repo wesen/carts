@@ -21,15 +21,12 @@ function end_game()
     palt()
     yield()
    end
-   printh("mode end")
    mode=mode_end
   end, draw_crs)
 end
 
 function is_space_pressed()
- if stat(30) then
-  printh(tostr(stat(31)))
- end
+ return stat(30) and stat(31)==" "
 end
 
 function _init()
@@ -51,6 +48,9 @@ function _draw()
  cls()
  if mode==mode_title then
   draw_title()
+  if is_space_pressed() then
+   start_game()
+  end
  end
 
  if mode!=mode_end then

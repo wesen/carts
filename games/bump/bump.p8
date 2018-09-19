@@ -402,7 +402,25 @@ function draw_title()
  palt(0,true)
 
  fillp()
- print("- pixelgore 2018 -",title_dx+5,title_dy+40,7)
+ if (frame%10)<3 then
+  aberration_str("- pixelgore 2018 -",title_dx+5,title_dy+39)
+  aberration_str("- press space to start -",title_dx-7,title_dy+48)
+  for i=0,1 do
+   draw_random_line(0,title_dx+15,title_dy+33,1)
+   draw_random_line(7,title_dx+15,title_dy+33,1)
+   draw_random_line(12,title_dx+15,title_dy+33,1)
+   draw_random_line(8,title_dx+15,title_dy+33,1)
+  end
+ elseif (frame%10<8) then
+  print("- pixelgore 2018 -",title_dx+5,title_dy+39,7)
+  print("- press space to start -",title_dx-7,title_dy+48,7)
+ end
+end
+
+function aberration_str(s,x,y)
+  print(s,x+mrnd(2),y+mrnd(2)+1,12)
+  print(s,x+mrnd(2),y+mrnd(2),8)
+  print(s,x,y,7)
 end
 
 function draw_title_frame1()
@@ -414,11 +432,15 @@ function draw_title_frame1()
  sspr(title_ssx,title_ssy,title_w,title_h,title_dx,title_dy,title_w*2,2*title_h)
 end
 
-function draw_random_line(col)
- for i=0,5 do
+function draw_random_line(col,offx,offy,cnt)
+ if (offx==nil) offx=title_dx
+ if (offy==nil) offy=title_dy+10
+ if (cnt==nil) cnt=5
+
+ for i=0,cnt do
   palt(col,false)
-  local x=rnd(title_w+10)+title_dx
-  local y=rnd(title_h+5)+title_dy+10
+  local x=rnd(title_w+10)+offx
+  local y=rnd(title_h+5)+offy
   local w=rnd(10)
   line(x,y,x+w,y,col)
   palt()
@@ -1773,15 +1795,12 @@ function end_game()
     palt()
     yield()
    end
-   printh("mode end")
    mode=mode_end
   end, draw_crs)
 end
 
 function is_space_pressed()
- if stat(30) then
-  printh(tostr(stat(31)))
- end
+ return stat(30) and stat(31)==" "
 end
 
 function _init()
@@ -1803,6 +1822,9 @@ function _draw()
  cls()
  if mode==mode_title then
   draw_title()
+  if is_space_pressed() then
+   start_game()
+  end
  end
 
  if mode!=mode_end then

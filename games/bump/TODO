@@ -71,12 +71,14 @@
 -- x fix walking on top of head
 -- x number of player selector menu
 
--- title screen
--- credits screen
+-- x title screen
+-- x shrunk player can't seem to teleport
+-- spawn shows wrong character sprite
+
+-- press start to start game
+-- fade across mode transitions
 -- selector menu
 -- game end screen (kills or timer) -- restart game
-
--- shrunk player can't seem to teleport
 
 --- later later later later -----
 
