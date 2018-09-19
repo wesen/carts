@@ -369,6 +369,8 @@ function cls_player:add_score(add)
    cls_score_particle.init(v2(self.x,self.y),"triple kill",9,1)
   elseif combo_kills[nr]==4 then
    cls_score_particle.init(v2(self.x,self.y),"killing spree",8,7)
+   combo_kill_timer[nr]=0
+   combo_kills[nr]=0
   end
  end
 

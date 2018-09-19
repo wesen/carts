@@ -85,6 +85,7 @@
 -- x proper transition and end of game handling
 -- x spawn locations don't seem to be reset correctly when loading the actual level
 -- x game end screen (kills or timer) -- restart game
+-- x combo kills stop after winning state (?)
 
 --- later later later later -----
 
