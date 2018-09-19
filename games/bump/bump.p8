@@ -1338,7 +1338,7 @@ spr_tele_exit=200
 tele_exits={}
 
 cls_tele_enter=subclass(cls_interactable,function(self,pos)
- cls_interactable._ctr(self,pos.x,pos.y,4,4,1,1)
+ cls_interactable._ctr(self,pos.x,pos.y,4,4,1,4)
 end)
 tiles[spr_tele_enter]=cls_tele_enter
 
