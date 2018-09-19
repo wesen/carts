@@ -1352,7 +1352,7 @@ function cls_spawn:cr_spawn()
 end
 
 function cls_spawn:draw()
- spr(spr_spawn_point,self.x,self.y)
+ spr(start_sprites[self.input_port+1],self.x,self.y)
 end
 
 spr_spikes=68
