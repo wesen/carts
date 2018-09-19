@@ -555,7 +555,7 @@ function cls_actor:move_x(amount)
    local solid=solid_at_offset(self,step,0)
    local actor=self:is_actor_at(step,0)
 
-   printh("self.x "..tostr(self.x).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+   -- printh("self.x "..tostr(self.x).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
 
    if solid or actor then
     if abs(step)<0.1 then
@@ -587,9 +587,8 @@ function cls_actor:move_y(amount)
    local solid=solid_at_offset(self,0,step)
    local actor,a=self:is_actor_at(0,step)
 
-   printh(tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
-   printh(tostr(self.name).." aabb "..tostr(self.aax)..","..tostr(self.aay)..
-   "-"..tostr(self.bbx)..","..tostr(self.bby))
+   -- printh(tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+   -- printh(tostr(self.name).." aabb "..tostr(self.aax)..","..tostr(self.aay).. "-"..tostr(self.bbx)..","..tostr(self.bby))
 
    if solid or actor then
     if abs(step)<0.1 then
@@ -1230,7 +1229,7 @@ function cls_player:update_normal()
      cls_smoke.init(v2(self.x,self.y),32,0)
      if player.input_port==self.input_port then
       -- killed a doppelgaenger
-      -- scores[self.input_port+1]-=1
+      self:add_score(0)
      else
       self:add_score(1)
      end
@@ -1262,16 +1261,18 @@ end
 
 function cls_player:add_score(add)
  scores[self.input_port+1]+=add
- self.combo_kill_timer=3
- self.combo_kills+=1
- if self.combo_kills==1 then
-  cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]),1,7)
- elseif self.combo_kills==2 then
-  cls_score_particle.init(v2(self.x,self.y),"double kill",10,1)
- elseif self.combo_kills==3 then
-  cls_score_particle.init(v2(self.x,self.y),"triple kill",9,1)
- elseif self.combo_kills==4 then
-  cls_score_particle.init(v2(self.x,self.y),"killing spree",8,7)
+ if add>=0 then
+  self.combo_kill_timer=3
+  self.combo_kills+=1
+  if self.combo_kills==1 then
+   cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]),1,7)
+  elseif self.combo_kills==2 then
+   cls_score_particle.init(v2(self.x,self.y),"double kill",10,1)
+  elseif self.combo_kills==3 then
+   cls_score_particle.init(v2(self.x,self.y),"triple kill",9,1)
+  elseif self.combo_kills==4 then
+   cls_score_particle.init(v2(self.x,self.y),"killing spree",8,7)
+  end
  end
 
  if scores[self.input_port+1]>win_threshold then
