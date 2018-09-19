@@ -1,6 +1,0 @@
---2018-09-18 19:41:17--  https://media.discordapp.net/attachments/487936988448686110/491686987934334986/bump1.png?width=116
-Resolving media.discordapp.net... 104.16.249.144, 104.16.251.144, 104.16.250.144, ...
-Connecting to media.discordapp.net|104.16.249.144|:443... connected.
-HTTP request sent, awaiting response... 400 Bad Request
-2018-09-18 19:41:17 ERROR 400: Bad Request.
-

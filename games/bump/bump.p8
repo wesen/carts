@@ -1759,124 +1759,13 @@ function fireflies_init(v)
  end
 end
 
-
--- x split into actors / particles / interactables
--- x gravity
--- x downward collision
--- x wall slide
--- x add wall slide smoko
--- x fall down faster
--- x wall jump
--- x variable jump time
--- x test controller input
--- x add ice
--- x springs
--- x wall sliding on ice
--- x player spawn points
--- x spikes
--- x respawn player after death
--- x add ease in for spawn point
--- x add coroutine for spawn point
--- x slippage when changing directions
--- x flip smoke correctly when wall sliding
--- x particles with sprites
--- x add gore particles and gored up tiles
--- x add gore on vertical surfaces
--- x make gore slippery
--- x add gore when dying
--- x vanishing platforms
--- x add second player
--- x add multiple players / spawn points
--- x add death mechanics
--- x add score
--- x camera shake
--- x doppelgangers
--- x remove typ code
--- x bullet time on kill
-
--- x invincibility
--- x blast mine
--- x superspeed
--- x superjump
--- x gravity tweak
--- x suicide bomber
--- x invisibility
--- x bomb
--- x miniature mode
--- x have players join when pressing action
--- x balloon pulling upwards
-
---[[
- sfx:
- 00 jumping
-01 killing sound
-02 springboard
-03 power up
-04 explosion
-]]
-
--- x prettier score display
--- x pretty pass
-
--- x powerups - item dropper
--- x refactor powerups to have a decent api
--- x visualize power ups
--- x different sprites for different players
-
--- x multiple players
--- x random player spawns
--- x player collision
--- x player kill
--- x player colors
-
--- x fix collision bug
--- x fix walking on top of head
--- x number of player selector menu
-
--- title screen
--- credits screen
--- selector menu
--- game end screen (kills or timer) -- restart game
-
--- shrunk player can't seem to teleport
-
---- later later later later -----
-
--- double jump
--- dash
--- meteors
--- flamethrower
--- bullet time
--- whip
--- jetpack
--- lasers
--- gun
--- rope
--- level design
-
--- go through right and come back left (?)
-
--- make player selection screen
-
--- moving platforms
--- laser beam
--- add water
--- add butterflies
--- add flies
--- lookup / lookdown sprites
--- add trailing smoke particles when springing up
-
--- fades
--- better kill animations
--- x restore ghosts / particles on player
--- x decrease score when dying on spikes
 winning_player=nil
 
 mode_title=0
 mode_game=1
 mode_end=2
 
-mode=mode_game
+mode=mode_title
 
 function _init()
  room=cls_room.init(v2(0,16),v2(16,16))
@@ -1884,7 +1773,7 @@ function _init()
  room:spawn_player(p2_input)
  -- room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
- -- music(0)
+ music(0)
 end
 
 function update_a(a) a:update() end
@@ -2256,8 +2145,11 @@ __sfx__
 01050000292302a321270102701029230293102a0102a01026230273212901029010292302932026010270112623027321290102901024230243201840024400224001f40024410245101f20024200222001f200
 01050000292302a321270102701029230293102a0102a010262302732129010290102b2302b32026010270112f230303212b0102b010000000000030410305100000000000000000000030410305100000000000
 01050000283302933129310293202b3302b40027400244002733024400224001f4002433024400224001f40021330223312231022320223122242222332224322333024331243122432224312244222433224412
+01050000000000000000000000002f510305112e5100000030510000002e510005002a5102b5112b5122b51530510000002e51000000305100050029510000002a5102b5112b5122b5122951224512225111a511
+01050000000000000000000000002f510305112e5100000030510000002e510005002a5102b5112b5122b51530510000002e51000000305100050033510000002f51030511305123051230512305122e51126511
+01050000000000000000000000002f510305112e5100000030510000002e510005002a5102b5112b512265113251033511335123251131512325113251231511305103151131512315112f510305112b51125511
 __music__
-01 41050d44
+00 41050d44
 00 41060c44
 00 41050d44
 00 41060c44
@@ -2265,13 +2157,13 @@ __music__
 00 41070c44
 00 41050d44
 00 41070c44
-00 41050b11
+01 41050b11
 00 41060c12
 00 41050b13
 00 41060c14
-00 41050b44
+00 41050b1c
 00 41070c19
-00 41050b44
+00 41050b1d
 00 41070c1a
 00 41080e16
 00 41090f17
@@ -2280,5 +2172,12 @@ __music__
 00 41080e16
 00 41090f17
 00 41080e15
-02 410a101b
-
+00 410a101b
+00 41050d1c
+00 41060c44
+00 41050d1d
+00 41060c44
+00 41050d1c
+00 41060c1d
+00 41050d1c
+02 41060c1e
