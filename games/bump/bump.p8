@@ -1002,11 +1002,6 @@ function cls_player:update_normal()
  local on_ground_recently=self.on_ground_interval>0
 
 
- if solid then
- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
-  foobar="a"..nil
- end
-
  if not self.on_ground then
   accel=in_air_accel
   decel=in_air_decel
@@ -1129,7 +1124,7 @@ function cls_player:update_normal()
     kill_player=true
    else
     -- attack
-    local can_attack=not self.on_ground and self.spd_y>0
+    local can_attack=not self.on_ground
 
     if (do_bboxes_collide(self.feet_box,player.head_box) and can_attack)
        or do_bboxes_collide(self,player) then
@@ -1162,6 +1157,17 @@ function cls_player:update_normal()
   end
  end
 
+ local solid=solid_at_offset(self,0,0)
+ local actor,a=self:is_actor_at(0,0)
+ if actor or solid then
+  -- we're still solid, even though we shouldn't
+  -- to avoid having the player stuck, we're just gonna kill him
+  self:kill()
+  sfx(1)
+ -- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+ --  foobar="a"..nil
+ end
+
  for a in all(interactables) do
   if (do_bboxes_collide(self,a)) a:on_player_collision(self)
  end
@@ -1172,7 +1178,7 @@ end
 
 function cls_player:add_score(add)
  scores[self.input_port+1]+=add
- self.combo_kill_timer=2
+ self.combo_kill_timer=3
  self.combo_kills+=1
  if self.combo_kills==1 then
   cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]),1,7)
@@ -1384,7 +1390,7 @@ end
 
 drop_min_time=60*4
 drop_max_time=60*10
-max_count=10
+max_count=2
 power_up_droppers={}
 
 cls_pwrup_dropper=subclass(cls_actor,function(self,pos)
@@ -1546,7 +1552,7 @@ powerup_countdowns[spr_pwrup_invisibility]=5
 
 spr_pwrup_shrink=139
 powerup_colors[spr_pwrup_shrink]={11,3,6,1}
-powerup_countdowns[spr_pwrup_shrink]=3
+powerup_countdowns[spr_pwrup_shrink]=10
 
 -- start offset for the item sprite values
 -- associate sprite value with class
@@ -1559,15 +1565,12 @@ tiles[spr_pwrup_superspeed]=cls_pwrup
 tiles[spr_pwrup_gravitytweak]=cls_pwrup
 
 power_up_tiles={
- -- spr_pwrup_doppelgaenger,
+ spr_pwrup_doppelgaenger,
  -- spr_pwrup_invisibility,
- -- spr_pwrup_invisibility,
- -- spr_pwrup_invisibility,
+ spr_pwrup_invisibility,
+ spr_pwrup_invisibility,
  spr_pwrup_shrink,
  spr_pwrup_shrink,
- spr_pwrup_shrink,
- spr_pwrup_shrink,
- spr_pwrup_shrink
 }
 
 spr_mine=69
@@ -1756,6 +1759,10 @@ function cls_bomb:draw()
  spr(spr_bomb,self.x,self.y)
 end
 
+for i=0,4 do
+ add(power_up_tiles,spr_bomb)
+end
+
 
 fireflies={}
 
@@ -1851,6 +1858,40 @@ end
 04 explosion
 ]]
 
+
+-- x fix collision bug
+-- x 
+-- number of player selector menu
+-- title screen
+-- game end screen (kills or timer)
+-- x prettier score display
+-- x pretty pass
+
+-- x powerups - item dropper
+-- x refactor powerups to have a decent api
+-- x visualize power ups
+-- x different sprites for different players
+
+-- x multiple players
+-- x random player spawns
+-- x player collision
+-- x player kill
+-- x player colors
+
+-- double jump
+-- dash
+-- meteors
+-- flamethrower
+-- bullet time
+-- whip
+-- jetpack
+-- lasers
+-- gun
+-- rope
+-- level design
+
+-- go through right and come back left (?)
+
 -- make player selection screen
 
 -- moving platforms
@@ -1865,37 +1906,6 @@ end
 -- better kill animations
 -- x restore ghosts / particles on player
 -- x decrease score when dying on spikes
-
--- number of player selector menu
--- title screen
--- game end screen (kills or timer)
--- x prettier score display
--- x pretty pass
-
--- x powerups - item dropper
--- x refactor powerups to have a decent api
--- x visualize power ups
--- x different sprites for different players
--- double jump
--- dash
--- meteors
--- flamethrower
--- bullet time
--- whip
--- jetpack
--- lasers
--- gun
--- rope
--- level design
-
--- x multiple players
--- x random player spawns
--- x player collision
--- x player kill
--- x player colors
-
--- go through right and come back left (?)
-
 winning_player=nil
 
 function _init()

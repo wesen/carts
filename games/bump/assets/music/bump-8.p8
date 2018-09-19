@@ -1670,13 +1670,9 @@ function cls_bomb:draw()
  spr(spr_bomb,self.x,self.y)
 end
 
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-
+for i=0,4 do
+ add(power_up_tiles,spr_bomb)
+end
 
 fireflies={}
 
@@ -2172,4 +2168,3 @@ __music__
 00 41090f17
 00 41080e15
 02 410a101b
-

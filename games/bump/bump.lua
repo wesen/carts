@@ -88,6 +88,40 @@
 04 explosion
 ]]
 
+
+-- x fix collision bug
+-- x 
+-- number of player selector menu
+-- title screen
+-- game end screen (kills or timer)
+-- x prettier score display
+-- x pretty pass
+
+-- x powerups - item dropper
+-- x refactor powerups to have a decent api
+-- x visualize power ups
+-- x different sprites for different players
+
+-- x multiple players
+-- x random player spawns
+-- x player collision
+-- x player kill
+-- x player colors
+
+-- double jump
+-- dash
+-- meteors
+-- flamethrower
+-- bullet time
+-- whip
+-- jetpack
+-- lasers
+-- gun
+-- rope
+-- level design
+
+-- go through right and come back left (?)
+
 -- make player selection screen
 
 -- moving platforms
@@ -102,35 +136,4 @@
 -- better kill animations
 -- x restore ghosts / particles on player
 -- x decrease score when dying on spikes
-
--- number of player selector menu
--- title screen
--- game end screen (kills or timer)
--- x prettier score display
--- x pretty pass
-
--- x powerups - item dropper
--- x refactor powerups to have a decent api
--- x visualize power ups
--- x different sprites for different players
--- double jump
--- dash
--- meteors
--- flamethrower
--- bullet time
--- whip
--- jetpack
--- lasers
--- gun
--- rope
--- level design
-
--- x multiple players
--- x random player spawns
--- x player collision
--- x player kill
--- x player colors
-
--- go through right and come back left (?)
-
 --#include main
