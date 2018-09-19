@@ -56,7 +56,7 @@ function start_game()
 end
 
 function end_game()
- make_transition(function()
+ make_transition(nil,function()
   mode=mode_end
  end)
 end

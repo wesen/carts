@@ -78,6 +78,7 @@
 -- x when picking up 2 bombs, they can get stuck on each other
 -- kills by clones should go towards combo count
 -- players killed by bomb should count towards score
+-- horizontal bomb friction is way too low
 
 -- x press start to start game
 -- x fade across start transitions

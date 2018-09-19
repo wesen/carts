@@ -387,7 +387,7 @@ end
 
 function cls_player:draw()
  if self.is_bullet_time then
-  rectfill(0,0,128,128,8)
+  rectfill(0,0,128,128,7)
   return
  end
  if not self.is_teleporting then

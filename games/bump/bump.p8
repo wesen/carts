@@ -1281,7 +1281,7 @@ end
 
 function cls_player:draw()
  if self.is_bullet_time then
-  rectfill(0,0,128,128,8)
+  rectfill(0,0,128,128,7)
   return
  end
  if not self.is_teleporting then
@@ -1846,7 +1846,7 @@ function start_game()
 end
 
 function end_game()
- make_transition(function()
+ make_transition(nil,function()
   mode=mode_end
  end)
 end
