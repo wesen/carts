@@ -8,10 +8,26 @@ mode=mode_title
 
 function start_game()
  room=cls_room.init(v2(0,16),v2(16,16))
+ for i=1,4 do
+  scores[i]=0
+ end
+end
+
+function end_game()
+  add_cr(function()
+   for i=0,30 do
+    palt(0,false)
+    circfill(64,64,inexpo(i,0,80,30),8)
+    palt()
+    yield()
+   end
+   printh("mode end")
+   mode=mode_end
+  end, draw_crs)
 end
 
 function _init()
- room=cls_room.init(v2(0,16),v2(16,16))
+ room=cls_room.init(v2(0,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
  -- room:spawn_player(p3_input)
@@ -25,10 +41,12 @@ function draw_a(a) a:draw() end
 function _draw()
  frame+=1
 
+ cls()
  if mode==mode_title then
   draw_title()
- elseif mode==mode_game then
- cls()
+ end
+
+ if mode!=mode_end then
   camera(camera_shake.x,camera_shake.y)
   room:draw()
   foreach(interactables, draw_a)
@@ -36,13 +54,11 @@ function _draw()
   foreach(static_objects, draw_a)
   draw_actors()
 
-   tick_crs(draw_crs)
+  tick_crs(draw_crs)
+  fireflies_draw()
+  foreach(particles, draw_a)
 
-  if winning_player==nil then
-   tick_crs(draw_crs)
-   fireflies_draw()
-   foreach(particles, draw_a)
-
+  if mode==mode_game then
    local entry_length=30
    for i=0,#scores-1,1 do
     print(
@@ -51,6 +67,9 @@ function _draw()
     )
    end
   end
+ else
+  rectfill(0,0,128,128,8)
+  bstr("player "..tostr(winning_player).." won!",38,64,7,1)
  end
 end
 

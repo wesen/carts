@@ -360,7 +360,7 @@ function cls_player:add_score(add)
   self.combo_kill_timer=3
   self.combo_kills+=1
   if self.combo_kills==1 then
-   cls_score_particle.init(v2(self.x,self.y),tostr(scores[self.input_port+1]),1,7)
+   cls_score_particle.init(v2(self.x,self.y),"kill",1,7)
   elseif self.combo_kills==2 then
    cls_score_particle.init(v2(self.x,self.y),"double kill",10,1)
   elseif self.combo_kills==3 then
@@ -370,21 +370,9 @@ function cls_player:add_score(add)
   end
  end
 
- if scores[self.input_port+1]>win_threshold then
+ if mode==mode_title and scores[self.input_port+1]>win_threshold then
   winning_player=self.input_port+1
-  add_cr(function()
-   for i=0,30 do
-    palt(0,false)
-    circfill(64,64,inexpo(i,0,80,30),8)
-    palt()
-    yield()
-   end
-   while true do
-    rectfill(0,0,128,128,8)
-    bstr("player "..tostr(winning_player).." won!",38,64,7,1)
-    yield()
-   end
-  end, draw_crs)
+  end_game()
  end
 end
 
