@@ -76,11 +76,11 @@ function cls_bomb:update()
 
  if self.is_thrown then
   local solid=solid_at_offset(self,0,0)
-  if not self.is_solid and not solid then
+  local actor,a=self:is_actor_at(0,0)
+  if not self.is_solid and not solid and not actor then
    -- avoid a bomb getting stuck on a wall when thrown
    self.is_solid=true
   end
-  local actor,a=self:is_actor_at(0,0)
 
   local gravity=0.12
   local maxfall=2
