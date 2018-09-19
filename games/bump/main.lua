@@ -9,33 +9,26 @@ function _init()
  music(0)
 end
 
+function update_a(a) a:update() end
+function draw_a(a) a:draw() end
+
 function _draw()
  frame+=1
 
  cls()
+ camera(camera_shake.x,camera_shake.y)
+ room:draw()
+ foreach(interactables, draw_a)
+ foreach(environments, draw_a)
+ foreach(static_objects, draw_a)
+ draw_actors()
 
-  camera(camera_shake.x,camera_shake.y)
-  room:draw()
-  for a in all(interactables) do
-   a:draw()
-  end
-  for a in all(environments) do
-   a:draw()
-  end
-  for a in all(static_objects) do
-   a:draw()
-  end
-  draw_actors()
-
- if winning_player!=nil then
   tick_crs(draw_crs)
- else
+
+ if winning_player==nil then
   tick_crs(draw_crs)
   fireflies_draw()
-
-  for a in all(particles) do
-   a:draw()
-  end
+  foreach(particles, draw_a)
 
   local entry_length=30
   for i=0,#scores-1,1 do
@@ -45,9 +38,6 @@ function _draw()
    )
   end
  end
-
- -- print(tostr(stat(1)).." actors "..tostr(#actors),0,8,7)
- -- print(tostr(stat(1)/#particles).." particles "..tostr(#particles),0,16,7)
 end
 
 function _update60()
@@ -56,20 +46,12 @@ function _update60()
 
  check_for_new_players()
 
- for a in all(actors) do
-  a:update_bbox()
- end
+ for a in all(actors) do a:update_bbox() end
  tick_crs()
- foreach(environments, function(a)
-  a:update()
- end)
+ foreach(environments, update_a)
  update_actors()
- foreach(particles, function(a)
-  a:update()
- end)
- foreach(interactables, function(a)
-  a:update()
- end)
+ foreach(particles, update_a)
+ foreach(interactables, update_a)
  update_shake()
 
  fireflies_update()

@@ -88,12 +88,6 @@
 04 explosion
 ]]
 
-
--- x fix collision bug
--- x 
--- number of player selector menu
--- title screen
--- game end screen (kills or timer)
 -- x prettier score display
 -- x pretty pass
 
@@ -107,6 +101,19 @@
 -- x player collision
 -- x player kill
 -- x player colors
+
+-- x fix collision bug
+-- x fix walking on top of head
+-- x number of player selector menu
+
+-- title screen
+-- credits screen
+-- selector menu
+-- game end screen (kills or timer) -- restart game
+
+-- shrunk player can't seem to teleport
+
+--- later later later later -----
 
 -- double jump
 -- dash
