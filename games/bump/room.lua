@@ -43,6 +43,13 @@ function cls_room:spawn_player(input_port)
  return spawn
 end
 
+function is_outside_room(bbox)
+ return (bbox.aax<0
+   or bbox.bbx>room.bbx
+   or bbox.aay<0
+   or bbox.bby>room.bby)
+end
+
 function solid_at_offset(bbox,x,y)
  if bbox.aax+x<0
   or bbox.bbx+x>room.bbx

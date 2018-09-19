@@ -47,7 +47,7 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
 end)
 
 function cls_player:update_bbox()
- if self.power_up_type!=spr_pwrup_shrink then
+ if self.power_up_type!=spr_pwrup_shrink and not (solid or actor) then
   cls_actor.update_bbox(self)
   self.head_box={
     aax=self.x+0,
@@ -62,26 +62,38 @@ function cls_player:update_bbox()
    }
   self.feet_box.bbx=self.feet_box.aax+4
   self.feet_box.bby=self.feet_box.aay+1
+
+  -- we should actually never collide at the start of the frame
+  -- if we are, use the small hitbox
+  local solid=solid_at_offset(self,0,0)
+  local actor,a=self:is_actor_at(0,0)
+  if actor or solid then
+   self:update_shrunk_bbox()
+  end
  else
-  self.aax=self.x+3
-  self.aay=self.y+4.5
-  self.bbx=self.aax+3
-  self.bby=self.aay+3.5
-
-  self.head_box={
-    aax=self.x+2,
-    aay=self.y+5
-   }
-  self.head_box.bbx=self.head_box.aax+4
-  self.head_box.bby=self.head_box.aay+1
-
-  self.feet_box={
-    aax=self.x+2,
-    aay=self.y+7
-   }
-  self.feet_box.bbx=self.feet_box.aax+4
-  self.feet_box.bby=self.feet_box.aay+1
+  self:update_shrunk_bbox()
  end
+end
+
+function cls_player:update_shrunk_bbox()
+ self.aax=self.x+3
+ self.aay=self.y+4.5
+ self.bbx=self.aax+3
+ self.bby=self.aay+3.5
+
+ self.head_box={
+   aax=self.x+2,
+   aay=self.y+5
+  }
+ self.head_box.bbx=self.head_box.aax+4
+ self.head_box.bby=self.head_box.aay+1
+
+ self.feet_box={
+   aax=self.x+2,
+   aay=self.y+7
+  }
+ self.feet_box.bbx=self.feet_box.aax+4
+ self.feet_box.bby=self.feet_box.aay+1
 end
 
 function cls_player:smoke(spr,dir)
@@ -107,13 +119,17 @@ function cls_player:kill()
 end
 
 function cls_player:update()
- if self.is_teleporting or self.is_bullet_time then
+ if is_outside_room(self) then
+  self:kill()
+  sfx(1)
+ elseif self.is_teleporting or self.is_bullet_time then
  else
   self:update_normal()
  end
 end
 
 function cls_player:update_normal()
+
  if self.combo_kill_timer>0 then
   self.combo_kill_timer-=dt
  else
@@ -163,12 +179,10 @@ function cls_player:update_normal()
  end
  local on_ground_recently=self.on_ground_interval>0
 
- local solid=solid_at_offset(self,0,0)
- local actor,a=self:is_actor_at(0,0)
 
  if solid then
- -- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
- --  foobar="a"..nil
+ printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
+  foobar="a"..nil
  end
 
  if not self.on_ground then
@@ -330,9 +344,8 @@ function cls_player:update_normal()
   if (do_bboxes_collide(self,a)) a:on_player_collision(self)
  end
 
-
-if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
-if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
+ if (not self.on_ground and frame%2==0) insert(self.ghosts,{x=self.x,y=self.y})
+ if ((self.on_ground or #self.ghosts>6)) popend(self.ghosts)
 end
 
 function cls_player:add_score(add)

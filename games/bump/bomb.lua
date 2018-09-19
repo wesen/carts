@@ -87,7 +87,3 @@ end
 function cls_bomb:draw()
  spr(spr_bomb,self.x,self.y)
 end
-
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
-add(power_up_tiles,spr_bomb)
