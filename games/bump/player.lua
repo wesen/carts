@@ -410,11 +410,7 @@ function cls_player:draw()
   end
   pal()
 
-  if powerup_colors[self.power_up_type]!=nil then
-   bspr(self.spr,self.x,self.y,self.flip.x,self.flip.y,powerup_colors[self.power_up_type])
-  else
-   spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
-  end
+  spr(self.spr,self.x,self.y,1,1,self.flip.x,self.flip.y)
 
   --[[
   local bbox=self:bbox()
