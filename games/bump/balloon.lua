@@ -43,3 +43,8 @@ function cls_balloon:draw()
   line(self.player.x+4,self.player.y,self.x+4,self.y+7,7)
  end
 end
+
+
+for i=0,5 do
+ add(power_up_tiles,spr_balloon)
+end

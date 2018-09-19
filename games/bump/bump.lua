@@ -29,8 +29,6 @@
 --#include teleporter
 --#include power-up-dropper
 --#include power-ups
---#include mine
---#include balloon
 --#include bomb
 
 --#include fireflies

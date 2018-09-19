@@ -4,6 +4,30 @@ cls_bomb_pwrup=subclass(cls_pwrup,function(self,pos)
 end)
 tiles[spr_bomb]=cls_bomb_pwrup
 
+function make_blast(x,y,radius)
+ add_cr(function ()
+  for i=0,20 do
+   local r=outexpo(i,radius,-radius,20)
+   circfill(x+4,y+6,r,7)
+   yield()
+  end
+ end, draw_crs)
+  add_shake(5)
+    sfx(4)
+ for p in all(players) do
+  if p.power_up!=spr_pwrup_invincibility then
+   local dx=p.x-x
+   local dy=p.y-y
+   local d=sqrt(dx*dx+dy*dy)
+   if d<radius then
+    p:add_score(-1)
+    p:kill()
+    make_gore_explosion(v2(p.x,p.y))
+   end
+  end
+ end
+end
+
 function cls_bomb_pwrup:on_powerup_start(player)
  local bomb=cls_bomb.init(player)
 end

@@ -4,7 +4,7 @@ mode_title=0
 mode_game=1
 mode_end=2
 
-mode=mode_title
+mode=mode_game
 
 function _init()
  room=cls_room.init(v2(0,16),v2(16,16))
