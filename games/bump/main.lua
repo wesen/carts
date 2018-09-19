@@ -8,9 +8,15 @@ mode=mode_title
 
 function start_game()
  room=cls_room.init(v2(0,16),v2(16,16))
+ for p in all(players) do
+  del(players,p)
+  del(actors,p)
+  room:spawn_player(p.input_port)
+ end
  for i=1,4 do
   scores[i]=0
  end
+ mode=mode_game
 end
 
 function end_game()
@@ -34,7 +40,7 @@ function _init()
  room=cls_room.init(v2(0,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
- -- room:spawn_player(p3_input)
+ room:spawn_player(p3_input)
  fireflies_init(v2(16,16))
  music(0)
 end
