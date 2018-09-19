@@ -1,6 +1,6 @@
 title_w=5*8
 title_h=2*8
-title_dx=20
+title_dx=25
 title_dy=10
 title_ssx=11*8
 title_ssy=12*8
@@ -40,6 +40,9 @@ function draw_title()
  end
 
  palt(0,true)
+
+ fillp()
+ print("- pixelgore 2018 -",title_dx+5,title_dy+40,7)
 end
 
 function draw_title_frame1()

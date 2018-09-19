@@ -360,7 +360,7 @@ end
 
 title_w=5*8
 title_h=2*8
-title_dx=20
+title_dx=25
 title_dy=10
 title_ssx=11*8
 title_ssy=12*8
@@ -400,6 +400,9 @@ function draw_title()
  end
 
  palt(0,true)
+
+ fillp()
+ print("- pixelgore 2018 -",title_dx+5,title_dy+40,7)
 end
 
 function draw_title_frame1()
@@ -1766,6 +1769,10 @@ mode_game=1
 mode_end=2
 
 mode=mode_title
+
+function start_game()
+ room=cls_room.init(v2(0,16),v2(16,16))
+end
 
 function _init()
  room=cls_room.init(v2(0,16),v2(16,16))
