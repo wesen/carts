@@ -15,6 +15,14 @@
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rete@1.0.0-alpha.9/build/rete.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rete-vue-render-plugin@0.2.0/build/vue-render-plugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rete-connection-plugin@0.1.2/build/connection-plugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alight@0.14.1/alight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rete-context-menu-plugin@0.1.4/build/context-menu-plugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rete-area-plugin@0.1.5/build/area-plugin.min.js"></script>
+
     <STYLE TYPE="text/css">
         <!--
         canvas#canvas {
@@ -130,22 +138,16 @@
         -->
     </STYLE>
 
+
+
+
 </head>
 
 <body bgcolor=#5F574F style="height:100%;border:0px;overflow:hidden;" leftmargin=0 topmargin=0>
 <!-- margins for chrome (defaults on 8) -->
 
-<div class="slidercontainer">
+<div id="rete" class="node-editor"></div>
 
-    <button>A button element</button>
-
-    <table>
-        <tr>
-            <td>Value:</td>
-            <td><div class="slider" data-min="0" data-max="255" data-id="4"/></td>
-        </tr>
-    </table>
-</div>
 
 <div class="center">
     <div id="plate" class=plate oncontextmenu="return false;">
@@ -196,28 +198,10 @@
     </div>
 </div>
 
-</body>
-</html>
-
 <script type="text/javascript">
   // ===== pico8 gpio / slider code
   var pico8_gpio = new Array(128);
 
-  $(function () {
-    $("button").button();
-    $("button").click(function (event) {
-      console.log("button event ", event, this);
-      event.preventDefault();
-    });
-    $(".slider").slider({
-      min: $(this).data("min"),
-      max: $(this).data("max"),
-      slide: function (event, ui) {
-        console.log($(this).data("id"), $(this).value);
-        pico8_gpio[$(this).data("id")] = $(this).slider("option", "value");
-      }
-    });
-  });
 
   requestAnimationFrame(handleGpios);
   pico8_gpio[0] = 1;
@@ -231,6 +215,10 @@
   }
 
 </script>
+
+<script src="main.js"></script>
+</body>
+</html>
 
 <script type="text/javascript">
 

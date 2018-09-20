@@ -78,15 +78,13 @@ function _init()
  dust_layer.default_damping=0.8
  add(layers,dust_layer)
  blast_layer.emit_cb=function(p)
-  printh("blast p "..tostr(p.x)..","..tostr(p.y))
   for i=0,5 do
    local _p=dust_layer:emit(p.x,p.y)
-  printh("emit _p "..tostr(_p.x)..","..tostr(_p.y))
   end
  end
 end
 
-function _update()
+function _update60()
  dt=time()-lasttime
  lasttime=time()
 
@@ -102,4 +100,6 @@ function _draw()
  for p in all(layers) do
   p:draw()
  end
+
+ print(tostr(stat(1)),0, 110,7)
 end
