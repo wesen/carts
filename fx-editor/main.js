@@ -3,6 +3,79 @@ console.log("foobar");
 
 // ------- pico8
 
+const RPC_TYPE_HELLO_WORLD = 0;
+
+class RPCCall {
+  constructor(type, args, callback) {
+    this.type = type;
+    this.args = args;
+    this.callback = callback;
+  }
+
+  fillGpio() {
+    pico8_gpio[1] = this.type;
+    pico8_gpio[2] = this.args.length;
+    for (var i = 0; i < this.args.length; i++) {
+      pico8_gpio[3 + i] = this.args[i];
+    }
+  }
+}
+
+var rpcCalls = [];
+
+function doRpcCall(type, args, callback) {
+  rpcCalls.push(new RPCCall(type, args, callback));
+}
+
+const GPIO_DISPATCH_IDLE = 1;
+const GPIO_DISPATCH_RPC_CALL = 0;
+const GPIO_DISPATCH_RPC_RESPONSE = 2;
+
+pico8_gpio[0] = GPIO_DISPATCH_IDLE;
+
+function handleGpios() {
+  var rpcCall = undefined;
+
+  switch (pico8_gpio[0]) {
+    case GPIO_DISPATCH_IDLE:
+      // gpios are ours to use
+      if (rpcCalls.length > 0) {
+        rpcCall = rpcCalls[0];
+        rpcCall.fillGpio();
+        pico8_gpio[0] = GPIO_DISPATCH_RPC_CALL;
+      }
+      break;
+
+    case GPIO_DISPATCH_RPC_RESPONSE:
+      // RPC call response
+      if (rpcCalls.length > 0) {
+        rpcCall = rpcCalls.shift();
+        var argsLength = pico8_gpio[1];
+        var vals = []
+        for (var i = 0; i < argsLength; i++) {
+          vals.push(pico8_gpio[2 + i]);
+        }
+        if (rpcCall.callback !== undefined) {
+          rpcCall.callback(vals)
+        }
+        pico8_gpio[0] = GPIO_DISPATCH_IDLE;
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  requestAnimationFrame(handleGpios);
+}
+
+requestAnimationFrame(handleGpios);
+
+
+doRpcCall(RPC_TYPE_HELLO_WORLD, [2, 3, 4], function (vals) {
+  console.log("Hello world", vals);
+});
+
 // ------- node editor stuff -------
 
 var numSocket = new Rete.Socket('Number value');
@@ -10,7 +83,6 @@ var numSocket = new Rete.Socket('Number value');
 function onControlChanged(control) {
   console.log("onControlChange", control);
 }
-
 
 var VueNumControl = {
   props: ['readonly', 'emitter', 'ikey', 'getData', 'putData', 'control', 'foobar'],

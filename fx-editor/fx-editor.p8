@@ -6,10 +6,34 @@ end
 
 frame=0
 
+hello_world_args={0,0,0}
+
+function rpc_hello_world(args)
+ for i,v in pairs(args) do
+  hello_world_args[i]=v
+ end
+ return {5,6,7}
+end
+
+rpc_dispatch={}
+rpc_dispatch[0]=rpc_hello_world
+
 function _update()
  if peek(0x5f80)==0 then
-  poke(0x5f81,peek(0x5f81)+peek(0x5f82))
-  poke(0x5f80,1)
+  local type=peek(0x5f81)
+  local len=peek(0x5f82)
+  local args={}
+  for i=1,len do
+   args[i]=peek(0x5f82+i)
+  end
+  if rpc_dispatch[type]!=nil then
+   local vals=rpc_dispatch[type](args)
+   poke(0x5f81,#vals)
+   for i,v in pairs(vals) do
+    poke(0x5f81+i,v)
+   end
+   poke(0x5f80,2)
+  end
  end
 end
 
@@ -17,10 +41,9 @@ function _draw()
  frame+=1
  cls()
  rectfill(10,10,20,20,7)
- print(tostr(peek(0x5f84)),64,64,7)
- print(tostr(peek(0x5f85)),64,70,7)
- print(tostr(peek(0x5f86)),64,76,7)
- print(tostr(peek(0x5f87)),64,82,7)
+ print(tostr(hello_world_args[1]),64,64,7)
+ print(tostr(hello_world_args[2]),64,70,7)
+ print(tostr(hello_world_args[3]),64,76,7)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -202,18 +202,6 @@
   // ===== pico8 gpio / slider code
   var pico8_gpio = new Array(128);
 
-
-  requestAnimationFrame(handleGpios);
-  pico8_gpio[0] = 1;
-
-  function handleGpios() {
-    if (pico8_gpio[0] === 1) {
-    } else {
-      // do nothing
-    }
-    requestAnimationFrame(handleGpios);
-  }
-
 </script>
 
 <script src="main.js"></script>
