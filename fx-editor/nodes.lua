@@ -26,6 +26,7 @@ function cls_node_rect:set_value(args)
  if (id==0) self.x=value
  if (id==1) self.y=value
  if (id==2) self.w=value
+ return {id,value}
 end
 
 node_types[0]=cls_node_rect

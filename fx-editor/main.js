@@ -50,6 +50,7 @@ function handleGpios() {
       // gpios are ours to use
       if (rpcCalls.length > 0) {
         rpcCall = rpcCalls[0];
+        console.log("triggering rpc call", rpcCall.type, rpcCall.args);
         rpcCall.fillGpio();
         pico8_gpio[0] = GPIO_DISPATCH_RPC_CALL;
       }
@@ -90,11 +91,18 @@ doRpcCall(RPC_TYPE_HELLO_WORLD, [2, 3, 4], function (vals) {
 var numSocket = new Rete.Socket('Number value');
 
 function onControlChanged(control) {
-  console.log("onControlChange", control);
+  var node = control.getNode();
+  var data = control.getData(control.key);
+  console.log("onControlChange", control, node, data);
+
+  doRpcCall(RPC_TYPE_SET_VALUE, [node.id, control.id, data],
+    function (args) {
+      console.log("Set value", args)
+    });
 }
 
 var VueNumControl = {
-  props: ['readonly', 'emitter', 'ikey', 'getData', 'putData', 'control', 'foobar'],
+  props: ['readonly', 'emitter', 'ikey', 'getData', 'putData', 'control'],
   template: '<input type="number" :readonly="readonly" :value="value" @input="change($event)"/>',
   data() {
     return {
@@ -111,7 +119,7 @@ var VueNumControl = {
         this.putData(this.ikey, this.value)
       }
       this.emitter.trigger('process');
-      onControlChanged(this);
+      onControlChanged(this.control);
     }
   },
   mounted() {
@@ -120,10 +128,11 @@ var VueNumControl = {
 };
 
 class NumControl extends Rete.Control {
-  constructor(emitter, key, readonly) {
+  constructor(emitter, key, readonly, id) {
     super(key);
     this.component = VueNumControl;
-    this.props = {emitter, ikey: key, readonly, control: this, foobar: 123};
+    this.id = id;
+    this.props = {emitter, ikey: key, readonly, control: this};
   }
 
   setValue(val) {
@@ -140,7 +149,11 @@ class RectComponent extends Rete.Component {
   }
 
   builder(node) {
-    return node.addControl(new NumControl(this.editor, 'size', false));
+    return node
+      .addControl(new NumControl(this.editor, 'x', false, 0))
+      .addControl(new NumControl(this.editor, 'y', false, 1))
+      .addControl(new NumControl(this.editor, 'width', false, 2))
+      ;
   }
 
   worker(node, inputs, outputs) {
@@ -194,6 +207,10 @@ components.map(c => {
   editor.on('noderemoved', async (node) => {
     console.log('noderemoved', node);
   });
+
+  var n1 = await components[0].createNode({x: 10, y: 20, width: 10});
+  n1.position = [80, 200];
+  editor.addNode(n1);
 
   editor.on('process nodecreated noderemoved connectioncreated connectionremoved', async () => {
     console.log("process")

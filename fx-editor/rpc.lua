@@ -10,9 +10,11 @@ function dispatch_rpc()
   end
   if rpc_dispatch[type]!=nil then
    local vals=rpc_dispatch[type](args)
-   poke(0x5f81,#vals)
-   for i,v in pairs(vals) do
-    poke(0x5f81+i,v)
+   if vals!=nil then
+    poke(0x5f81,#vals)
+    for i,v in pairs(vals) do
+     poke(0x5f81+i,v)
+    end
    end
    poke(0x5f80,2)
   end
