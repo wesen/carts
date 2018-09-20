@@ -4,6 +4,15 @@ console.log("foobar");
 // ------- pico8
 
 const RPC_TYPE_HELLO_WORLD = 0;
+const RPC_TYPE_ADD_NODE = 1;
+const RPC_TYPE_REMOVE_NODE = 2;
+const RPC_TYPE_ADD_CONNECTION = 3;
+const RPC_TYPE_REMOVE_CONNECTION = 4;
+const RPC_TYPE_SET_VALUE = 5;
+
+const NODE_TYPE_RECT = 0;
+
+var NODE_ID = 0;
 
 class RPCCall {
   constructor(type, args, callback) {
@@ -51,7 +60,7 @@ function handleGpios() {
       if (rpcCalls.length > 0) {
         rpcCall = rpcCalls.shift();
         var argsLength = pico8_gpio[1];
-        var vals = []
+        var vals = [];
         for (var i = 0; i < argsLength; i++) {
           vals.push(pico8_gpio[2 + i]);
         }
@@ -125,6 +134,9 @@ class NumControl extends Rete.Control {
 class RectComponent extends Rete.Component {
   constructor() {
     super("Rect");
+    this.type = NODE_TYPE_RECT;
+    this.id = NODE_ID;
+    NODE_ID += 1;
   }
 
   builder(node) {
@@ -175,6 +187,9 @@ components.map(c => {
 
   editor.on('nodecreated', async (node) => {
     console.log('nodecreated', node);
+    doRpcCall(RPC_TYPE_ADD_NODE, [node.type, node.id], function (args) {
+      console.log("node created in pico8", args);
+    })
   });
   editor.on('noderemoved', async (node) => {
     console.log('noderemoved', node);
