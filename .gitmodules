@@ -1,0 +1,3 @@
+[submodule "vendor/rete"]
+	path = vendor/rete
+	url = https://github.com/retejs/rete
