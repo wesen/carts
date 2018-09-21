@@ -25,7 +25,7 @@ var rpcCalls = [];
 
 function doRpcCall(type, args, callback) {
   let rpcCall = new RPCCall(type, args, callback);
-  console.log("queueing rpcCall", rpcCall);
+  // console.log("queueing rpcCall", rpcCall);
   rpcCalls.push(rpcCall);
 }
 
@@ -43,7 +43,7 @@ function handleGpios() {
       // gpios are ours to use
       if (rpcCalls.length > 0) {
         rpcCall = rpcCalls[0];
-        console.log("triggering rpc call", rpcCall.type, rpcCall.args);
+        // console.log("triggering rpc call", rpcCall.type, rpcCall.args);
         rpcCall.fillGpio();
         pico8_gpio[0] = GPIO_DISPATCH_RPC_CALL;
       }

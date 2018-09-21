@@ -127,6 +127,12 @@ class RectComponent extends Rete.Component {
       .addInput(in_width)
     ;
 
+    node.data = {
+      x: 10,
+      y: 10,
+      width: 10
+    };
+
     return result;
   }
 

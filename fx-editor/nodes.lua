@@ -176,7 +176,7 @@ function rpc_rm_node(args)
  local node=nodes[id]
  if node!=nil then
   node:delete()
-  del(nodes,node)
+  nodes[id]=nil
  end
 end
 

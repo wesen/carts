@@ -53,7 +53,6 @@ class NumControl extends Rete.Control {
 
 
 class TextControl extends Rete.Control {
-
   constructor(emitter, key, readonly, type = 'text') {
     super();
     this.emitter = emitter;

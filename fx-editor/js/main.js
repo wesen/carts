@@ -86,7 +86,17 @@ components.map(c => {
   editor.on('nodecreated', async (node) => {
     console.log('nodecreated', node, node.type, node.id);
     doRpcCall(RPC_TYPE_ADD_NODE, [node.type, node.id], function (args) {
-      console.log("node created in pico8", args);
+      console.log("node created in pico8", node, args);
+      node.inputs.forEach((input) => {
+        console.log("input", input);
+        console.log("control", input.control);
+        if (input.control !== undefined && input.control !== null) {
+          onControlChanged(input.control);
+        }
+      });
+      node.controls.forEach((control) => {
+        console.log("control", control);
+      });
     });
     node.controls.forEach(onControlChanged);
   });
@@ -115,7 +125,6 @@ components.map(c => {
   editor.addNode(n4);
 
   editor.on('process nodecreated noderemoved connectioncreated connectionremoved', async () => {
-    console.log("process")
     await engine.abort();
     await engine.process(editor.toJSON());
   })
