@@ -105,6 +105,22 @@ end
 function cls_node:set_value(input_num,value)
 end
 
+-- MULTADD NODE ---------
+
+cls_node_multadd=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+ self.a=1
+ self.b=0
+end)
+node_types[2]=cls_node_multadd
+
+function cls_node_multadd:set_value(id,value)
+ if (id==0) self:send_value(0,value*self.a+self.b)
+ if (id==1) self.a=value/16
+ if (id==2) self.b=value/16
+end
+
+
 -- RECT NODE ----------------------
 rect_x=0
 rect_y=40
@@ -116,6 +132,7 @@ cls_node_rect=subclass(cls_node,function(self,args)
  self.w=20
  rect_x+=25
 end)
+node_types[0]=cls_node_rect
 
 function cls_node_rect:draw()
  rectfill(self.x,self.y,self.x+self.w,self.y+self.w,7)
@@ -128,8 +145,6 @@ function cls_node_rect:set_value(id,value)
  return {id,value}
 end
 
-node_types[0]=cls_node_rect
-
 -- SINE NODE ------------------------
 
 cls_node_sine=subclass(cls_node,function(self,args)
@@ -138,24 +153,23 @@ cls_node_sine=subclass(cls_node,function(self,args)
  self.phase=0
  self.v=0
 end)
+node_types[1]=cls_node_sine
 
 function cls_node_sine:update()
  local v=sin(time()*self.f+self.phase)
  self.v=v
- self:send_value(0,v*30+30)
+ self:send_value(0,v)
 end
 
 function cls_node_sine:set_value(id,value)
- if (id==0) self.f=value/20
- if (id==1) self.phase=value/20
+ if (id==0) self.f=value/16
+ if (id==1) self.phase=value/16
 end
 
 function cls_node_sine:draw()
  print(tostr(self.v),0,120,7)
  print(tostr(#self.connections),40,120,7)
 end
-
-node_types[1]=cls_node_sine
 
 -- NODE RPC -------------------------
 

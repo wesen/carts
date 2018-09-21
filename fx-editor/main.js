@@ -9,6 +9,7 @@ const RPC_TYPE_SET_VALUE = 5;
 
 const NODE_TYPE_RECT = 0;
 const NODE_TYPE_SINE = 1;
+const NODE_TYPE_MULTADD = 2;
 
 var NODE_ID = 0;
 
@@ -97,7 +98,7 @@ function onControlChanged(control) {
   var data = control.getData(control.key);
   console.log("onControlChange", control, node, data);
 
-  doRpcCall(RPC_TYPE_SET_VALUE, [node.id, control.id, data],
+  doRpcCall(RPC_TYPE_SET_VALUE, [node.id, node.controlNumbers[control.key], data],
     function (args) {
       console.log("Set value", args)
     });
@@ -133,7 +134,6 @@ class NumControl extends Rete.Control {
   constructor(emitter, key, readonly, id) {
     super(key);
     this.component = VueNumControl;
-    this.id = id;
     this.props = {emitter, ikey: key, readonly, control: this};
   }
 
@@ -142,10 +142,41 @@ class NumControl extends Rete.Control {
   }
 }
 
+class MultAddComponent extends Rete.Component {
+  constructor() {
+    super("MultAdd");
+  }
+
+  builder(node) {
+    var in_value = new Rete.Input('value', 'Number', numSocket);
+    var in_a = new Rete.Input('a', 'Number', numSocket);
+    var in_b = new Rete.Input('b', 'Number', numSocket);
+    in_a.addControl(new NumControl(this.editor, 'a'));
+    in_b.addControl(new NumControl(this.editor, 'b'));
+    var out_val = new Rete.Output('val', 'Number', numSocket);
+
+    node.inputNumbers = node.controlNumbers = {
+      value: 0,
+      a: 1,
+      b: 2,
+    };
+    node.outputNumbers = {
+      val: 0,
+    };
+
+    node.type = NODE_TYPE_MULTADD;
+
+    return node
+      .addInput(in_value)
+      .addInput(in_a)
+      .addInput(in_b)
+      .addOutput(out_val);
+  }
+}
+
 class SineComponent extends Rete.Component {
   constructor() {
     super("Sine");
-    NODE_ID += 1;
   }
 
   builder(node) {
@@ -167,6 +198,7 @@ class SineComponent extends Rete.Component {
     node.outputNumbers = {
       num: 0
     };
+    node.controlNumbers = node.inputNumbers;
 
     node.type = NODE_TYPE_SINE;
 
@@ -184,9 +216,6 @@ class SineComponent extends Rete.Component {
 class RectComponent extends Rete.Component {
   constructor() {
     super("Rect");
-    this.type = NODE_TYPE_RECT;
-    this.id = NODE_ID;
-    NODE_ID += 1;
   }
 
   builder(node) {
@@ -195,14 +224,15 @@ class RectComponent extends Rete.Component {
     var in_width = new Rete.Input('width', 'Number', numSocket);
 
     in_x.addControl(new NumControl(this.editor, 'x'));
-    in_y.addControl(new NumControl(this.editor, 'y', false, 0));
-    in_width.addControl(new NumControl(this.editor, 'width', false, 2));
+    in_y.addControl(new NumControl(this.editor, 'y', false));
+    in_width.addControl(new NumControl(this.editor, 'width', false));
 
     node.inputNumbers = {
       x: 0,
       y: 1,
       width: 2
     };
+    node.controlNumbers = node.inputNumbers;
 
     node.type = NODE_TYPE_RECT;
 
@@ -223,7 +253,8 @@ class RectComponent extends Rete.Component {
 var container = document.querySelector('#rete');
 var components = [
   new RectComponent(),
-  new SineComponent()
+  new SineComponent(),
+  new MultAddComponent()
 ];
 
 var editor = new Rete.NodeEditor('demo@0.1.0', container);
@@ -300,12 +331,16 @@ components.map(c => {
   });
 
   var n1 = await components[0].createNode({x: 10, y: 20, width: 10});
-  n1.position = [80, 200];
+  n1.position = [400, 200];
   editor.addNode(n1);
 
   var n2 = await components[1].createNode({freq: 10, phase: 20});
-  n2.position = [200, 200];
+  n2.position = [80, 200];
   editor.addNode(n2);
+
+  var n3 = await components[2].createNode({a: 16*10, b: 0});
+  n3.position = [200,200];
+  editor.addNode(n3);
 
   editor.on('process nodecreated noderemoved connectioncreated connectionremoved', async () => {
     console.log("process")
