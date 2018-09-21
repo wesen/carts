@@ -11,17 +11,17 @@ frame=0
 function _update()
  dispatch_rpc()
  for node in all(nodes) do
-  node:update()
+  if (node.update!=nil) node:update()
  end
 end
+
+debug_str=""
 
 function _draw()
  frame+=1
  cls()
  for node in all(nodes) do
-  node:draw()
+  if (node.draw!=nil) node:draw()
  end
- print(tostr(hello_world_args[1]),64,64,7)
- print(tostr(hello_world_args[2]),64,70,7)
- print(tostr(hello_world_args[3]),64,76,7)
+ print(debug_str,0,0,7)
 end

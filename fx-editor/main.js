@@ -1,6 +1,3 @@
-console.log("foobar");
-
-
 // ------- pico8
 
 const RPC_TYPE_HELLO_WORLD = 0;
@@ -11,6 +8,7 @@ const RPC_TYPE_REMOVE_CONNECTION = 4;
 const RPC_TYPE_SET_VALUE = 5;
 
 const NODE_TYPE_RECT = 0;
+const NODE_TYPE_SINE = 1;
 
 var NODE_ID = 0;
 
@@ -33,7 +31,9 @@ class RPCCall {
 var rpcCalls = [];
 
 function doRpcCall(type, args, callback) {
-  rpcCalls.push(new RPCCall(type, args, callback));
+  let rpcCall = new RPCCall(type, args, callback);
+  console.log("queueing rpcCall", rpcCall);
+  rpcCalls.push(rpcCall);
 }
 
 const GPIO_DISPATCH_IDLE = 1;
@@ -89,6 +89,8 @@ doRpcCall(RPC_TYPE_HELLO_WORLD, [2, 3, 4], function (vals) {
 // ------- node editor stuff -------
 
 var numSocket = new Rete.Socket('Number value');
+var boolSocket = new Rete.Socket('Boolean value');
+var triggerSocket = new Rete.Socket('Trigger value');
 
 function onControlChanged(control) {
   var node = control.getNode();
@@ -140,6 +142,45 @@ class NumControl extends Rete.Control {
   }
 }
 
+class SineComponent extends Rete.Component {
+  constructor() {
+    super("Sine");
+    NODE_ID += 1;
+  }
+
+  builder(node) {
+    var in_freq = new Rete.Input('freq', 'Number', numSocket);
+    var in_phase = new Rete.Input('phase', 'Number', numSocket);
+    var in_enabled = new Rete.Input('enabled', 'Boolean', boolSocket);
+    var in_restart = new Rete.Input('restart', 'Trigger', triggerSocket);
+    var out_x = new Rete.Output('num', 'Number', numSocket);
+
+    in_freq.addControl(new NumControl(this.editor, 'freq'));
+    in_phase.addControl(new NumControl(this.editor, 'phase'));
+
+    node.inputNumbers = {
+      freq: 0,
+      phase: 1,
+      enabled: 2,
+      restart: 3,
+    };
+    node.outputNumbers = {
+      num: 0
+    };
+
+    node.type = NODE_TYPE_SINE;
+
+    var result = node
+      .addInput(in_freq)
+      .addInput(in_phase)
+      .addInput(in_enabled)
+      .addInput(in_restart)
+      .addOutput(out_x);
+
+    return result;
+  }
+}
+
 class RectComponent extends Rete.Component {
   constructor() {
     super("Rect");
@@ -149,11 +190,30 @@ class RectComponent extends Rete.Component {
   }
 
   builder(node) {
-    return node
-      .addControl(new NumControl(this.editor, 'x', false, 0))
-      .addControl(new NumControl(this.editor, 'y', false, 1))
-      .addControl(new NumControl(this.editor, 'width', false, 2))
-      ;
+    var in_x = new Rete.Input('x', 'Number', numSocket);
+    var in_y = new Rete.Input('y', 'Number', numSocket);
+    var in_width = new Rete.Input('width', 'Number', numSocket);
+
+    in_x.addControl(new NumControl(this.editor, 'x'));
+    in_y.addControl(new NumControl(this.editor, 'y', false, 0));
+    in_width.addControl(new NumControl(this.editor, 'width', false, 2));
+
+    node.inputNumbers = {
+      x: 0,
+      y: 1,
+      width: 2
+    };
+
+    node.type = NODE_TYPE_RECT;
+
+    var result = node
+      .addInput(in_x)
+      .addInput(in_y)
+      .addInput(in_width)
+    ;
+
+
+    return result;
   }
 
   worker(node, inputs, outputs) {
@@ -162,7 +222,9 @@ class RectComponent extends Rete.Component {
 
 var container = document.querySelector('#rete');
 var components = [
-  new RectComponent()];
+  new RectComponent(),
+  new SineComponent()
+];
 
 var editor = new Rete.NodeEditor('demo@0.1.0', container);
 console.log("editor", editor);
@@ -193,24 +255,57 @@ components.map(c => {
 (async () => {
   editor.on('connectionremoved', async (connection) => {
     console.log('connectionremoved', connection);
+
+    var inputNode = connection.input.node;
+    var inputKey = connection.input.key;
+    var inputNumber = inputNode.inputNumbers[inputKey];
+
+    var outputNode = connection.output.node;
+    var outputKey = connection.output.key;
+    var outputNumber = outputNode.outputNumbers[outputKey];
+
+    doRpcCall(RPC_TYPE_REMOVE_CONNECTION, [outputNode.id, outputNumber, inputNode.id, inputNumber], function (args) {
+      console.log("connection created in pico8", args);
+    });
   });
+
   editor.on('connectioncreated', async (connection) => {
     console.log('connectioncreated', connection);
+    var inputNode = connection.input.node;
+    var inputKey = connection.input.key;
+    var inputNumber = inputNode.inputNumbers[inputKey];
+
+    var outputNode = connection.output.node;
+    var outputKey = connection.output.key;
+    var outputNumber = outputNode.outputNumbers[outputKey];
+
+    doRpcCall(RPC_TYPE_ADD_CONNECTION, [outputNode.id, outputNumber, inputNode.id, inputNumber], function (args) {
+      console.log("connection created in pico8", args);
+    });
   });
 
   editor.on('nodecreated', async (node) => {
-    console.log('nodecreated', node);
+    console.log('nodecreated', node, node.type, node.id);
     doRpcCall(RPC_TYPE_ADD_NODE, [node.type, node.id], function (args) {
       console.log("node created in pico8", args);
-    })
+    });
+    node.controls.forEach(onControlChanged);
   });
+
   editor.on('noderemoved', async (node) => {
     console.log('noderemoved', node);
+    doRpcCall(RPC_TYPE_REMOVE_NODE, [node.id], function (args) {
+      console.log("node removed in pico8", args);
+    });
   });
 
   var n1 = await components[0].createNode({x: 10, y: 20, width: 10});
   n1.position = [80, 200];
   editor.addNode(n1);
+
+  var n2 = await components[1].createNode({freq: 10, phase: 20});
+  n2.position = [200, 200];
+  editor.addNode(n2);
 
   editor.on('process nodecreated noderemoved connectioncreated connectionremoved', async () => {
     console.log("process")

@@ -8,6 +8,7 @@ function dispatch_rpc()
   for i=1,len do
    args[i]=peek(0x5f82+i)
   end
+  debug_str="dispatch type "..tostr(type).." len "..tostr(len).." args "..tostr(#args)
   if rpc_dispatch[type]!=nil then
    local vals=rpc_dispatch[type](args)
    if vals!=nil then
