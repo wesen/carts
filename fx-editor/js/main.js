@@ -31,10 +31,27 @@ var engine = new Rete.Engine('demo@0.1.0');
 components.map(c => {
   editor.register(c);
   engine.register(c);
-})
-;
+});
 
 (async () => {
+  function saveModule() {
+    console.log("Add module");
+    localStorage.module = JSON.stringify(editor.toJSON());
+  }
+
+  function loadModule() {
+    console.log("Load module");
+    editor.fromJSON(JSON.parse(localStorage.module));
+  }
+
+  function openModule(m) {
+    console.log("Open module");
+  }
+
+  var modules = [];
+
+  alight("#modules", { modules, saveModule, openModule, loadModule });
+
   editor.on('connectionremoved', async (connection) => {
     console.log('connectionremoved', connection);
 

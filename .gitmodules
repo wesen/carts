@@ -1,3 +1,9 @@
 [submodule "vendor/rete"]
 	path = vendor/rete
 	url = https://github.com/retejs/rete
+[submodule "vendor/rete-connection-plugin"]
+	path = vendor/rete-connection-plugin
+	url = https://github.com/retejs/connection-plugin
+[submodule "vendor/rete-vue-render-plugin"]
+	path = vendor/rete-vue-render-plugin
+	url = https://github.com/retejs/vue-render-plugin

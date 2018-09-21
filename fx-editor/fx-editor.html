@@ -139,12 +139,26 @@
             width: 100px;
         }
 
+        #modules {
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: 5;
+        }
         -->
     </STYLE>
 </head>
 
 <body bgcolor=#5F574F style="height:100%;border:0px;overflow:hidden;" leftmargin=0 topmargin=0>
 <!-- margins for chrome (defaults on 8) -->
+
+<div al-app id="modules">
+    <div class="module" al-repeat="(key, val) in modules" @click="openModule(key)">
+        {{key}}
+    </div>
+    <button @click="loadModule()">Load</button>
+    <button @click="saveModule()">Save</button>
+</div>
 
 <div id="rete" class="node-editor"></div>
 <div class="center">
@@ -210,7 +224,6 @@
 </html>
 
 <script type="text/javascript">
-
   var autoresize = false; // enables autoresize. duh.
   var autoplay = true; // enables autoplay when possible.
 

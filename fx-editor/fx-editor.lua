@@ -1,4 +1,5 @@
 --#include oo
+--#include strings
 --#include rpc
 --#include nodes
 
@@ -25,6 +26,11 @@ function _draw()
  cls()
  for node in all(nodes) do
   if (node.draw!=nil) node:draw()
+ end
+ local i=0
+ for idx,node in pairs(nodes) do
+  print(tostr(idx).."("..tostr(node.id)..") "..node:str(),20,i*6+10)
+  i+=1
  end
  print(debug_str,0,0,7)
 end

@@ -37,6 +37,10 @@ function cls_node:send_value(output_num,value)
  end
 end
 
+function cls_node:str()
+ return "n["..tostr(self.id)..","..tostr(self.type).."]"
+end
+
 function cls_node:set_rpc_value(args)
  local id=args[2]
  local value=bor(shl(args[3],8),bor(args[4],bor(shr(args[5],8),shr(args[6],16))))
@@ -72,6 +76,10 @@ function cls_node_debug:draw()
  print("v:"..tostr(self.v),self.x,self.y,7)
 end
 
+function cls_node_debug:str()
+ return "dbg"
+end
+
 -- multadd node ---------
 
 cls_node_multadd=subclass(cls_node,function(self,args)
@@ -87,6 +95,9 @@ function cls_node_multadd:set_value(id,value)
  if (id==2) self.b=value
 end
 
+function cls_node_multadd:str()
+ return "madd("..tostr(self.a).."*x+"..tostr(self.b)..")"
+end
 
 -- rect node ----------------------
 rect_x=0
@@ -110,6 +121,10 @@ function cls_node_rect:set_value(id,value)
  if (id==1) self.y=value
  if (id==2) self.w=value
  return {id,value}
+end
+
+function cls_node_rect:str()
+ return "rect("..tostr(self.x)..","..tostr(self.y)..","..tostr(self.w)..")"
 end
 
 -- sine node ------------------------
@@ -140,12 +155,17 @@ function cls_node_sine:draw()
  print(tostr(#self.connections),40,120,7)
 end
 
+function cls_node_sine:str()
+ return "sine("..tostr(self.f)..","..tostr(self.phase)..")"
+end
+
 -- node rpc -------------------------
 
 function rpc_add_node(args)
  local type=args[1]
  if node_types[type]!=nil then
   local node=node_types[type].init(args)
+  node.type=type
   return {1,node.id}
  end
  return {0}
