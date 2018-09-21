@@ -59,7 +59,7 @@ rpc_dispatch[0]=rpc_hello_world
 node_types={}
 nodes={}
 
--- BASE NODE ----------------------
+-- base node ----------------------
 cls_node=class(function(self,args)
  self.connections={}
  self.id=args[2]
@@ -97,15 +97,15 @@ end
 
 function cls_node:set_rpc_value(args)
  local id=args[2]
- local value=args[3]
- debug_str="set value "..tostr(id).." value "..tostr(value)
+ local value=bor(shl(args[3],8),bor(args[4],bor(shr(args[5],8),shr(args[6],16))))
+ debug_str="set value "..tostr(id).." value "..tostr(value).." "..tostr(args[3])..","..tostr(args[4])..","..tostr(args[5])..","..tostr(args[6])
  self:set_value(id,value)
 end
 
 function cls_node:set_value(input_num,value)
 end
 
--- MULTADD NODE ---------
+-- multadd node ---------
 
 cls_node_multadd=subclass(cls_node,function(self,args)
  cls_node._ctr(self,args)
@@ -116,12 +116,12 @@ node_types[2]=cls_node_multadd
 
 function cls_node_multadd:set_value(id,value)
  if (id==0) self:send_value(0,value*self.a+self.b)
- if (id==1) self.a=value/16
- if (id==2) self.b=value/16
+ if (id==1) self.a=value
+ if (id==2) self.b=value
 end
 
 
--- RECT NODE ----------------------
+-- rect node ----------------------
 rect_x=0
 rect_y=40
 
@@ -145,7 +145,7 @@ function cls_node_rect:set_value(id,value)
  return {id,value}
 end
 
--- SINE NODE ------------------------
+-- sine node ------------------------
 
 cls_node_sine=subclass(cls_node,function(self,args)
  cls_node._ctr(self,args)
@@ -162,8 +162,8 @@ function cls_node_sine:update()
 end
 
 function cls_node_sine:set_value(id,value)
- if (id==0) self.f=value/16
- if (id==1) self.phase=value/16
+ if (id==0) self.f=value
+ if (id==1) self.phase=value
 end
 
 function cls_node_sine:draw()
@@ -171,10 +171,9 @@ function cls_node_sine:draw()
  print(tostr(#self.connections),40,120,7)
 end
 
--- NODE RPC -------------------------
+-- node rpc -------------------------
 
 function rpc_add_node(args)
- debug_str="add node"
  local type=args[1]
  if node_types[type]!=nil then
   local node=node_types[type].init(args)
@@ -188,7 +187,6 @@ function rpc_rm_node(args)
 end
 
 function rpc_add_connection(args)
- debug_str="add connection"
  local id=args[1]
  local output_num=args[2]
  local input_node_id=args[3]
