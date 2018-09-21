@@ -2,8 +2,13 @@
 -- x multadd scaling node seems to be weird with sine wave
 -- x add debug node
 -- x split files
--- save json graph to reload later on
 -- add lua generation for the graph so that this can be debugged in the console
 -- add flag input controls
--- emit control values on creation
--- save graph to local storage
+-- x emit control values on creation
+-- x save graph to local storage
+-- better control and input node values
+-- socket colors
+-- download local graph
+-- save json graph to reload later on
+-- upload local graph
+-- save to local storage with a name

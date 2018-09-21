@@ -8,37 +8,31 @@ class DebugComponent extends Rete.Component {
   }
 
   builder(node) {
-    var in_value = new Rete.Input("value", "Number", numSocket);
+    var in_value = new Rete.Input("value", "Value", numSocket);
 
     node.inputNumbers = {
       value: 0
-    };
-    node.controlNumbers = {
-      x: 1,
-      y: 2
     };
 
     node.type = NODE_TYPE_DEBUG;
 
     return node
-      .addInput(in_value)
-      .addControl(new NumControl(this.editor, 'x'))
-      .addControl(new NumControl(this.editor, 'y'));
+      .addInput(in_value);
   }
 }
 
 class MultAddComponent extends Rete.Component {
   constructor() {
-    super("MultAdd");
+    super("a*x+b");
   }
 
   builder(node) {
-    var in_value = new Rete.Input('value', 'Number', numSocket);
-    var in_a = new Rete.Input('a', 'Number', numSocket);
-    var in_b = new Rete.Input('b', 'Number', numSocket);
+    var in_value = new Rete.Input('value', 'x', numSocket);
+    var in_a = new Rete.Input('a', 'A', numSocket);
+    var in_b = new Rete.Input('b', 'B', numSocket);
     in_a.addControl(new NumControl(this.editor, 'a'));
     in_b.addControl(new NumControl(this.editor, 'b'));
-    var out_val = new Rete.Output('val', 'Number', numSocket);
+    var out_val = new Rete.Output('val', 'Output', numSocket);
 
     node.inputNumbers = node.controlNumbers = {
       value: 0,
@@ -65,11 +59,11 @@ class SineComponent extends Rete.Component {
   }
 
   builder(node) {
-    var in_freq = new Rete.Input('freq', 'Number', numSocket);
-    var in_phase = new Rete.Input('phase', 'Number', numSocket);
-    var in_enabled = new Rete.Input('enabled', 'Boolean', boolSocket);
-    var in_restart = new Rete.Input('restart', 'Trigger', triggerSocket);
-    var out_x = new Rete.Output('num', 'Number', numSocket);
+    var in_freq = new Rete.Input('freq', 'Frequency', numSocket);
+    var in_phase = new Rete.Input('phase', 'Phase', numSocket);
+    var in_enabled = new Rete.Input('enabled', 'Enabled', boolSocket);
+    var in_restart = new Rete.Input('restart', 'Restart', triggerSocket);
+    var out_x = new Rete.Output('num', 'Output', numSocket);
 
     in_freq.addControl(new NumControl(this.editor, 'freq'));
     in_phase.addControl(new NumControl(this.editor, 'phase'));
@@ -104,9 +98,9 @@ class RectComponent extends Rete.Component {
   }
 
   builder(node) {
-    var in_x = new Rete.Input('x', 'Number', numSocket);
-    var in_y = new Rete.Input('y', 'Number', numSocket);
-    var in_width = new Rete.Input('width', 'Number', numSocket);
+    var in_x = new Rete.Input('x', 'X', numSocket);
+    var in_y = new Rete.Input('y', 'Y', numSocket);
+    var in_width = new Rete.Input('width', 'Width', numSocket);
 
     in_x.addControl(new NumControl(this.editor, 'x'));
     in_y.addControl(new NumControl(this.editor, 'y', false));

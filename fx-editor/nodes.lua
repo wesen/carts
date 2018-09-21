@@ -61,23 +61,15 @@ debug_node_cnt=0
 cls_node_debug=subclass(cls_node,function(self,args)
  cls_node._ctr(self,args)
  self.v=0
- self.x=0
- self.y=12
 end)
 node_types[3]=cls_node_debug
 
 function cls_node_debug:set_value(id,value)
  if (id==0) self.v=value
- if (id==1) self.x=value
- if (id==2) self.y=value
-end
-
-function cls_node_debug:draw()
- print("v:"..tostr(self.v),self.x,self.y,7)
 end
 
 function cls_node_debug:str()
- return "dbg"
+ return "dbg:"..tostr(self.v)
 end
 
 -- multadd node ---------

@@ -15,7 +15,7 @@ function onControlChanged(control) {
 
 var VueNumControl = {
   props: ['readonly', 'emitter', 'ikey', 'getData', 'putData', 'control'],
-  template: '<input type="number" :readonly="readonly" :value="value" @input="change($event)"/>',
+  template: '<div>{{ikey}} <input type="number" :readonly="readonly" :value="value" @input="change($event)"/></div>',
   data() {
     return {
       value: 0,
