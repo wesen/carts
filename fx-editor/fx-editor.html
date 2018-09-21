@@ -22,6 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/alight@0.14.1/alight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/rete-context-menu-plugin@0.1.4/build/context-menu-plugin.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/rete-area-plugin@0.1.5/build/area-plugin.min.js"></script>
+    <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/14082/FileSaver.js"></script>
 
     <STYLE TYPE="text/css">
         <!--
@@ -169,8 +170,12 @@
     <div class="module" al-repeat="(key, val) in modules" @click="openModule(key)">
         {{key}}
     </div>
-    <button @click="loadModule()">Load</button>
-    <button @click="saveModule()">Save</button>
+    <button @click="loadModule()">Load from Local Storage</button>
+    <button @click="saveModule()">Save to Local Stroage</button><br>
+    <button id="saveLSToFile">Save LocalStorage to File</button>
+    <button id="saveEditorToFile">Save Editor to File</button><br>
+    <button id="filebutton" onclick="uploadReroute()">Upload a JSON File</button><br>
+    <input type="file" id="files" name="files[]" style="display:none"/>
 </div>
 
 <div id="rete" class="node-editor"></div>
