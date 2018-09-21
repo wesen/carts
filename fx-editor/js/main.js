@@ -18,7 +18,7 @@ editor.use(AreaPlugin);
 function fitPico8() {
   const {container} = editor.view;
   const width = container.parentElement.clientWidth;
-  const height = Math.max(0, container.parentElement.clientHeight - 550);
+  const height = Math.max(0, container.parentElement.clientHeight);
 
   container.style.width = width + 'px';
   container.style.height = height + 'px';
@@ -109,3 +109,20 @@ components.map(c => {
   AreaPlugin.zoomAt(editor);
   editor.trigger('process');
 })();
+
+// save to text
+
+function saveFile(filename, data) {
+  var blob = new Blob([data], {type: 'text/csv'});
+  if(window.navigator.msSaveOrOpenBlob) {
+    window.navigator.msSaveBlob(blob, filename);
+  }
+  else{
+    var elem = window.document.createElement('a');
+    elem.href = window.URL.createObjectURL(blob);
+    elem.download = filename;
+    document.body.appendChild(elem);
+    elem.click();
+    document.body.removeChild(elem);
+  }
+}

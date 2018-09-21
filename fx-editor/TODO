@@ -6,3 +6,4 @@
 -- add lua generation for the graph so that this can be debugged in the console
 -- add flag input controls
 -- emit control values on creation
+-- save graph to local storage

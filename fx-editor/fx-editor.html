@@ -54,17 +54,21 @@
         .center {
             text-align: center;
             /* Safari, Opera, and Chrome */
-            display: -webkit-box;
-            -webkit-box-pack: center;
-            -webkit-box-align: center;
-            /* Firefox */
-            display: -moz-box;
-            -moz-box-pack: center;
-            -moz-box-align: center;
-            /* Internet Explorer 10 */
-            display: -ms-flexbox;
-            -ms-flex-pack: center;
-            -ms-flex-align: center;
+            /*display: -webkit-box;*/
+            /*-webkit-box-pack: center;*/
+            /*-webkit-box-align: center;*/
+            /*!* Firefox *!*/
+            /*display: -moz-box;*/
+            /*-moz-box-pack: center;*/
+            /*-moz-box-align: center;*/
+            /*!* Internet Explorer 10 *!*/
+            /*display: -ms-flexbox;*/
+            /*-ms-flex-pack: center;*/
+            /*-ms-flex-align: center;*/
+
+            position: fixed;
+            top: 10px;
+            left: 10px;
 
             margin: 0 0;
             border: 0px;
@@ -137,25 +141,19 @@
 
         -->
     </STYLE>
-
-
-
-
 </head>
 
 <body bgcolor=#5F574F style="height:100%;border:0px;overflow:hidden;" leftmargin=0 topmargin=0>
 <!-- margins for chrome (defaults on 8) -->
 
 <div id="rete" class="node-editor"></div>
-
-
 <div class="center">
     <div id="plate" class=plate oncontextmenu="return false;">
 
         <!-- the itch app messes with the first found canvas -->
         <canvas id="dummy4itchapp" style="position:absolute;visibility:hidden;width:0;height:0;"></canvas>
 
-        <div id="frame" class=center style="visibility:hidden;"> <!-- firefox can't resize a fullscreen canvas (?)-->
+        <div id="frame" style="visibility:hidden;"> <!-- firefox can't resize a fullscreen canvas (?)-->
             <canvas class="emscripten pixels" id="canvas" oncontextmenu="event.preventDefault()" tabindex="1"></canvas>
         </div>
 

@@ -6,7 +6,7 @@ function onControlChanged(control) {
   // for now, we only deal with numbers
   var fractional = Math.floor((data % 1.) * 65536.);
   var integer = Math.floor(data);
-  var args = [node.id, node.controlNumbers[control.key], integer / 256, integer % 256, fractional / 256, fractional % 256 ];
+  var args = [node.id, node.controlNumbers[control.key], integer / 256, integer % 256, fractional / 256, fractional % 256];
 
   doRpcCall(RPC_TYPE_SET_VALUE, args, function (args) {
     console.log("Set value", args)
@@ -51,3 +51,46 @@ class NumControl extends Rete.Control {
   }
 }
 
+
+class TextControl extends Rete.Control {
+
+  constructor(emitter, key, readonly, type = 'text') {
+    super();
+    this.emitter = emitter;
+    this.key = key;
+    this.type = type;
+    this.template = `<input type="${type}" :readonly="readonly" :value="value" @input="change($event)"/>`;
+
+    this.scope = {
+      value: null,
+      readonly,
+      change: this.change.bind(this)
+    };
+  }
+
+  onChange() {
+  }
+
+  change(e) {
+    this.scope.value = this.type === 'number' ? +e.target.value : e.target.value;
+    this.update();
+    this.onChange();
+  }
+
+  update() {
+    if (this.key)
+      this.putData(this.key, this.scope.value)
+    this.emitter.trigger('process');
+    this._alight.scan();
+  }
+
+  mounted() {
+    this.scope.value = this.getData(this.key) || (this.type === 'number' ? 0 : '...');
+    this.update();
+  }
+
+  setValue(val) {
+    this.scope.value = val;
+    this._alight.scan()
+  }
+}
