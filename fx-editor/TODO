@@ -1,2 +1,8 @@
--- send 16.16 bit values from javascript instead of uint8
+-- x send 16.16 bit values from javascript instead of uint8
+-- x multadd scaling node seems to be weird with sine wave
+-- x add debug node
+-- x split files
+-- save json graph to reload later on
+-- add lua generation for the graph so that this can be debugged in the console
 -- add flag input controls
+-- emit control values on creation

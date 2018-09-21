@@ -6,9 +6,12 @@ function _init()
 end
 
 frame=0
+dt=0
+lasttime=time()
 
-
-function _update()
+function _update60()
+ dt=time()-lasttime
+ lasttime=time()
  dispatch_rpc()
  for node in all(nodes) do
   if (node.update!=nil) node:update()

@@ -47,6 +47,31 @@ end
 function cls_node:set_value(input_num,value)
 end
 
+function cls_node:delete()
+end
+
+-- debug node ----------
+
+debug_node_cnt=0
+
+cls_node_debug=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+ self.v=0
+ self.x=0
+ self.y=12
+end)
+node_types[3]=cls_node_debug
+
+function cls_node_debug:set_value(id,value)
+ if (id==0) self.v=value
+ if (id==1) self.x=value
+ if (id==2) self.y=value
+end
+
+function cls_node_debug:draw()
+ print("v:"..tostr(self.v),self.x,self.y,7)
+end
+
 -- multadd node ---------
 
 cls_node_multadd=subclass(cls_node,function(self,args)
@@ -94,11 +119,13 @@ cls_node_sine=subclass(cls_node,function(self,args)
  self.f=1 -- in rotation / second
  self.phase=0
  self.v=0
+ self.t=0
 end)
 node_types[1]=cls_node_sine
 
 function cls_node_sine:update()
- local v=sin(time()*self.f+self.phase)
+ self.t+=self.f*dt
+ local v=sin(self.t+self.phase)
  self.v=v
  self:send_value(0,v)
 end
@@ -125,7 +152,12 @@ function rpc_add_node(args)
 end
 
 function rpc_rm_node(args)
- del(nodes,nodes[args[1]])
+ local id=args[1]
+ local node=nodes[id]
+ if node!=nil then
+  node:delete()
+  del(nodes,node)
+ end
 end
 
 function rpc_add_connection(args)
