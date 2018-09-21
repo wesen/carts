@@ -4,6 +4,7 @@
 --#include nodes
 
 function _init()
+ poke(0x5f2d,1) 
 end
 
 frame=0

@@ -239,6 +239,23 @@ function cls_node_sine:str()
  return "sine("..tostr(self.f)..","..tostr(self.phase)..")"
 end
 
+
+-- mouse node
+cls_node_mouse=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+end)
+node_types[4]=cls_node_mouse
+
+function cls_node_mouse:update()
+ self:send_value(0,stat(32))
+ self:send_value(1,stat(33))
+ self:send_value(2,stat(34))
+end
+
+function cls_node_mouse:str()
+ return "mouse"
+end
+
 -- node rpc -------------------------
 
 function rpc_add_node(args)
@@ -289,6 +306,7 @@ rpc_dispatch[5]=rpc_set_value
 
 
 function _init()
+ poke(0x5f2d,1) 
 end
 
 frame=0

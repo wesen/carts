@@ -2,6 +2,12 @@ var numSocket = new Rete.Socket('Number value');
 var boolSocket = new Rete.Socket('Boolean value');
 var triggerSocket = new Rete.Socket('Trigger value');
 
+const NODE_TYPE_RECT = 0;
+const NODE_TYPE_SINE = 1;
+const NODE_TYPE_MULTADD = 2;
+const NODE_TYPE_DEBUG = 3;
+const NODE_TYPE_MOUSE = 4;
+
 class DebugComponent extends Rete.Component {
   constructor() {
     super("Debug");
@@ -134,10 +140,35 @@ class RectComponent extends Rete.Component {
   }
 }
 
+class MouseComponent extends Rete.Component {
+  constructor() {
+    super("Mouse");
+  }
+
+  builder(node) {
+    node.type = NODE_TYPE_MOUSE;
+    var out_x = new Rete.Output('x', 'X', numSocket);
+    var out_y = new Rete.Output('y', 'Y', numSocket);
+    var out_button = new Rete.Output('button', 'Button', numSocket);
+
+    node.outputNumbers = {
+      x: 0,
+      y: 1,
+      button: 2
+    };
+    var result = node
+      .addOutput(out_x)
+      .addOutput(out_y)
+      .addOutput(out_button);
+
+  }
+}
+
 var components = [
   new RectComponent(),
   new SineComponent(),
   new MultAddComponent(),
-  new DebugComponent()
+  new DebugComponent(),
+  new MouseComponent(),
 ];
 

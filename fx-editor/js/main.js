@@ -1,10 +1,3 @@
-const NODE_TYPE_RECT = 0;
-const NODE_TYPE_SINE = 1;
-const NODE_TYPE_MULTADD = 2;
-const NODE_TYPE_DEBUG = 3;
-
-var NODE_ID = 0;
-
 // ------- node editor stuff -------
 
 var container = document.querySelector('#rete');
@@ -39,9 +32,9 @@ components.map(c => {
     localStorage.module = JSON.stringify(editor.toJSON());
   }
 
-  function loadModule() {
+  async function loadModule() {
     console.log("Load module");
-    editor.fromJSON(JSON.parse(localStorage.module));
+    await editor.fromJSON(JSON.parse(localStorage.module));
   }
 
   function openModule(m) {
@@ -108,21 +101,7 @@ components.map(c => {
     });
   });
 
-  var n1 = await components[0].createNode({x: 10, y: 20, width: 10});
-  n1.position = [400, 200];
-  editor.addNode(n1);
-
-  var n2 = await components[1].createNode({freq: 10, phase: 20});
-  n2.position = [80, 200];
-  editor.addNode(n2);
-
-  var n3 = await components[2].createNode({a: 16 * 10, b: 0});
-  n3.position = [200, 200];
-  editor.addNode(n3);
-
-  var n4 = await components[3].createNode({x: 0, y: 12});
-  n4.position = [300, 200];
-  editor.addNode(n4);
+  await loadModule();
 
   editor.on('process nodecreated noderemoved connectioncreated connectionremoved', async () => {
     await engine.abort();
