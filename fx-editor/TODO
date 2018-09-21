@@ -1,0 +1,2 @@
+-- send 16.16 bit values from javascript instead of uint8
+-- add flag input controls
