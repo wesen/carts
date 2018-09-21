@@ -33,12 +33,12 @@ function _draw()
  for _,node in pairs(nodes) do
   if (node.draw!=nil) node:draw()
  end
- local i=0
- for idx,node in pairs(nodes) do
-  print(tostr(idx).."("..tostr(node.id)..") "..node:str(),20,i*6+10)
-  i+=1
- end
- print(debug_str,0,0,7)
+ -- local i=0
+ -- for idx,node in pairs(nodes) do
+ --  print(tostr(idx).."("..tostr(node.id)..") "..node:str(),20,i*6+10)
+ --  i+=1
+ -- end
+ -- print(debug_str,0,0,7)
 
  print(tostr(stat(1)),0, 110,7)
  print(tostr(stat(0)),0, 116,7)

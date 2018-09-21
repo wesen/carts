@@ -48,19 +48,19 @@ cls_node_rays=subclass(cls_node_particles,function(self,args)
  local layer=cls_layer.init()
  layer.x=64
  layer.y=0
- layer.emit_interval=nil
+ layer.emit_interval=.1
  layer.col=nil
  layer.cols={8,9,10,10,7}
  layer.min_angle=-0.5
- layer.x_jitter=20
+ layer.x_jitter=0
  layer.max_angle=0
  layer.default_weight=2
  layer.weight_jitter=2
  layer.fill=true
  layer.default_radius=2
+ layer.radius_jitter=1
  layer.default_lifetime=0.5
  layer.lifetime_jitter=0.1
- layer.radius_jitter=1
  layer.default_speed_x=1
  layer.speed_jitter_x=0.3
  layer.default_speed_y=1
@@ -70,6 +70,13 @@ cls_node_rays=subclass(cls_node_particles,function(self,args)
  cls_node_particles._ctr(self,args,layer)
 end)
 node_types[6]=cls_node_rays
+
+function cls_node_rays:set_value(id,value)
+ cls_node_particles.set_value(self,id,value)
+ if (id==3) self.layer.default_radius=value
+ if (id==4) self.layer.radius_jitter=value
+ if (id==5) self.layer.emit_interval=value
+end
 
 function cls_node_rays:str()
  return "rays"

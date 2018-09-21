@@ -56,7 +56,7 @@ end
 
 function cls_layer:update()
  self.t+=dt
- if self.emit_interval!=nil and self.t>self.emit_interval then
+ if self.emit_interval!=nil and self.emit_interval>0 and self.t>self.emit_interval then
   self.t=0
   self:emit()
  end

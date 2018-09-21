@@ -90,6 +90,11 @@ class SineComponent extends Rete.Component {
 
     node.type = NODE_TYPE_SINE;
 
+    node.data = {
+      freq: 1,
+      phase: 0
+    };
+
     var result = node
       .addInput(in_freq)
       .addInput(in_phase)
@@ -227,6 +232,27 @@ class BlastComponent extends ParticleComponent {
 class RaysComponent extends ParticleComponent {
   constructor() {
     super("Rays", NODE_TYPE_RAYS);
+  }
+
+  builder(node) {
+    var result = super.builder(node);
+
+    var in_radius = new Rete.Input('radius', 'Radius', numSocket);
+    var in_radius_jitter = new Rete.Input('radius_jitter', 'Radius Jitter', numSocket);
+    var in_emit_interval = new Rete.Input('emit_interval', 'Emit Interval', numSocket);
+    in_radius.addControl(new NumControl(this.editor, 'radius'));
+    in_radius_jitter.addControl(new NumControl(this.editor, 'radius_jitter'));
+    in_emit_interval.addControl(new NumControl(this.editor, 'emit_interval'));
+    node.inputNumbers = Object.assign({}, node.inputNumbers, {
+      radius: 3,
+      radius_jitter: 4,
+      emit_interval: 5,
+    });
+    node.controlNumbers = node.inputNumbers;
+
+    node.data = Object.assign({}, node.data, {radius: 2, radius_jitter: 0, emit_interval: 0});
+
+    return result.addInput(in_radius).addInput(in_radius_jitter).addInput(in_emit_interval);
   }
 }
 
