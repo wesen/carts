@@ -3,8 +3,13 @@
 --#include rpc
 --#include nodes
 
+--#include helpers
+--#include tween
+--#include particles
+--#include particle_nodes
+
 function _init()
- poke(0x5f2d,1) 
+ poke(0x5f2d,1)
 end
 
 frame=0
@@ -34,4 +39,7 @@ function _draw()
   i+=1
  end
  print(debug_str,0,0,7)
+
+ print(tostr(stat(1)),0, 110,7)
+ print(tostr(stat(0)),0, 116,7)
 end

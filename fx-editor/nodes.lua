@@ -151,17 +151,19 @@ function cls_node_sine:str()
  return "sine("..tostr(self.f)..","..tostr(self.phase)..")"
 end
 
-
 -- mouse node
 cls_node_mouse=subclass(cls_node,function(self,args)
  cls_node._ctr(self,args)
+ self.prev_button=stat(34)
 end)
 node_types[4]=cls_node_mouse
 
 function cls_node_mouse:update()
  self:send_value(0,stat(32))
  self:send_value(1,stat(33))
- self:send_value(2,stat(34))
+ local button=stat(34)
+ if (button!=self.prev_button) self:send_value(2,button)
+ self.prev_button=button
 end
 
 function cls_node_mouse:str()

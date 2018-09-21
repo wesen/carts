@@ -7,6 +7,9 @@ const NODE_TYPE_SINE = 1;
 const NODE_TYPE_MULTADD = 2;
 const NODE_TYPE_DEBUG = 3;
 const NODE_TYPE_MOUSE = 4;
+const NODE_TYPE_BLAST = 5;
+const NODE_TYPE_RAYS = 6;
+const NODE_TYPE_DUST = 7;
 
 class DebugComponent extends Rete.Component {
   constructor() {
@@ -164,11 +167,83 @@ class MouseComponent extends Rete.Component {
   }
 }
 
+class ParticleComponent extends Rete.Component {
+  constructor(name,rpcType) {
+    super(name);
+    this.rpcType = rpcType
+  }
+
+  builder(node) {
+    node.type = NODE_TYPE_BLAST;
+
+    var in_x = new Rete.Input('x', 'X', numSocket);
+    var in_y = new Rete.Input('y', 'Y', numSocket);
+    var in_emit = new Rete.Input('emit', 'Emit', numSocket);
+
+    var out_die_x = new Rete.Output('die_x', 'Die X', numSocket);
+    var out_die_y = new Rete.Output('die_y', 'Die_Y', numSocket);
+    var out_die = new Rete.Output('die', 'Die', numSocket);
+
+    in_x.addControl(new NumControl(this.editor, 'x'));
+    in_y.addControl(new NumControl(this.editor, 'y', false));
+
+    node.inputNumbers = {
+      emit: 0,
+      x: 1,
+      y: 2,
+    };
+    node.controlNumbers = node.inputNumbers;
+    node.outputNumbers = {
+      die_x: 0,
+      die_y: 1,
+      die: 2
+    };
+
+    node.type = this.rpcType;
+
+    var result = node
+      .addInput(in_x)
+      .addInput(in_y)
+      .addInput(in_emit)
+      .addOutput(out_die_x)
+      .addOutput(out_die_y)
+      .addOutput(out_die);
+
+    node.data = {
+      x: 10,
+      y: 10
+    };
+
+    return result;
+  }
+}
+
+class BlastComponent extends ParticleComponent {
+  constructor() {
+    super("Blast", NODE_TYPE_BLAST);
+  }
+}
+
+class RaysComponent extends ParticleComponent {
+  constructor() {
+    super("Rays", NODE_TYPE_RAYS);
+  }
+}
+
+class DustComponent extends ParticleComponent {
+  constructor() {
+    super("Dust", NODE_TYPE_DUST);
+  }
+}
+
 var components = [
   new RectComponent(),
   new SineComponent(),
   new MultAddComponent(),
   new DebugComponent(),
   new MouseComponent(),
+  new BlastComponent(),
+  new RaysComponent(),
+  new DustComponent(),
 ];
 
