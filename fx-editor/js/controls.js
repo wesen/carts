@@ -93,3 +93,48 @@ class TextControl extends Rete.Control {
     this._alight.scan()
   }
 }
+
+function handleFileSelect(evt) {
+  var files = evt.target.files;
+
+  var output = [];
+  for (var i = 0, f; f = files[i]; i++) {
+    var reader = new FileReader();
+
+    reader.onload = (function (theFile) {
+      return function (e) {
+        console.log('e readAsText = ', e);
+        console.log('e readAsText target = ', e.target);
+        try {
+          //handle loading editor here
+          editor.fromJSON(JSON.parse(e.target.result))
+          console.log('JSON has been loaded to editor');
+        } catch (ex) {
+          console.log('ex when trying to parse json = ' + ex);
+        }
+      }
+    })(f);
+    reader.readAsText(f);
+  }
+
+}
+
+function uploadReroute(){
+  document.querySelector('#files').click();
+}
+
+document.getElementById('files').addEventListener('change', handleFileSelect, false);
+document.getElementById("saveLSToFile").addEventListener("click", function(){
+  var text = localStorage.module;
+  var filename = prompt("Name your file:","Particle_Effect_01");
+  var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+  saveAs(blob, filename+".json");
+  console.log("LocalStorage saved to file")
+});
+document.getElementById("saveEditorToFile").addEventListener("click", function(){
+  var text = JSON.stringify(editor.toJSON());
+  var filename = prompt("Name your file:","Particle_Effect_01");
+  var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+  saveAs(blob, filename+".json");
+  console.log("Editor saved to file")
+});
