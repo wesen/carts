@@ -231,8 +231,6 @@ function cls_node_sine:set_value(id,value)
 end
 
 function cls_node_sine:draw()
- print(tostr(self.v),0,120,7)
- print(tostr(#self.connections),40,120,7)
 end
 
 function cls_node_sine:str()
@@ -515,6 +513,8 @@ function cls_layer:draw()
  end
 end
 
+-- base class for particles
+
 cls_node_particles=subclass(cls_node,function(self,args,layer)
  cls_node._ctr(self,args)
  self.layer=layer
@@ -537,6 +537,35 @@ function cls_node_particles:set_value(id,value)
  if (id==1) self.layer.x=value
  if (id==2) self.layer.y=value
 end
+
+-- emitter node
+cls_node_emitter=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+ self.x=0
+ self.y=0
+ self.emit_interval=1
+ self.t=0
+end)
+
+function cls_node_emitter:update()
+ self.t+=dt
+ if self.t>self.emit_interval then
+  self.send_value(0,self.x)
+  self.send_value(1,self.y)
+  self.send_value(2,true)
+  self.t-=self.emit_interval
+ end
+end
+
+function cls_node_emitter:set_value(id,value)
+ if (id==0) self.x=value
+ if (id==1) self.y=value
+ if (id==2) self.emit_interval=value
+end
+
+
+
+-- blast node
 
 cls_node_blast=subclass(cls_node_particles,function(self,args)
  local blast_layer=cls_layer.init()

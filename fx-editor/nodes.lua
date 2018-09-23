@@ -143,8 +143,6 @@ function cls_node_sine:set_value(id,value)
 end
 
 function cls_node_sine:draw()
- print(tostr(self.v),0,120,7)
- print(tostr(#self.connections),40,120,7)
 end
 
 function cls_node_sine:str()

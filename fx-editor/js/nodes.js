@@ -11,54 +11,89 @@ const NODE_TYPE_BLAST = 5;
 const NODE_TYPE_RAYS = 6;
 const NODE_TYPE_DUST = 7;
 
-class DebugNode extends Rete.Component {
-  constructor() {
-    super("Debug");
+class EditorNode extends Rete.Component {
+  constructor(name, type) {
+    super(name);
+    this.type = type;
+    this.inputs = {};
+    this.outputs = {};
+    this.controls = {};
+    this.inputNumbers = {};
+    this.outputNumbers = {};
+    this.defaults = {};
+  }
+
+  addInput(key, number, name, socket, defaultValue) {
+    this.inputNumbers[key] = number;
+    this.inputs[key] = { key, name, socket };
+    this.defaults[key] = defaultValue;
+    return this;
+  }
+
+  addOutput(key, number, name, socket) {
+    this.outputNumbers[key] = number;
+    this.outputs[key] = { key, name, socket };
+    return this;
+  }
+
+  addInputControl(key, controlClass) {
+    this.inputs[key].controlClass = controlClass;
+    return this;
+  }
+
+  addControl(key, number, controlClass, defaultValue) {
+    this.controls[key] = { key, controlClass };
+    this.inputNumbers[key] = number;
+    this.defaults[key] = defaultValue;
+    return this;
   }
 
   builder(node) {
-    const in_value = new Rete.Input("value", "Value", numSocket);
+    Object.keys(this.inputs).forEach((k) => {
+      const input = this.inputs[k];
+      const reteInput = new Rete.Input(input.key, input.name, input.socket);
+      node.addInput(reteInput);
 
-    node.inputNumbers = {
-      value: 0
-    };
+      if (input.controlClass !== undefined) {
+        reteInput.addControl(new input.controlClass(this.editor, input.key));
+      }
+    });
 
-    node.type = NODE_TYPE_DEBUG;
+    Object.keys(this.outputs).forEach((k) => {
+      const output = this.outputs[k];
+      node.addOutput(new Rete.Output(output.key, output.name, output.socket));
+    });
 
-    return node
-      .addInput(in_value);
+    Object.keys(this.controls).forEach((k) => {
+      const control = this.controls[k];
+      node.addControl(new control.controlClass(this.editor, control.key));
+    });
+
+    node.inputNumbers = this.inputNumbers;
+    node.outputNumbers = this.outputNumbers;
+
+    node.data = Object.assign({}, this.defaults, node.data);
+    node.type = this.type;
+
+    return node;
   }
 }
 
-class MultAddNode extends Rete.Component {
+class DebugNode extends EditorNode {
   constructor() {
-    super("a*x+b");
+    super("Debug", NODE_TYPE_DEBUG);
+    this.addInput("value", 0, "Value", numSocket, 0);
   }
 
-  builder(node) {
-    const in_value = new Rete.Input('value', 'x', numSocket);
-    const in_a = new Rete.Input('a', 'A', numSocket);
-    const in_b = new Rete.Input('b', 'B', numSocket);
-    in_a.addControl(new NumControl(this.editor, 'a'));
-    in_b.addControl(new NumControl(this.editor, 'b'));
-    const out_val = new Rete.Output('val', 'Output', numSocket);
+}
 
-    node.inputNumbers = node.controlNumbers = {
-      value: 0,
-      a: 1,
-      b: 2,
-    };
-    node.outputNumbers = {
-      val: 0,
-    };
-
-    node.type = NODE_TYPE_MULTADD;
-
-    return node
-      .addInput(in_value)
-      .addInput(in_a)
-      .addInput(in_b)
-      .addOutput(out_val);
+class MultAddNode extends EditorNode {
+  constructor() {
+    super("a*x+b", NODE_TYPE_MULTADD);
+    this.addInput('value', 0, 'x', numSocket);
+    this.addInput('a', 1, 'A', numSocket, 1).addInputControl('a', NumControl);
+    this.addInput('b', 2, 'B', numSocket, 0).addInputControl('b', NumControl);
+    this.addOutput('val', 0, 'Output', numSocket);
   }
 }
 
@@ -125,7 +160,6 @@ class RectNode extends Rete.Component {
       y: 1,
       width: 2
     };
-    node.controlNumbers = node.inputNumbers;
 
     node.type = NODE_TYPE_RECT;
 
