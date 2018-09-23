@@ -1,15 +1,20 @@
 const numSocket = new Rete.Socket('Number');
 const boolSocket = new Rete.Socket('Boolean');
 const triggerSocket = new Rete.Socket('Trigger');
+const functionSocket = new Rete.Socket('Function');
 
 const NODE_TYPE_RECT = 0;
 const NODE_TYPE_SINE = 1;
 const NODE_TYPE_MULTADD = 2;
 const NODE_TYPE_DEBUG = 3;
 const NODE_TYPE_MOUSE = 4;
-const NODE_TYPE_BLAST = 5;
-const NODE_TYPE_RAYS = 6;
-const NODE_TYPE_DUST = 7;
+// const NODE_TYPE_BLAST = 5;
+// const NODE_TYPE_RAYS = 6;
+// const NODE_TYPE_DUST = 7;
+const NODE_TYPE_EMITTER = 8;
+const NODE_TYPE_JITTER = 9;
+const NODE_TYPE_GENERIC_PARTICLES = 10;
+const NODE_TYPE_FUNCTION_MULTADD = 11;
 
 class EditorNode extends Rete.Component {
   constructor(name, type) {
@@ -25,14 +30,14 @@ class EditorNode extends Rete.Component {
 
   addInput(key, number, name, socket, defaultValue) {
     this.inputNumbers[key] = number;
-    this.inputs[key] = { key, name, socket };
+    this.inputs[key] = {key, name, socket};
     this.defaults[key] = defaultValue;
     return this;
   }
 
   addOutput(key, number, name, socket) {
     this.outputNumbers[key] = number;
-    this.outputs[key] = { key, name, socket };
+    this.outputs[key] = {key, name, socket};
     return this;
   }
 
@@ -42,7 +47,7 @@ class EditorNode extends Rete.Component {
   }
 
   addControl(key, number, controlClass, defaultValue) {
-    this.controls[key] = { key, controlClass };
+    this.controls[key] = {key, controlClass};
     this.inputNumbers[key] = number;
     this.defaults[key] = defaultValue;
     return this;
@@ -97,202 +102,85 @@ class MultAddNode extends EditorNode {
   }
 }
 
-class SineNode extends Rete.Component {
+class SineNode extends EditorNode {
   constructor() {
-    super("Sine");
-  }
-
-  builder(node) {
-    const in_freq = new Rete.Input('freq', 'Frequency', numSocket);
-    const in_phase = new Rete.Input('phase', 'Phase', numSocket);
-    const in_enabled = new Rete.Input('enabled', 'Enabled', boolSocket);
-    const in_restart = new Rete.Input('restart', 'Restart', triggerSocket);
-    const out_x = new Rete.Output('num', 'Output', numSocket);
-
-    in_freq.addControl(new NumControl(this.editor, 'freq'));
-    in_phase.addControl(new NumControl(this.editor, 'phase'));
-
-    node.inputNumbers = {
-      freq: 0,
-      phase: 1,
-      enabled: 2,
-      restart: 3,
-    };
-    node.outputNumbers = {
-      num: 0
-    };
-    node.controlNumbers = node.inputNumbers;
-
-    node.type = NODE_TYPE_SINE;
-
-    node.data = Object.assign({
-      freq: 1,
-      phase: 0
-    }, node.data);
-
-    const result = node
-      .addInput(in_freq)
-      .addInput(in_phase)
-      .addInput(in_enabled)
-      .addInput(in_restart)
-      .addOutput(out_x);
-
-    return result;
+    super("Sine", NODE_TYPE_SINE);
+    this.addInput('freq', 0, 'Frequency', numSocket, 1)
+      .addInputControl('freq', NumControl)
+      .addInput('phase', 1, 'Phase', numSocket, 0)
+      .addInputControl('phase', NumControl)
+      .addInput('enabled', 2, 'Enabled', boolSocket, true)
+      .addInput('restart', 3, 'Restart', triggerSocket)
+      .addOutput('num', 0, 'Output', numSocket);
   }
 }
 
-class RectNode extends Rete.Component {
+class RectNode extends EditorNode {
   constructor() {
-    super("Rect");
-  }
-
-  builder(node) {
-    const in_x = new Rete.Input('x', 'X', numSocket);
-    const in_y = new Rete.Input('y', 'Y', numSocket);
-    const in_width = new Rete.Input('width', 'Width', numSocket);
-
-    in_x.addControl(new NumControl(this.editor, 'x'));
-    in_y.addControl(new NumControl(this.editor, 'y', false));
-    in_width.addControl(new NumControl(this.editor, 'width', false));
-
-    node.inputNumbers = {
-      x: 0,
-      y: 1,
-      width: 2
-    };
-
-    node.type = NODE_TYPE_RECT;
-
-    const result = node
-      .addInput(in_x)
-      .addInput(in_y)
-      .addInput(in_width)
-    ;
-
-    node.data = Object.assign({
-      x: 10,
-      y: 10,
-      width: 10
-    }, node.data);
-
-    return result;
-  }
-
-  worker(node, inputs, outputs) {
+    super("Rect", NODE_TYPE_RECT);
+    this.addInput('x', 0, 'X', numSocket, 10)
+      .addInputControl('x', NumControl)
+      .addInput('y', 1, 'Y', numSocket, 10)
+      .addInputControl('y', NumControl)
+      .addInput('w', 2, 'Width', numSocket, 10)
+      .addInputControl('w', NumControl);
   }
 }
 
-class MouseInputNode extends Rete.Component {
+class MouseInputNode extends EditorNode {
   constructor() {
-    super("Mouse");
-  }
-
-  builder(node) {
-    node.type = NODE_TYPE_MOUSE;
-    const out_x = new Rete.Output('x', 'X', numSocket);
-    const out_y = new Rete.Output('y', 'Y', numSocket);
-    const out_button = new Rete.Output('button', 'Button', numSocket);
-
-    node.outputNumbers = {
-      x: 0,
-      y: 1,
-      button: 2
-    };
-    const result = node
-      .addOutput(out_x)
-      .addOutput(out_y)
-      .addOutput(out_button);
-
+    super("Mouse", NODE_TYPE_MOUSE);
+    this.addOutput('x', 0, 'X', numSocket)
+      .addOutput('y', 1, 'Y', numSocket)
+      .addOutput('button', 2, 'Button', triggerSocket);
   }
 }
 
-class ParticleNode extends Rete.Component {
-  constructor(name,rpcType) {
-    super(name);
-    this.rpcType = rpcType
-  }
-
-  builder(node) {
-    node.type = NODE_TYPE_BLAST;
-
-    const in_x = new Rete.Input('x', 'X', numSocket);
-    const in_y = new Rete.Input('y', 'Y', numSocket);
-    const in_emit = new Rete.Input('emit', 'Emit', numSocket);
-
-    const out_die_x = new Rete.Output('die_x', 'Die X', numSocket);
-    const out_die_y = new Rete.Output('die_y', 'Die_Y', numSocket);
-    const out_die = new Rete.Output('die', 'Die', numSocket);
-
-    in_x.addControl(new NumControl(this.editor, 'x'));
-    in_y.addControl(new NumControl(this.editor, 'y', false));
-
-    node.inputNumbers = {
-      emit: 0,
-      x: 1,
-      y: 2,
-    };
-    node.controlNumbers = node.inputNumbers;
-    node.outputNumbers = {
-      die_x: 0,
-      die_y: 1,
-      die: 2
-    };
-
-    node.type = this.rpcType;
-
-    const result = node
-      .addInput(in_x)
-      .addInput(in_y)
-      .addInput(in_emit)
-      .addOutput(out_die_x)
-      .addOutput(out_die_y)
-      .addOutput(out_die);
-
-    node.data = Object.assign({
-      x: 10,
-      y: 10
-    }, node.data);
-
-    return result;
+class ParticleNode extends EditorNode {
+  constructor(name, rpcType) {
+    super(name, rpcType);
+    this.addInput('x', 1, 'X', numSocket, 64)
+      .addInputControl('x', NumControl)
+      .addInput('y', 2, 'Y', numSocket, 64)
+      .addInputControl('y', NumControl)
+      .addInput('emit', 0, 'Emit', triggerSocket)
+      .addOutput('die_x', 0, 'Die X', numSocket)
+      .addOutput('die_y', 1, 'Die Y', numSocket)
+      .addOutput('die', 2, 'Die', triggerSocket)
   }
 }
 
-class BlastNode extends ParticleNode {
+class EmitterNode extends EditorNode {
   constructor() {
-    super("Blast", NODE_TYPE_BLAST);
+    super("Emitter", NODE_TYPE_EMITTER);
+    this.addInput('interval', 0, 'Interval', numSocket, 0.5)
+      .addInputControl('interval', NumControl)
+      .addOutput('emit', 0, 'Emit', triggerSocket);
   }
 }
 
-class RaysNode extends ParticleNode {
+class JitterNode extends EditorNode {
   constructor() {
-    super("Rays", NODE_TYPE_RAYS);
-  }
-
-  builder(node) {
-    const result = super.builder(node);
-
-    const in_radius = new Rete.Input('radius', 'Radius', numSocket);
-    const in_radius_jitter = new Rete.Input('radius_jitter', 'Radius Jitter', numSocket);
-    const in_emit_interval = new Rete.Input('emit_interval', 'Emit Interval', numSocket);
-    in_radius.addControl(new NumControl(this.editor, 'radius'));
-    in_radius_jitter.addControl(new NumControl(this.editor, 'radius_jitter'));
-    in_emit_interval.addControl(new NumControl(this.editor, 'emit_interval'));
-    node.inputNumbers = Object.assign({}, node.inputNumbers, {
-      radius: 3,
-      radius_jitter: 4,
-      emit_interval: 5,
-    });
-    node.controlNumbers = node.inputNumbers;
-
-    node.data = Object.assign({}, {radius: 2, radius_jitter: 0, emit_interval: 0}, node.data);
-
-    return result.addInput(in_radius).addInput(in_radius_jitter).addInput(in_emit_interval);
+    super("Jitter", NODE_TYPE_JITTER);
+    this.addInput("value", 0, 'Value', numSocket)
+      .addInput("jitter", 1, "Jitter", numSocket, 0)
+      .addInputControl('jitter', NumControl)
+      .addOutput('value', 0, 'Value', numSocket);
   }
 }
 
-class DustComponent extends ParticleNode {
+class GenericParticleNode extends ParticleNode {
   constructor() {
-    super("Dust", NODE_TYPE_DUST);
+    super("Generic Particles", NODE_TYPE_GENERIC_PARTICLES);
+    this
+      .addInput('spd_x', 3, 'Speed X', numSocket, 0)
+      .addInputControl('spd_x', NumControl)
+      .addInput('spd_y', 4, 'Speed Y', numSocket, 0)
+      .addInputControl('spd_y', NumControl)
+      .addInput('lifetime', 5, 'Lifetime', numSocket, 1)
+      .addInputControl('lifetime', NumControl)
+      .addInput('radius', 6, 'Radius', numSocket, 2)
+      .addInputControl('radius', NumControl);
   }
 }
 
@@ -302,8 +190,8 @@ const components = [
   new MultAddNode(),
   new DebugNode(),
   new MouseInputNode(),
-  new BlastNode(),
-  new RaysNode(),
-  new DustComponent(),
+  new EmitterNode(),
+  new JitterNode(),
+  new GenericParticleNode(),
 ];
 

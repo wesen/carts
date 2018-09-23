@@ -1,21 +1,13 @@
 cls_layer=class(function(self)
  self.particles={}
- self.emit_interval=.2
- self.t=0
  self.x=64
- self.x_jitter=0
  self.y=64
- self.y_jitter=0
  self.default_lifetime=1
- self.lifetime_jitter=0
  self.default_radius=3
- self.radius_jitter=0
  self.min_angle=0
  self.max_angle=1
  self.default_speed_x=1
- self.speed_jitter_x=0
  self.default_speed_y=1
- self.speed_jitter_y=0
  self.gravity=0.1
  self.default_weight=1
  self.weight_jitter=0
@@ -34,20 +26,17 @@ end)
 function cls_layer:emit(x,y)
  if (x==nil) x=self.x
  if (y==nil) y=self.y
- local angle=self.min_angle+rnd(self.max_angle-self.min_angle)
- local spd_x=cos(angle)*self.default_speed_x+mrnd(self.speed_jitter_x)
- local spd_y=sin(angle)*self.default_speed_y+mrnd(self.speed_jitter_y)
  local weight=self.default_weight+mrnd(self.weight_jitter)
 
- local p={x=x+mrnd(self.x_jitter),
-          y=y+mrnd(self.y_jitter),
-          spd_x=spd_x,
-          spd_y=spd_y,
+ local p={x=x,
+          y=y,
+          spd_x=self.default_speed_x,
+          spd_y=self.default_speed_y,
           t=0,
           weight=weight,
           damping=self.default_damping+mrnd(self.damping_jitter),
-          radius=self.default_radius+mrnd(self.radius_jitter),
-          lifetime=self.default_lifetime+mrnd(self.lifetime_jitter)
+          radius=self.default_radius,
+          lifetime=self.default_lifetime
          }
  add(self.particles,p)
  if (self.emit_cb!=nil) self.emit_cb(p)
@@ -55,11 +44,6 @@ function cls_layer:emit(x,y)
 end
 
 function cls_layer:update()
- self.t+=dt
- if self.emit_interval!=nil and self.emit_interval>0 and self.t>self.emit_interval then
-  self.t=0
-  self:emit()
- end
  for p in all(self.particles) do
   p.x+=p.spd_x
   p.spd_y+=p.weight*self.gravity

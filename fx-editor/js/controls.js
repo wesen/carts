@@ -6,7 +6,15 @@ function onControlChanged(control) {
   // for now, we only deal with numbers
   var fractional = Math.floor((data % 1.) * 65536.);
   var integer = Math.floor(data);
-  var args = [node.id, node.inputNumbers[control.key], integer / 256, integer % 256, fractional / 256, fractional % 256];
+  if (integer < 0) {
+    integer = 0xffff + integer;
+  }
+  var args = [
+    node.id, node.inputNumbers[control.key],
+    integer / 256,
+    integer % 256,
+    fractional / 256,
+    fractional % 256];
 
   doRpcCall(RPC_TYPE_SET_VALUE, args, function (args) {
     console.log("Set value", args)

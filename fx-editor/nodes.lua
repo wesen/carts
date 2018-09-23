@@ -72,8 +72,11 @@ function cls_node_debug:str()
  return "dbg:"..tostr(self.v)
 end
 
--- multadd node ---------
+function cls_node_debug:draw()
+ print(tostr(self.v),100,100)
+end
 
+-- multadd node ---------
 cls_node_multadd=subclass(cls_node,function(self,args)
  cls_node._ctr(self,args)
  self.a=1

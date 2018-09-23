@@ -7,6 +7,7 @@
 --#include tween
 --#include particles
 --#include particle_nodes
+--#include util_nodes
 
 function _init()
  poke(0x5f2d,1)
