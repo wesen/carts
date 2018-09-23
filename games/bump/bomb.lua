@@ -68,7 +68,7 @@ cls_bomb=subclass(cls_actor,function(self,player)
  self.is_thrown=false
  self.is_solid=false
  self.player=player
- self.time=5
+ self.time=10
  self.name="bomb"
 end)
 
@@ -87,6 +87,23 @@ function cls_bomb:update()
   if not self.is_solid and not solid and not actor then
    -- avoid a bomb getting stuck on a wall when thrown
    self.is_solid=true
+  end
+
+  if self.x<=0 then
+   self.spd_x=0
+   self.x=1
+  end
+  if self.y<=0 then
+   self.y=1
+   self.spd_y=0
+  end
+  if self.x>=119 then
+   self.x=119
+   self.spd_x=0
+  end
+  if self.y>=119 then
+   self.y=119
+   self.spd_y=0
   end
 
   local gravity=0.12

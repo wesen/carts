@@ -938,8 +938,6 @@ cls_player=subclass(cls_actor,function(self,pos,input_port)
  -- players are handled separately
  add(players,self)
 
- self.name="player:"..tostr(input_port)..":"..tostr(player_cnt)
-
  self.ghosts={}
 
  self.nr=player_cnt
@@ -1258,6 +1256,7 @@ function cls_player:update_normal()
  if actor or solid then
   -- we're still solid, even though we shouldn't
   -- to avoid having the player stuck, we're just gonna kill him
+  printh("kill because actor "..tostr(actor).." solid "..tostr(solid))
   self:kill()
   sfx(1)
  end
@@ -1730,7 +1729,7 @@ cls_bomb=subclass(cls_actor,function(self,player)
  self.is_thrown=false
  self.is_solid=false
  self.player=player
- self.time=5
+ self.time=10
  self.name="bomb"
 end)
 
@@ -1749,6 +1748,23 @@ function cls_bomb:update()
   if not self.is_solid and not solid and not actor then
    -- avoid a bomb getting stuck on a wall when thrown
    self.is_solid=true
+  end
+
+  if self.x<=0 then
+   self.spd_x=0
+   self.x=1
+  end
+  if self.y<=0 then
+   self.y=1
+   self.spd_y=0
+  end
+  if self.x>=119 then
+   self.x=119
+   self.spd_x=0
+  end
+  if self.y>=119 then
+   self.y=119
+   self.spd_y=0
   end
 
   local gravity=0.12
@@ -1831,7 +1847,7 @@ mode_game=1
 mode_end=2
 mode_transition=3
 
-mode=mode_title
+mode=mode_game
 
 function make_transition(mid_cb,end_cb)
  add_cr(function()
@@ -1893,7 +1909,7 @@ end
 
 function _init()
  poke(0x5f2d,1)
- room=cls_room.init(v2(0,0),v2(16,16))
+ room=cls_room.init(v2(0,16),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
  -- room:spawn_player(p3_input)
