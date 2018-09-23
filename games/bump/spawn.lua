@@ -1,4 +1,5 @@
 spr_spawn_point=1
+spawn_points={}
 
 cls_spawn=class(function(self,pos,input_port)
  self.x=pos.x
@@ -12,6 +13,7 @@ cls_spawn=class(function(self,pos,input_port)
   self:cr_spawn()
  end)
  add(particles,self)
+ add(spawn_points,self)
 end)
 
 
@@ -21,6 +23,7 @@ end
 function cls_spawn:cr_spawn()
  cr_move_to(self,self.target_x,self.target_y,1,inexpo)
  del(particles,self)
+ del(spawn_points,self)
  local player=cls_player.init(v2(self.target_x,self.target_y), self.input_port)
  player.is_doppelgaenger=self.is_doppelgaenger
  cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)

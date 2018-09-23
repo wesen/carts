@@ -35,8 +35,25 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player(input_port)
- -- xxx potentially find better spawn locatiosn
- local spawn_pos = rnd_elt(self.spawn_locations)
+ local max_spawn_dist=0
+ local spawn_pos
+ for pos in all(self.spawn_locations) do
+  local min_dist=10000
+  for p in all(players) do
+   local dist=sqrt((pos.x-p.x)^2+(pos.y-p.y)^2)
+   if (dist<min_dist) min_dist=dist
+  end
+  for p in all(spawn_points) do
+   local dist=sqrt((pos.x-p.x)^2+(pos.y-p.y)^2)
+   if (dist<min_dist) min_dist=dist
+  end
+  if min_dist>max_spawn_dist then
+   spawn_pos=pos
+   max_spawn_dist=min_dist
+  end
+ end
+
+ if (spawn_pos==nil) spawn_pos=rnd_elt(self.spawn_locations)
  local spawn=cls_spawn.init(spawn_pos, input_port)
  connected_players[input_port]=true
  return spawn

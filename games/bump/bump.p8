@@ -699,8 +699,25 @@ function cls_room:draw()
 end
 
 function cls_room:spawn_player(input_port)
- -- xxx potentially find better spawn locatiosn
- local spawn_pos = rnd_elt(self.spawn_locations)
+ local max_spawn_dist=0
+ local spawn_pos
+ for pos in all(self.spawn_locations) do
+  local min_dist=10000
+  for p in all(players) do
+   local dist=sqrt((pos.x-p.x)^2+(pos.y-p.y)^2)
+   if (dist<min_dist) min_dist=dist
+  end
+  for p in all(spawn_points) do
+   local dist=sqrt((pos.x-p.x)^2+(pos.y-p.y)^2)
+   if (dist<min_dist) min_dist=dist
+  end
+  if min_dist>max_spawn_dist then
+   spawn_pos=pos
+   max_spawn_dist=min_dist
+  end
+ end
+
+ if (spawn_pos==nil) spawn_pos=rnd_elt(self.spawn_locations)
  local spawn=cls_spawn.init(spawn_pos, input_port)
  connected_players[input_port]=true
  return spawn
@@ -1349,6 +1366,7 @@ function cls_spring:draw()
 end
 
 spr_spawn_point=1
+spawn_points={}
 
 cls_spawn=class(function(self,pos,input_port)
  self.x=pos.x
@@ -1362,6 +1380,7 @@ cls_spawn=class(function(self,pos,input_port)
   self:cr_spawn()
  end)
  add(particles,self)
+ add(spawn_points,self)
 end)
 
 
@@ -1371,6 +1390,7 @@ end
 function cls_spawn:cr_spawn()
  cr_move_to(self,self.target_x,self.target_y,1,inexpo)
  del(particles,self)
+ del(spawn_points,self)
  local player=cls_player.init(v2(self.target_x,self.target_y), self.input_port)
  player.is_doppelgaenger=self.is_doppelgaenger
  cls_smoke.init(v2(self.x,self.y),spr_full_smoke,0)

@@ -35,7 +35,9 @@ components.map(c => {
   async function loadModule() {
     console.log("Load module");
     if (localStorage.getItem('module') !== null) {
-      await editor.fromJSON(JSON.parse(localStorage.module));
+      let jsonText = localStorage.module;
+      let jsonData = JSON.parse(jsonText);
+      await editor.fromJSON(jsonData);
     }
   }
 
