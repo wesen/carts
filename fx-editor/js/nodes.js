@@ -90,10 +90,10 @@ class SineComponent extends Rete.Component {
 
     node.type = NODE_TYPE_SINE;
 
-    node.data = {
+    node.data = Object.assign({
       freq: 1,
       phase: 0
-    };
+    }, node.data);
 
     var result = node
       .addInput(in_freq)
@@ -135,11 +135,11 @@ class RectComponent extends Rete.Component {
       .addInput(in_width)
     ;
 
-    node.data = {
+    node.data = Object.assign({
       x: 10,
       y: 10,
       width: 10
-    };
+    }, node.data);
 
     return result;
   }
@@ -214,10 +214,10 @@ class ParticleComponent extends Rete.Component {
       .addOutput(out_die_y)
       .addOutput(out_die);
 
-    node.data = {
+    node.data = Object.assign({
       x: 10,
       y: 10
-    };
+    }, node.data);
 
     return result;
   }
@@ -250,7 +250,7 @@ class RaysComponent extends ParticleComponent {
     });
     node.controlNumbers = node.inputNumbers;
 
-    node.data = Object.assign({}, node.data, {radius: 2, radius_jitter: 0, emit_interval: 0});
+    node.data = Object.assign({}, {radius: 2, radius_jitter: 0, emit_interval: 0}, node.data);
 
     return result.addInput(in_radius).addInput(in_radius_jitter).addInput(in_emit_interval);
   }
