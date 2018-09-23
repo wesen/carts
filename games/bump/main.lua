@@ -119,7 +119,7 @@ function _draw()
    local _spr=start_sprites[winning_player]+flr(frame/8)%3
    local sx=_spr%16*8
    local sy=flr(_spr/16)*8
-   sspr(sx,sy,8,8,64-16,68,32,32)
+   sspr(sx,sy,8,8,64-16,title_dy+56,32,32)
 
    if is_space_pressed() then
     run()

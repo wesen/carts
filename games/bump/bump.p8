@@ -53,7 +53,7 @@ jump_max_hold_time=15
 
 ground_grace_interval=6
 
-win_threshold=10
+win_threshold=9
 
 
 function class (init)
@@ -1729,7 +1729,7 @@ cls_bomb=subclass(cls_actor,function(self,player)
  self.is_thrown=false
  self.is_solid=false
  self.player=player
- self.time=10
+ self.time=5
  self.name="bomb"
 end)
 
@@ -1961,7 +1961,7 @@ function _draw()
    local _spr=start_sprites[winning_player]+flr(frame/8)%3
    local sx=_spr%16*8
    local sy=flr(_spr/16)*8
-   sspr(sx,sy,8,8,64-16,68,32,32)
+   sspr(sx,sy,8,8,64-16,title_dy+56,32,32)
 
    if is_space_pressed() then
     run()

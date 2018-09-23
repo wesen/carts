@@ -68,7 +68,7 @@ cls_bomb=subclass(cls_actor,function(self,player)
  self.is_thrown=false
  self.is_solid=false
  self.player=player
- self.time=10
+ self.time=5
  self.name="bomb"
 end)
 
