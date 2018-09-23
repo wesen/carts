@@ -5,7 +5,7 @@ mode_game=1
 mode_end=2
 mode_transition=3
 
-mode=mode_game
+mode=mode_title
 
 function make_transition(mid_cb,end_cb)
  add_cr(function()
@@ -67,7 +67,7 @@ end
 
 function _init()
  poke(0x5f2d,1)
- room=cls_room.init(v2(0,16),v2(16,16))
+ room=cls_room.init(v2(0,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
  -- room:spawn_player(p3_input)
