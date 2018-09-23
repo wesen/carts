@@ -1949,12 +1949,15 @@ function _draw()
 
    if mode==mode_game then
     local entry_length=30
+    palt(0,false)
+    rectfill(0,120,128,128,0)
     for i=0,#scores-1,1 do
      print(
      "p"..tostr(i+1)..": "..tostr(scores[i+1]),
-     i*entry_length,1,7
+     i*entry_length+10,121,7
      )
     end
+    palt()
    end
   else
    draw_title("player "..tostr(winning_player).." won!")
