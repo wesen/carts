@@ -15,6 +15,8 @@ const NODE_TYPE_EMITTER = 8;
 const NODE_TYPE_JITTER = 9;
 const NODE_TYPE_GENERIC_PARTICLES = 10;
 const NODE_TYPE_FUNCTION_MULTADD = 11;
+const NODE_TYPE_CIRCULAR_EMITTER = 12;
+const NODE_TYPE_LINE_EMITTER = 13;
 
 class EditorNode extends Rete.Component {
   constructor(name, type) {
@@ -184,6 +186,20 @@ class GenericParticleNode extends ParticleNode {
   }
 }
 
+class CircularEmitterNode extends EditorNode {
+  constructor() {
+    super("Circular Emitter", NODE_TYPE_CIRCULAR_EMITTER);
+    this.addInput('emit', 0, 'Emit', triggerSocket)
+      .addInput('cnt', 1, 'Count', numSocket, 6)
+      .addInputControl('cnt', NumControl)
+      .addInput('spd', 2, 'Speed', numSocket, 1)
+      .addInputControl('spd', NumControl)
+      .addOutput('spd_x', 0, 'X Speed', numSocket)
+      .addOutput('spd_y', 1, 'Y Speed', numSocket)
+      .addOutput('emit', 2, 'Emit', triggerSocket);
+  }
+}
+
 const components = [
   new RectNode(),
   new SineNode(),
@@ -193,5 +209,6 @@ const components = [
   new EmitterNode(),
   new JitterNode(),
   new GenericParticleNode(),
+  new CircularEmitterNode(),
 ];
 

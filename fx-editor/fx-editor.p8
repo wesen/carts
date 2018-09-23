@@ -579,6 +579,25 @@ function cls_node_jitter:set_value(id,value)
  if (id==1) self.jitter=value
 end
 
+cls_node_circular_emitter=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+ self.cnt=6
+ self.spd=1
+end)
+node_types[12]=cls_node_circular_emitter
+
+function cls_node_circular_emitter:set_value(id,value)
+ if id==0 and value>0 then
+  for i=1,self.cnt do
+   self:send_value(0,cos(i/self.cnt)*self.spd)
+   self:send_value(1,sin(i/self.cnt)*self.spd)
+   self:send_value(2,value)
+  end
+ end
+ if (id==1) self.cnt=value
+ if (id==2) self.spd=value
+end
+
 
 function _init()
  poke(0x5f2d,1)
