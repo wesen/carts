@@ -342,8 +342,6 @@ function cls_player:update_normal()
   -- to avoid having the player stuck, we're just gonna kill him
   self:kill()
   sfx(1)
- -- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
- --  foobar="a"..nil
  end
 
  for a in all(interactables) do
@@ -356,7 +354,6 @@ end
 
 function cls_player:add_score(add)
  local nr=self.input_port+1
- printh("add score for player "..tostr(nr).." score "..tostr(scores[nr]))
  scores[nr]+=add
  if add>=0 then
   combo_kill_timer[nr]=3

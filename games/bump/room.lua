@@ -36,9 +36,8 @@ end
 
 function cls_room:spawn_player(input_port)
  -- xxx potentially find better spawn locatiosn
- local spawn_pos = self.spawn_locations[spawn_idx]
+ local spawn_pos = rnd_elt(self.spawn_locations)
  local spawn=cls_spawn.init(spawn_pos, input_port)
- spawn_idx = (spawn_idx%#self.spawn_locations)+1
  connected_players[input_port]=true
  return spawn
 end

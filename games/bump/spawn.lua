@@ -1,7 +1,6 @@
 spr_spawn_point=1
 
 cls_spawn=class(function(self,pos,input_port)
- add(particles,self)
  self.x=pos.x
  self.y=128
  self.is_solid=false
@@ -12,7 +11,9 @@ cls_spawn=class(function(self,pos,input_port)
  add_cr(function()
   self:cr_spawn()
  end)
+ add(particles,self)
 end)
+
 
 function cls_spawn:update()
 end

@@ -1,7 +1,7 @@
 title_w=5*8
 title_h=2*8
 title_dx=25
-title_dy=10
+title_dy=-3
 title_ssx=11*8
 title_ssy=12*8
 
@@ -48,7 +48,11 @@ end
 function glitch_str(s)
  if (frame%10)<3 then
   aberration_str("- pixelgore 2018 -",title_dy+39)
-  aberration_str("- press space to start -",title_dy+48)
+  aberration_str("- space=start -",title_dy+48)
+  if mode==mode_title then
+   aberration_str("\x8e throw",title_dy+61,86)
+   aberration_str("\x97 join/jump",title_dy+61,10)
+  end
   if (s!=nil) aberration_str(s,title_dy+96)
   for i=0,1 do
    draw_random_line(0,title_dx+15,title_dy+33,1)
@@ -59,6 +63,10 @@ function glitch_str(s)
  elseif (frame%10<8) then
   center_print("- pixelgore 2018 -",title_dy+39)
   center_print("- press space to start -",title_dy+48)
+  if mode==mode_title then
+   center_print("\x8e throw",title_dy+61,86)
+   center_print("\x97 join/jump",title_dy+61,10)
+  end
   if (s!=nil) center_print(s,title_dy+96)
  end
 end
@@ -67,12 +75,13 @@ function center_str_x(s)
  return 64-(#s*4)/2
 end
 
-function center_print(s,y)
- print(s,center_str_x(s),y,7)
+function center_print(s,y,x)
+ if (x==nil) x=center_str_x(s)
+ print(s,x,y,7)
 end
 
-function aberration_str(s,y)
- local x=center_str_x(s)
+function aberration_str(s,y,x)
+ if (x==nil) x=center_str_x(s)
  print(s,x+mrnd(2),y+mrnd(2)+1,12)
  print(s,x+mrnd(2),y+mrnd(2),8)
  print(s,x,y,7)

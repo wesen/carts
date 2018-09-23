@@ -107,6 +107,7 @@ function _draw()
  frame+=1
 
  cls()
+ map(0,0,0,0,16,16)
  rectfill(mouse_pos.x-2,mouse_pos.y-2,mouse_pos.x+2,mouse_pos.y+2,7)
  for p in all(layers) do
   p:draw()

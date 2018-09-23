@@ -38,7 +38,6 @@ frame=0
 dt=0
 lasttime=time()
 room=nil
-spawn_idx=1
 
 actors={}
 particles={}
@@ -361,7 +360,7 @@ end
 title_w=5*8
 title_h=2*8
 title_dx=25
-title_dy=10
+title_dy=-3
 title_ssx=11*8
 title_ssy=12*8
 
@@ -408,7 +407,11 @@ end
 function glitch_str(s)
  if (frame%10)<3 then
   aberration_str("- pixelgore 2018 -",title_dy+39)
-  aberration_str("- press space to start -",title_dy+48)
+  aberration_str("- space=start -",title_dy+48)
+  if mode==mode_title then
+   aberration_str("\x8e throw",title_dy+61,86)
+   aberration_str("\x97 join/jump",title_dy+61,10)
+  end
   if (s!=nil) aberration_str(s,title_dy+96)
   for i=0,1 do
    draw_random_line(0,title_dx+15,title_dy+33,1)
@@ -419,6 +422,10 @@ function glitch_str(s)
  elseif (frame%10<8) then
   center_print("- pixelgore 2018 -",title_dy+39)
   center_print("- press space to start -",title_dy+48)
+  if mode==mode_title then
+   center_print("\x8e throw",title_dy+61,86)
+   center_print("\x97 join/jump",title_dy+61,10)
+  end
   if (s!=nil) center_print(s,title_dy+96)
  end
 end
@@ -427,12 +434,13 @@ function center_str_x(s)
  return 64-(#s*4)/2
 end
 
-function center_print(s,y)
- print(s,center_str_x(s),y,7)
+function center_print(s,y,x)
+ if (x==nil) x=center_str_x(s)
+ print(s,x,y,7)
 end
 
-function aberration_str(s,y)
- local x=center_str_x(s)
+function aberration_str(s,y,x)
+ if (x==nil) x=center_str_x(s)
  print(s,x+mrnd(2),y+mrnd(2)+1,12)
  print(s,x+mrnd(2),y+mrnd(2),8)
  print(s,x,y,7)
@@ -692,9 +700,8 @@ end
 
 function cls_room:spawn_player(input_port)
  -- xxx potentially find better spawn locatiosn
- local spawn_pos = self.spawn_locations[spawn_idx]
+ local spawn_pos = rnd_elt(self.spawn_locations)
  local spawn=cls_spawn.init(spawn_pos, input_port)
- spawn_idx = (spawn_idx%#self.spawn_locations)+1
  connected_players[input_port]=true
  return spawn
 end
@@ -1236,8 +1243,6 @@ function cls_player:update_normal()
   -- to avoid having the player stuck, we're just gonna kill him
   self:kill()
   sfx(1)
- -- printh("foobar "..tostr(self.name).." pos "..tostr(self.x)..","..tostr(self.y).." amount "..tostr(amount).." solid "..tostr(solid).." actor "..tostr(actor))
- --  foobar="a"..nil
  end
 
  for a in all(interactables) do
@@ -1250,7 +1255,6 @@ end
 
 function cls_player:add_score(add)
  local nr=self.input_port+1
- printh("add score for player "..tostr(nr).." score "..tostr(scores[nr]))
  scores[nr]+=add
  if add>=0 then
   combo_kill_timer[nr]=3
@@ -1347,7 +1351,6 @@ end
 spr_spawn_point=1
 
 cls_spawn=class(function(self,pos,input_port)
- add(particles,self)
  self.x=pos.x
  self.y=128
  self.is_solid=false
@@ -1358,7 +1361,9 @@ cls_spawn=class(function(self,pos,input_port)
  add_cr(function()
   self:cr_spawn()
  end)
+ add(particles,self)
 end)
+
 
 function cls_spawn:update()
 end
@@ -1871,8 +1876,8 @@ function _init()
  room=cls_room.init(v2(0,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
- room:spawn_player(p3_input)
- room:spawn_player(p4_input)
+ -- room:spawn_player(p3_input)
+ -- room:spawn_player(p4_input)
  fireflies_init(v2(16,16))
  music(0)
 end
