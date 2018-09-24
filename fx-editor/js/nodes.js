@@ -17,6 +17,7 @@ const NODE_TYPE_GENERIC_PARTICLES = 10;
 const NODE_TYPE_FUNCTION_MULTADD = 11;
 const NODE_TYPE_CIRCULAR_EMITTER = 12;
 const NODE_TYPE_LINE_EMITTER = 13;
+const NODE_TYPE_LATCH=14;
 
 class EditorNode extends Rete.Component {
   constructor(name, type) {
@@ -182,13 +183,21 @@ class GenericParticleNode extends ParticleNode {
       .addInput('lifetime', 5, 'Lifetime', numSocket, 1)
       .addInputControl('lifetime', NumControl)
       .addInput('radius', 6, 'Radius', numSocket, 2)
-      .addInputControl('radius', NumControl);
+      .addInputControl('radius', NumControl)
+      .addInput('weight', 7, 'Weight', numSocket, 0)
+      .addInputControl('weight', NumControl)
+      .addInput('damping', 8, 'Damping', numSocket, 1)
+      .addInputControl('damping', NumControl)
+      .addInput('fill', 9, 'Fill', numSocket, 0)
+      .addInputControl('fill', NumControl)
+      .addInput('color', 10, 'Color', numSocket, 7)
+      .addInputControl('color', NumControl);
   }
 }
 
 class CircularEmitterNode extends EditorNode {
   constructor() {
-    super("Circular Emitter", NODE_TYPE_CIRCULAR_EMITTER);
+    super("CircularEmitterNode", NODE_TYPE_CIRCULAR_EMITTER);
     this.addInput('emit', 0, 'Emit', triggerSocket)
       .addInput('cnt', 1, 'Count', numSocket, 6)
       .addInputControl('cnt', NumControl)
@@ -197,6 +206,46 @@ class CircularEmitterNode extends EditorNode {
       .addOutput('spd_x', 0, 'X Speed', numSocket)
       .addOutput('spd_y', 1, 'Y Speed', numSocket)
       .addOutput('emit', 2, 'Emit', triggerSocket);
+  }
+}
+
+class LinearEmitterNode extends EditorNode {
+  constructor() {
+    super("Linear Emitter", NODE_TYPE_LINE_EMITTER);
+    this.addInput('emit', 0, 'Emit', triggerSocket)
+      .addInput('cnt', 1, 'Count', numSocket, 6)
+      .addInputControl('cnt', NumControl)
+      .addInput('start_x', 2, 'X Start', numSocket, 1)
+      .addInputControl('start_x', NumControl)
+      .addInput('start_y', 3, 'Y Start', numSocket, 100)
+      .addInputControl('start_y', NumControl)
+
+      .addInput('spd_x', 4, 'X Speed', numSocket, 0)
+      .addInputControl('spd_x', NumControl)
+      .addInput('spd_y', 5, 'Y Speed', numSocket, -1)
+      .addInputControl('spd_y', NumControl)
+
+      .addInput('x_spacing', 6, 'X Spacing', numSocket, 5)
+      .addInputControl('x_spacing', NumControl)
+      .addInput('y_spacing', 7, 'Y Spacing', numSocket, 0)
+      .addInputControl('y_spacing', NumControl)
+
+      .addOutput('x', 0, 'X', numSocket)
+      .addOutput('y', 1, 'Y', numSocket)
+      .addOutput('spd_x', 2, 'X Speed', numSocket)
+      .addOutput('spd_y', 3, 'Y Speed', numSocket)
+      .addOutput('emit', 4, 'Emit', triggerSocket);
+
+  }
+}
+
+class LatchNode extends EditorNode {
+  constructor() {
+    super("Latch", NODE_TYPE_LATCH);
+    this.addInput("v", 0, "Value", numSocket, 0)
+      .addInputControl('v', NumControl)
+      .addInput("trigger", 1, 'Trigger', triggerSocket)
+      .addOutput('value', 0, 'Value', numSocket);
   }
 }
 
@@ -210,5 +259,7 @@ const components = [
   new JitterNode(),
   new GenericParticleNode(),
   new CircularEmitterNode(),
+  new LinearEmitterNode(),
+  new LatchNode(),
 ];
 

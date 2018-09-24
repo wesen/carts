@@ -4,13 +4,10 @@ cls_layer=class(function(self)
  self.y=64
  self.default_lifetime=1
  self.default_radius=3
- self.min_angle=0
- self.max_angle=1
  self.default_speed_x=1
  self.default_speed_y=1
  self.gravity=0.1
  self.default_weight=1
- self.weight_jitter=0
  self.fill=false
  self.col=7
  self.cols=nil
@@ -20,21 +17,20 @@ cls_layer=class(function(self)
  self.die_cb=nil
  self.emit_cb=nil
  self.default_damping=1
- self.damping_jitter=0
 end)
 
 function cls_layer:emit(x,y)
  if (x==nil) x=self.x
  if (y==nil) y=self.y
- local weight=self.default_weight+mrnd(self.weight_jitter)
+ local weight=self.default_weight
 
  local p={x=x,
           y=y,
           spd_x=self.default_speed_x,
           spd_y=self.default_speed_y,
           t=0,
-          weight=weight,
-          damping=self.default_damping+mrnd(self.damping_jitter),
+          weight=self.default_weight,
+          damping=self.default_damping,
           radius=self.default_radius,
           lifetime=self.default_lifetime
          }

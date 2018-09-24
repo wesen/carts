@@ -36,6 +36,10 @@ function cls_node_generic_particles:set_value(id,value)
  if (id==4) self.layer.default_speed_y=value
  if (id==5) self.layer.default_lifetime=value
  if (id==6) self.layer.default_radius=value
+ if (id==7) self.layer.default_weight=value
+ if (id==8) self.layer.default_damping=value
+ if (id==9) self.layer.fill=value>0
+ if (id==10) self.layer.col=value
 end
 
 function cls_node_generic_particles:str()

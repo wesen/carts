@@ -259,6 +259,19 @@ function cls_node_mouse:str()
  return "mouse"
 end
 
+-- latch node
+
+cls_node_latch=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+ self.v=0
+end)
+node_types[14]=cls_node_latch
+
+function cls_node_latch:set_value(id,value)
+ if (id==0) self.v=value
+ if (id==1) self:send_value(0,self.v)
+end
+
 -- node rpc -------------------------
 
 function rpc_add_node(args)
@@ -400,13 +413,10 @@ cls_layer=class(function(self)
  self.y=64
  self.default_lifetime=1
  self.default_radius=3
- self.min_angle=0
- self.max_angle=1
  self.default_speed_x=1
  self.default_speed_y=1
  self.gravity=0.1
  self.default_weight=1
- self.weight_jitter=0
  self.fill=false
  self.col=7
  self.cols=nil
@@ -416,21 +426,20 @@ cls_layer=class(function(self)
  self.die_cb=nil
  self.emit_cb=nil
  self.default_damping=1
- self.damping_jitter=0
 end)
 
 function cls_layer:emit(x,y)
  if (x==nil) x=self.x
  if (y==nil) y=self.y
- local weight=self.default_weight+mrnd(self.weight_jitter)
+ local weight=self.default_weight
 
  local p={x=x,
           y=y,
           spd_x=self.default_speed_x,
           spd_y=self.default_speed_y,
           t=0,
-          weight=weight,
-          damping=self.default_damping+mrnd(self.damping_jitter),
+          weight=self.default_weight,
+          damping=self.default_damping,
           radius=self.default_radius,
           lifetime=self.default_lifetime
          }
@@ -538,6 +547,10 @@ function cls_node_generic_particles:set_value(id,value)
  if (id==4) self.layer.default_speed_y=value
  if (id==5) self.layer.default_lifetime=value
  if (id==6) self.layer.default_radius=value
+ if (id==7) self.layer.default_weight=value
+ if (id==8) self.layer.default_damping=value
+ if (id==9) self.layer.fill=value>0
+ if (id==10) self.layer.col=value
 end
 
 function cls_node_generic_particles:str()
@@ -575,7 +588,7 @@ end)
 node_types[9]=cls_node_jitter
 
 function cls_node_jitter:set_value(id,value)
- if (id==0) self:send_value(0,value+rnd(self.jitter))
+ if (id==0) self:send_value(0,value+mrnd(self.jitter))
  if (id==1) self.jitter=value
 end
 
@@ -593,9 +606,42 @@ function cls_node_circular_emitter:set_value(id,value)
    self:send_value(1,sin(i/self.cnt)*self.spd)
    self:send_value(2,value)
   end
+ else
+  if (id==1) self.cnt=value
+  if (id==2) self.spd=value
  end
- if (id==1) self.cnt=value
- if (id==2) self.spd=value
+end
+
+cls_node_linear_emitter=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+ self.start_x=64
+ self.start_y=64
+ self.cnt=6
+ self.spd_x=0
+ self.spd_y=-1
+ self.x_spacing=5
+ self.y_spacing=0
+end)
+node_types[13]=cls_node_linear_emitter;
+
+function cls_node_linear_emitter:set_value(id,value)
+ if id==0 and value>0 then
+  for i=1,self.cnt do
+   self:send_value(0,self.start_x+i*self.x_spacing)
+   self:send_value(1,self.start_y+i*self.y_spacing)
+   self:send_value(2,self.spd_x)
+   self:send_value(3,self.spd_y)
+   self:send_value(4,value)
+  end
+ else
+  if (id==1) self.cnt=value
+  if (id==2) self.start_x=value
+  if (id==3) self.start_y=value
+  if (id==4) self.spd_x=value
+  if (id==5) self.spd_y=value
+  if (id==6) self.x_spacing=value
+  if (id==7) self.y_spacing=value
+ end
 end
 
 

@@ -11,8 +11,11 @@
 
 -- x fix setting negative numbers
 -- x add generic particle node
--- add circular emitter
+-- x add circular emitter
+-- add duplicate node functionality
 -- add linear emitter
+-- add clear button
+-- add "recent projects"
 -- add function sockets for mapping
 -- better control and input node values
 -- add submodules

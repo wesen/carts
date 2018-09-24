@@ -171,6 +171,19 @@ function cls_node_mouse:str()
  return "mouse"
 end
 
+-- latch node
+
+cls_node_latch=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+ self.v=0
+end)
+node_types[14]=cls_node_latch
+
+function cls_node_latch:set_value(id,value)
+ if (id==0) self.v=value
+ if (id==1) self:send_value(0,self.v)
+end
+
 -- node rpc -------------------------
 
 function rpc_add_node(args)
