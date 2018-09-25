@@ -44,7 +44,7 @@ function cls_room:spawn_player(input_port)
    if (dist<min_dist) min_dist=dist
   end
   for p in all(spawn_points) do
-   local dist=sqrt((pos.x-p.x)^2+(pos.y-p.y)^2)
+   local dist=sqrt((pos.x-p.target_x)^2+(pos.y-p.target_y)^2)
    if (dist<min_dist) min_dist=dist
   end
   if min_dist>max_spawn_dist then

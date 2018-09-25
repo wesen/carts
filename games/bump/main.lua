@@ -38,15 +38,17 @@ function start_game()
  particles={}
  fireflies_init(v2(16,16))
  crs={}
+ music(-1,500)
  pwrup_counts=0
  for i=1,4 do
   scores[i]=0
  end
  make_transition(function()
-  mode=mode_transition
-  room=cls_room.init(v2(0,16),v2(16,16))
+ mode=mode_transition
+ room=cls_room.init(v2(0,16),v2(16,16))
  end, function()
   mode=mode_game
+  music(0,100)
   for input,v in pairs(connected_players) do
    if v==true then
     room:spawn_player(input)
@@ -56,7 +58,9 @@ function start_game()
 end
 
 function end_game()
+ music(-1,500)
  make_transition(nil,function()
+  music(48,100)
   mode=mode_end
  end)
 end
@@ -67,13 +71,13 @@ end
 
 function _init()
  poke(0x5f2d,1)
+ music(32)
  room=cls_room.init(v2(0,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
  -- room:spawn_player(p3_input)
  -- room:spawn_player(p4_input)
  fireflies_init(v2(16,16))
- music(0)
 end
 
 function update_a(a) a:update() end
@@ -122,7 +126,7 @@ function _draw()
    local _spr=start_sprites[winning_player]+flr(frame/8)%3
    local sx=_spr%16*8
    local sy=flr(_spr/16)*8
-   sspr(sx,sy,8,8,64-16,title_dy+56,32,32)
+   sspr(sx,sy,8,8,64-16,title_dy+58,32,32)
 
    if is_space_pressed() then
     run()
