@@ -12,8 +12,9 @@
 -- x fix setting negative numbers
 -- x add generic particle node
 -- x add circular emitter
+-- x add linear emitter
+-- add color sequence sockets
 -- add duplicate node functionality
--- add linear emitter
 -- add clear button
 -- add "recent projects"
 -- add function sockets for mapping
