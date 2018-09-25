@@ -272,6 +272,19 @@ function cls_node_latch:set_value(id,value)
  if (id==1) self:send_value(0,self.v)
 end
 
+-- order node
+cls_node_order=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+end)
+node_types[15]=cls_node_order
+
+function cls_node_order:set_value(id,value)
+ self:send_value(0,1)
+ self:send_value(1,1)
+ self:send_value(2,1)
+ self:send_value(3,1)
+ self:send_value(4,1)
+end
 -- node rpc -------------------------
 
 function rpc_add_node(args)
@@ -319,6 +332,37 @@ rpc_dispatch[2]=rpc_rm_node
 rpc_dispatch[3]=rpc_add_connection
 rpc_dispatch[4]=rpc_rm_connection
 rpc_dispatch[5]=rpc_set_value
+
+console_lines={}
+console_size=15
+
+function clear_console()
+ console_lines={}
+end
+
+function shift_console()
+ if #console_lines>=15 then
+  for i=2,15 do
+   console_lines[i-1]=console_lines[i]
+  end
+  for i=15,#console_lines do
+   console_lines[i]=nil
+  end
+ end
+end
+
+function cstr(str)
+ shift_console()
+ console_lines[#console_lines+1]=str
+end
+
+function draw_console()
+ local i=0
+ for _,v in pairs(console_lines) do
+  print(console_lines[i],0,i*6)
+  i+=1
+ end
+end
 
 
 -- functions
@@ -438,6 +482,7 @@ function cls_layer:emit(x,y)
           spd_x=self.default_speed_x,
           spd_y=self.default_speed_y,
           t=0,
+          col=self.col,
           weight=self.default_weight,
           damping=self.default_damping,
           radius=self.default_radius,
@@ -482,7 +527,7 @@ end
 
 function cls_layer:draw()
  for p in all(self.particles) do
-  local col=self.col
+  local col=p.col
   if col==nil then
    col=self.cols[flr(#self.cols*p.t/p.lifetime)+1]
   end
@@ -599,6 +644,8 @@ cls_node_circular_emitter=subclass(cls_node,function(self,args)
 end)
 node_types[12]=cls_node_circular_emitter
 
+local tick=0
+
 function cls_node_circular_emitter:set_value(id,value)
  if id==0 and value>0 then
   for i=1,self.cnt do
@@ -606,6 +653,7 @@ function cls_node_circular_emitter:set_value(id,value)
    self:send_value(1,sin(i/self.cnt)*self.spd)
    self:send_value(2,value)
   end
+  tick+=1
  else
   if (id==1) self.cnt=value
   if (id==2) self.spd=value
@@ -677,6 +725,8 @@ function _draw()
  -- end
  -- print(debug_str,0,0,7)
 
+ draw_console()
+
  print(tostr(stat(1)),0, 110,7)
  print(tostr(stat(0)),0, 116,7)
 end
@@ -685,6 +735,5 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00077000000006660000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

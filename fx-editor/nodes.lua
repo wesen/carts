@@ -184,6 +184,19 @@ function cls_node_latch:set_value(id,value)
  if (id==1) self:send_value(0,self.v)
 end
 
+-- order node
+cls_node_order=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+end)
+node_types[15]=cls_node_order
+
+function cls_node_order:set_value(id,value)
+ self:send_value(0,1)
+ self:send_value(1,1)
+ self:send_value(2,1)
+ self:send_value(3,1)
+ self:send_value(4,1)
+end
 -- node rpc -------------------------
 
 function rpc_add_node(args)

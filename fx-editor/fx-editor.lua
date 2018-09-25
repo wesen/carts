@@ -2,6 +2,7 @@
 --#include strings
 --#include rpc
 --#include nodes
+--#include console
 
 --#include helpers
 --#include tween
@@ -41,6 +42,8 @@ function _draw()
  --  i+=1
  -- end
  -- print(debug_str,0,0,7)
+
+ draw_console()
 
  print(tostr(stat(1)),0, 110,7)
  print(tostr(stat(0)),0, 116,7)

@@ -18,6 +18,7 @@ const NODE_TYPE_FUNCTION_MULTADD = 11;
 const NODE_TYPE_CIRCULAR_EMITTER = 12;
 const NODE_TYPE_LINE_EMITTER = 13;
 const NODE_TYPE_LATCH=14;
+const NODE_TYPE_ORDER=15;
 
 class EditorNode extends Rete.Component {
   constructor(name, type) {
@@ -188,10 +189,13 @@ class GenericParticleNode extends ParticleNode {
       .addInputControl('weight', NumControl)
       .addInput('damping', 8, 'Damping', numSocket, 1)
       .addInputControl('damping', NumControl)
-      .addInput('fill', 9, 'Fill', numSocket, 0)
-      .addInputControl('fill', NumControl)
+      .addInput('fill', 9, 'Fill', boolSocket, 0)
+      .addInputControl('fill', BoolControl)
       .addInput('color', 10, 'Color', numSocket, 7)
-      .addInputControl('color', NumControl);
+      .addInputControl('color', NumControl)
+      .addInput('circle', 11, 'Circle', boolSocket, true)
+      .addInputControl('circle', BoolControl)
+    ;
   }
 }
 
@@ -235,7 +239,6 @@ class LinearEmitterNode extends EditorNode {
       .addOutput('spd_x', 2, 'X Speed', numSocket)
       .addOutput('spd_y', 3, 'Y Speed', numSocket)
       .addOutput('emit', 4, 'Emit', triggerSocket);
-
   }
 }
 
@@ -246,6 +249,19 @@ class LatchNode extends EditorNode {
       .addInputControl('v', NumControl)
       .addInput("trigger", 1, 'Trigger', triggerSocket)
       .addOutput('value', 0, 'Value', numSocket);
+  }
+}
+
+class OrderNode extends EditorNode {
+  constructor() {
+    super("Order", NODE_TYPE_ORDER);
+    this
+      .addInput("trigger", 0, 'Trigger', triggerSocket)
+      .addOutput('emit1', 0, 'Emit1', triggerSocket)
+      .addOutput('emit2', 1, 'Emit2', triggerSocket)
+      .addOutput('emit3', 2, 'Emit3', triggerSocket)
+      .addOutput('emit4', 3, 'Emit4', triggerSocket)
+      .addOutput('emit5', 4, 'Emit5', triggerSocket);
   }
 }
 
@@ -261,5 +277,6 @@ const components = [
   new CircularEmitterNode(),
   new LinearEmitterNode(),
   new LatchNode(),
+  new OrderNode(),
 ];
 

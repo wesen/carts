@@ -47,10 +47,49 @@ var VueNumControl = {
   }
 };
 
+var VueBoolControl = {
+  props: ['readonly', 'emitter', 'ikey', 'getData', 'putData', 'control'],
+  template: '<div>{{ikey}} <input type="checkbox" :readonly="readonly" :checked="value" @input="change($event)"/></div>',
+  data() {
+    return {
+      value: false,
+    }
+  },
+  methods: {
+    change(e) {
+      console.log("Changed value", e.target.checked, typeof(e.target.value));
+      this.value = e.target.checked;
+      this.update();
+    },
+    update() {
+      if (this.ikey) {
+        this.putData(this.ikey, this.value)
+      }
+      this.emitter.trigger('process');
+      onControlChanged(this.control);
+    }
+  },
+  mounted() {
+    this.value = this.getData(this.ikey);
+  }
+};
+
 class NumControl extends Rete.Control {
   constructor(emitter, key, readonly, id) {
     super(key);
     this.component = VueNumControl;
+    this.props = {emitter, ikey: key, readonly, control: this};
+  }
+
+  setValue(val) {
+    this.vueContext.value = val;
+  }
+}
+
+class BoolControl extends Rete.Control {
+  constructor(emitter, key, readonly, id) {
+    super(key);
+    this.component = VueBoolControl;
     this.props = {emitter, ikey: key, readonly, control: this};
   }
 

@@ -29,6 +29,7 @@ function cls_layer:emit(x,y)
           spd_x=self.default_speed_x,
           spd_y=self.default_speed_y,
           t=0,
+          col=self.col,
           weight=self.default_weight,
           damping=self.default_damping,
           radius=self.default_radius,
@@ -73,7 +74,7 @@ end
 
 function cls_layer:draw()
  for p in all(self.particles) do
-  local col=self.col
+  local col=p.col
   if col==nil then
    col=self.cols[flr(#self.cols*p.t/p.lifetime)+1]
   end

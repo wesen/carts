@@ -5,6 +5,8 @@ cls_node_circular_emitter=subclass(cls_node,function(self,args)
 end)
 node_types[12]=cls_node_circular_emitter
 
+local tick=0
+
 function cls_node_circular_emitter:set_value(id,value)
  if id==0 and value>0 then
   for i=1,self.cnt do
@@ -12,6 +14,7 @@ function cls_node_circular_emitter:set_value(id,value)
    self:send_value(1,sin(i/self.cnt)*self.spd)
    self:send_value(2,value)
   end
+  tick+=1
  else
   if (id==1) self.cnt=value
   if (id==2) self.spd=value
