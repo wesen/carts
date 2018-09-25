@@ -50,8 +50,8 @@ function glitch_str(s)
   aberration_str("- pixelgore 2018 -",title_dy+39)
   aberration_str("- space=start -",title_dy+48)
   if mode==mode_title then
-   aberration_str("\x8e throw",title_dy+61,86)
-   aberration_str("\x97 join/jump",title_dy+61,10)
+   aberration_str("\x97 throw",title_dy+61,86)
+   aberration_str("\x8e join/jump",title_dy+61,10)
   end
   if (s!=nil) aberration_str(s,title_dy+96)
   for i=0,1 do
@@ -64,8 +64,8 @@ function glitch_str(s)
   center_print("- pixelgore 2018 -",title_dy+39)
   center_print("- press space to start -",title_dy+48)
   if mode==mode_title then
-   center_print("\x8e throw",title_dy+61,86)
-   center_print("\x97 join/jump",title_dy+61,10)
+   center_print("\x97 throw",title_dy+61,86)
+   center_print("\x8e join/jump",title_dy+61,10)
   end
   if (s!=nil) center_print(s,title_dy+96)
  end

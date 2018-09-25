@@ -48,7 +48,7 @@ function start_game()
  room=cls_room.init(v2(0,16),v2(16,16))
  end, function()
   mode=mode_game
-  music(0,100)
+  music(0,100,16)
   for input,v in pairs(connected_players) do
    if v==true then
     room:spawn_player(input)
@@ -60,7 +60,7 @@ end
 function end_game()
  music(-1,500)
  make_transition(nil,function()
-  music(48,100)
+  music(48,100,16)
   mode=mode_end
  end)
 end
@@ -71,7 +71,7 @@ end
 
 function _init()
  poke(0x5f2d,1)
- music(32)
+ music(32,100,16)
  room=cls_room.init(v2(0,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)

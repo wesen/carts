@@ -53,7 +53,7 @@ jump_max_hold_time=15
 
 ground_grace_interval=6
 
-win_threshold=0
+win_threshold=9
 
 
 function class (init)
@@ -409,8 +409,8 @@ function glitch_str(s)
   aberration_str("- pixelgore 2018 -",title_dy+39)
   aberration_str("- space=start -",title_dy+48)
   if mode==mode_title then
-   aberration_str("\x8e throw",title_dy+61,86)
-   aberration_str("\x97 join/jump",title_dy+61,10)
+   aberration_str("\x97 throw",title_dy+61,86)
+   aberration_str("\x8e join/jump",title_dy+61,10)
   end
   if (s!=nil) aberration_str(s,title_dy+96)
   for i=0,1 do
@@ -423,8 +423,8 @@ function glitch_str(s)
   center_print("- pixelgore 2018 -",title_dy+39)
   center_print("- press space to start -",title_dy+48)
   if mode==mode_title then
-   center_print("\x8e throw",title_dy+61,86)
-   center_print("\x97 join/jump",title_dy+61,10)
+   center_print("\x97 throw",title_dy+61,86)
+   center_print("\x8e join/jump",title_dy+61,10)
   end
   if (s!=nil) center_print(s,title_dy+96)
  end
@@ -1890,7 +1890,7 @@ function start_game()
  room=cls_room.init(v2(0,16),v2(16,16))
  end, function()
   mode=mode_game
-  music(0,100)
+  music(0,100,16)
   for input,v in pairs(connected_players) do
    if v==true then
     room:spawn_player(input)
@@ -1902,7 +1902,7 @@ end
 function end_game()
  music(-1,500)
  make_transition(nil,function()
-  music(48,100)
+  music(48,100,16)
   mode=mode_end
  end)
 end
@@ -1913,7 +1913,7 @@ end
 
 function _init()
  poke(0x5f2d,1)
- music(32)
+ music(32,100,16)
  room=cls_room.init(v2(0,0),v2(16,16))
  room:spawn_player(p1_input)
  room:spawn_player(p2_input)
