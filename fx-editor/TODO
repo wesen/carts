@@ -30,3 +30,5 @@
 -- comparator modules
 -- add lua generation for the graph so that this can be debugged in the console
 -- add flag input controls
+
+-- draw ordering

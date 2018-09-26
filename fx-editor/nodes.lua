@@ -43,8 +43,21 @@ end
 
 function cls_node:set_rpc_value(args)
  local id=args[2]
- local value=bor(shl(args[3],8),bor(args[4],bor(shr(args[5],8),shr(args[6],16))))
- debug_str="set value "..tostr(id).." value "..tostr(value).." "..tostr(args[3])..","..tostr(args[4])..","..tostr(args[5])..","..tostr(args[6])
+ local value
+ local idx=3
+ local type=args[idx]
+ if type==0 then
+  value=decode_number(args,idx+1)
+ elseif type==1 then
+  value=args[idx+1]!=0
+ elseif type==2 then
+  value={}
+  for k=1,args[idx+1] do
+   value[k]=decode_number(args,idx+2)
+   idx+=4
+  end
+ end
+ -- cstr("set rpc value "..tostr(id)..": "..tostr(type).." "..tostr(value))
  self:set_value(id,value)
 end
 

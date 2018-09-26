@@ -76,15 +76,9 @@ function dispatch_rpc()
  end
 end
 
-hello_world_args={0,0,0}
-
-function rpc_hello_world(args)
- for i,v in pairs(args) do
-  hello_world_args[i]=v
- end
- return {5,6,7}
+function decode_number(args,i)
+ return bor(shl(args[i],8),bor(args[i+1],bor(shr(args[i+2],8),shr(args[i+3],16))))
 end
-rpc_dispatch[0]=rpc_hello_world
 
 node_types={}
 nodes={}
@@ -131,8 +125,21 @@ end
 
 function cls_node:set_rpc_value(args)
  local id=args[2]
- local value=bor(shl(args[3],8),bor(args[4],bor(shr(args[5],8),shr(args[6],16))))
- debug_str="set value "..tostr(id).." value "..tostr(value).." "..tostr(args[3])..","..tostr(args[4])..","..tostr(args[5])..","..tostr(args[6])
+ local value
+ local idx=3
+ local type=args[idx]
+ if type==0 then
+  value=decode_number(args,idx+1)
+ elseif type==1 then
+  value=args[idx+1]!=0
+ elseif type==2 then
+  value={}
+  for k=1,args[idx+1] do
+   value[k]=decode_number(args,idx+2)
+   idx+=4
+  end
+ end
+ -- cstr("set rpc value "..tostr(id)..": "..tostr(type).." "..tostr(value))
  self:set_value(id,value)
 end
 
@@ -462,8 +469,7 @@ cls_layer=class(function(self)
  self.gravity=0.1
  self.default_weight=1
  self.fill=false
- self.col=7
- self.cols=nil
+ self.cols={7}
  self.grow=false
  self.trail_duration=0
  self.trails={}
@@ -482,7 +488,7 @@ function cls_layer:emit(x,y)
           spd_x=self.default_speed_x,
           spd_y=self.default_speed_y,
           t=0,
-          col=self.col,
+          cols=self.cols,
           weight=self.default_weight,
           damping=self.default_damping,
           radius=self.default_radius,
@@ -527,16 +533,21 @@ end
 
 function cls_layer:draw()
  for p in all(self.particles) do
-  local col=p.col
-  if col==nil then
-   col=self.cols[flr(#self.cols*p.t/p.lifetime)+1]
-  end
+  local col=p.cols[flr(#p.cols*p.t/p.lifetime)+1]
   local radius=p.radius*(1-p.t/p.lifetime)
   if (self.grow) radius=p.radius-radius
   if self.fill then
-   circfill(p.x,p.y,radius,col)
+   if self.draw_circle then
+    circfill(p.x,p.y,radius,col)
+   else
+    rectfill(p.x-radius/2,p.y-radius/2,p.x+radius/2,p.y+radius/2,col)
+   end
   else
-   circ(p.x,p.y,radius,col)
+   if self.draw_circle then
+    circ(p.x,p.y,radius,col)
+   else
+    rect(p.x-radius/2,p.y-radius/2,p.x+radius/2,p.y+radius/2,col)
+   end
   end
  end
 
@@ -594,8 +605,15 @@ function cls_node_generic_particles:set_value(id,value)
  if (id==6) self.layer.default_radius=value
  if (id==7) self.layer.default_weight=value
  if (id==8) self.layer.default_damping=value
- if (id==9) self.layer.fill=value>0
- if (id==10) self.layer.col=value
+ if (id==9) self.layer.fill=value
+ if id==10 then
+  if type(value)=="number" then
+   self.layer.cols={value}
+  else
+   self.layer.cols=value
+  end
+ end
+ if (id==11) self.layer.draw_circle=value
 end
 
 function cls_node_generic_particles:str()

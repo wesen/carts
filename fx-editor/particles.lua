@@ -9,8 +9,7 @@ cls_layer=class(function(self)
  self.gravity=0.1
  self.default_weight=1
  self.fill=false
- self.col=7
- self.cols=nil
+ self.cols={7}
  self.grow=false
  self.trail_duration=0
  self.trails={}
@@ -29,7 +28,7 @@ function cls_layer:emit(x,y)
           spd_x=self.default_speed_x,
           spd_y=self.default_speed_y,
           t=0,
-          col=self.col,
+          cols=self.cols,
           weight=self.default_weight,
           damping=self.default_damping,
           radius=self.default_radius,
@@ -74,16 +73,21 @@ end
 
 function cls_layer:draw()
  for p in all(self.particles) do
-  local col=p.col
-  if col==nil then
-   col=self.cols[flr(#self.cols*p.t/p.lifetime)+1]
-  end
+  local col=p.cols[flr(#p.cols*p.t/p.lifetime)+1]
   local radius=p.radius*(1-p.t/p.lifetime)
   if (self.grow) radius=p.radius-radius
   if self.fill then
-   circfill(p.x,p.y,radius,col)
+   if self.draw_circle then
+    circfill(p.x,p.y,radius,col)
+   else
+    rectfill(p.x-radius/2,p.y-radius/2,p.x+radius/2,p.y+radius/2,col)
+   end
   else
-   circ(p.x,p.y,radius,col)
+   if self.draw_circle then
+    circ(p.x,p.y,radius,col)
+   else
+    rect(p.x-radius/2,p.y-radius/2,p.x+radius/2,p.y+radius/2,col)
+   end
   end
  end
 

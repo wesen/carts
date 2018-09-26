@@ -5,6 +5,10 @@ const RPC_TYPE_ADD_CONNECTION = 3;
 const RPC_TYPE_REMOVE_CONNECTION = 4;
 const RPC_TYPE_SET_VALUE = 5;
 
+const RPC_TYPE_NUMBER = 0;
+const RPC_TYPE_BOOLEAN = 1;
+const RPC_TYPE_NUMBER_ARRAY = 2;
+
 class RPCCall {
   constructor(type, args, callback) {
     this.type = type;
@@ -74,8 +78,4 @@ function handleGpios() {
 
 requestAnimationFrame(handleGpios);
 
-
-doRpcCall(RPC_TYPE_HELLO_WORLD, [2, 3, 4], function (vals) {
-  console.log("Hello world", vals);
-});
 

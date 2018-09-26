@@ -22,12 +22,6 @@ function dispatch_rpc()
  end
 end
 
-hello_world_args={0,0,0}
-
-function rpc_hello_world(args)
- for i,v in pairs(args) do
-  hello_world_args[i]=v
- end
- return {5,6,7}
+function decode_number(args,i)
+ return bor(shl(args[i],8),bor(args[i+1],bor(shr(args[i+2],8),shr(args[i+3],16))))
 end
-rpc_dispatch[0]=rpc_hello_world

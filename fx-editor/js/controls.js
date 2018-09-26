@@ -1,20 +1,52 @@
+function encodeData(data) {
+  var res = [];
+  switch (typeof(data)) {
+    case "number":
+      res.push(RPC_TYPE_NUMBER);
+      res = res.concat(encodeNumber(data));
+      break;
+
+    case "boolean":
+      res.push(RPC_TYPE_BOOLEAN);
+      res.push(data ? 1 : 0);
+      break;
+
+    case "object":
+      res.push(RPC_TYPE_NUMBER_ARRAY);
+      res.push(data.length);
+      for (let i = 0; i < data.length; i++) {
+        res = res.concat(encodeNumber(data[i]));
+      }
+      break;
+  }
+
+  return res;
+}
+
+function encodeNumber(data) {
+  var fractional = Math.floor((data % 1.) * 65536.);
+
+  var integer = Math.floor(data);
+  if (integer < 0) {
+    integer = 0xffff + integer;
+  }
+
+  return [
+    Math.floor(integer / 256),
+    integer % 256,
+    fractional / 256,
+    fractional % 256];
+}
+
 function onControlChanged(control) {
   var node = control.getNode();
   var data = control.getData(control.key);
   console.log("onControlChange", control, node, data);
 
   // for now, we only deal with numbers
-  var fractional = Math.floor((data % 1.) * 65536.);
-  var integer = Math.floor(data);
-  if (integer < 0) {
-    integer = 0xffff + integer;
-  }
   var args = [
-    node.id, node.inputNumbers[control.key],
-    integer / 256,
-    integer % 256,
-    fractional / 256,
-    fractional % 256];
+    node.id, node.inputNumbers[control.key]
+  ].concat(encodeData(data));
 
   doRpcCall(RPC_TYPE_SET_VALUE, args, function (args) {
     console.log("Set value", args)
