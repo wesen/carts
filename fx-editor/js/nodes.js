@@ -2,6 +2,7 @@ const numSocket = new Rete.Socket('Number');
 const boolSocket = new Rete.Socket('Boolean');
 const triggerSocket = new Rete.Socket('Trigger');
 const functionSocket = new Rete.Socket('Function');
+const colorSocket = new Rete.Socket('Color');
 
 const NODE_TYPE_RECT = 0;
 const NODE_TYPE_SINE = 1;
@@ -191,8 +192,8 @@ class GenericParticleNode extends ParticleNode {
       .addInputControl('damping', NumControl)
       .addInput('fill', 9, 'Fill', boolSocket, 0)
       .addInputControl('fill', BoolControl)
-      .addInput('color', 10, 'Color', numSocket, 7)
-      .addInputControl('color', NumControl)
+      .addInput('color', 10, 'Color', colorSocket, [7])
+      .addInputControl('color', ColorControl)
       .addInput('circle', 11, 'Circle', boolSocket, true)
       .addInputControl('circle', BoolControl)
     ;
