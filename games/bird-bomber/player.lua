@@ -1,20 +1,19 @@
 cls_player=subclass(cls_actor,function(self)
- self.pos=v2(10,80)
+ cls_actor._ctr(self,10,80)
  self.fly_button=cls_button.init(btn_fly,30)
  -- self.fire_button=cls_button.init(btn_fire,30)
- self.spd=v2(0,0)
- self.hitbox=hitbox(v2(0,0),v2(8,8))
  self.is_solid=true
  self.spr=35
- self.flip=v2(false,false)
+ self.fliph=false
+ self.flipv=false
  self.prev_input=0
  self.weight=0.5
- del(actors,self)
+ del(glb_actors,self)
 end)
 
 function cls_player:draw()
  palt(7,true)
- spr(self.spr,self.pos.x,self.pos.y,1,1,not self.flip.x,self.flip.y)
+ spr(self.spr,self.x,self.y,1,1,not self.fliph,self.flipv)
  palt()
 end
 
@@ -30,12 +29,12 @@ function cls_player:update()
  local accel=0.1
  local decel=0.01
 
- if abs(self.spd.x)>maxrun then
-  self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
+ if abs(self.spdx)>maxrun then
+  self.spdx=appr(self.spdx,sign(self.spdx)*maxrun,decel)
  elseif input != 0 then
-  self.spd.x=appr(self.spd.x,input*maxrun,accel)
+  self.spdx=appr(self.spdx,input*maxrun,accel)
  else
-  self.spd.x=appr(self.spd.x,0,decel)
+  self.spdx=appr(self.spdx,0,decel)
  end
 
  local maxfall=2
@@ -45,25 +44,26 @@ function cls_player:update()
  if self.fly_button.is_down then
   if self.fly_button:is_held() or self.fly_button:was_just_pressed() then
    self.spr=36
-   self.spd.y=-1.2
+   self.spdy=-1.2
    self.fly_button.hold_time+=1
   end
   if (self.fly_button:was_just_pressed()) sfx(14)
  end
 
- self.spd.y=appr(self.spd.y,maxfall,gravity)
- local dir=self.flip.x and -1 or 1
+ self.spdy=appr(self.spdy,maxfall,gravity)
+ local dir=self.fliph and -1 or 1
 
- self:move(self.spd)
+
+ self:move_x(self.spdx)
+ self:move_y(self.spdy)
 
  if input!=self.prev_input and input!=0 then
-  printh("Update input")
-  self.flip.x=input==-1
+  self.fliph=input==-1
  end
  self.prev_input=input
 
  if btnp(btn_fire) then
-  cls_projectile.init(self.pos+v2(0,8),v2(self.spd.x+dir*0.5,0))
+  cls_projectile.init(self.x,self.y+8,self.spdx+dir*0.5,0)
   sfx(16)
  end
 end

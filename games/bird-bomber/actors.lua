@@ -1,28 +1,27 @@
-actor_cnt=0
-actors={}
+glb_actors={}
 
-cls_actor=class(function(self,pos)
- self.pos=pos
- self.id=actor_cnt
- actor_cnt+=1
- self.spd=v2(0,0)
+cls_actor=class(function(self,x,y)
+ self.x=x
+ self.y=y
+ self.spdx=0
+ self.spdy=0
  self.is_solid=true
- self.hitbox=hitbox(v2(0,0),v2(8,8))
- add(actors,self)
+ self.hitbox={x=0.5,y=0.5,dimx=7,dimy=7}
+ self:update_bbox()
+ add(glb_actors,self)
 end)
 
-function cls_actor:bbox(offset)
- if (offset==nil) offset=v2(0,0)
- return self.hitbox:to_bbox_at(self.pos+offset)
+function cls_actor:update_bbox()
+ self.aax=self.hitbox.x+self.x
+ self.aay=self.hitbox.y+self.y
+ self.bbx=self.aax+self.hitbox.dimx
+ self.bby=self.aay+self.hitbox.dimy
 end
 
-function cls_actor:str()
- return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
+function cls_actor:draw()
 end
 
-function cls_actor:move(o)
- self:move_x(o.x)
- self:move_y(o.y)
+function cls_actor:update()
 end
 
 function cls_actor:move_x(amount)
@@ -30,16 +29,27 @@ function cls_actor:move_x(amount)
   while abs(amount)>0 do
    local step=amount
    if (abs(amount)>1) step=sign(amount)
-   amount-=step
-   if not self:is_solid_at(v2(step,0)) then
-    self.pos.x+=step
+   local solid=solid_at_offset(self,step,0)
+   local actor=self:is_actor_at(step,0)
+
+   if solid or actor then
+    if abs(step)<0.1 then
+     self.spdx=0
+     break
+    else
+     amount/=2
+    end
    else
-    self.spd.x=0
-    break
+    amount-=step
+    self.x+=step
+    self.aax+=step
+    self.bbx+=step
    end
   end
  else
-  self.pos.x+=amount
+  self.x+=amount
+  self.aax+=amount
+  self.bbx+=amount
  end
 end
 
@@ -48,48 +58,34 @@ function cls_actor:move_y(amount)
   while abs(amount)>0 do
    local step=amount
    if (abs(amount)>1) step=sign(amount)
-   amount-=step
-   if not self:is_solid_at(v2(0,step)) then
-    self.pos.y+=step
+
+   local solid=solid_at_offset(self,0,step)
+   local actor,a=self:is_actor_at(0,step)
+
+   if solid or actor then
+    if abs(step)<0.1 then
+     self.spdy=0
+     break
+    else
+     amount/=2
+    end
    else
-    self.spd.y=0
-    break
+    amount-=step
+    self.y+=step
+    self.aay+=step
+    self.bby+=step
    end
   end
  else
-  self.pos.y+=amount
+  self.y+=amount
+  self.aay+=amount
+  self.bby+=amount
  end
 end
 
-function cls_actor:is_solid_at(offset)
- return solid_at(self:bbox(offset))
-end
-
-function cls_actor:collides_with(other_actor)
- return self:bbox():collide(other_actor:bbox())
-end
-
-function cls_actor:get_collisions(typ,offset)
- local res={}
-
- local bbox=self:bbox(offset)
- for actor in all(actors) do
-  if actor!=self and actor.typ==typ then
-   if (bbox:collide(actor:bbox())) add(res,actor)
-  end
+function cls_actor:is_actor_at(x,y)
+ for actor in all(glbl_actors) do
+  if (actor.is_solid and self!=actor and do_bbox_collide_offset(self,actor,x,y)) return true,actor
  end
-
- return res
-end
-
-function draw_actors(typ)
- for a in all(actors) do
-  if ((typ==nil or a.typ==typ) and a.draw!=nil) a:draw()
- end
-end
-
-function update_actors(typ)
- for a in all(actors) do
-  if ((typ==nil or a.typ==typ) and a.update!=nil) a:update()
- end
+ return false
 end

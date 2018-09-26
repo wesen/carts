@@ -2,7 +2,6 @@
 --#include helpers
 --#include v2
 --#include bbox
---#include hitbox
 --#include globals
 --#include coroutines
 

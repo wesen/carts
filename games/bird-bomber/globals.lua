@@ -1,9 +1,9 @@
-frame=0
-dt=0
-lasttime=time()
-crs={}
+glb_frame=0
+glb_dt=0
+glb_lasttime=time()
+glb_crs={}
 
-player=nil
+glb_player=nil
 
 btn_right=1
 btn_left=0

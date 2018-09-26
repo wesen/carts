@@ -9,19 +9,13 @@ function tick_crs(crs_)
  end
 end
 
-function add_cr(f)
+function add_cr(f,crs_)
  local cr=cocreate(f)
- add(crs,cr)
+ add(crs_,cr)
  return cr
 end
 
-function add_draw_cr(f)
- local cr=cocreate(f)
- add(draw_crs,cr)
- return cr
-end
-
-function wait_for(t)
+function cr_wait_for(t)
  while t>0 do
   t-=dt
   yield()

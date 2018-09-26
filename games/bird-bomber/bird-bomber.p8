@@ -159,85 +159,29 @@ function dir2vec(dir)
 end
 
 function angle2vec(angle)
- return v2(cos(angle),sin(angle))
+ return cos(angle),sin(angle)
 end
 
-local bboxvt={}
-bboxvt.__index=bboxvt
-
-function bbox(aa,bb)
- return setmetatable({aa=aa,bb=bb},bboxvt)
+function do_bboxes_collide(a,b)
+ return a.bbx > b.aax and
+  a.bby > b.aay and
+  a.aax < b.bbx and
+  a.aay < b.bby
 end
 
-function bboxvt:w()
- return self.bb.x-self.aa.x
+function do_bboxes_collide_offset(a,b,dx,dy)
+ return (a.bbx+dx) > b.aax and
+   (a.bby+dy) > b.aay and
+   (a.aax+dx) < b.bbx and
+   (a.aay+dy) < b.bby
 end
 
-function bboxvt:h()
- return self.bb.y-self.aa.y
-end
+glb_frame=0
+glb_dt=0
+glb_lasttime=time()
+glb_crs={}
 
-function bboxvt:is_inside(v)
- return v.x>=self.aa.x
- and v.x<=self.bb.x
- and v.y>=self.aa.y
- and v.y<=self.bb.y
-end
-
-function bboxvt:str()
- return self.aa:str().."-"..self.bb:str()
-end
-
-function bboxvt:draw(col)
- rect(self.aa.x,self.aa.y,self.bb.x-1,self.bb.y-1,col)
-end
-
-function bboxvt:to_tile_bbox()
- local x0=max(0,flr(self.aa.x/8))
- local x1=min(level.dim.x,(self.bb.x-1)/8)
- local y0=max(0,flr(self.aa.y/8))
- local y1=min(level.dim.y,(self.bb.y-1)/8)
- return bbox(v2(x0,y0),v2(x1,y1))
-end
-
-function bboxvt:collide(other)
- return other.bb.x > self.aa.x and
-   other.bb.y > self.aa.y and
-   other.aa.x < self.bb.x and
-   other.aa.y < self.bb.y
-end
-
-function bboxvt:clip(p)
- return v2(mid(self.aa.x,p.x,self.bb.x),
-           mid(self.aa.y,p.y,self.bb.y))
-end
-
-function bboxvt:shrink(amt)
- local v=v2(amt,amt)
- return bbox(v+self.aa,self.bb-v)
-end
-
-local hitboxvt={}
-hitboxvt.__index=hitboxvt
-
-function hitbox(offset,dim)
- return setmetatable({offset=offset,dim=dim},hitboxvt)
-end
-
-function hitboxvt:to_bbox_at(v)
- return bbox(self.offset+v,self.offset+v+self.dim)
-end
-
-function hitboxvt:str()
- return self.offset:str().."-("..self.dim:str()..")"
-end
-
-frame=0
-dt=0
-lasttime=time()
-crs={}
-
-player=nil
+glb_player=nil
 
 btn_right=1
 btn_left=0
@@ -255,19 +199,13 @@ function tick_crs(crs_)
  end
 end
 
-function add_cr(f)
+function add_cr(f,crs_)
  local cr=cocreate(f)
- add(crs,cr)
+ add(crs_,cr)
  return cr
 end
 
-function add_draw_cr(f)
- local cr=cocreate(f)
- add(draw_crs,cr)
- return cr
-end
-
-function wait_for(t)
+function cr_wait_for(t)
  while t>0 do
   t-=dt
   yield()
@@ -275,31 +213,30 @@ function wait_for(t)
 end
 
 
-actor_cnt=0
-actors={}
+glb_actors={}
 
-cls_actor=class(function(self,pos)
- self.pos=pos
- self.id=actor_cnt
- actor_cnt+=1
- self.spd=v2(0,0)
+cls_actor=class(function(self,x,y)
+ self.x=x
+ self.y=y
+ self.spdx=0
+ self.spdy=0
  self.is_solid=true
- self.hitbox=hitbox(v2(0,0),v2(8,8))
- add(actors,self)
+ self.hitbox={x=0.5,y=0.5,dimx=7,dimy=7}
+ self:update_bbox()
+ add(glb_actors,self)
 end)
 
-function cls_actor:bbox(offset)
- if (offset==nil) offset=v2(0,0)
- return self.hitbox:to_bbox_at(self.pos+offset)
+function cls_actor:update_bbox()
+ self.aax=self.hitbox.x+self.x
+ self.aay=self.hitbox.y+self.y
+ self.bbx=self.aax+self.hitbox.dimx
+ self.bby=self.aay+self.hitbox.dimy
 end
 
-function cls_actor:str()
- return "actor["..tostr(self.id)..",t:"..tostr(self.typ).."]"
+function cls_actor:draw()
 end
 
-function cls_actor:move(o)
- self:move_x(o.x)
- self:move_y(o.y)
+function cls_actor:update()
 end
 
 function cls_actor:move_x(amount)
@@ -307,16 +244,27 @@ function cls_actor:move_x(amount)
   while abs(amount)>0 do
    local step=amount
    if (abs(amount)>1) step=sign(amount)
-   amount-=step
-   if not self:is_solid_at(v2(step,0)) then
-    self.pos.x+=step
+   local solid=solid_at_offset(self,step,0)
+   local actor=self:is_actor_at(step,0)
+
+   if solid or actor then
+    if abs(step)<0.1 then
+     self.spdx=0
+     break
+    else
+     amount/=2
+    end
    else
-    self.spd.x=0
-    break
+    amount-=step
+    self.x+=step
+    self.aax+=step
+    self.bbx+=step
    end
   end
  else
-  self.pos.x+=amount
+  self.x+=amount
+  self.aax+=amount
+  self.bbx+=amount
  end
 end
 
@@ -325,53 +273,39 @@ function cls_actor:move_y(amount)
   while abs(amount)>0 do
    local step=amount
    if (abs(amount)>1) step=sign(amount)
-   amount-=step
-   if not self:is_solid_at(v2(0,step)) then
-    self.pos.y+=step
+
+   local solid=solid_at_offset(self,0,step)
+   local actor,a=self:is_actor_at(0,step)
+
+   if solid or actor then
+    if abs(step)<0.1 then
+     self.spdy=0
+     break
+    else
+     amount/=2
+    end
    else
-    self.spd.y=0
-    break
+    amount-=step
+    self.y+=step
+    self.aay+=step
+    self.bby+=step
    end
   end
  else
-  self.pos.y+=amount
+  self.y+=amount
+  self.aay+=amount
+  self.bby+=amount
  end
 end
 
-function cls_actor:is_solid_at(offset)
- return solid_at(self:bbox(offset))
-end
-
-function cls_actor:collides_with(other_actor)
- return self:bbox():collide(other_actor:bbox())
-end
-
-function cls_actor:get_collisions(typ,offset)
- local res={}
-
- local bbox=self:bbox(offset)
- for actor in all(actors) do
-  if actor!=self and actor.typ==typ then
-   if (bbox:collide(actor:bbox())) add(res,actor)
-  end
+function cls_actor:is_actor_at(x,y)
+ for actor in all(glbl_actors) do
+  if (actor.is_solid and self!=actor and do_bbox_collide_offset(self,actor,x,y)) return true,actor
  end
-
- return res
+ return false
 end
 
-function draw_actors(typ)
- for a in all(actors) do
-  if ((typ==nil or a.typ==typ) and a.draw!=nil) a:draw()
- end
-end
-
-function update_actors(typ)
- for a in all(actors) do
-  if ((typ==nil or a.typ==typ) and a.update!=nil) a:update()
- end
-end
-
-level=nil
+glb_level=nil
 
 cls_level=class(function(self)
 end)
@@ -380,48 +314,27 @@ function cls_level:draw()
  map(0,0,0,0,32,16)
 end
 
-function cls_level:bbox()
- return bbox(v2(0,0),v2(256,128))
-end
-
-function cls_level:update()
-end
-
-function cls_level:solid_at(bbox)
- if bbox.aa.x<0
-  or bbox.bb.x>256
-  or bbox.aa.y<0
-  or bbox.bb.y>120 then
-   return true,nil
- else
-  for e in all(self.environment) do
-   if (bbox:collide(e:bbox())) return true,e
-  end
-  return false
- end
-end
-
-function solid_at(bbox)
- return level:solid_at(bbox)
+function solid_at_offset(bbox,x,y)
+ if (bbox.aay+y<0) return true
+ return false
 end
 
 cls_player=subclass(cls_actor,function(self)
- self.pos=v2(10,80)
+ cls_actor._ctr(self,10,80)
  self.fly_button=cls_button.init(btn_fly,30)
  -- self.fire_button=cls_button.init(btn_fire,30)
- self.spd=v2(0,0)
- self.hitbox=hitbox(v2(0,0),v2(8,8))
  self.is_solid=true
  self.spr=35
- self.flip=v2(false,false)
+ self.fliph=false
+ self.flipv=false
  self.prev_input=0
  self.weight=0.5
- del(actors,self)
+ del(glb_actors,self)
 end)
 
 function cls_player:draw()
  palt(7,true)
- spr(self.spr,self.pos.x,self.pos.y,1,1,not self.flip.x,self.flip.y)
+ spr(self.spr,self.x,self.y,1,1,not self.fliph,self.flipv)
  palt()
 end
 
@@ -437,12 +350,12 @@ function cls_player:update()
  local accel=0.1
  local decel=0.01
 
- if abs(self.spd.x)>maxrun then
-  self.spd.x=appr(self.spd.x,sign(self.spd.x)*maxrun,decel)
+ if abs(self.spdx)>maxrun then
+  self.spdx=appr(self.spdx,sign(self.spdx)*maxrun,decel)
  elseif input != 0 then
-  self.spd.x=appr(self.spd.x,input*maxrun,accel)
+  self.spdx=appr(self.spdx,input*maxrun,accel)
  else
-  self.spd.x=appr(self.spd.x,0,decel)
+  self.spdx=appr(self.spdx,0,decel)
  end
 
  local maxfall=2
@@ -452,25 +365,26 @@ function cls_player:update()
  if self.fly_button.is_down then
   if self.fly_button:is_held() or self.fly_button:was_just_pressed() then
    self.spr=36
-   self.spd.y=-1.2
+   self.spdy=-1.2
    self.fly_button.hold_time+=1
   end
   if (self.fly_button:was_just_pressed()) sfx(14)
  end
 
- self.spd.y=appr(self.spd.y,maxfall,gravity)
- local dir=self.flip.x and -1 or 1
+ self.spdy=appr(self.spdy,maxfall,gravity)
+ local dir=self.fliph and -1 or 1
 
- self:move(self.spd)
+
+ self:move_x(self.spdx)
+ self:move_y(self.spdy)
 
  if input!=self.prev_input and input!=0 then
-  printh("Update input")
-  self.flip.x=input==-1
+  self.fliph=input==-1
  end
  self.prev_input=input
 
  if btnp(btn_fire) then
-  cls_projectile.init(self.pos+v2(0,8),v2(self.spd.x+dir*0.5,0))
+  cls_projectile.init(self.x,self.y+8,self.spdx+dir*0.5,0)
   sfx(16)
  end
 end
@@ -478,38 +392,40 @@ end
 cls_camera=class(function(self)
  self.target=nil
  self.pull=16
- self.pos=v2(0,0)
- self.shk=v2(0,0)
- -- this is where to add shake
+ self.x=0
+ self.y=0
+ self.shkx=0
+ self.shky=0
 end)
 
 function cls_camera:set_target(target)
  self.target=target
- self.pos=target.pos:clone()
+ self.x=target.x
+ self.y=target.y
 end
 
 function cls_camera:compute_position()
- return v2(self.pos.x-64+self.shk.x,self.pos.y-64+self.shk.y)
+ return self.x-64+self.shkx,self.y-64+self.shky
 end
 
-function cls_camera:abs_position(p)
- return p+self:compute_position()
+function cls_camera:abs_position(x,y)
+ local posx,posy
+ return x+self.x-64+self.shkx,y-64+self.shky+y
 end
 
 function cls_camera:pull_bbox()
  local v=v2(self.pull,self.pull)
- return bbox(self.pos-v,self.pos+v)
+ return {aax=self.x-self.pull,bbx=self.x+self.pull,aay=self.y-self.pull,bby=self.y+self.pull}
 end
 
 function cls_camera:update()
  if (self.target==nil) return
  local b=self:pull_bbox()
- local p=self.target.pos
- if (b.bb.x<p.x) self.pos.x+=min(p.x-b.bb.x,4)
- if (b.aa.x>p.x) self.pos.x-=min(b.aa.x-p.x,4)
- if (b.bb.y<p.y) self.pos.y+=min(p.y-b.bb.y,4)
- if (b.aa.y>p.y) self.pos.y-=min(b.aa.y-p.y,4)
- self.pos=level:bbox():shrink(64):clip(self.pos)
+ local p=self.target
+ if (b.bbx<p.x) self.x+=min(self.target.x-b.bbx,4)
+ if (b.aax>p.x) self.x-=min(b.aax-p.x,4)
+ if (b.bby<p.y) self.y+=min(p.y-b.bby,4)
+ if (b.aay>p.y) self.y-=min(b.aay-p.y,4)
  self:update_shake()
 end
 
@@ -520,55 +436,60 @@ function cls_camera:add_shake(p)
 end
 
 function cls_camera:update_shake()
- if abs(self.shk.x)+abs(self.shk.y)<1 then
-  self.shk=v2(0,0)
+ if abs(self.shkx)+abs(self.shky)<1 then
+  self.shkx=0
+  self.shky=0
  end
- if frame%4==0 then
-  self.shk*=v2(-0.4-rnd(0.1),-0.4-rnd(0.1))
+ if glb_frame%4==0 then
+  self.shkx*=-0.4-rnd(0.1)
+  self.shky*=-0.4-rnd(0.1)
  end
 end
 
-cls_projectile=subclass(cls_actor,function(self,pos,spd)
- cls_actor._ctr(self,pos)
- self.spd=spd
+cls_projectile=subclass(cls_actor,function(self,x,y,vx,vy)
+ cls_actor._ctr(self,x,y)
+ self.spdx=vx
+ self.spdy=vy
  self.has_weight=true
  self.weight=1.2
- self.flip=v2(false,false)
+ self.fliph=false
+ self.flipv=false
  self.spr=6 -- bomb
 end)
 
 function cls_projectile:draw()
- spr(self.spr,self.pos.x,self.pos.y,1,1,self.flip.x,self.flip.y)
+ spr(self.spr,self.x,self.y,1,1,self.fliph,self.flipy)
 end
 
 function cls_projectile:update()
  local maxfall=4
  local gravity=0.12*self.weight
 
- self.spd.y=appr(self.spd.y,maxfall,gravity)
+ self.spdy=appr(self.spdy,maxfall,gravity)
 
- self.pos+=self.spd
- self.flip.x=self.spd.x<0
+ self.x+=self.spdx
+ self.y+=self.spdy
+ self.fliph=self.spdx<0
 
- if solid_at(self:bbox()) then
-  main_camera:add_shake(4)
-  cls_boom.init(self.pos,32,rnd_elt(bomb_colors))
+ if solid_at_offset(self,0,0) then
+  glb_main_camera:add_shake(4)
+  cls_boom.init(self.x,self.y,32,rnd_elt(bomb_colors))
   sfx(12)
-  del(actors,self)
+  del(glb_actors,self)
  end
 end
 
-bomb_colors={7,8,8,8,8,9,9,9,7,7,7,9,13,14,15,6}
+glb_bomb_colors={7,8,8,8,8,9,9,9,7,7,7,9,13,14,15,6}
+glb_dark={[0]=0,0,1,1,2,1,5,6,2,4,9,3,1,1,8,10}
 
-dark={[0]=0,0,1,1,2,1,5,6,2,4,9,3,1,1,8,10}
-
-cls_boom=class(function(self,pos,radius,color,p)
- self.pos=pos
+cls_boom=class(function(self,x,y,radius,color,p)
+ self.x=x
+ self.y=y
  self.radius=radius
  self.original_color=color
  self.p=p or 1
- self.color=color+flr(rnd(2))*(dark[color]-color)
- add(actors,self)
+ self.color=color+flr(rnd(2))*(glb_dark[color]-color)
+ add(glb_actors,self)
 end)
 
 function cls_boom:update()
@@ -577,49 +498,54 @@ function cls_boom:update()
    local rx=mrnd(1.1*self.radius)
    local ry=mrnd(1.1*self.radius)
    cls_boom.init(
-      v2(mid(self.pos.x+rx,0,127),max(self.pos.y+ry,0)),
+      v2(mid(self.pos.x+rx,0,127),max(self.y+ry,0)),
       mrnd(0.5*self.radius),
       self.original_color)
   end
 
   for i=1,10 do
-   cls_smoke.init(self.pos:clone(),self.color)
+   cls_smoke.init(self.x,self.y,self.color)
   end
  end
 
  self.p+=1
- if (self.p>3) del(actors,self)
+ if (self.p>3) del(glb_actors,self)
 end
 
 function cls_boom:draw()
  if self.p==1 then
-  circfill(self.pos.x,self.pos.y,self.radius,7)
+  circfill(self.x,self.y,self.radius,7)
  elseif self.p==2 then
-  circfill(self.pos.x,self.pos.y,self.radius,self.color)
+  circfill(self.x,self.y,self.radius,self.color)
  else
-  circ(self.pos.x,self.pos.y,self.radius+self.p-3,self.color)
+  circ(self.x,self.y,self.radius+self.p-3,self.color)
  end
 end
 
-cls_smoke=class(function(self,pos,color)
- self.pos=pos
+cls_smoke=class(function(self,x,y,color)
+ self.x=x
+ self.y=y
  self.color=color
- self.spd=(2+rnd(1))*angle2vec(rnd(1))
+ local ax,ay
+ ax,ay=angle2vec(rnd(1))
+ self.spdx=ax*(2+rnd(1))
+ self.spdy=ay*(2+rnd(1))
  self.radius=1+rnd(3)
  self.color=color+flr(rnd(2))*(dark[color]-color)
- add(actors,self)
+ add(glb_actors,self)
 end)
 
 function cls_smoke:draw()
- circfill(self.pos.x,self.pos.y,self.radius,self.color)
+ circfill(self.x,self.y,self.radius,self.color)
 end
 
 function cls_smoke:update()
  self.radius-=0.1
- self.pos+=self.spd
- self.spd.x*=0.9
- self.spd.y=0.9*self.spd.y-0.1
- if (self.radius<0) del(actors,self)
+ self.x+=self.spdx
+ self.y+=self.spdy
+ self.spdx*=0.9
+ self.spdy=0.9*self.spdy-0.1
+ if (self.radius<0) del(glb_actors,self)
 end
 
 
@@ -656,38 +582,36 @@ function cls_button:is_held()
 end
 
 function _init()
- player=cls_player.init()
- level=cls_level.init()
- main_camera=cls_camera.init()
- main_camera:set_target(player)
- music(1)
+ glb_player=cls_player.init()
+ glb_level=cls_level.init()
+ glb_main_camera=cls_camera.init()
+ glb_main_camera:set_target(glb_player)
+ -- music(1)
 end
 
 function _draw()
- frame+=1
+ glb_frame+=1
  cls()
 
- local p=main_camera:compute_position()
-
- camera(p.x,p.y)
- level:draw()
- for actor in all(actors) do
-  actor:draw()
- end
- player:draw()
+ local camx,camy
+ camx,camy=glb_main_camera:compute_position()
+ --
+ camera(camx,camy)
+ glb_level:draw()
+ for _,actor in pairs(glb_actors) do actor:draw() end
+ glb_player:draw()
 
 end
 
 function _update60()
- dt=time()-lasttime
- lasttime=time()
- tick_crs(crs)
- player:update()
- for actor in all(actors) do
-  actor:update()
- end
-
- main_camera:update()
+ cls()
+ glb_dt=time()-glb_lasttime
+ glb_lasttime=time()
+ tick_crs(glb_crs)
+ glb_player:update()
+ for _,actor in pairs(glb_actors) do actor:update() end
+ --
+ glb_main_camera:update()
 end
 
 

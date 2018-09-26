@@ -79,5 +79,5 @@ function dir2vec(dir)
 end
 
 function angle2vec(angle)
- return v2(cos(angle),sin(angle))
+ return cos(angle),sin(angle)
 end

@@ -1,34 +1,32 @@
 function _init()
- player=cls_player.init()
- level=cls_level.init()
- main_camera=cls_camera.init()
- main_camera:set_target(player)
- music(1)
+ glb_player=cls_player.init()
+ glb_level=cls_level.init()
+ glb_main_camera=cls_camera.init()
+ glb_main_camera:set_target(glb_player)
+ -- music(1)
 end
 
 function _draw()
- frame+=1
+ glb_frame+=1
  cls()
 
- local p=main_camera:compute_position()
-
- camera(p.x,p.y)
- level:draw()
- for actor in all(actors) do
-  actor:draw()
- end
- player:draw()
+ local camx,camy
+ camx,camy=glb_main_camera:compute_position()
+ --
+ camera(camx,camy)
+ glb_level:draw()
+ for _,actor in pairs(glb_actors) do actor:draw() end
+ glb_player:draw()
 
 end
 
 function _update60()
- dt=time()-lasttime
- lasttime=time()
- tick_crs(crs)
- player:update()
- for actor in all(actors) do
-  actor:update()
- end
-
- main_camera:update()
+ cls()
+ glb_dt=time()-glb_lasttime
+ glb_lasttime=time()
+ tick_crs(glb_crs)
+ glb_player:update()
+ for _,actor in pairs(glb_actors) do actor:update() end
+ --
+ glb_main_camera:update()
 end
