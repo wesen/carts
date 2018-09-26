@@ -47,6 +47,7 @@ function cls_node_generic_particles:set_value(id,value)
   end
  end
  if (id==11) self.layer.draw_circle=value
+ if (id==12) self.layer.radius_f=value
 end
 
 function cls_node_generic_particles:str()

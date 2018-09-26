@@ -10,12 +10,12 @@ cls_layer=class(function(self)
  self.default_weight=1
  self.fill=false
  self.cols={7}
- self.grow=false
  self.trail_duration=0
  self.trails={}
  self.die_cb=nil
  self.emit_cb=nil
  self.default_damping=1
+ self.radius_f=nil
 end)
 
 function cls_layer:emit(x,y)
@@ -48,8 +48,9 @@ function cls_layer:update()
   p.spd_x*=p.damping
   p.spd_y*=p.damping
   if self.trail_duration>0 then
-   local radius=p.radius*(1-p.t/p.lifetime)
-   if (self.grow) radius=p.radius-radius
+   local v=p.t/p.lifetime
+   if (self.radius_f!=nil) v=self.radius_f:compute(v)
+   local radius=p.radius*v
    add(self.trails,{
     x=p.x,
     y=p.y,
@@ -74,8 +75,9 @@ end
 function cls_layer:draw()
  for p in all(self.particles) do
   local col=p.cols[flr(#p.cols*p.t/p.lifetime)+1]
-  local radius=p.radius*(1-p.t/p.lifetime)
-  if (self.grow) radius=p.radius-radius
+  local v=p.t/p.lifetime
+  if (self.radius_f!=nil) v=self.radius_f:compute(v)
+  local radius=v*p.radius
   if self.fill then
    if self.draw_circle then
     circfill(p.x,p.y,radius,col)

@@ -20,6 +20,7 @@ const NODE_TYPE_CIRCULAR_EMITTER = 12;
 const NODE_TYPE_LINE_EMITTER = 13;
 const NODE_TYPE_LATCH=14;
 const NODE_TYPE_ORDER=15;
+const NODE_TYPE_FMULTADD=16;
 
 class EditorNode extends Rete.Component {
   constructor(name, type) {
@@ -104,6 +105,15 @@ class MultAddNode extends EditorNode {
     this.addInput('a', 1, 'A', numSocket, 1).addInputControl('a', NumControl);
     this.addInput('b', 2, 'B', numSocket, 0).addInputControl('b', NumControl);
     this.addOutput('val', 0, 'Output', numSocket);
+  }
+}
+
+class FMultAddNode extends EditorNode {
+  constructor() {
+    super("f(x)=a*x+b", NODE_TYPE_FMULTADD);
+    this.addInput('a', 0, 'A', numSocket, 1).addInputControl('a', NumControl);
+    this.addInput('b', 1, 'B', numSocket, 0).addInputControl('b', NumControl);
+    this.addOutput('f', 0, 'Function', functionSocket);
   }
 }
 
@@ -196,6 +206,7 @@ class GenericParticleNode extends ParticleNode {
       .addInputControl('color', ColorControl)
       .addInput('circle', 11, 'Circle', boolSocket, true)
       .addInputControl('circle', BoolControl)
+      .addInput('radiusF', 12, 'Radius Function', functionSocket)
     ;
   }
 }
@@ -279,5 +290,6 @@ const components = [
   new LinearEmitterNode(),
   new LatchNode(),
   new OrderNode(),
+  new FMultAddNode(),
 ];
 

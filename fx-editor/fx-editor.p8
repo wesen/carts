@@ -470,12 +470,12 @@ cls_layer=class(function(self)
  self.default_weight=1
  self.fill=false
  self.cols={7}
- self.grow=false
  self.trail_duration=0
  self.trails={}
  self.die_cb=nil
  self.emit_cb=nil
  self.default_damping=1
+ self.radius_f=nil
 end)
 
 function cls_layer:emit(x,y)
@@ -508,8 +508,9 @@ function cls_layer:update()
   p.spd_x*=p.damping
   p.spd_y*=p.damping
   if self.trail_duration>0 then
-   local radius=p.radius*(1-p.t/p.lifetime)
-   if (self.grow) radius=p.radius-radius
+   local v=p.t/p.lifetime
+   if (self.radius_f!=nil) v=self.radius_f:compute(v)
+   local radius=p.radius*v
    add(self.trails,{
     x=p.x,
     y=p.y,
@@ -534,8 +535,9 @@ end
 function cls_layer:draw()
  for p in all(self.particles) do
   local col=p.cols[flr(#p.cols*p.t/p.lifetime)+1]
-  local radius=p.radius*(1-p.t/p.lifetime)
-  if (self.grow) radius=p.radius-radius
+  local v=p.t/p.lifetime
+  if (self.radius_f!=nil) v=self.radius_f:compute(v)
+  local radius=v*p.radius
   if self.fill then
    if self.draw_circle then
     circfill(p.x,p.y,radius,col)
@@ -614,6 +616,7 @@ function cls_node_generic_particles:set_value(id,value)
   end
  end
  if (id==11) self.layer.draw_circle=value
+ if (id==12) self.layer.radius_f=value
 end
 
 function cls_node_generic_particles:str()
@@ -708,6 +711,34 @@ function cls_node_linear_emitter:set_value(id,value)
   if (id==6) self.x_spacing=value
   if (id==7) self.y_spacing=value
  end
+end
+
+cls_node_fmultadd=subclass(cls_node,function(self,args)
+ cls_node._ctr(self,args)
+ self.a=1
+ self.b=0
+end)
+node_types[16]=cls_node_fmultadd
+
+function cls_node_fmultadd:add_connection(output_num,node_id,input_num)
+ cls_node.add_connection(self,output_num,node_id,input_num)
+ if (output_num==0) self:send_value(output_num,self)
+end
+
+function cls_node_fmultadd:rm_connection(output_num,node_id,input_num)
+ if (output_num==0) self:send_value(output_num,nil)
+ cls_node.rm_connection(self,output_num,node_id,input_num)
+end
+
+function cls_node_fmultadd:set_value(id,value)
+ if (id==0) self.a=value
+ if (id==1) self.b=value
+end
+
+function cls_node_fmultadd:compute(t)
+ local res=t*self.a+self.b
+ -- cstr(tostr(self.a).."*("..tostr(t)..")+"..tostr(self.b).."="..tostr(res))
+ return res
 end
 
 

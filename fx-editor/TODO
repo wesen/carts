@@ -13,15 +13,18 @@
 -- x add generic particle node
 -- x add circular emitter
 -- x add linear emitter
+-- x add color sequence sockets
+-- x serialize values with type
+-- x add function sockets for mapping
 
+-- add draw order connections
 -- array interpolate node
-
--- add color sequence sockets
+-- send out values when connecting outputs (for example for latch)
+-- checkbox selection controls
 
 -- add duplicate node functionality
 -- add clear button
 -- add "recent projects"
--- add function sockets for mapping
 -- better control and input node values
 -- add submodules
 -- save to local storage with a name

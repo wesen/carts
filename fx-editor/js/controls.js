@@ -28,7 +28,7 @@ function encodeNumber(data) {
 
   var integer = Math.floor(data);
   if (integer < 0) {
-    integer = 0xffff + integer;
+    integer = 0xffff + integer + 1;
   }
 
   return [
