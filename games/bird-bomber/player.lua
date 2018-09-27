@@ -15,6 +15,7 @@ function cls_player:draw()
  palt(7,true)
  spr(self.spr,self.x,self.y,1,1,not self.fliph,self.flipv)
  palt()
+ rect(self.aax,self.aay,self.bbx,self.bby,8)
 end
 
 function cls_player:update()

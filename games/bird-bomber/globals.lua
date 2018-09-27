@@ -2,6 +2,7 @@ glb_frame=0
 glb_dt=0
 glb_lasttime=time()
 glb_crs={}
+glb_particles={}
 
 glb_player=nil
 

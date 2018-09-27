@@ -35,6 +35,8 @@ function cls_camera:update()
  if (b.aax>p.x) self.x-=min(b.aax-p.x,4)
  if (b.bby<p.y) self.y+=min(p.y-b.bby,4)
  if (b.aay>p.y) self.y-=min(b.aay-p.y,4)
+ self.x=mid(64,self.x,glb_level.length*8-64)
+ self.y=mid(-64+64,self.y,128-64)
  self:update_shake()
 end
 
