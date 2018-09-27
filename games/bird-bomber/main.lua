@@ -16,6 +16,7 @@ function _draw()
  camera(camx,camy)
  glb_level:draw()
  for _,actor in pairs(glb_actors) do actor:draw() end
+ for _,p in pairs(glb_particles) do p:draw() end
  glb_player:draw()
 
 end
@@ -27,6 +28,7 @@ function _update60()
  tick_crs(glb_crs)
  glb_player:update()
  for _,actor in pairs(glb_actors) do actor:update() end
+ for _,p in pairs(glb_particles) do p:update() end
  --
  glb_main_camera:update()
 end

@@ -350,7 +350,7 @@ function cls_player:draw()
  palt(7,true)
  spr(self.spr,self.x,self.y,1,1,not self.fliph,self.flipv)
  palt()
- rect(self.aax,self.aay,self.bbx,self.bby,8)
+ -- rect(self.aax,self.aay,self.bbx,self.bby,8)
 end
 
 function cls_player:update()
@@ -449,7 +449,8 @@ end
 -- from trasevol_dog
 function cls_camera:add_shake(p)
  local a=rnd(1)
- self.shk+=v2(p*cos(a),p*sin(a))
+ self.shkx+=p*cos(a)
+ self.shky+=p*sin(a)
 end
 
 function cls_camera:update_shake()
@@ -471,11 +472,13 @@ cls_projectile=subclass(cls_actor,function(self,x,y,vx,vy)
  self.weight=1.2
  self.fliph=false
  self.flipv=false
+ self.is_solid=false
  self.spr=6 -- bomb
 end)
 
 function cls_projectile:draw()
  spr(self.spr,self.x,self.y,1,1,self.fliph,self.flipy)
+ -- rect(self.aax,self.aay,self.bbx,self.bby,8)
 end
 
 function cls_projectile:update()
@@ -484,13 +487,13 @@ function cls_projectile:update()
 
  self.spdy=appr(self.spdy,maxfall,gravity)
 
- self.x+=self.spdx
- self.y+=self.spdy
+ self:move_x(self.spdx)
+ self:move_y(self.spdy)
  self.fliph=self.spdx<0
 
  if solid_at_offset(self,0,0) then
   glb_main_camera:add_shake(4)
-  cls_boom.init(self.x,self.y,32,rnd_elt(bomb_colors))
+  cls_boom.init(self.x,self.y,32,rnd_elt(glb_bomb_colors))
   sfx(12)
   del(glb_actors,self)
  end
@@ -506,7 +509,7 @@ cls_boom=class(function(self,x,y,radius,color,p)
  self.original_color=color
  self.p=p or 1
  self.color=color+flr(rnd(2))*(glb_dark[color]-color)
- add(glb_actors,self)
+ add(glb_particles,self)
 end)
 
 function cls_boom:update()
@@ -515,7 +518,7 @@ function cls_boom:update()
    local rx=mrnd(1.1*self.radius)
    local ry=mrnd(1.1*self.radius)
    cls_boom.init(
-      v2(mid(self.pos.x+rx,0,127),max(self.y+ry,0)),
+      mid(self.x+rx,0,127),max(self.y+ry,0),
       mrnd(0.5*self.radius),
       self.original_color)
   end
@@ -526,7 +529,7 @@ function cls_boom:update()
  end
 
  self.p+=1
- if (self.p>3) del(glb_actors,self)
+ if (self.p>3) del(glb_particles,self)
 end
 
 function cls_boom:draw()
@@ -548,8 +551,8 @@ cls_smoke=class(function(self,x,y,color)
  self.spdx=ax*(2+rnd(1))
  self.spdy=ay*(2+rnd(1))
  self.radius=1+rnd(3)
- self.color=color+flr(rnd(2))*(dark[color]-color)
- add(glb_actors,self)
+ self.color=color+flr(rnd(2))*(glb_dark[color]-color)
+ add(glb_particles,self)
 end)
 
 function cls_smoke:draw()
@@ -562,7 +565,7 @@ function cls_smoke:update()
  self.y+=self.spdy
  self.spdx*=0.9
  self.spdy=0.9*self.spdy-0.1
- if (self.radius<0) del(glb_actors,self)
+ if (self.radius<0) del(glb_particles,self)
 end
 
 
@@ -584,7 +587,7 @@ function cls_island:draw()
   spr(self.tiles[i],i*8,120)
   spr(self.tiles_top[i],i*8,120-8)
  end
- rect(self.aax,self.aay,self.bbx,self.bby,8)
+ -- rect(self.aax,self.aay,self.bbx,self.bby,8)
 end
 
 cls_button=class(function(self,btn_nr,max_hold_time)
@@ -636,6 +639,7 @@ function _draw()
  camera(camx,camy)
  glb_level:draw()
  for _,actor in pairs(glb_actors) do actor:draw() end
+ for _,p in pairs(glb_particles) do p:draw() end
  glb_player:draw()
 
 end
@@ -647,6 +651,7 @@ function _update60()
  tick_crs(glb_crs)
  glb_player:update()
  for _,actor in pairs(glb_actors) do actor:update() end
+ for _,p in pairs(glb_particles) do p:update() end
  --
  glb_main_camera:update()
 end

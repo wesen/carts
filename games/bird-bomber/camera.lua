@@ -43,7 +43,8 @@ end
 -- from trasevol_dog
 function cls_camera:add_shake(p)
  local a=rnd(1)
- self.shk+=v2(p*cos(a),p*sin(a))
+ self.shkx+=p*cos(a)
+ self.shky+=p*sin(a)
 end
 
 function cls_camera:update_shake()

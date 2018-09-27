@@ -16,5 +16,5 @@ function cls_island:draw()
   spr(self.tiles[i],i*8,120)
   spr(self.tiles_top[i],i*8,120-8)
  end
- rect(self.aax,self.aay,self.bbx,self.bby,8)
+ -- rect(self.aax,self.aay,self.bbx,self.bby,8)
 end
