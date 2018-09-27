@@ -1,14 +1,6 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
--- zepton 0.9.2
--- a game by rez
-
--- ââââââtodoââââââ
--- energy pyramid
--- bonus (life/shield)
--- ââââââââââââââ
-
 function _init()
 	cls""
 	cartdata"zepton"

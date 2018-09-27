@@ -1,11 +1,3 @@
--- zepton 0.9.2
--- a game by rez
-
--- ââââââtodoââââââ
--- energy pyramid
--- bonus (life/shield)
--- ââââââââââââââ
-
 function _init()
 	cls""
 	cartdata"zepton"
