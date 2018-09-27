@@ -500,7 +500,7 @@ function cls_layer:emit(x,y)
 end
 
 function cls_layer:update()
- for p in all(self.particles) do
+ for _,p in pairs(self.particles) do
   p.x+=p.spd_x
   p.spd_y+=p.weight*self.gravity
   p.y+=p.spd_y
@@ -524,7 +524,7 @@ function cls_layer:update()
    del(self.particles,p)
   end
  end
- for trail in all(self.trails) do
+ for _,trail in pairs(self.trails) do
   trail.t+=dt
   if trail.t>trail.lifetime then
    del(self.trails,trail)
@@ -533,7 +533,7 @@ function cls_layer:update()
 end
 
 function cls_layer:draw()
- for p in all(self.particles) do
+ for _,p in pairs(self.particles) do
   local col=p.cols[flr(#p.cols*p.t/p.lifetime)+1]
   local v=p.t/p.lifetime
   if (self.radius_f!=nil) v=self.radius_f:compute(v)
@@ -553,7 +553,7 @@ function cls_layer:draw()
   end
  end
 
- for p in all(self.trails) do
+ for _,p in pairs(self.trails) do
   local col=self.col
   if col==nil then
    col=self.cols[flr(#self.cols*p.t/p.lifetime)+1]
