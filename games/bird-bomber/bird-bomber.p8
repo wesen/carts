@@ -649,6 +649,7 @@ end
 
 function _draw()
  glb_frame+=1
+ palt(0,false)
  cls(12)
 
  local camx,camy
