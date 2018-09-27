@@ -8,7 +8,8 @@ end
 
 function _draw()
  glb_frame+=1
- cls()
+ palt(0,false)
+ cls(12)
 
  local camx,camy
  camx,camy=glb_main_camera:compute_position()
@@ -22,7 +23,6 @@ function _draw()
 end
 
 function _update60()
- cls()
  glb_dt=time()-glb_lasttime
  glb_lasttime=time()
  tick_crs(glb_crs)
