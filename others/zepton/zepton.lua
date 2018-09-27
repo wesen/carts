@@ -1,3 +1,6 @@
+-- zepton 0.9.2
+-- a game by rez
+
 function _init()
 	cls""
 	cartdata"zepton"
@@ -757,7 +760,7 @@ function game()
 		spr(94,20,9,2,1)
 		pal()
 		if tw==0 and t%64<32 then
-			print("pressð¾ï¸â",-45,63,0)
+			print("press X C",-45,63,0)
 		end
 	end
 	---------------------------bar
@@ -1146,7 +1149,7 @@ function menu()
 		end
 	end
 	camera(0)
-	print("pressð¾ï¸â",1,122,1)
+	print("press",1,122,1)
 end
 
 function sf() --------starfield
