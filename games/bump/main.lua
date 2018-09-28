@@ -36,6 +36,8 @@ function start_game()
  actors={}
  players={}
  particles={}
+ static_objects={}
+ tele_exits={}
  fireflies_init(v2(16,16))
  crs={}
  music(-1,500)
