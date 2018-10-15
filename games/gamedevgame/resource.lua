@@ -50,8 +50,14 @@ function resource_cls:are_dependencies_fulfilled()
 end
 
 function resource_cls:on_click()
- self.count+=1
- self.created=true
+ if self:are_dependencies_fulfilled() then
+  self.count+=1
+  self.created=true
+  for n,v in pairs(self.dependencies) do
+   local res=glb_resource_manager.resources[n]
+   res.count-=v
+  end
+ end
 end
 
 function resource_cls:is_mouse_over()
