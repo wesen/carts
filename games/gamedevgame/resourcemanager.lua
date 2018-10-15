@@ -7,6 +7,9 @@ function resource_manager_cls:draw()
  for _,k in pairs(self.resources) do
   k:draw()
  end
+ for _,k in pairs(self.workers) do
+  k:draw()
+ end
 end
 
 function resource_manager_cls:update()
