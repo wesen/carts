@@ -973,6 +973,8 @@ cls_worker=class(function(self,duration)
  self.spd_x=rnd(0.2)+0.2
  self.dir=1
  self.state=0 -- 0=walking, 1=jumping
+ self.auto_resources={}
+ self.default_resource=nil
  add(glb_resource_manager.workers,self)
 end)
 
@@ -995,6 +997,48 @@ function cls_worker:draw()
 end
 
 function cls_worker:on_tick()
+ local res=self.default_resource
+ local max_requirements={}
+ for _,v in pairs(self.auto_resources) do
+  for name,dep in pairs(v.dependencies) do
+   if (max_requirements[name]~=nil) max_requirements[name]=dep
+   max_requirements[name]=max(dep,max_requirements[name])
+  end
+ end
+
+
+ for name,v in pairs(max_requirements) do
+  printh(name.." "..tostr(v))
+ end
+ local potential_resources={}
+
+ for _,v in pairs(self.auto_resources) do
+  if v:are_dependencies_fulfilled() then
+   local add_res=true
+   printh("considering "..v.name)
+   for name,dep in pairs(v.dependencies) do
+    if glb_resource_manager.resources[name].count<max_requirements[name] then
+     add_res=false
+     printh("discarding "..v.name.." because of "..name)
+    end
+   end
+   if (add_res) add(potential_resources,v)
+  end
+ end
+
+ if #potential_resources>0 then
+  res=rnd_elt(potential_resources)
+  printh("potential_resources:")
+  for _,v in pairs(potential_resources) do
+   printh(v.name)
+  end
+ end
+ printh("\n")
+
+ if (res==nil) return
+
+ res:produce()
+ self.duration=res.duration
  local text=rnd_elt({"wow","ok","!!!","yeah","boom","kaching","lol","haha"})
  cls_score_particle.init(self.x-(#text/2),115,text,0,7)
 end
@@ -1002,56 +1046,22 @@ end
 cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=64
+ self.default_resource=res_loc
+ self.auto_resources={res_func,res_csharp_file}
 end)
-
-function cls_coder:on_tick()
- cls_worker.on_tick(self)
- local auto_resources={res_build,res_csharp_file,res_func}
- for _,v in pairs(auto_resources) do
-  if v:are_dependencies_fulfilled() and maybe(0.5) then
-   v:produce()
-   self.duration=v.duration
-   return
-  end
- end
- res_loc:produce()
-end
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=80
+ self.default_resource=res_pixel
+ self.auto_resources={res_tilemap,res_sprite,res_animation}
 end)
-
-function cls_gfx_artist:on_tick()
- cls_worker.on_tick(self)
- local auto_resources={res_sprite,res_animation,res_tilemap}
- for _,v in pairs(auto_resources) do
-  if v:are_dependencies_fulfilled() and maybe(0.5) then
-   v:produce()
-   self.duration=v.duration
-   return
-  end
- end
- res_pixel:produce()
-end
 
 cls_game_designer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=96
+ self.auto_resources={res_prop,res_character,res_level}
 end)
-
-function cls_game_designer:on_tick()
- cls_worker.on_tick(self)
- local auto_resources={res_prop,res_character,res_level}
- for _,v in pairs(auto_resources) do
-  if v:are_dependencies_fulfilled() and maybe(0.5) then
-   v:produce()
-   self.duration=v.duration
-   return
-  end
- end
- res_pixel:produce()
-end
 
 
 function _init()
