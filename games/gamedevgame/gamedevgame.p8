@@ -367,6 +367,7 @@ glb_resource_manager=resource_manager_cls.init()
 
 resource_cls=class(function(self,
    name,
+   full_name,
    x,y,
    dependencies,
    duration,
@@ -375,6 +376,7 @@ resource_cls=class(function(self,
  self.x=x
  self.y=y
  self.name=name
+ self.full_name=full_name
  self.dependencies=dependencies
  self.duration=duration
  self.t=0
@@ -386,6 +388,7 @@ resource_cls=class(function(self,
  glb_resource_manager.resources[name]=self
 end)
 
+glb_timescale=10
 glb_resource_w=16
 
 function resource_cls:draw()
@@ -403,8 +406,23 @@ function resource_cls:draw()
  end
  print(tostr(self.count),x+2,y+glb_resource_w+2,7)
 
- if (self:is_mouse_over()) print(self.name,32,80,7)
+ if (self:is_mouse_over()) print(self:get_display_text(),32,80,7)
  pal()
+end
+
+function resource_cls:get_display_text()
+ local txt=self.description
+ local txt2=""
+ for n,v in pairs(self.dependencies) do
+  local res=glb_resource_manager.resources[n]
+  txt2=txt2.."- "..tostr(v).." "..(res.full_name).."\n"
+ end
+
+ if txt2!="" then
+  txt=txt.."\nrequires:\n"..txt2
+ end
+
+ return txt
 end
 
 function resource_cls:get_cur_xy()
@@ -416,7 +434,7 @@ end
 function resource_cls:update()
  if self.t>0 then
   self.t+=glb_dt
-  if self.t>self.duration then
+  if self.t>(self.duration/glb_timescale) then
    self.count+=1
    self.created=true
    self.t=0
@@ -465,6 +483,8 @@ end
 res_loc=resource_cls.init(
   -- name
   "loc",
+  -- full_name
+  "lines of code",
   -- position
   0,0,
   -- dependencies
@@ -474,49 +494,78 @@ res_loc=resource_cls.init(
   -- spr
   16,
   -- description
-  "Write a line of code!"
+  "write a line of code!"
 )
 res_loc.active=true
 
-resource_cls.init("func",
+resource_cls.init(
+"func",
+"c# functions",
  1,0,
  {loc=5},
  1,
   -- spr
   16,
   -- description
-  "Write a C# function!"
+  "write a c# function!"
 )
 
-resource_cls.init("csharp_file",
+resource_cls.init(
+ "csharp_file",
+ "c# files",
  2,0,
  {func=5},
  1,
  -- spr
  16,
  -- description
- "Write a C# file!"
+ "write a c# file!"
 )
 
-resource_cls.init("build",
+resource_cls.init(
+ "build",
+ "game builds",
  2,0,
  {csharp_file=10},
  1,
  -- spr
  16,
  -- description
- "Write a C# file!"
+ "write a c# file!"
 )
 
 res_pix=resource_cls.init("pixel",
+ "pixels",
   0,1,
   {},
   1,
   -- spr
   48,
   -- description
-  "Draw a pixel!"
+  "draw a pixel!"
 )
+
+res_spr=resource_cls.init("sprite",
+ "sprites",
+  1,1,
+  {pixel=8},
+  1,
+  -- spr
+  48,
+  -- description
+  "draw a sprite!"
+)
+
+res_anim=resource_cls.init("animation",
+ "animations",
+ 2,1,
+ {sprite=4},
+ 1,
+ 48,
+ "animate a character!"
+)
+
+
 res_pix.active=true
 
 

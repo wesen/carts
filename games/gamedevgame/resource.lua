@@ -1,5 +1,6 @@
 resource_cls=class(function(self,
    name,
+   full_name,
    x,y,
    dependencies,
    duration,
@@ -8,6 +9,7 @@ resource_cls=class(function(self,
  self.x=x
  self.y=y
  self.name=name
+ self.full_name=full_name
  self.dependencies=dependencies
  self.duration=duration
  self.t=0
@@ -19,6 +21,7 @@ resource_cls=class(function(self,
  glb_resource_manager.resources[name]=self
 end)
 
+glb_timescale=10
 glb_resource_w=16
 
 function resource_cls:draw()
@@ -36,8 +39,23 @@ function resource_cls:draw()
  end
  print(tostr(self.count),x+2,y+glb_resource_w+2,7)
 
- if (self:is_mouse_over()) print(self.name,32,80,7)
+ if (self:is_mouse_over()) print(self:get_display_text(),32,80,7)
  pal()
+end
+
+function resource_cls:get_display_text()
+ local txt=self.description
+ local txt2=""
+ for n,v in pairs(self.dependencies) do
+  local res=glb_resource_manager.resources[n]
+  txt2=txt2.."- "..tostr(v).." "..(res.full_name).."\n"
+ end
+
+ if txt2!="" then
+  txt=txt.."\nrequires:\n"..txt2
+ end
+
+ return txt
 end
 
 function resource_cls:get_cur_xy()
@@ -49,7 +67,7 @@ end
 function resource_cls:update()
  if self.t>0 then
   self.t+=glb_dt
-  if self.t>self.duration then
+  if self.t>(self.duration/glb_timescale) then
    self.count+=1
    self.created=true
    self.t=0
