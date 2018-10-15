@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 glb_debug=true
-glb_timescale=1
+glb_timescale=10
 
 function class (init)
   local c = {}
@@ -891,7 +891,7 @@ res_character=resource_cls.init("character",
 res_tilemap=resource_cls.init("tilemap",
  "tilemaps",
  0,2,
- {sprite=8},
+ {sprite=4},
  2,
  -- spr
  16,
@@ -900,7 +900,6 @@ res_tilemap=resource_cls.init("tilemap",
 )
 
 ---
-
 
 res_level=resource_cls.init("level",
  "levels",
@@ -1009,13 +1008,13 @@ function cls_coder:on_tick()
  cls_worker.on_tick(self)
  local auto_resources={res_build,res_csharp_file,res_func}
  for _,v in pairs(auto_resources) do
-  if v:are_dependencies_fulfilled() then
+  if v:are_dependencies_fulfilled() and maybe(0.5) then
    v:produce()
    self.duration=v.duration
    return
   end
  end
- res_loc.count+=1
+ res_loc:produce()
 end
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
@@ -1025,15 +1024,33 @@ end)
 
 function cls_gfx_artist:on_tick()
  cls_worker.on_tick(self)
- local auto_resources={res_sprite,res_animation}
+ local auto_resources={res_sprite,res_animation,res_tilemap}
  for _,v in pairs(auto_resources) do
-  if v:are_dependencies_fulfilled() then
+  if v:are_dependencies_fulfilled() and maybe(0.5) then
    v:produce()
    self.duration=v.duration
    return
   end
  end
- res_pixel.count+=1
+ res_pixel:produce()
+end
+
+cls_game_designer=subclass(cls_worker,function(self,duration)
+ cls_worker._ctr(self,duration)
+ self.spr=96
+end)
+
+function cls_game_designer:on_tick()
+ cls_worker.on_tick(self)
+ local auto_resources={res_prop,res_character,res_level}
+ for _,v in pairs(auto_resources) do
+  if v:are_dependencies_fulfilled() and maybe(0.5) then
+   v:produce()
+   self.duration=v.duration
+   return
+  end
+ end
+ res_pixel:produce()
 end
 
 
@@ -1045,6 +1062,8 @@ function _init()
   cls_coder.init(3)
   local gfx_artist=cls_gfx_artist.init(2)
   gfx_artist=cls_gfx_artist.init(3)
+  local game_designer=cls_game_designer.init(2)
+  game_designer=cls_game_designer.init(2)
  end
 end
 

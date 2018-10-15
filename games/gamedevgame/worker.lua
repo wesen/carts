@@ -42,13 +42,13 @@ function cls_coder:on_tick()
  cls_worker.on_tick(self)
  local auto_resources={res_build,res_csharp_file,res_func}
  for _,v in pairs(auto_resources) do
-  if v:are_dependencies_fulfilled() then
+  if v:are_dependencies_fulfilled() and maybe(0.5) then
    v:produce()
    self.duration=v.duration
    return
   end
  end
- res_loc.count+=1
+ res_loc:produce()
 end
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
@@ -58,13 +58,31 @@ end)
 
 function cls_gfx_artist:on_tick()
  cls_worker.on_tick(self)
- local auto_resources={res_sprite,res_animation}
+ local auto_resources={res_sprite,res_animation,res_tilemap}
  for _,v in pairs(auto_resources) do
-  if v:are_dependencies_fulfilled() then
+  if v:are_dependencies_fulfilled() and maybe(0.5) then
    v:produce()
    self.duration=v.duration
    return
   end
  end
- res_pixel.count+=1
+ res_pixel:produce()
+end
+
+cls_game_designer=subclass(cls_worker,function(self,duration)
+ cls_worker._ctr(self,duration)
+ self.spr=96
+end)
+
+function cls_game_designer:on_tick()
+ cls_worker.on_tick(self)
+ local auto_resources={res_prop,res_character,res_level}
+ for _,v in pairs(auto_resources) do
+  if v:are_dependencies_fulfilled() and maybe(0.5) then
+   v:produce()
+   self.duration=v.duration
+   return
+  end
+ end
+ res_pixel:produce()
 end

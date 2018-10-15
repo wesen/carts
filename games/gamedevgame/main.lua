@@ -6,6 +6,8 @@ function _init()
   cls_coder.init(3)
   local gfx_artist=cls_gfx_artist.init(2)
   gfx_artist=cls_gfx_artist.init(3)
+  local game_designer=cls_game_designer.init(2)
+  game_designer=cls_game_designer.init(2)
  end
 end
 

@@ -104,7 +104,7 @@ res_character=resource_cls.init("character",
 res_tilemap=resource_cls.init("tilemap",
  "tilemaps",
  0,2,
- {sprite=8},
+ {sprite=4},
  2,
  -- spr
  16,
@@ -113,7 +113,6 @@ res_tilemap=resource_cls.init("tilemap",
 )
 
 ---
-
 
 res_level=resource_cls.init("level",
  "levels",
