@@ -138,3 +138,42 @@ res_build=resource_cls.init(
  "make a beta build",
  "game built"
 )
+
+res_build=resource_cls.init(
+ "build",
+ "game builds",
+ 2,2,
+ {level=5,character=5},
+ 2,
+ -- spr
+ 16,
+ -- description
+ "make a beta build",
+ "game built"
+)
+
+res_playtest=resource_cls.init(
+ "playtest",
+ "playtests",
+ 3,2,
+ {build=0},
+ .5,
+ -- spr
+ 16,
+ -- description
+ "playtest the beta build",
+ "game tested"
+)
+
+res_release=resource_cls.init(
+ "release",
+ "releases",
+ 4,2,
+ {build=5,playtest=100},
+ 10,
+ -- spr
+ 16,
+ -- description
+ "make a release",
+ "game released"
+)

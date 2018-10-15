@@ -22,7 +22,7 @@ resource_cls=class(function(self,
  glb_resource_manager.resources[name]=self
 
  if glb_debug then
-  self.created=true
+  -- self.created=true
  end
 end)
 
