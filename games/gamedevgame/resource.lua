@@ -23,7 +23,7 @@ glb_resource_w=16
 
 function resource_cls:draw()
  if (not self:is_visible()) return
- if (not self:are_dependencies_fulfilled()) darken(50)
+ if (not self:are_dependencies_fulfilled() and self.t==0) darken(50)
  local x,y
  x,y=self:get_cur_xy()
 
@@ -31,6 +31,9 @@ function resource_cls:draw()
  local sy=flr(self.spr/16)
  local sx=self.spr%16
  sspr(sx*8,sy*8,8,8,x,y,16,16)
+ if self.t>0 then
+  rectfill(x,y+glb_resource_w,x+self.t/self.duration*glb_resource_w,y+glb_resource_w+1,11)
+ end
  print(tostr(self.count),x+2,y+glb_resource_w+2,7)
 
  if (self:is_mouse_over()) print(self.name,32,80,7)
@@ -44,6 +47,14 @@ function resource_cls:get_cur_xy()
 end
 
 function resource_cls:update()
+ if self.t>0 then
+  self.t+=glb_dt
+  if self.t>self.duration then
+   self.count+=1
+   self.created=true
+   self.t=0
+  end
+ end
 end
 
 function resource_cls:is_visible()
@@ -62,14 +73,17 @@ function resource_cls:are_dependencies_fulfilled()
  return true
 end
 
+function resource_cls:is_clickable()
+ return self.t==0 and self:are_dependencies_fulfilled()
+end
+
 function resource_cls:on_click()
- if self:are_dependencies_fulfilled() then
-  self.count+=1
-  self.created=true
+ if self:is_clickable() then
   for n,v in pairs(self.dependencies) do
    local res=glb_resource_manager.resources[n]
    res.count-=v
   end
+  self.t=glb_dt
  end
 end
 

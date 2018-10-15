@@ -6,7 +6,7 @@ res_loc=resource_cls.init(
   -- dependencies
   {},
   -- duration
-  10,
+  1,
   -- spr
   16,
   -- description
@@ -17,7 +17,7 @@ res_loc.active=true
 resource_cls.init("func",
  1,0,
  {loc=5},
- 10,
+ 1,
   -- spr
   16,
   -- description
@@ -27,7 +27,7 @@ resource_cls.init("func",
 resource_cls.init("csharp_file",
  2,0,
  {func=5},
- 10,
+ 1,
  -- spr
  16,
  -- description
@@ -37,7 +37,7 @@ resource_cls.init("csharp_file",
 resource_cls.init("build",
  2,0,
  {csharp_file=10},
- 10,
+ 1,
  -- spr
  16,
  -- description
@@ -47,7 +47,7 @@ resource_cls.init("build",
 res_pix=resource_cls.init("pixel",
   0,1,
   {},
-  10,
+  1,
   -- spr
   48,
   -- description
