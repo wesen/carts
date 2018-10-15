@@ -1,4 +1,5 @@
 resource_manager_cls=class(function(self)
+ self.workers={}
  self.resources={}
 end)
 
@@ -16,6 +17,9 @@ function resource_manager_cls:update()
  end
 
  for _,k in pairs(self.resources) do
+  k:update()
+ end
+ for _,k in pairs(self.workers) do
   k:update()
  end
 end

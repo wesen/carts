@@ -15,15 +15,17 @@ resource_cls=class(function(self,
  self.duration=duration
  self.t=0
  self.count=0
- self.active=false
  self.created=false
  self.spr=spr
  self.description=description
  self.creation_text=creation_text
  glb_resource_manager.resources[name]=self
+
+ if glb_debug then
+  self.created=true
+ end
 end)
 
-glb_timescale=1
 glb_resource_w=16
 
 function resource_cls:draw()
@@ -93,12 +95,30 @@ function resource_cls:get_cur_xy()
  return x,y
 end
 
+function resource_cls:on_produced()
+  self.count+=1
+  self.created=true
+  if (self.on_produced_cb!=nil) self.on_produced_cb(self)
+end
+
+function resource_cls:start_producing()
+  for n,v in pairs(self.dependencies) do
+   local res=glb_resource_manager.resources[n]
+   res.count-=v
+  end
+  if (self.on_produce_cb) self.on_produce_cb(self)
+end
+
+function resource_cls:produce()
+ self:start_producing()
+ self:on_produced()
+end
+
 function resource_cls:update()
  if self.t>0 then
   self.t+=glb_dt
   if self.t>(self.duration/glb_timescale) then
-   self.count+=1
-   self.created=true
+   self:on_produced()
    self.t=0
    local x,y
    x=64
@@ -130,10 +150,7 @@ end
 
 function resource_cls:on_click()
  if self:is_clickable() then
-  for n,v in pairs(self.dependencies) do
-   local res=glb_resource_manager.resources[n]
-   res.count-=v
-  end
+  self:start_producing()
   self.t=glb_dt
  end
 end

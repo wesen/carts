@@ -1,6 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
+glb_debug=true
+glb_timescale=5
+
 function class (init)
   local c = {}
   c.__index = c
@@ -583,6 +586,7 @@ end
 
 
 resource_manager_cls=class(function(self)
+ self.workers={}
  self.resources={}
 end)
 
@@ -600,6 +604,9 @@ function resource_manager_cls:update()
  end
 
  for _,k in pairs(self.resources) do
+  k:update()
+ end
+ for _,k in pairs(self.workers) do
   k:update()
  end
 end
@@ -623,15 +630,17 @@ resource_cls=class(function(self,
  self.duration=duration
  self.t=0
  self.count=0
- self.active=false
  self.created=false
  self.spr=spr
  self.description=description
  self.creation_text=creation_text
  glb_resource_manager.resources[name]=self
+
+ if glb_debug then
+  self.created=true
+ end
 end)
 
-glb_timescale=1
 glb_resource_w=16
 
 function resource_cls:draw()
@@ -701,12 +710,30 @@ function resource_cls:get_cur_xy()
  return x,y
 end
 
+function resource_cls:on_produced()
+  self.count+=1
+  self.created=true
+  if (self.on_produced_cb!=nil) self.on_produced_cb(self)
+end
+
+function resource_cls:start_producing()
+  for n,v in pairs(self.dependencies) do
+   local res=glb_resource_manager.resources[n]
+   res.count-=v
+  end
+  if (self.on_produce_cb) self.on_produce_cb(self)
+end
+
+function resource_cls:produce()
+ self:start_producing()
+ self:on_produced()
+end
+
 function resource_cls:update()
  if self.t>0 then
   self.t+=glb_dt
   if self.t>(self.duration/glb_timescale) then
-   self.count+=1
-   self.created=true
+   self:on_produced()
    self.t=0
    local x,y
    x=64
@@ -738,10 +765,7 @@ end
 
 function resource_cls:on_click()
  if self:is_clickable() then
-  for n,v in pairs(self.dependencies) do
-   local res=glb_resource_manager.resources[n]
-   res.count-=v
-  end
+  self:start_producing()
   self.t=glb_dt
  end
 end
@@ -786,7 +810,7 @@ res_func=resource_cls.init(
    "c# function written"
 )
 
-res_file=resource_cls.init(
+res_csharp_file=resource_cls.init(
  "csharp_file",
  "c# files",
  2,0,
@@ -799,11 +823,7 @@ res_file=resource_cls.init(
  "c# file written"
 )
 
-res_func.created=true
-res_file.created=true
-res_loc.created=true
-
-resource_cls.init(
+res_build=resource_cls.init(
  "build",
  "game builds",
  3,0,
@@ -816,7 +836,7 @@ resource_cls.init(
  "game built"
 )
 
-res_pix=resource_cls.init("pixel",
+res_pixel=resource_cls.init("pixel",
  "pixels",
   0,1,
   {},
@@ -828,7 +848,7 @@ res_pix=resource_cls.init("pixel",
   "pixel drawn"
 )
 
-res_spr=resource_cls.init("sprite",
+res_sprite=resource_cls.init("sprite",
  "sprites",
   1,1,
   {pixel=8},
@@ -840,7 +860,7 @@ res_spr=resource_cls.init("sprite",
   "sprite drawn"
 )
 
-res_anim=resource_cls.init("animation",
+res_animation=resource_cls.init("animation",
  "animations",
  2,1,
  {sprite=4},
@@ -850,11 +870,69 @@ res_anim=resource_cls.init("animation",
  "character animated"
 )
 
-res_pix.active=true
+glb_workers={}
+
+cls_worker=class(function(self,duration)
+ self.t=0
+ self.orig_duration=duration/glb_timescale
+ self.duration=self.orig_duration
+ add(glb_resource_manager.workers,self)
+end)
+
+function cls_worker:update()
+ self.t+=glb_dt
+ if self.t>self.duration then
+  self.duration=self.orig_duration
+  self.t=0
+  self:on_tick()
+ end
+end
+
+function cls_worker:on_tick()
+end
+
+cls_coder=subclass(cls_worker,function(self,duration)
+ cls_worker._ctr(self,duration)
+end)
+
+function cls_coder:on_tick()
+ local auto_resources={res_build,res_csharp_file,res_func}
+ for _,v in pairs(auto_resources) do
+  if v:are_dependencies_fulfilled() then
+   v:produce()
+   self.duration=v.duration
+   return
+  end
+ end
+ res_loc.count+=1
+end
+
+cls_gfx_artist=subclass(cls_worker,function(self,duration)
+ cls_worker._ctr(self,duration)
+end)
+
+function cls_gfx_artist:on_tick()
+ local auto_resources={res_sprite,res_animation}
+ for _,v in pairs(auto_resources) do
+  if v:are_dependencies_fulfilled() then
+   v:produce()
+   self.duration=v.duration
+   return
+  end
+ end
+ res_pixel.count+=1
+end
 
 
 function _init()
  poke(0x5f2d,1)
+ if glb_debug then
+  local coder=cls_coder.init(3)
+  coder.t=1
+  cls_coder.init(3)
+  local gfx_artist=cls_gfx_artist.init(2)
+  gfx_artist=cls_gfx_artist.init(3)
+ end
 end
 
 glb_lasttime=time()

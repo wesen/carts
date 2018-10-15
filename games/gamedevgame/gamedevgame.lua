@@ -1,3 +1,6 @@
+glb_debug=true
+glb_timescale=5
+
 --#include oo
 --#include helpers
 --#include v2
@@ -13,5 +16,6 @@
 --#include resourcemanager
 --#include resource
 --#include resources
+--#include worker
 
 --#include main

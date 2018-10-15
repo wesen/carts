@@ -1,5 +1,12 @@
 function _init()
  poke(0x5f2d,1)
+ if glb_debug then
+  local coder=cls_coder.init(3)
+  coder.t=1
+  cls_coder.init(3)
+  local gfx_artist=cls_gfx_artist.init(2)
+  gfx_artist=cls_gfx_artist.init(3)
+ end
 end
 
 glb_lasttime=time()

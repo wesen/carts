@@ -30,7 +30,7 @@ res_func=resource_cls.init(
    "c# function written"
 )
 
-res_file=resource_cls.init(
+res_csharp_file=resource_cls.init(
  "csharp_file",
  "c# files",
  2,0,
@@ -43,11 +43,7 @@ res_file=resource_cls.init(
  "c# file written"
 )
 
-res_func.created=true
-res_file.created=true
-res_loc.created=true
-
-resource_cls.init(
+res_build=resource_cls.init(
  "build",
  "game builds",
  3,0,
@@ -60,7 +56,7 @@ resource_cls.init(
  "game built"
 )
 
-res_pix=resource_cls.init("pixel",
+res_pixel=resource_cls.init("pixel",
  "pixels",
   0,1,
   {},
@@ -72,7 +68,7 @@ res_pix=resource_cls.init("pixel",
   "pixel drawn"
 )
 
-res_spr=resource_cls.init("sprite",
+res_sprite=resource_cls.init("sprite",
  "sprites",
   1,1,
   {pixel=8},
@@ -84,7 +80,7 @@ res_spr=resource_cls.init("sprite",
   "sprite drawn"
 )
 
-res_anim=resource_cls.init("animation",
+res_animation=resource_cls.init("animation",
  "animations",
  2,1,
  {sprite=4},
@@ -93,5 +89,3 @@ res_anim=resource_cls.init("animation",
  "animate a character!",
  "character animated"
 )
-
-res_pix.active=true
