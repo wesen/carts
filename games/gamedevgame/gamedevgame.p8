@@ -365,11 +365,13 @@ glb_resource_w=16
 
 function resource_cls:draw()
  if (not self:is_visible()) return
+ local col=7
+ if (not self:are_dependencies_fulfilled()) col=5
  local x,y
  x,y=self:get_cur_xy()
- rect(x,y,x+glb_resource_w,y+glb_resource_w,7)
- print(tostr(self.count),x+2,y+glb_resource_w+2,7)
- if (self:is_mouse_over()) print(self.name,32,80,7)
+ rect(x,y,x+glb_resource_w,y+glb_resource_w,col)
+ print(tostr(self.count),x+2,y+glb_resource_w+2,col)
+ if (self:is_mouse_over()) print(self.name,32,80,col)
 end
 
 function resource_cls:get_cur_xy()
@@ -385,6 +387,14 @@ function resource_cls:is_visible()
  for n,_ in pairs(self.dependencies) do
   local res=glb_resource_manager.resources[n]
   if (not res.created) return false
+ end
+ return true
+end
+
+function resource_cls:are_dependencies_fulfilled()
+ for n,v in pairs(self.dependencies) do
+  local res=glb_resource_manager.resources[n]
+  if (res.count<v) return false
  end
  return true
 end
@@ -416,13 +426,13 @@ res_loc.active=true
 
 resource_cls.init("func",
  1,0,
- {loc=1},
+ {loc=5},
  10
 )
 
 resource_cls.init("csharp_file",
  2,0,
- {func=1},
+ {func=5},
  10
 )
 
