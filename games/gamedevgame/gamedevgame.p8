@@ -48,6 +48,10 @@ function rnd_elt(v)
  return v[min(#v,1+flr(rnd(#v)+0.5))]
 end
 
+function frame(interval,len)
+ return flr(glb_frame/interval)%len
+end
+
 --- function for calculating
 -- exponents to a higher degree
 -- of accuracy than using the
@@ -265,6 +269,10 @@ end
 
 function rnd_elt(v)
  return v[min(#v,1+flr(rnd(#v)+0.5))]
+end
+
+function frame(interval,len)
+ return flr(glb_frame/interval)%len
 end
 
 --- function for calculating
@@ -635,7 +643,11 @@ function resource_cls:draw()
  palt(0,false)
  palt(11,true)
  if self:is_mouse_over() then
-  draw_rounded_rect2(x,y,w,w,glb_bg_col2,glb_bg_col2,7)
+  if frame(12,2)==0 then
+   draw_rounded_rect2(x-1,y-1,w+2,w+2,glb_bg_col2,glb_bg_col2,7)
+  else
+   draw_rounded_rect2(x,y,w,w,glb_bg_col2,glb_bg_col2,7)
+  end
  else
   draw_rounded_rect1(x,y,w,w,glb_bg_col2)
  end
@@ -649,7 +661,7 @@ function resource_cls:draw()
  end
  pal()
  palt()
- print(tostr(self.count),x+2,y+w+3,7)
+ print(tostr(self.count),x+2,y+w+4,7)
 
  if (self:is_mouse_over()) then
   glb_dialogbox.visible=true

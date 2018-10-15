@@ -28,6 +28,10 @@ function rnd_elt(v)
  return v[min(#v,1+flr(rnd(#v)+0.5))]
 end
 
+function frame(interval,len)
+ return flr(glb_frame/interval)%len
+end
+
 --- function for calculating
 -- exponents to a higher degree
 -- of accuracy than using the
