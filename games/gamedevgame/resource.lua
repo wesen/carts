@@ -90,7 +90,7 @@ function resource_cls:get_display_text()
 end
 
 function resource_cls:get_cur_xy()
- local x=self.x*(glb_resource_w+6)+4
+ local x=self.x*(glb_resource_w+6)+12
  local y=self.y*(glb_resource_w+3+10)+4
  return x,y
 end

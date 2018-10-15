@@ -572,15 +572,19 @@ end)
 glb_dialogbox=cls_dialogbox.init()
 
 function cls_dialogbox:draw()
+ local y=75
  if (not self.visible) return
 
- draw_rounded_rect2(15,75,98,40,12,1,6)
+ if (glb_mouse_y>50) y=5
+ local h=14+(#self.text-1)*8
+
+ draw_rounded_rect2(15,y+0,98,h,12,1,6)
  if #self.text>=1 then
   local txt=self.text[1][2]
-  bstr(txt,64-#txt*2,80,1,7)
+  bstr(txt,64-#txt*2,y+3,1,7)
  end
  for i=2,#self.text do
-  print(self.text[i][2],15+7,75+i*8,self.text[i][1])
+  print(self.text[i][2],15+7,y+i*8-2,self.text[i][1])
  end
 end
 
@@ -708,7 +712,7 @@ function resource_cls:get_display_text()
 end
 
 function resource_cls:get_cur_xy()
- local x=self.x*(glb_resource_w+6)+4
+ local x=self.x*(glb_resource_w+6)+12
  local y=self.y*(glb_resource_w+3+10)+4
  return x,y
 end
@@ -826,18 +830,7 @@ res_csharp_file=resource_cls.init(
  "c# file written"
 )
 
-res_build=resource_cls.init(
- "build",
- "game builds",
- 3,0,
- {csharp_file=10},
- 2,
- -- spr
- 16,
- -- description
- "write a c# file!",
- "game built"
-)
+--
 
 res_pixel=resource_cls.init("pixel",
  "pixels",
@@ -871,6 +864,66 @@ res_animation=resource_cls.init("animation",
  48,
  "animate a character!",
  "character animated"
+)
+
+res_prop=resource_cls.init("prop",
+ "props",
+ 3,1,
+ {sprite=4,csharp_file=1},
+ 2,
+ -- spr
+ 16,
+ "make a prop!",
+ "prop created"
+)
+
+res_character=resource_cls.init("character",
+ "characters",
+ 4,1,
+ {animation=4,csharp_file=3},
+ 4,
+ -- spr
+ 16,
+ "make a character!",
+ "character created"
+)
+
+res_tilemap=resource_cls.init("tilemap",
+ "tilemaps",
+ 0,2,
+ {sprite=8},
+ 2,
+ -- spr
+ 16,
+ "make a tilemap!",
+ "tilemap created"
+)
+
+---
+
+
+res_level=resource_cls.init("level",
+ "levels",
+ 1,2,
+ {tilemap=1,prop=5,character=2,csharp_file=2},
+ 5,
+ -- spr
+ 16,
+ "make a level!",
+ "level created"
+)
+
+res_build=resource_cls.init(
+ "build",
+ "game builds",
+ 2,2,
+ {level=5,character=5},
+ 2,
+ -- spr
+ 16,
+ -- description
+ "make a beta build",
+ "game built"
 )
 
 cls_worker=class(function(self,duration)

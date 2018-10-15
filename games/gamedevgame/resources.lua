@@ -43,18 +43,7 @@ res_csharp_file=resource_cls.init(
  "c# file written"
 )
 
-res_build=resource_cls.init(
- "build",
- "game builds",
- 3,0,
- {csharp_file=10},
- 2,
- -- spr
- 16,
- -- description
- "write a c# file!",
- "game built"
-)
+--
 
 res_pixel=resource_cls.init("pixel",
  "pixels",
@@ -88,4 +77,64 @@ res_animation=resource_cls.init("animation",
  48,
  "animate a character!",
  "character animated"
+)
+
+res_prop=resource_cls.init("prop",
+ "props",
+ 3,1,
+ {sprite=4,csharp_file=1},
+ 2,
+ -- spr
+ 16,
+ "make a prop!",
+ "prop created"
+)
+
+res_character=resource_cls.init("character",
+ "characters",
+ 4,1,
+ {animation=4,csharp_file=3},
+ 4,
+ -- spr
+ 16,
+ "make a character!",
+ "character created"
+)
+
+res_tilemap=resource_cls.init("tilemap",
+ "tilemaps",
+ 0,2,
+ {sprite=8},
+ 2,
+ -- spr
+ 16,
+ "make a tilemap!",
+ "tilemap created"
+)
+
+---
+
+
+res_level=resource_cls.init("level",
+ "levels",
+ 1,2,
+ {tilemap=1,prop=5,character=2,csharp_file=2},
+ 5,
+ -- spr
+ 16,
+ "make a level!",
+ "level created"
+)
+
+res_build=resource_cls.init(
+ "build",
+ "game builds",
+ 2,2,
+ {level=5,character=5},
+ 2,
+ -- spr
+ 16,
+ -- description
+ "make a beta build",
+ "game built"
 )
