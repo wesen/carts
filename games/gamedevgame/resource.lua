@@ -1,4 +1,10 @@
-resource_cls=class(function(self,name,x,y,dependencies,duration)
+resource_cls=class(function(self,
+   name,
+   x,y,
+   dependencies,
+   duration,
+   spr,
+   description)
  self.x=x
  self.y=y
  self.name=name
@@ -8,6 +14,8 @@ resource_cls=class(function(self,name,x,y,dependencies,duration)
  self.count=0
  self.active=false
  self.created=false
+ self.spr=spr
+ self.description=description
  glb_resource_manager.resources[name]=self
 end)
 
@@ -15,13 +23,18 @@ glb_resource_w=16
 
 function resource_cls:draw()
  if (not self:is_visible()) return
- local col=7
- if (not self:are_dependencies_fulfilled()) col=5
+ if (not self:are_dependencies_fulfilled()) darken(50)
  local x,y
  x,y=self:get_cur_xy()
- rect(x,y,x+glb_resource_w,y+glb_resource_w,col)
- print(tostr(self.count),x+2,y+glb_resource_w+2,col)
- if (self:is_mouse_over()) print(self.name,32,80,col)
+
+ local spage=flr(self.spr/64)
+ local sy=flr(self.spr/16)
+ local sx=self.spr%16
+ sspr(sx*8,sy*8,8,8,x,y,16,16)
+ print(tostr(self.count),x+2,y+glb_resource_w+2,7)
+
+ if (self:is_mouse_over()) print(self.name,32,80,7)
+ pal()
 end
 
 function resource_cls:get_cur_xy()

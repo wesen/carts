@@ -5,6 +5,7 @@
 --#include hitbox
 --#include helpers
 --#include coroutines
+--#include gfx
 
 --#include resourcemanager
 --#include resource
