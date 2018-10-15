@@ -24,9 +24,12 @@ function _draw()
  for _,v in pairs(glb_particles) do
   v:draw()
  end
+
+ glb_dialogbox:draw()
 end
 
 function _update60()
+ glb_dialogbox.visible=false
  glb_dt=time()-glb_lasttime
 
  local mouse_btn=stat(34)

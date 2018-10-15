@@ -35,9 +35,9 @@ function resource_cls:draw()
  palt(0,false)
  palt(11,true)
  if self:is_mouse_over() then
-  draw_rounded_rect2(x,y,w,glb_bg_col2,glb_bg_col2,7)
+  draw_rounded_rect2(x,y,w,w,glb_bg_col2,glb_bg_col2,7)
  else
-  draw_rounded_rect1(x,y,w,glb_bg_col2)
+  draw_rounded_rect1(x,y,w,w,glb_bg_col2)
  end
 
  local spage=flr(self.spr/64)
@@ -47,33 +47,45 @@ function resource_cls:draw()
  if self.t>0 then
   rectfill(x,y+w,x+self.t/self.duration*w,y+w+1,11)
  end
+ pal()
+ palt()
  print(tostr(self.count),x+2,y+w+3,7)
 
  if (self:is_mouse_over()) then
-   print(self:get_display_text(),32,80,7)
-  end
- pal()
- palt()
+  glb_dialogbox.visible=true
+  glb_dialogbox.text=self:get_display_text()
+ end
 end
 
 function resource_cls:get_display_text()
- local txt=self.description
- local txt2=""
+ local result={
+  {7,self.description}
+ }
+ local requirements={}
+ local requires_col=7
  for n,v in pairs(self.dependencies) do
   local res=glb_resource_manager.resources[n]
-  txt2=txt2.."- "..tostr(v).." "..(res.full_name).."\n"
+  local col=7
+  if v>res.count then
+   col=5
+   requires_col=5
+  end
+  requirements[#requirements+1]={col,"- "..tostr(v).." "..(res.full_name)}
  end
 
- if txt2!="" then
-  txt=txt.."\nrequires:\n"..txt2
+ if #requirements>0 then
+  result[#result+1]={requires_col,"requires:"}
+  for _,v in pairs(requirements) do
+   result[#result+1]=v
+  end
  end
 
- return txt
+ return result
 end
 
 function resource_cls:get_cur_xy()
- local x=self.x*(glb_resource_w+4)+2
- local y=self.y*(glb_resource_w+3+8)+2
+ local x=self.x*(glb_resource_w+6)+4
+ local y=self.y*(glb_resource_w+3+10)+4
  return x,y
 end
 

@@ -7,6 +7,8 @@
 --#include coroutines
 --#include gfx
 --#include particle
+--#include tween
+--#include dialogbox
 
 --#include resourcemanager
 --#include resource

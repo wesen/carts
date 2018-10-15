@@ -8,7 +8,7 @@ res_loc=resource_cls.init(
   -- dependencies
   {},
   -- duration
-  1,
+  0.3,
   -- spr
   16,
   -- description
@@ -17,12 +17,12 @@ res_loc=resource_cls.init(
 )
 res_loc.active=true
 
-resource_cls.init(
+res_func=resource_cls.init(
 "func",
 "c# functions",
  1,0,
  {loc=5},
- 1,
+ 0.5,
   -- spr
   16,
   -- description
@@ -30,7 +30,7 @@ resource_cls.init(
    "c# function written"
 )
 
-resource_cls.init(
+res_file=resource_cls.init(
  "csharp_file",
  "c# files",
  2,0,
@@ -43,12 +43,16 @@ resource_cls.init(
  "c# file written"
 )
 
+res_func.created=true
+res_file.created=true
+res_loc.created=true
+
 resource_cls.init(
  "build",
  "game builds",
- 2,0,
+ 3,0,
  {csharp_file=10},
- 1,
+ 2,
  -- spr
  16,
  -- description
@@ -60,7 +64,7 @@ res_pix=resource_cls.init("pixel",
  "pixels",
   0,1,
   {},
-  1,
+  0.3,
   -- spr
   48,
   -- description
@@ -72,7 +76,7 @@ res_spr=resource_cls.init("sprite",
  "sprites",
   1,1,
   {pixel=8},
-  1,
+  0.8,
   -- spr
   48,
   -- description

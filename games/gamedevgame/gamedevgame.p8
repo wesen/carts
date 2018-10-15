@@ -375,32 +375,41 @@ function bstr(s,x,y,c1,c2)
 	print(s,x+1,y+1,c2)
 end
 
-function draw_rounded_rect1(x,y,w,col_bg,col_border)
+function draw_rounded_rect1(x,y,w,h,col_bg,col_border)
  col_border=col_border or col_bg
- line(x,y-1,x+w-1,y-1,col_border)
- line(x,y+w,x+w-1,y+w,col_border)
- line(x-1,y,x-1,y+w-1,col_border)
- line(x+w,y,x+w,y+w-1,col_border)
- rectfill(x,y,x+w-1,y+w-1,col_bg)
+ local x2=x+w
+ local y2=y+h
+ line(x,y-1,x2-1,y-1,col_border)
+ line(x,y2,x2-1,y2,col_border)
+ line(x-1,y,x-1,y2-1,col_border)
+ line(x2,y,x2,y2-1,col_border)
+ rectfill(x,y,x2-1,y2-1,col_bg)
 end
 
-function draw_rounded_rect2(x,y,w,col_bg,col_border1,col_border2)
+function draw_rounded_rect2(x,y,w,h,col_bg,col_border1,col_border2)
  col_border1=col_border1 or col_bg
  col_border2=col_border2 or col_border1
 
- line(x,y-2,x+w-1,y-2,col_border2)
- line(x,y+w+1,x+w-1,y+w+1,col_border2)
- line(x-2,y,x-2,y+w-1,col_border2)
- line(x+w+1,y,x+w+1,y+w-1,col_border2)
- line(x,y-1,x+w-1,y-1,col_border1)
- line(x,y+w,x+w-1,y+w,col_border1)
- line(x-1,y,x-1,y+w-1,col_border1)
- line(x+w,y,x+w,y+w-1,col_border1)
+ local y2=y+h
+ local x2=x+w
+
+ line(x,y-2,x2-1,y-2,col_border2)
+ line(x,y+h+1,x2-1,y+h+1,col_border2)
+ line(x-2,y,x-2,y2-1,col_border2)
+ line(x2+1,y,x2+1,y2-1,col_border2)
+ line(x,y-1,x2-1,y-1,col_border1)
+ line(x,y2,x2-1,y2,col_border1)
+ line(x-1,y,x-1,y2-1,col_border1)
+ line(x2,y,x2,y2-1,col_border1)
  pset(x-1,y-1,col_border2)
- pset(x+w,y-1,col_border2)
- pset(x-1,y+w,col_border2)
- pset(x+w,y+w,col_border2)
- rectfill(x,y,x+w-1,y+w-1,col_bg)
+ pset(x2,y-1,col_border2)
+ pset(x-1,y2,col_border2)
+ pset(x2,y2,col_border2)
+ rectfill(x,y,x2-1,y2-1,col_bg)
+ pset(x,y,col_border1)
+ pset(x,y2-1,col_border1)
+ pset(x2-1,y2-1,col_border1)
+ pset(x2-1,y,col_border1)
 end
 
 glb_particles={}
@@ -505,6 +514,65 @@ function cls_pwrup_particle:draw()
  circ(self.x,self.y,(2-self.t/self.lifetime*2),col)
 end
 
+function inoutquint(t, b, c, d)
+ t = t / d * 2
+ if (t < 1) return c / 2 * pow(t, 5) + b
+ return c / 2 * (pow(t - 2, 5) + 2) + b
+end
+
+function inexpo(t, b, c, d)
+ if (t == 0) return b
+ return c * pow(2, 10 * (t / d - 1)) + b - c * 0.001
+end
+
+function outexpo(t, b, c, d)
+ if (t == d) return b + c
+ return c * 1.001 * (-pow(2, -10 * t / d) + 1) + b
+end
+
+function inoutexpo(t, b, c, d)
+ if (t == 0) return b
+ if (t == d) return b + c
+ t = t / d * 2
+ if (t < 1) return c / 2 * pow(2, 10 * (t - 1)) + b - c * 0.0005
+ return c / 2 * 1.0005 * (-pow(2, -10 * (t - 1)) + 2) + b
+end
+
+function cr_move_to(obj,target_x,target_y,d,easetype)
+ local t=0
+ local bx=obj.x
+ local cx=target_x-obj.x
+ local by=obj.y
+ local cy=target_y-obj.y
+ while t<d do
+  t+=dt
+  if (t>d) return
+  obj.x=round(easetype(t,bx,cx,d))
+  obj.y=round(easetype(t,by,cy,d))
+  yield()
+ end
+end
+
+cls_dialogbox=class(function(self)
+ self.visible=true
+ self.text={}
+end)
+
+glb_dialogbox=cls_dialogbox.init()
+
+function cls_dialogbox:draw()
+ if (not self.visible) return
+
+ draw_rounded_rect2(15,75,98,40,12,1,6)
+ if #self.text>=1 then
+  local txt=self.text[1][2]
+  bstr(txt,64-#txt*2,80,1,7)
+ end
+ for i=2,#self.text do
+  print(self.text[i][2],15+7,75+i*8,self.text[i][1])
+ end
+end
+
 
 resource_manager_cls=class(function(self)
  self.resources={}
@@ -567,9 +635,9 @@ function resource_cls:draw()
  palt(0,false)
  palt(11,true)
  if self:is_mouse_over() then
-  draw_rounded_rect2(x,y,w,glb_bg_col2,glb_bg_col2,7)
+  draw_rounded_rect2(x,y,w,w,glb_bg_col2,glb_bg_col2,7)
  else
-  draw_rounded_rect1(x,y,w,glb_bg_col2)
+  draw_rounded_rect1(x,y,w,w,glb_bg_col2)
  end
 
  local spage=flr(self.spr/64)
@@ -579,33 +647,45 @@ function resource_cls:draw()
  if self.t>0 then
   rectfill(x,y+w,x+self.t/self.duration*w,y+w+1,11)
  end
+ pal()
+ palt()
  print(tostr(self.count),x+2,y+w+3,7)
 
  if (self:is_mouse_over()) then
-   print(self:get_display_text(),32,80,7)
-  end
- pal()
- palt()
+  glb_dialogbox.visible=true
+  glb_dialogbox.text=self:get_display_text()
+ end
 end
 
 function resource_cls:get_display_text()
- local txt=self.description
- local txt2=""
+ local result={
+  {7,self.description}
+ }
+ local requirements={}
+ local requires_col=7
  for n,v in pairs(self.dependencies) do
   local res=glb_resource_manager.resources[n]
-  txt2=txt2.."- "..tostr(v).." "..(res.full_name).."\n"
+  local col=7
+  if v>res.count then
+   col=5
+   requires_col=5
+  end
+  requirements[#requirements+1]={col,"- "..tostr(v).." "..(res.full_name)}
  end
 
- if txt2!="" then
-  txt=txt.."\nrequires:\n"..txt2
+ if #requirements>0 then
+  result[#result+1]={requires_col,"requires:"}
+  for _,v in pairs(requirements) do
+   result[#result+1]=v
+  end
  end
 
- return txt
+ return result
 end
 
 function resource_cls:get_cur_xy()
- local x=self.x*(glb_resource_w+4)+2
- local y=self.y*(glb_resource_w+3+8)+2
+ local x=self.x*(glb_resource_w+6)+4
+ local y=self.y*(glb_resource_w+3+10)+4
  return x,y
 end
 
@@ -672,7 +752,7 @@ res_loc=resource_cls.init(
   -- dependencies
   {},
   -- duration
-  1,
+  0.3,
   -- spr
   16,
   -- description
@@ -681,12 +761,12 @@ res_loc=resource_cls.init(
 )
 res_loc.active=true
 
-resource_cls.init(
+res_func=resource_cls.init(
 "func",
 "c# functions",
  1,0,
  {loc=5},
- 1,
+ 0.5,
   -- spr
   16,
   -- description
@@ -694,7 +774,7 @@ resource_cls.init(
    "c# function written"
 )
 
-resource_cls.init(
+res_file=resource_cls.init(
  "csharp_file",
  "c# files",
  2,0,
@@ -707,12 +787,16 @@ resource_cls.init(
  "c# file written"
 )
 
+res_func.created=true
+res_file.created=true
+res_loc.created=true
+
 resource_cls.init(
  "build",
  "game builds",
- 2,0,
+ 3,0,
  {csharp_file=10},
- 1,
+ 2,
  -- spr
  16,
  -- description
@@ -724,7 +808,7 @@ res_pix=resource_cls.init("pixel",
  "pixels",
   0,1,
   {},
-  1,
+  0.3,
   -- spr
   48,
   -- description
@@ -736,7 +820,7 @@ res_spr=resource_cls.init("sprite",
  "sprites",
   1,1,
   {pixel=8},
-  1,
+  0.8,
   -- spr
   48,
   -- description
@@ -783,9 +867,12 @@ function _draw()
  for _,v in pairs(glb_particles) do
   v:draw()
  end
+
+ glb_dialogbox:draw()
 end
 
 function _update60()
+ glb_dialogbox.visible=false
  glb_dt=time()-glb_lasttime
 
  local mouse_btn=stat(34)
