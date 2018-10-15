@@ -57,3 +57,7 @@ end
 function v_idx(pos)
  return pos.x+pos.y*128
 end
+
+function angle2vec(angle)
+ return cos(angle),sin(angle)
+end

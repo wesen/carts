@@ -17,6 +17,10 @@ function _draw()
  cls()
  glb_resource_manager:draw()
  spr(1,glb_mouse_x,glb_mouse_y)
+
+ for _,v in pairs(glb_particles) do
+  v:draw()
+ end
 end
 
 function _update60()
@@ -32,4 +36,8 @@ function _update60()
  glb_lasttime=time()
  glb_resource_manager:update()
  tick_crs(crs)
+
+ for _,v in pairs(glb_particles) do
+  v:update()
+ end
 end

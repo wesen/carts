@@ -12,7 +12,8 @@ res_loc=resource_cls.init(
   -- spr
   16,
   -- description
-  "write a line of code!"
+  "write a line of code!",
+  "line of code written"
 )
 res_loc.active=true
 
@@ -25,7 +26,8 @@ resource_cls.init(
   -- spr
   16,
   -- description
-  "write a c# function!"
+  "write a c# function!",
+   "c# function written"
 )
 
 resource_cls.init(
@@ -37,7 +39,8 @@ resource_cls.init(
  -- spr
  16,
  -- description
- "write a c# file!"
+ "write a c# file!",
+ "c# file written"
 )
 
 resource_cls.init(
@@ -49,7 +52,8 @@ resource_cls.init(
  -- spr
  16,
  -- description
- "write a c# file!"
+ "write a c# file!",
+ "game built"
 )
 
 res_pix=resource_cls.init("pixel",
@@ -60,7 +64,8 @@ res_pix=resource_cls.init("pixel",
   -- spr
   48,
   -- description
-  "draw a pixel!"
+  "draw a pixel!",
+  "pixel drawn"
 )
 
 res_spr=resource_cls.init("sprite",
@@ -71,7 +76,8 @@ res_spr=resource_cls.init("sprite",
   -- spr
   48,
   -- description
-  "draw a sprite!"
+  "draw a sprite!",
+  "sprite drawn"
 )
 
 res_anim=resource_cls.init("animation",
@@ -80,8 +86,8 @@ res_anim=resource_cls.init("animation",
  {sprite=4},
  1,
  48,
- "animate a character!"
+ "animate a character!",
+ "character animated"
 )
-
 
 res_pix.active=true

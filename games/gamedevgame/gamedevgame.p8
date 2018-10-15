@@ -78,6 +78,10 @@ function v_idx(pos)
  return pos.x+pos.y*128
 end
 
+function angle2vec(angle)
+ return cos(angle),sin(angle)
+end
+
 -- vectors
 local v2mt={}
 v2mt.__index=v2mt
@@ -293,6 +297,10 @@ function v_idx(pos)
  return pos.x+pos.y*128
 end
 
+function angle2vec(angle)
+ return cos(angle),sin(angle)
+end
+
 function tick_crs(crs_)
  for cr in all(crs_) do
   if costatus(cr)!='dead' then
@@ -340,6 +348,135 @@ function darken(p,_pal)
  end
 end
 
+function palbg(col)
+ for i=1,16 do
+  pal(i,col)
+ end
+end
+
+function bspr(s,x,y,flipx,flipy,col)
+ palbg(col)
+ spr(s,x-1,y,1,1,flipx,flipy)
+ spr(s,x+1,y,1,1,flipx,flipy)
+ spr(s,x,y-1,1,1,flipx,flipy)
+ spr(s,x,y+1,1,1,flipx,flipy)
+ pal()
+ spr(s,x,y,1,1,flipx,flipy)
+end
+
+function bstr(s,x,y,c1,c2)
+	for i=0,2 do
+	 for j=0,2 do
+	  if not(i==1 and j==1) then
+	   print(s,x+i,y+j,c1)
+	  end
+	 end
+	end
+	print(s,x+1,y+1,c2)
+end
+
+glb_particles={}
+
+cls_particle=class(function(self,pos,lifetime,sprs)
+ self.x=pos.x+mrnd(1)
+ self.y=pos.y
+ add(glb_particles,self)
+ self.flip_h=false
+ self.flip_v=false
+ self.t=0
+ self.lifetime=lifetime
+ self.sprs=sprs
+ self.weight=0
+end)
+
+function cls_particle:random_flip()
+ self.flip_h=maybe()
+ self.flip_v=maybe()
+end
+
+function cls_particle:random_angle(spd)
+ local angle=rnd(1)
+ self.spd_x=cos(angle)*spd
+ self.spd_y=sin(angle)*spd
+end
+
+function cls_particle:update()
+ self.aax=self.x+2
+ self.bbx=self.x+4
+ self.aay=self.y+2
+ self.bby=self.y+4
+ self.t+=glb_dt
+
+ if self.t>self.lifetime then
+   del(glb_particles,self)
+   return
+ end
+
+ self.x+=self.spd_x
+ self.aax+=self.spd_x
+ self.bbx+=self.spd_x
+ self.y+=self.spd_y
+ self.aay+=self.spd_y
+ self.bby+=self.spd_y
+ self.spd_y=appr(self.spd_y,2,0.12)
+end
+
+function cls_particle:draw()
+ local idx=flr(#self.sprs*(self.t/self.lifetime))
+ local spr_=self.sprs[1+idx]
+ spr(spr_,self.x,self.y,1,1)
+end
+
+cls_score_particle=class(function(self,x,y,val,c2,c1)
+ self.x=x
+ self.y=y
+ self.spd_x=mrnd(0.2)
+ self.spd_y=-rnd(0.2)-0.4
+ self.c2=c2
+ self.c1=c1
+ self.val=val
+ self.t=0
+ self.lifetime=1
+ add(glb_particles,self)
+end)
+
+function cls_score_particle:update()
+ self.t+=glb_dt
+ self.x+=self.spd_x+rnd(.1)
+ self.x=mid(rnd(5),self.x,128-rnd(5)-4*#self.val)
+ self.y+=self.spd_y
+ if (self.t>self.lifetime) del(glb_particles,self)
+end
+
+function cls_score_particle:draw()
+ bstr(self.val,self.x,self.y,self.c1,self.c2)
+end
+
+cls_pwrup_particle=class(function(self,x,y,a,cols)
+ self.spd_x=cos(a)*.8
+ self.cols=cols
+ self.spd_y=sin(a)*.8
+ self.x=x+self.spd_x*5
+ self.y=y+self.spd_y*5
+ self.t=0
+ self.lifetime=0.8
+ add(glb_particles,self)
+end)
+
+function cls_pwrup_particle:update()
+ self.t+=glb_dt
+ self.y+=self.spd_y
+ self.x+=self.spd_x
+ self.spd_y*=0.9
+ self.spd_x*=0.9
+ if (self.t>self.lifetime) del(glb_particles,self)
+end
+
+function cls_pwrup_particle:draw()
+ local col=self.cols[flr(#self.cols*self.t/self.lifetime)+1]
+ circ(self.x,self.y,(2-self.t/self.lifetime*2),col)
+end
+
 
 resource_manager_cls=class(function(self)
  self.resources={}
@@ -372,7 +509,8 @@ resource_cls=class(function(self,
    dependencies,
    duration,
    spr,
-   description)
+   description,
+   creation_text)
  self.x=x
  self.y=y
  self.name=name
@@ -385,10 +523,11 @@ resource_cls=class(function(self,
  self.created=false
  self.spr=spr
  self.description=description
+ self.creation_text=creation_text
  glb_resource_manager.resources[name]=self
 end)
 
-glb_timescale=10
+glb_timescale=1
 glb_resource_w=16
 
 function resource_cls:draw()
@@ -438,6 +577,10 @@ function resource_cls:update()
    self.count+=1
    self.created=true
    self.t=0
+   local x,y
+   x=64
+   y=64
+   cls_score_particle.init(x-4*(#self.creation_text/2),y+8,self.creation_text,0,7)
   end
  end
 end
@@ -494,7 +637,8 @@ res_loc=resource_cls.init(
   -- spr
   16,
   -- description
-  "write a line of code!"
+  "write a line of code!",
+  "line of code written"
 )
 res_loc.active=true
 
@@ -507,7 +651,8 @@ resource_cls.init(
   -- spr
   16,
   -- description
-  "write a c# function!"
+  "write a c# function!",
+   "c# function written"
 )
 
 resource_cls.init(
@@ -519,7 +664,8 @@ resource_cls.init(
  -- spr
  16,
  -- description
- "write a c# file!"
+ "write a c# file!",
+ "c# file written"
 )
 
 resource_cls.init(
@@ -531,7 +677,8 @@ resource_cls.init(
  -- spr
  16,
  -- description
- "write a c# file!"
+ "write a c# file!",
+ "game built"
 )
 
 res_pix=resource_cls.init("pixel",
@@ -542,7 +689,8 @@ res_pix=resource_cls.init("pixel",
   -- spr
   48,
   -- description
-  "draw a pixel!"
+  "draw a pixel!",
+  "pixel drawn"
 )
 
 res_spr=resource_cls.init("sprite",
@@ -553,7 +701,8 @@ res_spr=resource_cls.init("sprite",
   -- spr
   48,
   -- description
-  "draw a sprite!"
+  "draw a sprite!",
+  "sprite drawn"
 )
 
 res_anim=resource_cls.init("animation",
@@ -562,9 +711,9 @@ res_anim=resource_cls.init("animation",
  {sprite=4},
  1,
  48,
- "animate a character!"
+ "animate a character!",
+ "character animated"
 )
-
 
 res_pix.active=true
 
@@ -588,6 +737,10 @@ function _draw()
  cls()
  glb_resource_manager:draw()
  spr(1,glb_mouse_x,glb_mouse_y)
+
+ for _,v in pairs(glb_particles) do
+  v:draw()
+ end
 end
 
 function _update60()
@@ -603,6 +756,10 @@ function _update60()
  glb_lasttime=time()
  glb_resource_manager:update()
  tick_crs(crs)
+
+ for _,v in pairs(glb_particles) do
+  v:update()
+ end
 end
 
 

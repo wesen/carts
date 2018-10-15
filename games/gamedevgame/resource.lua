@@ -5,7 +5,8 @@ resource_cls=class(function(self,
    dependencies,
    duration,
    spr,
-   description)
+   description,
+   creation_text)
  self.x=x
  self.y=y
  self.name=name
@@ -18,10 +19,11 @@ resource_cls=class(function(self,
  self.created=false
  self.spr=spr
  self.description=description
+ self.creation_text=creation_text
  glb_resource_manager.resources[name]=self
 end)
 
-glb_timescale=10
+glb_timescale=1
 glb_resource_w=16
 
 function resource_cls:draw()
@@ -71,6 +73,10 @@ function resource_cls:update()
    self.count+=1
    self.created=true
    self.t=0
+   local x,y
+   x=64
+   y=64
+   cls_score_particle.init(x-4*(#self.creation_text/2),y+8,self.creation_text,0,7)
   end
  end
 end

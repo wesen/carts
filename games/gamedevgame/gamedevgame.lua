@@ -6,6 +6,7 @@
 --#include helpers
 --#include coroutines
 --#include gfx
+--#include particle
 
 --#include resourcemanager
 --#include resource
