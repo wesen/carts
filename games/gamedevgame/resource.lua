@@ -28,21 +28,32 @@ glb_resource_w=16
 
 function resource_cls:draw()
  if (not self:is_visible()) return
- if (not self:are_dependencies_fulfilled() and self.t==0) darken(50)
+ if (not self:are_dependencies_fulfilled() and self.t==0) darken(10)
  local x,y
+ local w=glb_resource_w
  x,y=self:get_cur_xy()
+ palt(0,false)
+ palt(11,true)
+ if self:is_mouse_over() then
+  draw_rounded_rect2(x,y,w,glb_bg_col2,glb_bg_col2,7)
+ else
+  draw_rounded_rect1(x,y,w,glb_bg_col2)
+ end
 
  local spage=flr(self.spr/64)
  local sy=flr(self.spr/16)
  local sx=self.spr%16
  sspr(sx*8,sy*8,8,8,x,y,16,16)
  if self.t>0 then
-  rectfill(x,y+glb_resource_w,x+self.t/self.duration*glb_resource_w,y+glb_resource_w+1,11)
+  rectfill(x,y+w,x+self.t/self.duration*w,y+w+1,11)
  end
- print(tostr(self.count),x+2,y+glb_resource_w+2,7)
+ print(tostr(self.count),x+2,y+w+3,7)
 
- if (self:is_mouse_over()) print(self:get_display_text(),32,80,7)
+ if (self:is_mouse_over()) then
+   print(self:get_display_text(),32,80,7)
+  end
  pal()
+ palt()
 end
 
 function resource_cls:get_display_text()
@@ -61,8 +72,8 @@ function resource_cls:get_display_text()
 end
 
 function resource_cls:get_cur_xy()
- local x=self.x*(glb_resource_w+2)
- local y=self.y*(glb_resource_w+2+8)
+ local x=self.x*(glb_resource_w+4)+2
+ local y=self.y*(glb_resource_w+3+8)+2
  return x,y
 end
 

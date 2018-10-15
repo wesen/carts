@@ -12,9 +12,12 @@ glb_prev_mouse_btn=0
 glb_mouse_left_down=false
 glb_mouse_right_down=false
 
+glb_bg_col=1
+glb_bg_col2=12
+
 function _draw()
  glb_frame+=1
- cls()
+ cls(glb_bg_col)
  glb_resource_manager:draw()
  spr(1,glb_mouse_x,glb_mouse_y)
 
