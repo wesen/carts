@@ -8,5 +8,6 @@
 
 --#include resourcemanager
 --#include resource
+--#include resources
 
 --#include main

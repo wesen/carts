@@ -7,28 +7,41 @@ resource_cls=class(function(self,name,x,y,dependencies,duration)
  self.t=0
  self.count=0
  self.active=false
+ self.created=false
  glb_resource_manager.resources[name]=self
 end)
 
+glb_resource_w=16
+
 function resource_cls:draw()
+ if (not self:is_visible()) return
  local x,y
  x,y=self:get_cur_xy()
- rect(x,y,x+40,y+40,7)
- print(tostr(self.count),x+3,y+32,7)
+ rect(x,y,x+glb_resource_w,y+glb_resource_w,7)
+ print(tostr(self.count),x+2,y+glb_resource_w+2,7)
  if (self:is_mouse_over()) print(self.name,32,80,7)
 end
 
 function resource_cls:get_cur_xy()
- local x=self.x*42
- local y=self.y*42
+ local x=self.x*(glb_resource_w+2)
+ local y=self.y*(glb_resource_w+2+8)
  return x,y
 end
 
 function resource_cls:update()
 end
 
+function resource_cls:is_visible()
+ for n,_ in pairs(self.dependencies) do
+  local res=glb_resource_manager.resources[n]
+  if (not res.created) return false
+ end
+ return true
+end
+
 function resource_cls:on_click()
  self.count+=1
+ self.created=true
 end
 
 function resource_cls:is_mouse_over()
@@ -36,24 +49,5 @@ function resource_cls:is_mouse_over()
  x,y=self:get_cur_xy()
  local dx=glb_mouse_x-x
  local dy=glb_mouse_y-y
- print(tostr(dx)..","..tostr(dy),x+1,y+10)
- return dx>=0 and dx<=40 and dy>=0 and dy<=40
+ return dx>=0 and dx<=glb_resource_w and dy>=0 and dy<=glb_resource_w
 end
-
-resource_cls.init("line of code",
-  0,0,
-  {},
-  10
-)
-
-resource_cls.init("function",
- 1,0,
- {},
- 10
-)
-
-resource_cls.init("c# file",
- 2,0,
- {},
- 10
-)
