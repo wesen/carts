@@ -9,6 +9,7 @@ cls_worker=class(function(self,duration)
  self.state=0 -- 0=walking, 1=jumping
  self.auto_resources={}
  self.default_resource=nil
+ self.tab=nil
  add(glb_resource_manager.workers,self)
 end)
 
@@ -26,8 +27,14 @@ function cls_worker:update()
 end
 
 function cls_worker:draw()
- spr(self.spr+frame(8,2),self.x,120,1,1,self.dir<0)
- -- spr(self.spr+frame(8,3),self.x,120,8,8,self.dir>0)
+ if self:is_visible() then
+  spr(self.spr+frame(8,2),self.x,120,1,1,self.dir<0)
+  -- spr(self.spr+frame(8,3),self.x,120,8,8,self.dir>0)
+ end
+end
+
+function cls_worker:is_visible()
+ return self.tab==glb_current_tab
 end
 
 function cls_worker:on_tick()
@@ -63,9 +70,11 @@ function cls_worker:on_tick()
  if (res==nil) return
 
  res:produce()
- self.duration=res.duration
- local text=rnd_elt({"wow","ok","!!!","yeah","boom","kaching","lol","haha"})
- cls_score_particle.init(self.x-(#text/2),115,text,0,7)
+ self.duration=max(self.orig_duration,res.duration)
+ if self:is_visible() then
+  local text=rnd_elt({"wow","ok","!!!","yeah","boom","kaching","lol","haha"})
+  cls_score_particle.init(self.x-(#text/2),115,text,0,7)
+ end
 end
 
 cls_coder=subclass(cls_worker,function(self,duration)
@@ -73,6 +82,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  self.spr=64
  self.default_resource=res_loc
  self.auto_resources={res_func,res_csharp_file}
+ self.tab=tab_game
 end)
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
@@ -80,10 +90,33 @@ cls_gfx_artist=subclass(cls_worker,function(self,duration)
  self.spr=80
  self.default_resource=res_pixel
  self.auto_resources={res_tilemap,res_sprite,res_animation}
+ self.tab=tab_game
 end)
 
 cls_game_designer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=96
  self.auto_resources={res_prop,res_character,res_level}
+ self.tab=tab_game
+end)
+
+cls_tweeter=subclass(cls_worker,function(self,duration)
+ cls_worker._ctr(self,duration)
+ self.spr=96
+ self.auto_resources={res_tweet}
+ self.tab=tab_release
+end)
+
+cls_youtuber=subclass(cls_worker,function(self,duration)
+ cls_worker._ctr(self,duration)
+ self.spr=64
+ self.auto_resources={res_youtube}
+ self.tab=tab_release
+end)
+
+cls_twitcher=subclass(cls_worker,function(self,duration)
+ cls_worker._ctr(self,duration)
+ self.spr=80
+ self.auto_resources={res_twitch}
+ self.tab=tab_release
 end)

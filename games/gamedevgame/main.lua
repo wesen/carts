@@ -12,6 +12,12 @@ function _init()
   gfx_artist=cls_gfx_artist.init(3)
   local game_designer=cls_game_designer.init(2)
   game_designer=cls_game_designer.init(2)
+  cls_tweeter.init(3)
+  cls_tweeter.init(3)
+  cls_youtuber.init(3)
+  cls_youtuber.init(3)
+  cls_twitcher.init(3)
+  cls_twitcher.init(3)
  end
 end
 
