@@ -34,7 +34,7 @@ function cls_worker:on_tick()
  local res=self.default_resource
  local max_requirements={}
  for _,v in pairs(self.auto_resources) do
-  if v:is_visible() then
+  if v:are_dependencies_created() then
    for name,dep in pairs(v.dependencies) do
     if (max_requirements[name]~=nil) max_requirements[name]=dep
     max_requirements[name]=max(dep,max_requirements[name])
@@ -72,7 +72,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=64
  self.default_resource=res_loc
- self.auto_resources={res_func,res_csharp_file,res_contract_work}
+ self.auto_resources={res_func,res_csharp_file}
 end)
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)

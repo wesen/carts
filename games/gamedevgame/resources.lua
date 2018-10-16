@@ -60,7 +60,6 @@ res_contract_work=resource_cls.init(
  tab_game
 )
 res_contract_work.on_produced_cb=function(self)
- self.count-=1
  glb_resource_manager.money+=10
 end
 
@@ -208,6 +207,49 @@ res_release=resource_cls.init(
  "game released",
  tab_game
 )
+-- res_release.count=1
+res_release.created=true
 
+-- release resources
 
--- money resources
+res_tweet=resource_cls.init(
+ "tweet",
+ "tweets",
+ 0,0,
+ {release=0},
+ 0.5,
+ -- spr
+ 16,
+ -- description
+ "write a tweet",
+ "tweet written",
+ tab_release
+)
+
+res_youtube=resource_cls.init(
+ "youtube",
+ "youtube videos",
+ 1,0,
+ {release=0},
+ 3,
+ -- spr
+ 16,
+ -- description
+ "produce a youtube video",
+ "youtube video recorded",
+ tab_release
+)
+
+res_twitch=resource_cls.init(
+ "twitch",
+ "twitch streams",
+ 2,0,
+ {release=0},
+ 3,
+ -- spr
+ 16,
+ -- description
+ "produce a twitch stream",
+ "twitch stream recorded",
+ tab_release
+)

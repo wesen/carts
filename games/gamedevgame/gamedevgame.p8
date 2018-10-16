@@ -575,7 +575,7 @@ function cls_dialogbox:draw()
  local y=75
  if (not self.visible) return
 
- if (glb_mouse_y>50) y=5
+ if (glb_mouse_y>64) y=15
  local h=14+(#self.text-1)*8
 
  draw_rounded_rect2(15,y+0,98,h,12,1,6)
@@ -674,7 +674,7 @@ tab_game=cls_tab.init("gamedev")
 tab_money=cls_tab.init("studio")
 tab_release=cls_tab.init("release")
 
-glb_resource_manager.tabs={tab_game,tab_money,tab_release}
+glb_resource_manager.tabs={tab_game,tab_release,tab_money}
 glb_current_tab=tab_game
 
 resource_cls=class(function(self,
@@ -757,7 +757,7 @@ function resource_cls:get_display_text()
    col=5
    requires_col=5
   end
-  requirements[#requirements+1]={col,"- "..tostr(v).." "..(res.full_name)}
+  requirements[#requirements+1]={col,"- "..tostr(max(1,v)).." "..(res.full_name)}
  end
 
  if #requirements>0 then
@@ -809,12 +809,17 @@ function resource_cls:update()
  end
 end
 
-function resource_cls:is_visible()
+function resource_cls:are_dependencies_created()
  for n,_ in pairs(self.dependencies) do
   local res=glb_resource_manager.resources[n]
   if (not res.created) return false
  end
  return true
+end
+
+function resource_cls:is_visible()
+ if (self.tab!=glb_current_tab) return false
+ return self:are_dependencies_created()
 end
 
 function resource_cls:are_dependencies_fulfilled()
@@ -906,7 +911,6 @@ res_contract_work=resource_cls.init(
  tab_game
 )
 res_contract_work.on_produced_cb=function(self)
- self.count-=1
  glb_resource_manager.money+=10
 end
 
@@ -1054,9 +1058,52 @@ res_release=resource_cls.init(
  "game released",
  tab_game
 )
+-- res_release.count=1
+res_release.created=true
 
+-- release resources
 
--- money resources
+res_tweet=resource_cls.init(
+ "tweet",
+ "tweets",
+ 0,0,
+ {release=0},
+ 0.5,
+ -- spr
+ 16,
+ -- description
+ "write a tweet",
+ "tweet written",
+ tab_release
+)
+
+res_youtube=resource_cls.init(
+ "youtube",
+ "youtube videos",
+ 1,0,
+ {release=0},
+ 3,
+ -- spr
+ 16,
+ -- description
+ "produce a youtube video",
+ "youtube video recorded",
+ tab_release
+)
+
+res_twitch=resource_cls.init(
+ "twitch",
+ "twitch streams",
+ 2,0,
+ {release=0},
+ 3,
+ -- spr
+ 16,
+ -- description
+ "produce a twitch stream",
+ "twitch stream recorded",
+ tab_release
+)
 
 cls_worker=class(function(self,duration)
  self.t=0
@@ -1094,7 +1141,7 @@ function cls_worker:on_tick()
  local res=self.default_resource
  local max_requirements={}
  for _,v in pairs(self.auto_resources) do
-  if v:is_visible() then
+  if v:are_dependencies_created() then
    for name,dep in pairs(v.dependencies) do
     if (max_requirements[name]~=nil) max_requirements[name]=dep
     max_requirements[name]=max(dep,max_requirements[name])
@@ -1132,7 +1179,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=64
  self.default_resource=res_loc
- self.auto_resources={res_func,res_csharp_file,res_contract_work}
+ self.auto_resources={res_func,res_csharp_file}
 end)
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)

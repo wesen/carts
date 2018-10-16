@@ -78,7 +78,7 @@ function resource_cls:get_display_text()
    col=5
    requires_col=5
   end
-  requirements[#requirements+1]={col,"- "..tostr(v).." "..(res.full_name)}
+  requirements[#requirements+1]={col,"- "..tostr(max(1,v)).." "..(res.full_name)}
  end
 
  if #requirements>0 then
@@ -130,12 +130,17 @@ function resource_cls:update()
  end
 end
 
-function resource_cls:is_visible()
+function resource_cls:are_dependencies_created()
  for n,_ in pairs(self.dependencies) do
   local res=glb_resource_manager.resources[n]
   if (not res.created) return false
  end
  return true
+end
+
+function resource_cls:is_visible()
+ if (self.tab!=glb_current_tab) return false
+ return self:are_dependencies_created()
 end
 
 function resource_cls:are_dependencies_fulfilled()

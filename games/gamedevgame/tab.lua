@@ -20,5 +20,5 @@ tab_game=cls_tab.init("gamedev")
 tab_money=cls_tab.init("studio")
 tab_release=cls_tab.init("release")
 
-glb_resource_manager.tabs={tab_game,tab_money,tab_release}
+glb_resource_manager.tabs={tab_game,tab_release,tab_money}
 glb_current_tab=tab_game
