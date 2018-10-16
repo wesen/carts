@@ -659,19 +659,42 @@ end)
 function cls_tab:draw()
 end
 
-function cls_tab:update()
-end
-
 cls_money_tab=subclass(cls_tab,function(self,name)
  cls_tab._ctr(self,name)
 end)
 
 function cls_money_tab:draw()
- cls_tab.draw(self)
+ local x=15
+ local y=20
+ for i,k in pairs(glb_hire_workers) do
+  local w=82
+  local h=12
+  local is_mouse_over=glb_mouse_x>=x and glb_mouse_x<=x+w and glb_mouse_y>=y and glb_mouse_y<=y+h
+  if k:is_visible() then
+   if is_mouse_over then
+    if frame(12,2)==0 then
+     draw_rounded_rect2(x-1,y-1,w+2,5+2,13,13,7)
+    else
+     draw_rounded_rect2(x,y,w,5,13,13,7)
+    end
+    glb_dialogbox.visible=true
+    glb_dialogbox.text={{7,"hire a "..k.name}}
+    print(k.name,x+1,y,7)
+    if (glb_mouse_left_down) k:hire()
+   else
+    draw_rounded_rect2(x,y,w,5,glb_bg_col2,glb_bg_col2,7)
+    print(k.name,x+1,y,7)
+   end
+  else
+    draw_rounded_rect2(x,y,w,5,13,13,5)
+    print(k.name,x+1,y,6)
+  end
+  y+=h
+ end
 end
 
 tab_game=cls_tab.init("gamedev")
-tab_money=cls_tab.init("studio")
+tab_money=cls_money_tab.init("studio")
 tab_release=cls_tab.init("release")
 
 glb_resource_manager.tabs={tab_game,tab_release,tab_money}
@@ -968,7 +991,7 @@ res_prop=resource_cls.init("prop",
 res_character=resource_cls.init("character",
  "characters",
  4,1,
- {animation=2,csharp_file=3},
+ {animation=2,csharp_file=2},
  4,
  -- spr
  16,
@@ -1059,7 +1082,7 @@ res_release=resource_cls.init(
  tab_game
 )
 -- res_release.count=1
-res_release.created=true
+-- res_release.created=true
 
 -- release resources
 
@@ -1102,6 +1125,20 @@ res_twitch=resource_cls.init(
  -- description
  "produce a twitch stream",
  "twitch stream recorded",
+ tab_release
+)
+
+res_gamer=resource_cls.init(
+ "gamer",
+ "gamers",
+ 0,1,
+ {tweet=5,youtube=5,twitch=5},
+ 3,
+ -- spr
+ 80,
+ -- description
+ "recruit a gamer",
+ "gamer recruited",
  tab_release
 )
 
@@ -1162,7 +1199,7 @@ function cls_worker:on_tick()
   if v:are_dependencies_fulfilled() then
    local add_res=true
    for name,dep in pairs(v.dependencies) do
-    if glb_resource_manager.resources[name].count<max_requirements[name] then
+    if max_requirements[name]!=nil and glb_resource_manager.resources[name].count<max_requirements[name] then
      add_res=false
     end
    end
@@ -1170,7 +1207,7 @@ function cls_worker:on_tick()
   end
  end
 
- if #potential_resources>0 then
+ if #potential_resources>0 and maybe(0.2) then
   res=rnd_elt(potential_resources)
  end
 
@@ -1188,7 +1225,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=64
  self.default_resource=res_loc
- self.auto_resources={res_func,res_csharp_file}
+ self.auto_resources={res_func,res_csharp_file,res_contract_work}
  self.tab=tab_game
 end)
 
@@ -1227,6 +1264,49 @@ cls_twitcher=subclass(cls_worker,function(self,duration)
  self.auto_resources={res_twitch}
  self.tab=tab_release
 end)
+
+cls_gamer=subclass(cls_worker,function(self,duration)
+ cls_worker._ctr(self,duration)
+ self.spr=80
+ self.auto_resources={}
+ self.tab=tab_release
+end)
+
+cls_hire_worker=class(function(self,name,cls,dependencies)
+ self.cls=cls
+ self.name=name
+ self.workers={}
+ self.dependencies=dependencies or {}
+end)
+
+function cls_hire_worker:hire()
+ self.cls.init(2+rnd(2))
+end
+
+function cls_hire_worker:is_visible()
+ for k,v in pairs(self.dependencies) do
+  local res=glb_resource_manager.resources[k]
+  if (not res.created or res.count<v) return false
+ end
+ return true
+end
+
+function cls_hire_worker:dismiss()
+ if #self.workers>0 then
+  local worker=self.workers[1]
+  del(self.workers,worker)
+  del(glb_resource_manager.workers,worker)
+ end
+end
+
+glb_hire_workers={
+ cls_hire_worker.init("coder",cls_coder),
+ cls_hire_worker.init("artist",cls_gfx_artist),
+ cls_hire_worker.init("game designer",cls_game_designer),
+ cls_hire_worker.init("social media manager",cls_tweeter,{release=0}),
+ cls_hire_worker.init("youtuber",cls_youtuber,{release=0}),
+ cls_hire_worker.init("twitcher",cls_twitcher,{release=0})
+}
 
 
 function _init()

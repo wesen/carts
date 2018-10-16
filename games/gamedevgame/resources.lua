@@ -117,7 +117,7 @@ res_prop=resource_cls.init("prop",
 res_character=resource_cls.init("character",
  "characters",
  4,1,
- {animation=2,csharp_file=3},
+ {animation=2,csharp_file=2},
  4,
  -- spr
  16,
@@ -208,7 +208,7 @@ res_release=resource_cls.init(
  tab_game
 )
 -- res_release.count=1
-res_release.created=true
+-- res_release.created=true
 
 -- release resources
 
@@ -251,5 +251,19 @@ res_twitch=resource_cls.init(
  -- description
  "produce a twitch stream",
  "twitch stream recorded",
+ tab_release
+)
+
+res_gamer=resource_cls.init(
+ "gamer",
+ "gamers",
+ 0,1,
+ {tweet=5,youtube=5,twitch=5},
+ 3,
+ -- spr
+ 80,
+ -- description
+ "recruit a gamer",
+ "gamer recruited",
  tab_release
 )
