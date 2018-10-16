@@ -592,15 +592,47 @@ end
 resource_manager_cls=class(function(self)
  self.workers={}
  self.resources={}
+ self.tabs={}
+ printh("tabs "..tostr(#self.tabs))
+ self.money=0
 end)
 
 function resource_manager_cls:draw()
+ local x=5
+ local y=3
+
+ for i,k in pairs(self.tabs) do
+  local w=(#k.name)*4+1
+  local is_visible=glb_current_tab==k
+  local is_mouse_over=glb_mouse_x>=x and glb_mouse_x<=x+w and glb_mouse_y>=y and glb_mouse_y<=y+5
+  if is_visible then
+   draw_rounded_rect2(x,y,w,5,glb_bg_col2,glb_bg_col2,7)
+   print(k.name,x+1,y,7)
+   k:draw()
+  elseif is_mouse_over then
+   if frame(12,2)==0 then
+    draw_rounded_rect2(x-1,y-1,w+2,5+2,13,13,7)
+   else
+    draw_rounded_rect2(x,y,w,5,13,13,7)
+   end
+   glb_dialogbox.visible=true
+   glb_dialogbox.text={{7,"switch to "..k.name.." tab"}}
+   print(k.name,x+1,y,7)
+
+   if (glb_mouse_left_down) glb_current_tab=k
+  else
+   draw_rounded_rect2(x,y,w,5,13,13,5)
+   print(k.name,x+1,y,6)
+  end
+  x+=w+5
+ end
  for _,k in pairs(self.resources) do
   k:draw()
  end
  for _,k in pairs(self.workers) do
   k:draw()
  end
+ print("$"..tostr(self.money),105,2)
 end
 
 function resource_manager_cls:update()
@@ -620,6 +652,31 @@ end
 
 glb_resource_manager=resource_manager_cls.init()
 
+cls_tab=class(function(self, name)
+ self.name=name
+end)
+
+function cls_tab:draw()
+end
+
+function cls_tab:update()
+end
+
+cls_money_tab=subclass(cls_tab,function(self,name)
+ cls_tab._ctr(self,name)
+end)
+
+function cls_money_tab:draw()
+ cls_tab.draw(self)
+end
+
+tab_game=cls_tab.init("gamedev")
+tab_money=cls_tab.init("studio")
+tab_release=cls_tab.init("release")
+
+glb_resource_manager.tabs={tab_game,tab_money,tab_release}
+glb_current_tab=tab_game
+
 resource_cls=class(function(self,
    name,
    full_name,
@@ -628,7 +685,8 @@ resource_cls=class(function(self,
    duration,
    spr,
    description,
-   creation_text)
+   creation_text,
+  tab)
  self.x=x
  self.y=y
  self.name=name
@@ -641,6 +699,7 @@ resource_cls=class(function(self,
  self.spr=spr
  self.description=description
  self.creation_text=creation_text
+ self.tab=tab
  glb_resource_manager.resources[name]=self
 
  if glb_debug then
@@ -713,7 +772,7 @@ end
 
 function resource_cls:get_cur_xy()
  local x=self.x*(glb_resource_w+6)+12
- local y=self.y*(glb_resource_w+3+10)+4
+ local y=self.y*(glb_resource_w+3+10)+4+11
  return x,y
 end
 
@@ -800,7 +859,8 @@ res_loc=resource_cls.init(
   16,
   -- description
   "write a line of code!",
-  "line of code written"
+  "line of code written",
+  tab_game
 )
 res_loc.active=true
 
@@ -814,7 +874,8 @@ res_func=resource_cls.init(
   16,
   -- description
   "write a c# function!",
-   "c# function written"
+  "c# function written",
+  tab_game
 )
 
 res_csharp_file=resource_cls.init(
@@ -827,8 +888,27 @@ res_csharp_file=resource_cls.init(
  16,
  -- description
  "write a c# file!",
- "c# file written"
+ "c# file written",
+ tab_game
 )
+
+res_contract_work=resource_cls.init(
+ "contract",
+ "contract work",
+ 3,0,
+ {csharp_file=2},
+ 2,
+ -- spr
+ 16,
+ -- description
+ "do some client work",
+ "contract work done",
+ tab_game
+)
+res_contract_work.on_produced_cb=function(self)
+ self.count-=1
+ glb_resource_manager.money+=10
+end
 
 --
 
@@ -841,7 +921,8 @@ res_pixel=resource_cls.init("pixel",
   48,
   -- description
   "draw a pixel!",
-  "pixel drawn"
+  "pixel drawn",
+  tab_game
 )
 
 res_sprite=resource_cls.init("sprite",
@@ -853,7 +934,8 @@ res_sprite=resource_cls.init("sprite",
   48,
   -- description
   "draw a sprite!",
-  "sprite drawn"
+  "sprite drawn",
+  tab_game
 )
 
 res_animation=resource_cls.init("animation",
@@ -862,30 +944,33 @@ res_animation=resource_cls.init("animation",
  {sprite=4},
  1,
  48,
- "animate a character!",
- "character animated"
+ "make an animation",
+ "animation created",
+ tab_game
 )
 
 res_prop=resource_cls.init("prop",
  "props",
  3,1,
- {sprite=4,csharp_file=1},
+ {animation=2,csharp_file=1},
  2,
  -- spr
  16,
  "make a prop!",
- "prop created"
+ "prop created",
+ tab_game
 )
 
 res_character=resource_cls.init("character",
  "characters",
  4,1,
- {animation=4,csharp_file=3},
+ {animation=2,csharp_file=3},
  4,
  -- spr
  16,
  "make a character!",
- "character created"
+ "character created",
+ tab_game
 )
 
 res_tilemap=resource_cls.init("tilemap",
@@ -896,7 +981,8 @@ res_tilemap=resource_cls.init("tilemap",
  -- spr
  16,
  "make a tilemap!",
- "tilemap created"
+ "tilemap created",
+ tab_game
 )
 
 ---
@@ -909,7 +995,8 @@ res_level=resource_cls.init("level",
  -- spr
  16,
  "make a level!",
- "level created"
+ "level created",
+ tab_game
 )
 
 res_build=resource_cls.init(
@@ -922,7 +1009,8 @@ res_build=resource_cls.init(
  16,
  -- description
  "make a beta build",
- "game built"
+ "game built",
+ tab_game
 )
 
 res_build=resource_cls.init(
@@ -935,7 +1023,8 @@ res_build=resource_cls.init(
  16,
  -- description
  "make a beta build",
- "game built"
+ "game built",
+ tab_game
 )
 
 res_playtest=resource_cls.init(
@@ -948,7 +1037,8 @@ res_playtest=resource_cls.init(
  16,
  -- description
  "playtest the beta build",
- "game tested"
+ "game tested",
+ tab_game
 )
 
 res_release=resource_cls.init(
@@ -961,8 +1051,12 @@ res_release=resource_cls.init(
  16,
  -- description
  "make a release",
- "game released"
+ "game released",
+ tab_game
 )
+
+
+-- money resources
 
 cls_worker=class(function(self,duration)
  self.t=0
@@ -1000,26 +1094,22 @@ function cls_worker:on_tick()
  local res=self.default_resource
  local max_requirements={}
  for _,v in pairs(self.auto_resources) do
-  for name,dep in pairs(v.dependencies) do
-   if (max_requirements[name]~=nil) max_requirements[name]=dep
-   max_requirements[name]=max(dep,max_requirements[name])
+  if v:is_visible() then
+   for name,dep in pairs(v.dependencies) do
+    if (max_requirements[name]~=nil) max_requirements[name]=dep
+    max_requirements[name]=max(dep,max_requirements[name])
+   end
   end
  end
 
-
- for name,v in pairs(max_requirements) do
-  printh(name.." "..tostr(v))
- end
  local potential_resources={}
 
  for _,v in pairs(self.auto_resources) do
   if v:are_dependencies_fulfilled() then
    local add_res=true
-   printh("considering "..v.name)
    for name,dep in pairs(v.dependencies) do
     if glb_resource_manager.resources[name].count<max_requirements[name] then
      add_res=false
-     printh("discarding "..v.name.." because of "..name)
     end
    end
    if (add_res) add(potential_resources,v)
@@ -1028,12 +1118,7 @@ function cls_worker:on_tick()
 
  if #potential_resources>0 then
   res=rnd_elt(potential_resources)
-  printh("potential_resources:")
-  for _,v in pairs(potential_resources) do
-   printh(v.name)
-  end
  end
- printh("\n")
 
  if (res==nil) return
 
@@ -1047,7 +1132,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=64
  self.default_resource=res_loc
- self.auto_resources={res_func,res_csharp_file}
+ self.auto_resources={res_func,res_csharp_file,res_contract_work}
 end)
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
@@ -1070,7 +1155,11 @@ function _init()
   local coder=cls_coder.init(3)
   coder.t=1
   cls_coder.init(3)
+  cls_coder.init(3)
   local gfx_artist=cls_gfx_artist.init(2)
+  gfx_artist=cls_gfx_artist.init(3)
+  gfx_artist=cls_gfx_artist.init(3)
+  gfx_artist=cls_gfx_artist.init(3)
   gfx_artist=cls_gfx_artist.init(3)
   local game_designer=cls_game_designer.init(2)
   game_designer=cls_game_designer.init(2)

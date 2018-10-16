@@ -14,6 +14,7 @@ glb_timescale=10
 --#include dialogbox
 
 --#include resourcemanager
+--#include tab
 --#include resource
 --#include resources
 --#include worker

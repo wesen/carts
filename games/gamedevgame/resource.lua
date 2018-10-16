@@ -6,7 +6,8 @@ resource_cls=class(function(self,
    duration,
    spr,
    description,
-   creation_text)
+   creation_text,
+  tab)
  self.x=x
  self.y=y
  self.name=name
@@ -19,6 +20,7 @@ resource_cls=class(function(self,
  self.spr=spr
  self.description=description
  self.creation_text=creation_text
+ self.tab=tab
  glb_resource_manager.resources[name]=self
 
  if glb_debug then
@@ -91,7 +93,7 @@ end
 
 function resource_cls:get_cur_xy()
  local x=self.x*(glb_resource_w+6)+12
- local y=self.y*(glb_resource_w+3+10)+4
+ local y=self.y*(glb_resource_w+3+10)+4+11
  return x,y
 end
 

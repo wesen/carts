@@ -34,26 +34,22 @@ function cls_worker:on_tick()
  local res=self.default_resource
  local max_requirements={}
  for _,v in pairs(self.auto_resources) do
-  for name,dep in pairs(v.dependencies) do
-   if (max_requirements[name]~=nil) max_requirements[name]=dep
-   max_requirements[name]=max(dep,max_requirements[name])
+  if v:is_visible() then
+   for name,dep in pairs(v.dependencies) do
+    if (max_requirements[name]~=nil) max_requirements[name]=dep
+    max_requirements[name]=max(dep,max_requirements[name])
+   end
   end
  end
 
-
- for name,v in pairs(max_requirements) do
-  printh(name.." "..tostr(v))
- end
  local potential_resources={}
 
  for _,v in pairs(self.auto_resources) do
   if v:are_dependencies_fulfilled() then
    local add_res=true
-   printh("considering "..v.name)
    for name,dep in pairs(v.dependencies) do
     if glb_resource_manager.resources[name].count<max_requirements[name] then
      add_res=false
-     printh("discarding "..v.name.." because of "..name)
     end
    end
    if (add_res) add(potential_resources,v)
@@ -62,12 +58,7 @@ function cls_worker:on_tick()
 
  if #potential_resources>0 then
   res=rnd_elt(potential_resources)
-  printh("potential_resources:")
-  for _,v in pairs(potential_resources) do
-   printh(v.name)
-  end
  end
- printh("\n")
 
  if (res==nil) return
 
@@ -81,7 +72,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.spr=64
  self.default_resource=res_loc
- self.auto_resources={res_func,res_csharp_file}
+ self.auto_resources={res_func,res_csharp_file,res_contract_work}
 end)
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)

@@ -13,7 +13,8 @@ res_loc=resource_cls.init(
   16,
   -- description
   "write a line of code!",
-  "line of code written"
+  "line of code written",
+  tab_game
 )
 res_loc.active=true
 
@@ -27,7 +28,8 @@ res_func=resource_cls.init(
   16,
   -- description
   "write a c# function!",
-   "c# function written"
+  "c# function written",
+  tab_game
 )
 
 res_csharp_file=resource_cls.init(
@@ -40,8 +42,27 @@ res_csharp_file=resource_cls.init(
  16,
  -- description
  "write a c# file!",
- "c# file written"
+ "c# file written",
+ tab_game
 )
+
+res_contract_work=resource_cls.init(
+ "contract",
+ "contract work",
+ 3,0,
+ {csharp_file=2},
+ 2,
+ -- spr
+ 16,
+ -- description
+ "do some client work",
+ "contract work done",
+ tab_game
+)
+res_contract_work.on_produced_cb=function(self)
+ self.count-=1
+ glb_resource_manager.money+=10
+end
 
 --
 
@@ -54,7 +75,8 @@ res_pixel=resource_cls.init("pixel",
   48,
   -- description
   "draw a pixel!",
-  "pixel drawn"
+  "pixel drawn",
+  tab_game
 )
 
 res_sprite=resource_cls.init("sprite",
@@ -66,7 +88,8 @@ res_sprite=resource_cls.init("sprite",
   48,
   -- description
   "draw a sprite!",
-  "sprite drawn"
+  "sprite drawn",
+  tab_game
 )
 
 res_animation=resource_cls.init("animation",
@@ -75,30 +98,33 @@ res_animation=resource_cls.init("animation",
  {sprite=4},
  1,
  48,
- "animate a character!",
- "character animated"
+ "make an animation",
+ "animation created",
+ tab_game
 )
 
 res_prop=resource_cls.init("prop",
  "props",
  3,1,
- {sprite=4,csharp_file=1},
+ {animation=2,csharp_file=1},
  2,
  -- spr
  16,
  "make a prop!",
- "prop created"
+ "prop created",
+ tab_game
 )
 
 res_character=resource_cls.init("character",
  "characters",
  4,1,
- {animation=4,csharp_file=3},
+ {animation=2,csharp_file=3},
  4,
  -- spr
  16,
  "make a character!",
- "character created"
+ "character created",
+ tab_game
 )
 
 res_tilemap=resource_cls.init("tilemap",
@@ -109,7 +135,8 @@ res_tilemap=resource_cls.init("tilemap",
  -- spr
  16,
  "make a tilemap!",
- "tilemap created"
+ "tilemap created",
+ tab_game
 )
 
 ---
@@ -122,7 +149,8 @@ res_level=resource_cls.init("level",
  -- spr
  16,
  "make a level!",
- "level created"
+ "level created",
+ tab_game
 )
 
 res_build=resource_cls.init(
@@ -135,7 +163,8 @@ res_build=resource_cls.init(
  16,
  -- description
  "make a beta build",
- "game built"
+ "game built",
+ tab_game
 )
 
 res_build=resource_cls.init(
@@ -148,7 +177,8 @@ res_build=resource_cls.init(
  16,
  -- description
  "make a beta build",
- "game built"
+ "game built",
+ tab_game
 )
 
 res_playtest=resource_cls.init(
@@ -161,7 +191,8 @@ res_playtest=resource_cls.init(
  16,
  -- description
  "playtest the beta build",
- "game tested"
+ "game tested",
+ tab_game
 )
 
 res_release=resource_cls.init(
@@ -174,5 +205,9 @@ res_release=resource_cls.init(
  16,
  -- description
  "make a release",
- "game released"
+ "game released",
+ tab_game
 )
+
+
+-- money resources
