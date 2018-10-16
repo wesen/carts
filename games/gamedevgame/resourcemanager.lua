@@ -41,13 +41,13 @@ function resource_manager_cls:draw()
  for _,k in pairs(self.workers) do
   k:draw()
  end
- print("$"..tostr(self.money),105,2)
+ print("$"..tostr(self.money),104,3)
 end
 
 function resource_manager_cls:update()
  if glb_mouse_left_down then
   for _,k in pairs(self.resources) do
-   if (k:is_mouse_over()) k:on_click()
+   if (k:is_mouse_over() and k:is_visible()) k:on_click()
   end
  end
 

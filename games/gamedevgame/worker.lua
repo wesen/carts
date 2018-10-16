@@ -10,6 +10,8 @@ cls_worker=class(function(self,duration)
  self.auto_resources={}
  self.default_resource=nil
  self.tab=nil
+ self.cost=0
+ self.hire_worker=nil
  add(glb_resource_manager.workers,self)
 end)
 
@@ -19,6 +21,9 @@ function cls_worker:update()
   self.duration=self.orig_duration
   self.t=0
   self:on_tick()
+  glb_resource_manager.money-=self.cost
+  if glb_resource_manager.money<0 and maybe(0.06) then
+  end
  end
 
  self.x+=self.dir*self.spd_x
@@ -83,6 +88,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  self.default_resource=res_loc
  self.auto_resources={res_func,res_csharp_file,res_contract_work}
  self.tab=tab_game
+ self.cost=0.05
 end)
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
@@ -91,6 +97,7 @@ cls_gfx_artist=subclass(cls_worker,function(self,duration)
  self.default_resource=res_pixel
  self.auto_resources={res_tilemap,res_sprite,res_animation}
  self.tab=tab_game
+ self.cost=0.05
 end)
 
 cls_game_designer=subclass(cls_worker,function(self,duration)
@@ -98,6 +105,7 @@ cls_game_designer=subclass(cls_worker,function(self,duration)
  self.spr=96
  self.auto_resources={res_prop,res_character,res_level}
  self.tab=tab_game
+ self.cost=0.1
 end)
 
 cls_tweeter=subclass(cls_worker,function(self,duration)
@@ -127,39 +135,3 @@ cls_gamer=subclass(cls_worker,function(self,duration)
  self.auto_resources={}
  self.tab=tab_release
 end)
-
-cls_hire_worker=class(function(self,name,cls,dependencies)
- self.cls=cls
- self.name=name
- self.workers={}
- self.dependencies=dependencies or {}
-end)
-
-function cls_hire_worker:hire()
- self.cls.init(2+rnd(2))
-end
-
-function cls_hire_worker:is_visible()
- for k,v in pairs(self.dependencies) do
-  local res=glb_resource_manager.resources[k]
-  if (not res.created or res.count<v) return false
- end
- return true
-end
-
-function cls_hire_worker:dismiss()
- if #self.workers>0 then
-  local worker=self.workers[1]
-  del(self.workers,worker)
-  del(glb_resource_manager.workers,worker)
- end
-end
-
-glb_hire_workers={
- cls_hire_worker.init("coder",cls_coder),
- cls_hire_worker.init("artist",cls_gfx_artist),
- cls_hire_worker.init("game designer",cls_game_designer),
- cls_hire_worker.init("social media manager",cls_tweeter,{release=0}),
- cls_hire_worker.init("youtuber",cls_youtuber,{release=0}),
- cls_hire_worker.init("twitcher",cls_twitcher,{release=0})
-}

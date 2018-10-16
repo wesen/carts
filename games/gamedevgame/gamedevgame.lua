@@ -18,5 +18,6 @@ glb_timescale=10
 --#include resource
 --#include resources
 --#include worker
+--#include hire_worker
 
 --#include main

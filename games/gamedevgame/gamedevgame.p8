@@ -632,13 +632,13 @@ function resource_manager_cls:draw()
  for _,k in pairs(self.workers) do
   k:draw()
  end
- print("$"..tostr(self.money),105,2)
+ print("$"..tostr(self.money),104,3)
 end
 
 function resource_manager_cls:update()
  if glb_mouse_left_down then
   for _,k in pairs(self.resources) do
-   if (k:is_mouse_over()) k:on_click()
+   if (k:is_mouse_over() and k:is_visible()) k:on_click()
   end
  end
 
@@ -1154,6 +1154,8 @@ cls_worker=class(function(self,duration)
  self.auto_resources={}
  self.default_resource=nil
  self.tab=nil
+ self.cost=0
+ self.hire_worker=nil
  add(glb_resource_manager.workers,self)
 end)
 
@@ -1163,6 +1165,9 @@ function cls_worker:update()
   self.duration=self.orig_duration
   self.t=0
   self:on_tick()
+  glb_resource_manager.money-=self.cost
+  if glb_resource_manager.money<0 and maybe(0.06) then
+  end
  end
 
  self.x+=self.dir*self.spd_x
@@ -1227,6 +1232,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  self.default_resource=res_loc
  self.auto_resources={res_func,res_csharp_file,res_contract_work}
  self.tab=tab_game
+ self.cost=0.05
 end)
 
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
@@ -1235,6 +1241,7 @@ cls_gfx_artist=subclass(cls_worker,function(self,duration)
  self.default_resource=res_pixel
  self.auto_resources={res_tilemap,res_sprite,res_animation}
  self.tab=tab_game
+ self.cost=0.05
 end)
 
 cls_game_designer=subclass(cls_worker,function(self,duration)
@@ -1242,6 +1249,7 @@ cls_game_designer=subclass(cls_worker,function(self,duration)
  self.spr=96
  self.auto_resources={res_prop,res_character,res_level}
  self.tab=tab_game
+ self.cost=0.1
 end)
 
 cls_tweeter=subclass(cls_worker,function(self,duration)
@@ -1284,6 +1292,7 @@ function cls_hire_worker:hire()
 end
 
 function cls_hire_worker:is_visible()
+ if (glb_resource_manager.money<=0) return false
  for k,v in pairs(self.dependencies) do
   local res=glb_resource_manager.resources[k]
   if (not res.created or res.count<v) return false
@@ -1312,23 +1321,24 @@ glb_hire_workers={
 function _init()
  poke(0x5f2d,1)
  if glb_debug then
-  local coder=cls_coder.init(3)
-  coder.t=1
-  cls_coder.init(3)
-  cls_coder.init(3)
-  local gfx_artist=cls_gfx_artist.init(2)
-  gfx_artist=cls_gfx_artist.init(3)
-  gfx_artist=cls_gfx_artist.init(3)
-  gfx_artist=cls_gfx_artist.init(3)
-  gfx_artist=cls_gfx_artist.init(3)
-  local game_designer=cls_game_designer.init(2)
-  game_designer=cls_game_designer.init(2)
-  cls_tweeter.init(3)
-  cls_tweeter.init(3)
-  cls_youtuber.init(3)
-  cls_youtuber.init(3)
-  cls_twitcher.init(3)
-  cls_twitcher.init(3)
+  -- local coder=cls_coder.init(3)
+  -- coder.t=1
+  -- cls_coder.init(3)
+  -- cls_coder.init(3)
+  -- local gfx_artist=cls_gfx_artist.init(2)
+  -- gfx_artist=cls_gfx_artist.init(3)
+  -- gfx_artist=cls_gfx_artist.init(3)
+  -- gfx_artist=cls_gfx_artist.init(3)
+  -- gfx_artist=cls_gfx_artist.init(3)
+  -- local game_designer=cls_game_designer.init(2)
+  -- game_designer=cls_game_designer.init(2)
+  -- cls_tweeter.init(3)
+  -- cls_tweeter.init(3)
+  -- cls_youtuber.init(3)
+  -- cls_youtuber.init(3)
+  -- cls_twitcher.init(3)
+  -- cls_twitcher.init(3)
+  glb_resource_manager.money=20
  end
 end
 
