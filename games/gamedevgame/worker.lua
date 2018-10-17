@@ -39,7 +39,15 @@ function cls_worker:draw()
 end
 
 function cls_worker:is_visible()
- return self.tab==glb_current_tab or glb_current_tab==tab_money
+ if glb_current_tab==tab_money then
+  if tab_money.current_hire_worker!=nil then
+   return getmetatable(self)==tab_money.current_hire_worker.cls
+  else
+   return true
+  end
+ else
+  return self.tab==glb_current_tab
+ end
 end
 
 function cls_worker:on_tick()

@@ -666,12 +666,15 @@ end)
 function cls_money_tab:draw()
  local x=15
  local y=20
+
+ self.current_hire_worker=nil
  for i,k in pairs(glb_hire_workers) do
   local w=82
   local h=12
   local is_mouse_over=glb_mouse_x>=x and glb_mouse_x<=x+w and glb_mouse_y>=y and glb_mouse_y<=y+h
   if k:is_visible() then
    if is_mouse_over then
+    self.current_hire_worker=k
     if frame(12,2)==0 then
      draw_rounded_rect2(x-1,y-1,w+2,5+2,13,13,7)
     else
@@ -1183,7 +1186,15 @@ function cls_worker:draw()
 end
 
 function cls_worker:is_visible()
- return self.tab==glb_current_tab or glb_current_tab==tab_money
+ if glb_current_tab==tab_money then
+  if tab_money.current_hire_worker!=nil then
+   return getmetatable(self)==tab_money.current_hire_worker.cls
+  else
+   return true
+  end
+ else
+  return self.tab==glb_current_tab
+ end
 end
 
 function cls_worker:on_tick()
