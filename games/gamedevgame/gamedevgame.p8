@@ -664,14 +664,17 @@ cls_money_tab=subclass(cls_tab,function(self,name)
 end)
 
 function cls_money_tab:draw()
- local x=15
+ local x=25
  local y=20
 
  self.current_hire_worker=nil
+
  for i,k in pairs(glb_hire_workers) do
   local w=82
   local h=12
   local is_mouse_over=glb_mouse_x>=x and glb_mouse_x<=x+w and glb_mouse_y>=y and glb_mouse_y<=y+h
+  bstr(tostr(#k.workers).."x",x-23,y-1,7,0)
+  spr(k.spr,x-12,y-2)
   if k:is_visible() then
    if is_mouse_over then
     self.current_hire_worker=k
@@ -1237,69 +1240,73 @@ function cls_worker:on_tick()
  end
 end
 
+spr_coder=64
 cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=64
  self.default_resource=res_loc
  self.auto_resources={res_func,res_csharp_file,res_contract_work}
  self.tab=tab_game
  self.cost=0.05
 end)
 
+spr_gfx_artist=80
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=80
  self.default_resource=res_pixel
  self.auto_resources={res_tilemap,res_sprite,res_animation}
  self.tab=tab_game
  self.cost=0.05
 end)
 
+spr_game_designer=96
 cls_game_designer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=96
  self.auto_resources={res_prop,res_character,res_level}
  self.tab=tab_game
  self.cost=0.1
 end)
 
+spr_tweeter=96
 cls_tweeter=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=96
  self.auto_resources={res_tweet}
  self.tab=tab_release
 end)
 
+spr_youtuber=64
 cls_youtuber=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=64
  self.auto_resources={res_youtube}
  self.tab=tab_release
 end)
 
+spr_twitcher=80
 cls_twitcher=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=80
  self.auto_resources={res_twitch}
  self.tab=tab_release
 end)
 
+spr_gamer=80
 cls_gamer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=80
  self.auto_resources={}
+ self.spr=spr_gamer
  self.tab=tab_release
 end)
 
-cls_hire_worker=class(function(self,name,cls,dependencies)
+cls_hire_worker=class(function(self,name,cls,dependencies,spr)
  self.cls=cls
  self.name=name
  self.workers={}
- self.dependencies=dependencies or {}
+ self.dependencies=dependencies
+ self.spr=spr
 end)
 
 function cls_hire_worker:hire()
- self.cls.init(2+rnd(2))
+ local w=self.cls.init(2+rnd(2))
+ add(self.workers,w)
+ w.spr=self.spr
 end
 
 function cls_hire_worker:is_visible()
@@ -1320,12 +1327,12 @@ function cls_hire_worker:dismiss()
 end
 
 glb_hire_workers={
- cls_hire_worker.init("coder",cls_coder),
- cls_hire_worker.init("artist",cls_gfx_artist),
- cls_hire_worker.init("game designer",cls_game_designer),
- cls_hire_worker.init("social media manager",cls_tweeter,{release=0}),
- cls_hire_worker.init("youtuber",cls_youtuber,{release=0}),
- cls_hire_worker.init("twitcher",cls_twitcher,{release=0})
+ cls_hire_worker.init("coder",cls_coder,{},spr_coder),
+ cls_hire_worker.init("artist",cls_gfx_artist,{},spr_gfx_artist),
+ cls_hire_worker.init("game designer",cls_game_designer,{},spr_game_designer),
+ cls_hire_worker.init("social media manager",cls_tweeter,{release=0},spr_tweeter),
+ cls_hire_worker.init("youtuber",cls_youtuber,{release=0},spr_youtuber),
+ cls_hire_worker.init("twitcher",cls_twitcher,{release=0},spr_twitcher)
 }
 
 

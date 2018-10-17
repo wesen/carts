@@ -10,14 +10,17 @@ cls_money_tab=subclass(cls_tab,function(self,name)
 end)
 
 function cls_money_tab:draw()
- local x=15
+ local x=25
  local y=20
 
  self.current_hire_worker=nil
+
  for i,k in pairs(glb_hire_workers) do
   local w=82
   local h=12
   local is_mouse_over=glb_mouse_x>=x and glb_mouse_x<=x+w and glb_mouse_y>=y and glb_mouse_y<=y+h
+  bstr(tostr(#k.workers).."x",x-23,y-1,7,0)
+  spr(k.spr,x-12,y-2)
   if k:is_visible() then
    if is_mouse_over then
     self.current_hire_worker=k

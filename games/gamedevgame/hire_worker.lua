@@ -1,12 +1,15 @@
-cls_hire_worker=class(function(self,name,cls,dependencies)
+cls_hire_worker=class(function(self,name,cls,dependencies,spr)
  self.cls=cls
  self.name=name
  self.workers={}
- self.dependencies=dependencies or {}
+ self.dependencies=dependencies
+ self.spr=spr
 end)
 
 function cls_hire_worker:hire()
- self.cls.init(2+rnd(2))
+ local w=self.cls.init(2+rnd(2))
+ add(self.workers,w)
+ w.spr=self.spr
 end
 
 function cls_hire_worker:is_visible()
@@ -27,10 +30,10 @@ function cls_hire_worker:dismiss()
 end
 
 glb_hire_workers={
- cls_hire_worker.init("coder",cls_coder),
- cls_hire_worker.init("artist",cls_gfx_artist),
- cls_hire_worker.init("game designer",cls_game_designer),
- cls_hire_worker.init("social media manager",cls_tweeter,{release=0}),
- cls_hire_worker.init("youtuber",cls_youtuber,{release=0}),
- cls_hire_worker.init("twitcher",cls_twitcher,{release=0})
+ cls_hire_worker.init("coder",cls_coder,{},spr_coder),
+ cls_hire_worker.init("artist",cls_gfx_artist,{},spr_gfx_artist),
+ cls_hire_worker.init("game designer",cls_game_designer,{},spr_game_designer),
+ cls_hire_worker.init("social media manager",cls_tweeter,{release=0},spr_tweeter),
+ cls_hire_worker.init("youtuber",cls_youtuber,{release=0},spr_youtuber),
+ cls_hire_worker.init("twitcher",cls_twitcher,{release=0},spr_twitcher)
 }

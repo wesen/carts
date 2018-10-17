@@ -90,56 +90,57 @@ function cls_worker:on_tick()
  end
 end
 
+spr_coder=64
 cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=64
  self.default_resource=res_loc
  self.auto_resources={res_func,res_csharp_file,res_contract_work}
  self.tab=tab_game
  self.cost=0.05
 end)
 
+spr_gfx_artist=80
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=80
  self.default_resource=res_pixel
  self.auto_resources={res_tilemap,res_sprite,res_animation}
  self.tab=tab_game
  self.cost=0.05
 end)
 
+spr_game_designer=96
 cls_game_designer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=96
  self.auto_resources={res_prop,res_character,res_level}
  self.tab=tab_game
  self.cost=0.1
 end)
 
+spr_tweeter=96
 cls_tweeter=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=96
  self.auto_resources={res_tweet}
  self.tab=tab_release
 end)
 
+spr_youtuber=64
 cls_youtuber=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=64
  self.auto_resources={res_youtube}
  self.tab=tab_release
 end)
 
+spr_twitcher=80
 cls_twitcher=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=80
  self.auto_resources={res_twitch}
  self.tab=tab_release
 end)
 
+spr_gamer=80
 cls_gamer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.spr=80
  self.auto_resources={}
+ self.spr=spr_gamer
  self.tab=tab_release
 end)
