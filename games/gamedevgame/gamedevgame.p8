@@ -1183,7 +1183,7 @@ function cls_worker:draw()
 end
 
 function cls_worker:is_visible()
- return self.tab==glb_current_tab
+ return self.tab==glb_current_tab or glb_current_tab==tab_money
 end
 
 function cls_worker:on_tick()
