@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 glb_debug=true
-glb_timescale=10
+glb_timescale=1
 
 function class (init)
   local c = {}
