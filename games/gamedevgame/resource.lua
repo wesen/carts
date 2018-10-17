@@ -10,6 +10,8 @@ resource_cls=class(function(self,
   tab)
  self.x=x
  self.y=y
+ self.shkx=0
+ self.shky=0
  self.name=name
  self.full_name=full_name
  self.dependencies=dependencies
@@ -30,7 +32,22 @@ end)
 
 glb_resource_w=16
 
+function resource_cls:shake(p)
+ local a=rnd(1)
+ self.shkx=cos(a)*p
+ self.shky=sin(a)*p
+end
+
 function resource_cls:draw()
+ if abs(self.shkx)+abs(self.shky)<1 then
+  self.shkx=0
+  self.shky=0
+ end
+ if glb_frame%4==0 then
+  self.shkx*=-0.4-rnd(0.1)
+  self.shky*=-0.4-rnd(0.1)
+ end
+
  if (not self:is_visible()) return
  if (not self:are_dependencies_fulfilled() and self.t==0) darken(10)
  local x,y
@@ -94,7 +111,7 @@ end
 function resource_cls:get_cur_xy()
  local x=self.x*(glb_resource_w+6)+12
  local y=self.y*(glb_resource_w+3+10)+4+11
- return x,y
+ return x+self.shkx,y+self.shky
 end
 
 function resource_cls:on_produced()
@@ -109,6 +126,7 @@ function resource_cls:start_producing()
    res.count-=v
   end
   if (self.on_produce_cb) self.on_produce_cb(self)
+  self:shake(2)
 end
 
 function resource_cls:produce()

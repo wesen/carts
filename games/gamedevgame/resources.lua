@@ -55,7 +55,7 @@ res_contract_work=resource_cls.init(
  -- spr
  16,
  -- description
- "do some client work",
+ "do client work (+$10)",
  "contract work done",
  tab_game
 )
