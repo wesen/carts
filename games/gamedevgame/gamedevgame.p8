@@ -760,10 +760,14 @@ cls_tab=class(function(self, name)
  button.is_visible=function() return true end
  button.is_active=function() return glb_current_tab==self end
  button.on_hover=function()
-   glb_dialogbox.visible=true
-   glb_dialogbox.text={{7,"switch to "..self.name.." tab"}}
+   if glb_current_tab!=self then
+    glb_dialogbox.visible=true
+    glb_dialogbox.text={{7,"switch to "..self.name.." tab"}}
+   end
  end
- button.on_click=function() glb_current_tab=self end
+ button.on_click=function()
+  if (glb_current_tab!=self) transition_tab(self)
+ end
  button.should_blink=function()
   return button:is_mouse_over() and not button.is_active()
  end
@@ -807,6 +811,29 @@ tab_money.is_visible=function()
 end
 
 glb_resource_manager.tabs={tab_game,tab_release,tab_money}
+
+function transition_tab(tab)
+ add_cr(function()
+  local w=8
+  local w2=w*2
+  for i=1,w,w/32 do
+   yield()
+   i=inoutexpo(i,0,w+1,w)
+   for j=0,i do
+    palt(0,false)
+    for x=0,128/w2-1 do
+     for y=0,128/w2-1 do
+      -- rect(x*w2+j,y*w2+j,x*w2+w2-j,y*w2+w2-j,0)
+      rect(x*w2+w-j,y*w2+w-j,x*w2+w+j,y*w2+w+j,0)
+     end
+    end
+   end
+   palt()
+  end
+  glb_current_tab=tab
+
+ end,glb_draw_crs)
+end
 glb_current_tab=tab_game
 
 resource_cls=class(function(self,
