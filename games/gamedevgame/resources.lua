@@ -118,7 +118,7 @@ res_character=resource_cls.init("character",
  "characters",
  4,1,
  {animation=2,csharp_file=1},
- 4,
+ 6,
  -- spr
  16,
  "make a character!",

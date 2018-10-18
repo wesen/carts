@@ -22,7 +22,7 @@ function cls_worker:update()
  if self.t>self.duration then
   self.duration=self.orig_duration
   self.t=0
-  if glb_resource_manager.money>=self.cost then
+  if glb_resource_manager.money>=self.cost or self.hire_worker.name=="coder" then
    self:on_tick()
    self.no_salary_t=0
    glb_resource_manager.money-=self.cost

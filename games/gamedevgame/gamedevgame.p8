@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 glb_debug=true
-glb_timescale=1
+glb_timescale=10
 
 function class (init)
   local c = {}
@@ -1040,7 +1040,7 @@ res_character=resource_cls.init("character",
  "characters",
  4,1,
  {animation=2,csharp_file=1},
- 4,
+ 6,
  -- spr
  16,
  "make a character!",
@@ -1215,7 +1215,7 @@ function cls_worker:update()
  if self.t>self.duration then
   self.duration=self.orig_duration
   self.t=0
-  if glb_resource_manager.money>=self.cost then
+  if glb_resource_manager.money>=self.cost or self.hire_worker.name=="coder" then
    self:on_tick()
    self.no_salary_t=0
    glb_resource_manager.money-=self.cost
