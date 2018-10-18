@@ -500,6 +500,21 @@ function cls_score_particle:draw()
  bstr(self.val,self.x,self.y,self.c1,self.c2)
 end
 
+function make_score_particle_explosion(s,n,x,y,c2,c1,spread_x,spread_y)
+ spread_x=spread_x or 20
+ spread_y=spread_y or 8
+ for i=1,n do
+  local p=cls_score_particle.init(x+mrnd(spread_x),y+mrnd(spread_y),s,c2,c1)
+  p.spd_y*=1
+  p.lifetime=2
+ end
+end
+
+function make_mouse_text_particle(text,c2,c1)
+ cls_score_particle.init(mid(glb_mouse_x+5-(#text/2)*4,5,80),glb_mouse_y+2,
+  text,0,7)
+end
+
 cls_pwrup_particle=class(function(self,x,y,a,cols)
  self.spd_x=cos(a)*.8
  self.cols=cols
@@ -890,13 +905,13 @@ function resource_cls:update()
   if self.t>(self.duration/glb_timescale) then
    self:on_produced()
    self.t=0
-   cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,self.creation_text,0,7)
+   make_mouse_text_particle(self.creation_text,0,7)
   end
  end
 
  self.stat_t+=glb_dt
  if self.stat_t>5 then
-  printh(tostr(self.stat_produced).." "..self.name.." produced")
+  -- printh(tostr(self.stat_produced).." "..self.name.." produced")
   self.stat_produced=0
   self.stat_t=0
  end
@@ -1000,11 +1015,17 @@ res_contract_work=resource_cls.init(
  16,
  -- description
  "do client work (+$10)",
- "contract work done",
+ "",
  tab_game
 )
 res_contract_work.on_produced_cb=function(self)
  glb_resource_manager.money+=10
+ for i=1,10 do
+  printh("created money particle")
+  local p=cls_score_particle.init(83+mrnd(20),20+mrnd(8),"$",11,3)
+  p.spd_y*=1
+  p.lifetime=2
+ end
 end
 
 --
@@ -1380,10 +1401,15 @@ cls_gamer=subclass(cls_worker,function(self,duration)
  self.tab=tab_release
 end)
 
+function cls_gamer:is_visible()
+ return glb_current_tab!=tab_money
+end
+
 function cls_gamer:on_tick()
  cls_worker.on_tick(self)
  local money=1+(res_release.count-1)*0.5
  glb_resource_manager.money+=money
+ if (self:is_visible()) make_score_particle_explosion("$",flr(money)+1,self.x,116,11,3,5,2)
 end
 
 cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost,auto_resources,salary)
@@ -1447,8 +1473,7 @@ function cls_hire_worker:hire()
  w.hire_worker=self
  add(self.workers,w)
  add(glb_resource_manager.workers,w)
- cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,
-  "hired a "..self.name,0,7)
+ make_mouse_text_particle("hired a "..self.name,0,7)
  w.spr=self.spr
 end
 
@@ -1533,6 +1558,8 @@ function _init()
   res_loc.count=1000
   glb_timescale=1
   glb_resource_manager.money=1000
+  res_csharp_file.count=1000
+  res_csharp_file.created=true
   res_level.count=50
   res_level.created=true
   res_build.created=true

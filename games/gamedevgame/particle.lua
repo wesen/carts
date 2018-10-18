@@ -75,6 +75,21 @@ function cls_score_particle:draw()
  bstr(self.val,self.x,self.y,self.c1,self.c2)
 end
 
+function make_score_particle_explosion(s,n,x,y,c2,c1,spread_x,spread_y)
+ spread_x=spread_x or 20
+ spread_y=spread_y or 8
+ for i=1,n do
+  local p=cls_score_particle.init(x+mrnd(spread_x),y+mrnd(spread_y),s,c2,c1)
+  p.spd_y*=1
+  p.lifetime=2
+ end
+end
+
+function make_mouse_text_particle(text,c2,c1)
+ cls_score_particle.init(mid(glb_mouse_x+5-(#text/2)*4,5,80),glb_mouse_y+2,
+  text,0,7)
+end
+
 cls_pwrup_particle=class(function(self,x,y,a,cols)
  self.spd_x=cos(a)*.8
  self.cols=cols

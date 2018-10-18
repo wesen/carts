@@ -56,11 +56,17 @@ res_contract_work=resource_cls.init(
  16,
  -- description
  "do client work (+$10)",
- "contract work done",
+ "",
  tab_game
 )
 res_contract_work.on_produced_cb=function(self)
  glb_resource_manager.money+=10
+ for i=1,10 do
+  printh("created money particle")
+  local p=cls_score_particle.init(83+mrnd(20),20+mrnd(8),"$",11,3)
+  p.spd_y*=1
+  p.lifetime=2
+ end
 end
 
 --

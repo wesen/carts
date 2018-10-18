@@ -147,13 +147,13 @@ function resource_cls:update()
   if self.t>(self.duration/glb_timescale) then
    self:on_produced()
    self.t=0
-   cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,self.creation_text,0,7)
+   make_mouse_text_particle(self.creation_text,0,7)
   end
  end
 
  self.stat_t+=glb_dt
  if self.stat_t>5 then
-  printh(tostr(self.stat_produced).." "..self.name.." produced")
+  -- printh(tostr(self.stat_produced).." "..self.name.." produced")
   self.stat_produced=0
   self.stat_t=0
  end

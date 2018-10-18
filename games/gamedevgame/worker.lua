@@ -177,8 +177,13 @@ cls_gamer=subclass(cls_worker,function(self,duration)
  self.tab=tab_release
 end)
 
+function cls_gamer:is_visible()
+ return glb_current_tab!=tab_money
+end
+
 function cls_gamer:on_tick()
  cls_worker.on_tick(self)
  local money=1+(res_release.count-1)*0.5
  glb_resource_manager.money+=money
+ if (self:is_visible()) make_score_particle_explosion("$",flr(money)+1,self.x,116,11,3,5,2)
 end
