@@ -571,9 +571,10 @@ cls_button=class(function(self,x,y,text)
  self.w=(#self.text)*4+1
  self.h=5
  self.is_visible=function() return false end
+ self.is_active=function() return false end
  self.on_click=function() end
  self.on_hover=function() end
- self.blink_on_hover=fakse
+ self.should_blink=function() return false end
 end)
 
 function cls_button:is_mouse_over()
@@ -590,26 +591,26 @@ function cls_button:draw()
  local y=self.y
  local w=self.w
  local h=self.h
- local bg=self.is_visible() and glb_bg_col2 or 13
- local fg=self.is_visible() and 7 or 6
+ local bg=self.is_active() and glb_bg_col2 or 13
+ local fg=self.is_active() and 7 or 6
 
- if self:is_visible() and not self.blink_on_hover then
-  draw_rounded_rect2(x,y,w,h,bg,bg,7)
- elseif self:is_mouse_over() then
-  if frame(12,2)==0 then
-   draw_rounded_rect2(x-1,y-1,w+2,h+2,bg,bg,7)
+ if self:is_visible() then
+  if self:should_blink() then
+   if frame(12,2)==0 then
+    draw_rounded_rect2(x-1,y-1,w+2,h+2,bg,bg,fg)
+   else
+    draw_rounded_rect2(x,y,w,h,bg,bg,fg)
+   end
   else
-   draw_rounded_rect2(x,y,w,h,bg,bg,7)
+   draw_rounded_rect2(x,y,w,h,bg,bg,fg)
   end
- else
-  draw_rounded_rect2(x,y,w,h,bg,bg,5)
- end
 
- if self:is_mouse_over() then
-  self.on_hover()
-  if (glb_mouse_left_down) self.on_click()
+  if self:is_mouse_over() then
+   self.on_hover()
+   if (glb_mouse_left_down) self.on_click()
+  end
+  print(self.text,x+1,y,fg)
  end
- print(self.text,x+1,y,fg)
 end
 
 cls_dialogbox=class(function(self)
@@ -686,12 +687,17 @@ glb_resource_manager=resource_manager_cls.init()
 cls_tab=class(function(self, name)
  self.name=name
  self.button=cls_button.init(0,0,self.name)
- self.button.is_visible=function() return glb_current_tab==self end
- self.button.on_hover=function()
+ local button=self.button
+ button.is_visible=function() return true end
+ button.is_active=function() return glb_current_tab==self end
+ button.on_hover=function()
    glb_dialogbox.visible=true
    glb_dialogbox.text={{7,"switch to "..self.name.." tab"}}
  end
- self.button.on_click=function() glb_current_tab=self end
+ button.on_click=function() glb_current_tab=self end
+ button.should_blink=function()
+  return button:is_mouse_over() and not button.is_active()
+ end
 end)
 
 function cls_tab:draw()
@@ -713,6 +719,9 @@ function cls_money_tab:draw()
   k.button.y=y
   k.button.x=x
   k.button:draw()
+  k.dismiss_button.y=y
+  k.dismiss_button.x=x+60
+  k.dismiss_button:draw()
   y+=k.button.h+7
  end
 end
@@ -1343,15 +1352,33 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost)
  self.button=cls_button.init(0,0,self.name)
  local button=self.button
  button.blink_on_hover=true
- button.w=82
+ button.w=54
  button.h=5
 
- button.is_visible=function() return self:is_hireable() end
+ button.is_active=function() return self:is_hireable() end
+ button.is_visible=function() return true end
  button.on_hover=function()
   tab_money.current_hire_worker=self
  end
  button.on_click=function()
   if (self:is_hireable()) self:hire()
+ end
+ button.should_blink=function()
+  return button.is_active() and button:is_mouse_over()
+ end
+
+ self.dismiss_button=cls_button.init(0,0,"dismiss")
+ local dismiss_button=self.dismiss_button
+ dismiss_button.w=29
+ dismiss_button.h=5
+
+ dismiss_button.is_visible=function()
+  return #self.workers>0
+ end
+ dismiss_button.is_active=dismiss_button.is_visible
+ dismiss_button.should_blink=function() return dismiss_button:is_mouse_over() end
+ dismiss_button.on_click=function()
+  self:dismiss()
  end
 end)
 
@@ -1383,7 +1410,7 @@ glb_hire_workers={
  cls_hire_worker.init("coder",cls_coder,{},spr_coder,5),
  cls_hire_worker.init("artist",cls_gfx_artist,{},spr_gfx_artist,20),
  cls_hire_worker.init("game designer",cls_game_designer,{},spr_game_designer,20),
- cls_hire_worker.init("social media manager",cls_tweeter,{release=0},spr_tweeter,10),
+ cls_hire_worker.init("tweeter",cls_tweeter,{release=0},spr_tweeter,10),
  cls_hire_worker.init("youtuber",cls_youtuber,{release=0},spr_youtuber,10),
  cls_hire_worker.init("twitcher",cls_twitcher,{release=0},spr_twitcher,10)
 }
@@ -1426,7 +1453,18 @@ glb_mouse_right_down=false
 glb_bg_col=1
 glb_bg_col2=12
 
+function set_mouse()
+ local mouse_btn=stat(34)
+ glb_mouse_left_down=band(glb_prev_mouse_btn,1)!=1 and band(mouse_btn,1)==1
+ glb_mouse_right_down=band(glb_prev_mouse_btn,2)!=2 and band(mouse_btn,2)==2
+ glb_prev_mouse_btn=mouse_btn
+
+ glb_mouse_x=stat(32)
+ glb_mouse_y=stat(33)
+end
+
 function _draw()
+ set_mouse()
  glb_frame+=1
  cls(glb_bg_col)
  glb_resource_manager:draw()
@@ -1443,13 +1481,6 @@ function _update60()
  glb_dialogbox.visible=false
  glb_dt=time()-glb_lasttime
 
- local mouse_btn=stat(34)
- glb_mouse_left_down=band(glb_prev_mouse_btn,1)!=1 and band(mouse_btn,1)==1
- glb_mouse_right_down=band(glb_prev_mouse_btn,2)!=2 and band(mouse_btn,2)==2
- glb_prev_mouse_btn=mouse_btn
-
- glb_mouse_x=stat(32)
- glb_mouse_y=stat(33)
  glb_lasttime=time()
  glb_resource_manager:update()
  tick_crs(crs)

@@ -35,7 +35,18 @@ glb_mouse_right_down=false
 glb_bg_col=1
 glb_bg_col2=12
 
+function set_mouse()
+ local mouse_btn=stat(34)
+ glb_mouse_left_down=band(glb_prev_mouse_btn,1)!=1 and band(mouse_btn,1)==1
+ glb_mouse_right_down=band(glb_prev_mouse_btn,2)!=2 and band(mouse_btn,2)==2
+ glb_prev_mouse_btn=mouse_btn
+
+ glb_mouse_x=stat(32)
+ glb_mouse_y=stat(33)
+end
+
 function _draw()
+ set_mouse()
  glb_frame+=1
  cls(glb_bg_col)
  glb_resource_manager:draw()
@@ -52,13 +63,6 @@ function _update60()
  glb_dialogbox.visible=false
  glb_dt=time()-glb_lasttime
 
- local mouse_btn=stat(34)
- glb_mouse_left_down=band(glb_prev_mouse_btn,1)!=1 and band(mouse_btn,1)==1
- glb_mouse_right_down=band(glb_prev_mouse_btn,2)!=2 and band(mouse_btn,2)==2
- glb_prev_mouse_btn=mouse_btn
-
- glb_mouse_x=stat(32)
- glb_mouse_y=stat(33)
  glb_lasttime=time()
  glb_resource_manager:update()
  tick_crs(crs)

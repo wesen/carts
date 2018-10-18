@@ -9,15 +9,33 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost)
  self.button=cls_button.init(0,0,self.name)
  local button=self.button
  button.blink_on_hover=true
- button.w=82
+ button.w=54
  button.h=5
 
- button.is_visible=function() return self:is_hireable() end
+ button.is_active=function() return self:is_hireable() end
+ button.is_visible=function() return true end
  button.on_hover=function()
   tab_money.current_hire_worker=self
  end
  button.on_click=function()
   if (self:is_hireable()) self:hire()
+ end
+ button.should_blink=function()
+  return button.is_active() and button:is_mouse_over()
+ end
+
+ self.dismiss_button=cls_button.init(0,0,"dismiss")
+ local dismiss_button=self.dismiss_button
+ dismiss_button.w=29
+ dismiss_button.h=5
+
+ dismiss_button.is_visible=function()
+  return #self.workers>0
+ end
+ dismiss_button.is_active=dismiss_button.is_visible
+ dismiss_button.should_blink=function() return dismiss_button:is_mouse_over() end
+ dismiss_button.on_click=function()
+  self:dismiss()
  end
 end)
 
@@ -49,7 +67,7 @@ glb_hire_workers={
  cls_hire_worker.init("coder",cls_coder,{},spr_coder,5),
  cls_hire_worker.init("artist",cls_gfx_artist,{},spr_gfx_artist,20),
  cls_hire_worker.init("game designer",cls_game_designer,{},spr_game_designer,20),
- cls_hire_worker.init("social media manager",cls_tweeter,{release=0},spr_tweeter,10),
+ cls_hire_worker.init("tweeter",cls_tweeter,{release=0},spr_tweeter,10),
  cls_hire_worker.init("youtuber",cls_youtuber,{release=0},spr_youtuber,10),
  cls_hire_worker.init("twitcher",cls_twitcher,{release=0},spr_twitcher,10)
 }
