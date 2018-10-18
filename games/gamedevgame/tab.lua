@@ -23,7 +23,7 @@ cls_money_tab=subclass(cls_tab,function(self,name)
 end)
 
 function cls_money_tab:draw()
- local x=30
+ local x=40
  local y=20
 
  self.current_hire_worker=nil
@@ -34,9 +34,9 @@ function cls_money_tab:draw()
   k.button.y=y
   k.button.x=x
   k.button:draw()
-  k.dismiss_button.y=y
-  k.dismiss_button.x=x+60
-  k.dismiss_button:draw()
+  -- k.dismiss_button.y=y
+  -- k.dismiss_button.x=x+60
+  -- k.dismiss_button:draw()
   y+=k.button.h+7
  end
 end

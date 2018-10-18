@@ -624,7 +624,7 @@ function cls_dialogbox:draw()
  local y=62
  if (not self.visible) return
 
- if (glb_mouse_y>60) y=15
+ if (glb_mouse_y>56) y=8
  local h=14+(#self.text-1)*8
 
  draw_rounded_rect2(15,y+0,98,h,12,1,6)
@@ -710,7 +710,7 @@ cls_money_tab=subclass(cls_tab,function(self,name)
 end)
 
 function cls_money_tab:draw()
- local x=30
+ local x=40
  local y=20
 
  self.current_hire_worker=nil
@@ -721,9 +721,9 @@ function cls_money_tab:draw()
   k.button.y=y
   k.button.x=x
   k.button:draw()
-  k.dismiss_button.y=y
-  k.dismiss_button.x=x+60
-  k.dismiss_button:draw()
+  -- k.dismiss_button.y=y
+  -- k.dismiss_button.x=x+60
+  -- k.dismiss_button:draw()
   y+=k.button.h+7
  end
 end
@@ -1371,7 +1371,7 @@ end)
 
 function cls_gamer:on_tick()
  cls_worker.on_tick(self)
- local money=res_release.count*0.5
+ local money=1+(res_release.count-1)*0.5
  glb_resource_manager.money+=money
 end
 
@@ -1522,7 +1522,7 @@ function _init()
   res_loc.count=1000
   glb_timescale=1
   glb_resource_manager.money=1000
-  res_level.count=20
+  res_level.count=50
   res_level.created=true
   res_build.created=true
   res_build.count=5

@@ -179,6 +179,6 @@ end)
 
 function cls_gamer:on_tick()
  cls_worker.on_tick(self)
- local money=res_release.count*0.5
+ local money=1+(res_release.count-1)*0.5
  glb_resource_manager.money+=money
 end
