@@ -1546,7 +1546,7 @@ function cls_hire_worker:hire()
  w.hire_worker=self
  add(self.workers,w)
  add(glb_resource_manager.workers,w)
- make_mouse_text_particle("hired a "..self.name,0,7)
+ glb_dialogbox:shake(5)
  w.spr=self.spr
 end
 
@@ -1685,11 +1685,11 @@ function _draw()
  glb_resource_manager:draw()
  spr(1,glb_mouse_x,glb_mouse_y)
 
- glb_dialogbox:draw()
-
  for _,v in pairs(glb_particles) do
   v:draw()
  end
+
+ glb_dialogbox:draw()
 
  tick_crs(glb_draw_crs)
 end
