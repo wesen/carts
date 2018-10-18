@@ -3,6 +3,8 @@ cls_worker=class(function(self,duration)
  self.orig_duration=duration/glb_timescale
  self.duration=self.orig_duration
  self.spr=64
+ self.y=120
+ self.spd_y=0
  self.x=flr(rnd(120))
  self.spd_x=rnd(0.2)+0.2
  self.dir=1
@@ -17,12 +19,15 @@ end)
 
 function cls_worker:update()
  self.t+=glb_dt
+
  if (self.no_salary_t>0) self.no_salary_t+=glb_dt
+
  if self.t>self.duration then
   self.duration=self.orig_duration
   self.t=0
   if glb_resource_manager.money>=self.cost or self.hire_worker.name=="coder" then
    self:on_tick()
+   self.spd_y=-1.5+mrnd(0.75)
    self.no_salary_t=0
    glb_resource_manager.money-=self.cost
   else
@@ -40,13 +45,21 @@ function cls_worker:update()
  end
 
  self.x+=self.dir*self.spd_x
+ self.y+=self.spd_y
+ if self.y>120 then
+  self.y=120
+  self.spd_y=0
+ end
+ if self.spd_y!=0 then
+  self.spd_y+=0.18
+ end
  if (self.x<0 or self.x>120) self.dir*=-1
  if (maybe(1/200)) self.dir*=-1
 end
 
 function cls_worker:draw()
  if self:is_visible() then
-  spr(self.spr+frame(8,2),self.x,120,1,1,self.dir<0)
+  spr(self.spr+frame(8,2),self.x,self.y,1,1,self.dir<0)
   -- spr(self.spr+frame(8,3),self.x,120,8,8,self.dir>0)
  end
 end
@@ -114,7 +127,7 @@ function cls_worker:on_tick()
 end
 
 function cls_worker:show_text(text,fg,bg)
-  cls_score_particle.init(self.x-(#text/2),115,text,fg,bg)
+  cls_score_particle.init(self.x-(#text/2),self.y-5,text,fg,bg)
 end
 
 spr_coder=64

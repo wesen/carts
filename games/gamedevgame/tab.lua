@@ -29,7 +29,7 @@ function cls_money_tab:draw()
  self.current_hire_worker=nil
 
  for i,k in pairs(glb_hire_workers) do
-  bstr(tostr(#k.workers).."x",x-23,y-1,7,0)
+  bstr(tostr(#k.workers).."x",x-28,y-1,7,0)
   spr(k.spr,x-12,y-2)
   k.button.y=y
   k.button.x=x
