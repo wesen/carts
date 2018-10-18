@@ -1222,7 +1222,6 @@ function cls_worker:update()
   else
    if (self.no_salary_t==0) self.no_salary_t=glb_dt
 
-   printh("no salary "..tostr(self.no_salary_t))
    if self.no_salary_t>10 and maybe(0.1) then
     self.hire_worker:dismiss(self)
     self:show_text("i quit!!",8,7)
