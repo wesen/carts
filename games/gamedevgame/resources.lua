@@ -193,6 +193,7 @@ res_playtest=resource_cls.init(
  "game tested",
  tab_game
 )
+res_build.created=true
 
 res_release=resource_cls.init(
  "release",
@@ -216,7 +217,7 @@ res_tweet=resource_cls.init(
  "tweet",
  "tweets",
  0,0,
- {release=0},
+ {build=0},
  0.5,
  -- spr
  16,
@@ -230,7 +231,7 @@ res_youtube=resource_cls.init(
  "youtube",
  "youtube videos",
  1,0,
- {release=0},
+ {build=0},
  3,
  -- spr
  16,
@@ -244,7 +245,7 @@ res_twitch=resource_cls.init(
  "twitch",
  "twitch streams",
  2,0,
- {release=0},
+ {build=0},
  3,
  -- spr
  16,
@@ -258,7 +259,7 @@ res_gamer=resource_cls.init(
  "gamer",
  "gamers",
  0,1,
- {tweet=5,youtube=5,twitch=5},
+ {tweet=5,youtube=5,twitch=5,release=0},
  3,
  -- spr
  80,

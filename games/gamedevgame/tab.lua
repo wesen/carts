@@ -32,7 +32,7 @@ function cls_money_tab:draw()
  end
 end
 
-tab_game=cls_tab.init("gamedev")
+tab_game=cls_tab.init("office")
 tab_money=cls_money_tab.init("studio")
 tab_release=cls_tab.init("release")
 
