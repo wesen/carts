@@ -143,7 +143,7 @@ function resource_cls:update()
    local x,y
    x=64
    y=64
-   cls_score_particle.init(x-4*(#self.creation_text/2),y+8,self.creation_text,0,7)
+   cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,self.creation_text,0,7)
   end
  end
 end

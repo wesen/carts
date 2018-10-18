@@ -708,7 +708,7 @@ cls_money_tab=subclass(cls_tab,function(self,name)
 end)
 
 function cls_money_tab:draw()
- local x=25
+ local x=30
  local y=20
 
  self.current_hire_worker=nil
@@ -878,7 +878,7 @@ function resource_cls:update()
    local x,y
    x=64
    y=64
-   cls_score_particle.init(x-4*(#self.creation_text/2),y+8,self.creation_text,0,7)
+   cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,self.creation_text,0,7)
   end
  end
 end
@@ -1208,6 +1208,7 @@ cls_worker=class(function(self,duration)
  self.tab=nil
  self.cost=0
  self.hire_worker=nil
+ self.no_salary_t=0
  add(glb_resource_manager.workers,self)
 end)
 
@@ -1216,9 +1217,15 @@ function cls_worker:update()
  if self.t>self.duration then
   self.duration=self.orig_duration
   self.t=0
-  self:on_tick()
-  glb_resource_manager.money-=self.cost
-  if glb_resource_manager.money<0 and maybe(0.06) then
+  if glb_resource_manager.money>=self.cost then
+   self:on_tick()
+   self.no_salary_t=0
+   glb_resource_manager.money-=self.cost
+  else
+   self.no_salary_t+=glb_dt
+   if self.no_salary_t>10 and maybe(0.06) then
+    self.hire_worker:dismiss(self)
+   end
   end
  end
 
@@ -1400,6 +1407,7 @@ function cls_hire_worker:hire()
  glb_resource_manager.money-=self.cost
  w.auto_resources=self.auto_resources
  w.cost=self.salary
+ w.hire_worker=self
  add(self.workers,w)
  w.spr=self.spr
 end
@@ -1413,9 +1421,12 @@ function cls_hire_worker:is_hireable()
  return true
 end
 
-function cls_hire_worker:dismiss()
- if #self.workers>0 then
-  local worker=self.workers[1]
+function cls_hire_worker:dismiss(worker)
+ if #self.workers>0 and worker==nil then
+  worker=self.workers[1]
+ end
+
+ if worker!=nil then
   del(self.workers,worker)
   del(glb_resource_manager.workers,worker)
  end

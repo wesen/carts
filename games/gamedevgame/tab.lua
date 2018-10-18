@@ -22,7 +22,7 @@ cls_money_tab=subclass(cls_tab,function(self,name)
 end)
 
 function cls_money_tab:draw()
- local x=25
+ local x=30
  local y=20
 
  self.current_hire_worker=nil
