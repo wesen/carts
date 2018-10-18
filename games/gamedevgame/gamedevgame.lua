@@ -11,6 +11,7 @@ glb_timescale=1
 --#include gfx
 --#include particle
 --#include tween
+--#include button
 --#include dialogbox
 
 --#include resourcemanager

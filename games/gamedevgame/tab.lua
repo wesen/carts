@@ -1,5 +1,12 @@
 cls_tab=class(function(self, name)
  self.name=name
+ self.button=cls_button.init(0,0,self.name)
+ self.button.is_visible=function() return glb_current_tab==self end
+ self.button.on_hover=function()
+   glb_dialogbox.visible=true
+   glb_dialogbox.text={{7,"switch to "..self.name.." tab"}}
+ end
+ self.button.on_click=function() glb_current_tab=self end
 end)
 
 function cls_tab:draw()

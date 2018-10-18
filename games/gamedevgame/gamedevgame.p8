@@ -564,6 +564,51 @@ function cr_move_to(obj,target_x,target_y,d,easetype)
  end
 end
 
+cls_button=class(function(self,x,y,text)
+ self.x=x
+ self.y=y
+ self.text=text
+ self.w=(#self.text)*4+1
+ self.h=5
+ self.is_visible=function() return false end
+ self.on_click=function() end
+ self.on_hover=function() end
+end)
+
+function cls_button:is_mouse_over()
+  local x=self.x
+  local y=self.y
+  return glb_mouse_x>=x
+    and glb_mouse_x<=x+self.w
+    and glb_mouse_y>=y-1
+    and glb_mouse_y<=y+self.h+1
+end
+
+function cls_button:draw()
+ local x=self.x
+ local y=self.y
+ local w=self.w
+ local h=self.h
+
+ if self.is_visible() then
+  draw_rounded_rect2(x,y,w,h,glb_bg_col2,glb_bg_col2,7)
+  print(self.text,x+1,y,7)
+ elseif self:is_mouse_over() then
+  if frame(12,2)==0 then
+   draw_rounded_rect2(x-1,y-1,w+2,h+2,13,13,7)
+  else
+   draw_rounded_rect2(x,y,w,h,13,13,7)
+  end
+  self.on_hover()
+  print(self.text,x+1,y,7)
+
+  if (glb_mouse_left_down) self.on_click()
+ else
+  draw_rounded_rect2(x,y,w,h,13,13,5)
+  print(self.text,x+1,y,6)
+ end
+end
+
 cls_dialogbox=class(function(self)
  self.visible=true
  self.text={}
@@ -602,29 +647,12 @@ function resource_manager_cls:draw()
  local y=3
 
  for i,k in pairs(self.tabs) do
-  local w=(#k.name)*4+1
-  local is_visible=glb_current_tab==k
-  local is_mouse_over=glb_mouse_x>=x and glb_mouse_x<=x+w and glb_mouse_y>=y and glb_mouse_y<=y+5
-  if is_visible then
-   draw_rounded_rect2(x,y,w,5,glb_bg_col2,glb_bg_col2,7)
-   print(k.name,x+1,y,7)
-   k:draw()
-  elseif is_mouse_over then
-   if frame(12,2)==0 then
-    draw_rounded_rect2(x-1,y-1,w+2,5+2,13,13,7)
-   else
-    draw_rounded_rect2(x,y,w,5,13,13,7)
-   end
-   glb_dialogbox.visible=true
-   glb_dialogbox.text={{7,"switch to "..k.name.." tab"}}
-   print(k.name,x+1,y,7)
-
-   if (glb_mouse_left_down) glb_current_tab=k
-  else
-   draw_rounded_rect2(x,y,w,5,13,13,5)
-   print(k.name,x+1,y,6)
-  end
-  x+=w+5
+  local button=k.button
+  button.x=x
+  button.y=y
+  button:draw()
+  x+=button.w+5
+  if (glb_current_tab==k) k:draw()
  end
  for _,k in pairs(self.resources) do
   k:draw()
@@ -654,6 +682,13 @@ glb_resource_manager=resource_manager_cls.init()
 
 cls_tab=class(function(self, name)
  self.name=name
+ self.button=cls_button.init(0,0,self.name)
+ self.button.is_visible=function() return glb_current_tab==self end
+ self.button.on_hover=function()
+   glb_dialogbox.visible=true
+   glb_dialogbox.text={{7,"switch to "..self.name.." tab"}}
+ end
+ self.button.on_click=function() glb_current_tab=self end
 end)
 
 function cls_tab:draw()
