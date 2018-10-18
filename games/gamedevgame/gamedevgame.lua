@@ -1,5 +1,4 @@
 glb_debug=true
-glb_timescale=10
 
 --#include oo
 --#include helpers

@@ -96,6 +96,9 @@ function cls_worker:on_tick()
    if k.count<min_count then
     res=k
     min_count=k.count
+   elseif k.name=="contract" and maybe(0.3) then
+    res=k
+    break
    end
   end
  end

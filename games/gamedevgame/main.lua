@@ -2,6 +2,7 @@ function _init()
  poke(0x5f2d,1)
  if glb_debug then
   res_loc.count=1000
+  glb_timescale=1
   glb_resource_manager.money=1000
  end
 end

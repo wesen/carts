@@ -156,21 +156,7 @@ res_build=resource_cls.init(
  "build",
  "game builds",
  2,2,
- {level=5,character=5},
- 2,
- -- spr
- 16,
- -- description
- "make a beta build",
- "game built",
- tab_game
-)
-
-res_build=resource_cls.init(
- "build",
- "game builds",
- 2,2,
- {level=5,character=5},
+ {level=5},
  2,
  -- spr
  16,
@@ -258,7 +244,7 @@ res_gamer=resource_cls.init(
  "gamer",
  "gamers",
  0,1,
- {tweet=5,youtube=5,twitch=5,release=0},
+ {tweet=5,youtube=5,twitch=5,build=0},
  3,
  -- spr
  80,

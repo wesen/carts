@@ -2,7 +2,6 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 glb_debug=true
-glb_timescale=10
 
 function class (init)
   local c = {}
@@ -1088,21 +1087,7 @@ res_build=resource_cls.init(
  "build",
  "game builds",
  2,2,
- {level=5,character=5},
- 2,
- -- spr
- 16,
- -- description
- "make a beta build",
- "game built",
- tab_game
-)
-
-res_build=resource_cls.init(
- "build",
- "game builds",
- 2,2,
- {level=5,character=5},
+ {level=5},
  2,
  -- spr
  16,
@@ -1190,7 +1175,7 @@ res_gamer=resource_cls.init(
  "gamer",
  "gamers",
  0,1,
- {tweet=5,youtube=5,twitch=5,release=0},
+ {tweet=5,youtube=5,twitch=5,build=0},
  3,
  -- spr
  80,
@@ -1298,6 +1283,9 @@ function cls_worker:on_tick()
    if k.count<min_count then
     res=k
     min_count=k.count
+   elseif k.name=="contract" and maybe(0.3) then
+    res=k
+    break
    end
   end
  end
@@ -1514,6 +1502,7 @@ function _init()
  poke(0x5f2d,1)
  if glb_debug then
   res_loc.count=1000
+  glb_timescale=1
   glb_resource_manager.money=1000
  end
 end
