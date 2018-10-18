@@ -17,7 +17,6 @@ res_loc=resource_cls.init(
   tab_game
 )
 res_loc.active=true
-res_loc.count=9998
 
 res_func=resource_cls.init(
 "func",
@@ -194,7 +193,6 @@ res_playtest=resource_cls.init(
  "game tested",
  tab_game
 )
--- res_build.created=true
 
 res_release=resource_cls.init(
  "release",

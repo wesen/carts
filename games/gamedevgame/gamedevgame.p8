@@ -949,7 +949,6 @@ res_loc=resource_cls.init(
   tab_game
 )
 res_loc.active=true
-res_loc.count=9998
 
 res_func=resource_cls.init(
 "func",
@@ -993,9 +992,7 @@ res_contract_work=resource_cls.init(
  tab_game
 )
 res_contract_work.on_produced_cb=function(self)
- if glb_resource_manager.money<9999 then
-  glb_resource_manager.money+=10
- end
+ glb_resource_manager.money+=10
 end
 
 --
@@ -1128,7 +1125,6 @@ res_playtest=resource_cls.init(
  "game tested",
  tab_game
 )
--- res_build.created=true
 
 res_release=resource_cls.init(
  "release",
@@ -1295,8 +1291,15 @@ function cls_worker:on_tick()
   end
  end
 
+
  if #potential_resources>0 and maybe(0.2) then
-  res=rnd_elt(potential_resources)
+  local min_count=1000
+  for _,k in pairs(potential_resources) do
+   if k.count<min_count then
+    res=k
+    min_count=k.count
+   end
+  end
  end
 
  if (res==nil) return
@@ -1510,24 +1513,8 @@ glb_hire_workers={
 function _init()
  poke(0x5f2d,1)
  if glb_debug then
-  -- local coder=cls_coder.init(3)
-  -- coder.t=1
-  -- cls_coder.init(3)
-  -- cls_coder.init(3)
-  -- local gfx_artist=cls_gfx_artist.init(2)
-  -- gfx_artist=cls_gfx_artist.init(3)
-  -- gfx_artist=cls_gfx_artist.init(3)
-  -- gfx_artist=cls_gfx_artist.init(3)
-  -- gfx_artist=cls_gfx_artist.init(3)
-  -- local game_designer=cls_game_designer.init(2)
-  -- game_designer=cls_game_designer.init(2)
-  -- cls_tweeter.init(3)
-  -- cls_tweeter.init(3)
-  -- cls_youtuber.init(3)
-  -- cls_youtuber.init(3)
-  -- cls_twitcher.init(3)
-  -- cls_twitcher.init(3)
-  glb_resource_manager.money=0
+  res_loc.count=1000
+  glb_resource_manager.money=1000
  end
 end
 

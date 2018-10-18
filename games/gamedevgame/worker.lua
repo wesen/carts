@@ -89,8 +89,15 @@ function cls_worker:on_tick()
   end
  end
 
+
  if #potential_resources>0 and maybe(0.2) then
-  res=rnd_elt(potential_resources)
+  local min_count=1000
+  for _,k in pairs(potential_resources) do
+   if k.count<min_count then
+    res=k
+    min_count=k.count
+   end
+  end
  end
 
  if (res==nil) return

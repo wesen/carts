@@ -1,24 +1,8 @@
 function _init()
  poke(0x5f2d,1)
  if glb_debug then
-  -- local coder=cls_coder.init(3)
-  -- coder.t=1
-  -- cls_coder.init(3)
-  -- cls_coder.init(3)
-  -- local gfx_artist=cls_gfx_artist.init(2)
-  -- gfx_artist=cls_gfx_artist.init(3)
-  -- gfx_artist=cls_gfx_artist.init(3)
-  -- gfx_artist=cls_gfx_artist.init(3)
-  -- gfx_artist=cls_gfx_artist.init(3)
-  -- local game_designer=cls_game_designer.init(2)
-  -- game_designer=cls_game_designer.init(2)
-  -- cls_tweeter.init(3)
-  -- cls_tweeter.init(3)
-  -- cls_youtuber.init(3)
-  -- cls_youtuber.init(3)
-  -- cls_twitcher.init(3)
-  -- cls_twitcher.init(3)
-  glb_resource_manager.money=0
+  res_loc.count=1000
+  glb_resource_manager.money=1000
  end
 end
 
