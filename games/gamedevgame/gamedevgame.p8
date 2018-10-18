@@ -501,7 +501,7 @@ function cls_score_particle:draw()
 end
 
 function make_score_particle_explosion(s,n,x,y,c2,c1,spread_x,spread_y)
- spread_x=spread_x or 20
+ spread_x=spread_x or 10
  spread_y=spread_y or 8
  for i=1,n do
   local p=cls_score_particle.init(x+mrnd(spread_x),y+mrnd(spread_y),s,c2,c1)
@@ -1020,12 +1020,7 @@ res_contract_work=resource_cls.init(
 )
 res_contract_work.on_produced_cb=function(self)
  glb_resource_manager.money+=10
- for i=1,10 do
-  printh("created money particle")
-  local p=cls_score_particle.init(83+mrnd(20),20+mrnd(8),"$",11,3)
-  p.spd_y*=1
-  p.lifetime=2
- end
+ if (self:is_visible()) make_score_particle_explosion("$",5,83,20,11,3)
 end
 
 --

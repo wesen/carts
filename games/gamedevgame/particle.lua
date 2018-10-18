@@ -76,7 +76,7 @@ function cls_score_particle:draw()
 end
 
 function make_score_particle_explosion(s,n,x,y,c2,c1,spread_x,spread_y)
- spread_x=spread_x or 20
+ spread_x=spread_x or 10
  spread_y=spread_y or 8
  for i=1,n do
   local p=cls_score_particle.init(x+mrnd(spread_x),y+mrnd(spread_y),s,c2,c1)

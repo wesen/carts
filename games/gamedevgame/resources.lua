@@ -61,12 +61,7 @@ res_contract_work=resource_cls.init(
 )
 res_contract_work.on_produced_cb=function(self)
  glb_resource_manager.money+=10
- for i=1,10 do
-  printh("created money particle")
-  local p=cls_score_particle.init(83+mrnd(20),20+mrnd(8),"$",11,3)
-  p.spd_y*=1
-  p.lifetime=2
- end
+ if (self:is_visible()) make_score_particle_explosion("$",5,83,20,11,3)
 end
 
 --
