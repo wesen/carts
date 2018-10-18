@@ -18,7 +18,7 @@ function _init()
   -- cls_youtuber.init(3)
   -- cls_twitcher.init(3)
   -- cls_twitcher.init(3)
-  glb_resource_manager.money=20
+  glb_resource_manager.money=0
  end
 end
 

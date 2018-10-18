@@ -12,6 +12,7 @@ cls_tab=class(function(self, name)
  button.should_blink=function()
   return button:is_mouse_over() and not button.is_active()
  end
+ self.is_visible=function() return true end
 end)
 
 function cls_tab:draw()
@@ -41,8 +42,14 @@ function cls_money_tab:draw()
 end
 
 tab_game=cls_tab.init("office")
-tab_money=cls_money_tab.init("studio")
 tab_release=cls_tab.init("release")
+tab_release.is_visible=function()
+ return res_build.created
+end
+tab_money=cls_money_tab.init("studio")
+tab_money.is_visible=function()
+ return glb_resource_manager.money>0 or #glb_resource_manager.workers>0
+end
 
 glb_resource_manager.tabs={tab_game,tab_release,tab_money}
 glb_current_tab=tab_game

@@ -642,7 +642,6 @@ resource_manager_cls=class(function(self)
  self.workers={}
  self.resources={}
  self.tabs={}
- printh("tabs "..tostr(#self.tabs))
  self.money=0
 end)
 
@@ -651,12 +650,14 @@ function resource_manager_cls:draw()
  local y=3
 
  for i,k in pairs(self.tabs) do
-  local button=k.button
-  button.x=x
-  button.y=y
-  button:draw()
-  x+=button.w+5
-  if (glb_current_tab==k) k:draw()
+  if k.is_visible() then
+   local button=k.button
+   button.x=x
+   button.y=y
+   button:draw()
+   x+=button.w+5
+   if (glb_current_tab==k) k:draw()
+  end
  end
  for _,k in pairs(self.resources) do
   k:draw()
@@ -698,6 +699,7 @@ cls_tab=class(function(self, name)
  button.should_blink=function()
   return button:is_mouse_over() and not button.is_active()
  end
+ self.is_visible=function() return true end
 end)
 
 function cls_tab:draw()
@@ -727,8 +729,14 @@ function cls_money_tab:draw()
 end
 
 tab_game=cls_tab.init("office")
-tab_money=cls_money_tab.init("studio")
 tab_release=cls_tab.init("release")
+tab_release.is_visible=function()
+ return res_build.created
+end
+tab_money=cls_money_tab.init("studio")
+tab_money.is_visible=function()
+ return glb_resource_manager.money>0 or #glb_resource_manager.workers>0
+end
 
 glb_resource_manager.tabs={tab_game,tab_release,tab_money}
 glb_current_tab=tab_game
@@ -1115,7 +1123,7 @@ res_playtest=resource_cls.init(
  "game tested",
  tab_game
 )
-res_build.created=true
+-- res_build.created=true
 
 res_release=resource_cls.init(
  "release",
@@ -1206,7 +1214,6 @@ cls_worker=class(function(self,duration)
  self.cost=0
  self.hire_worker=nil
  self.no_salary_t=0
- add(glb_resource_manager.workers,self)
 end)
 
 function cls_worker:update()
@@ -1420,6 +1427,7 @@ function cls_hire_worker:hire()
  w.cost=self.salary
  w.hire_worker=self
  add(self.workers,w)
+ add(glb_resource_manager.workers,w)
  cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,
   "hired a "..self.name,0,7)
  w.spr=self.spr
@@ -1514,7 +1522,7 @@ function _init()
   -- cls_youtuber.init(3)
   -- cls_twitcher.init(3)
   -- cls_twitcher.init(3)
-  glb_resource_manager.money=20
+  glb_resource_manager.money=0
  end
 end
 

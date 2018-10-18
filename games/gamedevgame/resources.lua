@@ -193,7 +193,7 @@ res_playtest=resource_cls.init(
  "game tested",
  tab_game
 )
-res_build.created=true
+-- res_build.created=true
 
 res_release=resource_cls.init(
  "release",

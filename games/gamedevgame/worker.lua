@@ -13,7 +13,6 @@ cls_worker=class(function(self,duration)
  self.cost=0
  self.hire_worker=nil
  self.no_salary_t=0
- add(glb_resource_manager.workers,self)
 end)
 
 function cls_worker:update()

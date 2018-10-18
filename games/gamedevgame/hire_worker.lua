@@ -58,6 +58,7 @@ function cls_hire_worker:hire()
  w.cost=self.salary
  w.hire_worker=self
  add(self.workers,w)
+ add(glb_resource_manager.workers,w)
  cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,
   "hired a "..self.name,0,7)
  w.spr=self.spr
