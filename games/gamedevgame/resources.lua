@@ -17,6 +17,7 @@ res_loc=resource_cls.init(
   tab_game
 )
 res_loc.active=true
+res_loc.count=9998
 
 res_func=resource_cls.init(
 "func",

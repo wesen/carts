@@ -858,10 +858,12 @@ function resource_cls:get_cur_xy()
 end
 
 function resource_cls:on_produced()
+ if self.count<9999 then
   self.count+=1
-  self.created=true
-  if (self.on_produced_cb!=nil) self.on_produced_cb(self)
-  self:shake(2)
+ end
+ self.created=true
+ if (self.on_produced_cb!=nil) self.on_produced_cb(self)
+ self:shake(2)
 end
 
 function resource_cls:start_producing()
@@ -947,6 +949,7 @@ res_loc=resource_cls.init(
   tab_game
 )
 res_loc.active=true
+res_loc.count=9998
 
 res_func=resource_cls.init(
 "func",
@@ -990,7 +993,9 @@ res_contract_work=resource_cls.init(
  tab_game
 )
 res_contract_work.on_produced_cb=function(self)
- glb_resource_manager.money+=10
+ if glb_resource_manager.money<9999 then
+  glb_resource_manager.money+=10
+ end
 end
 
 --

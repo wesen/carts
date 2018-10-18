@@ -115,10 +115,12 @@ function resource_cls:get_cur_xy()
 end
 
 function resource_cls:on_produced()
+ if self.count<9999 then
   self.count+=1
-  self.created=true
-  if (self.on_produced_cb!=nil) self.on_produced_cb(self)
-  self:shake(2)
+ end
+ self.created=true
+ if (self.on_produced_cb!=nil) self.on_produced_cb(self)
+ self:shake(2)
 end
 
 function resource_cls:start_producing()
