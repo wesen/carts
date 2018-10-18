@@ -312,6 +312,9 @@ function angle2vec(angle)
  return cos(angle),sin(angle)
 end
 
+glb_draw_crs={}
+glb_crs={}
+
 function tick_crs(crs_)
  for cr in all(crs_) do
   if costatus(cr)!='dead' then
@@ -323,15 +326,9 @@ function tick_crs(crs_)
  end
 end
 
-function add_cr(f)
+function add_cr(f,crs_)
  local cr=cocreate(f)
- add(crs,cr)
- return cr
-end
-
-function add_draw_cr(f)
- local cr=cocreate(f)
- add(draw_crs,cr)
+ add(crs_,cr)
  return cr
 end
 
@@ -424,6 +421,7 @@ function draw_rounded_rect2(x,y,w,h,col_bg,col_border1,col_border2)
 end
 
 glb_particles={}
+glb_pwrup_particles={}
 
 cls_particle=class(function(self,pos,lifetime,sprs)
  self.x=pos.x+mrnd(1)
@@ -523,21 +521,55 @@ cls_pwrup_particle=class(function(self,x,y,a,cols)
  self.y=y+self.spd_y*5
  self.t=0
  self.lifetime=0.8
- add(glb_particles,self)
+ add(glb_pwrup_particles,self)
 end)
 
 function cls_pwrup_particle:update()
  self.t+=glb_dt
  self.y+=self.spd_y
  self.x+=self.spd_x
- self.spd_y*=0.9
- self.spd_x*=0.9
- if (self.t>self.lifetime) del(glb_particles,self)
+ self.spd_y*=0.81
+ self.spd_x*=0.81
+ if (self.t>self.lifetime) del(glb_pwrup_particles,self)
 end
 
 function cls_pwrup_particle:draw()
  local col=self.cols[flr(#self.cols*self.t/self.lifetime)+1]
- circ(self.x,self.y,(2-self.t/self.lifetime*2),col)
+ circfill(self.x,self.y,(2-self.t/self.lifetime*2),col)
+end
+
+pwrup_colors={
+ {8,2,1},
+ {7,6,5},
+ {9,8,7,2},
+ {6,6,5,1},
+ {12,13,2,1},
+ {9,8,2,1},
+ {11,3,6,1}
+}
+function make_pwrup_explosion(x,y,explode)
+ local radius=20
+ local off=mrnd(1)
+ local cols=rnd_elt(pwrup_colors)
+ local spd_mod=4+mrnd(0.5)
+ local inc=0.12+mrnd(0.03)
+
+ for i=0,1,inc do
+  local p=cls_pwrup_particle.init(x,y,i+off,cols)
+  p.spd_x*=spd_mod
+  p.spd_y*=spd_mod
+ end
+
+ if explode then
+  local radius=14
+  add_cr(function ()
+   for i=0,1 do
+    local r=outexpo(i,radius,-radius,20)
+    circfill(x,y,r,cols[1])
+    yield()
+   end
+  end, glb_draw_crs)
+ end
 end
 
 function inoutquint(t, b, c, d)
@@ -783,6 +815,7 @@ resource_cls=class(function(self,
  self.is_clickable_f=function(self) return true end
  self.tab=tab
  glb_resource_manager.resources[name]=self
+ self.last_explosion_time=0
 
  self.stat_t=0
  self.stat_produced=0
@@ -882,8 +915,16 @@ function resource_cls:on_produced()
   self.count+=1
  end
  self.created=true
+ if self:is_visible() then
+  local x,y
+  x,y=self:get_cur_xy()
+  local explode=(time()-self.last_explosion_time)>1
+  make_pwrup_explosion(x-self.shkx+8,y-self.shky+9,explode)
+  if (explode) self.last_explosion_time=time()
+ end
  if (self.on_produced_cb!=nil) self.on_produced_cb(self)
  self:shake(2)
+
 end
 
 function resource_cls:start_producing()
@@ -1612,6 +1653,11 @@ function _draw()
  set_mouse()
  glb_frame+=1
  cls(glb_bg_col)
+
+ for _,v in pairs(glb_pwrup_particles) do
+  v:draw()
+ end
+
  glb_resource_manager:draw()
  spr(1,glb_mouse_x,glb_mouse_y)
 
@@ -1620,6 +1666,8 @@ function _draw()
  end
 
  glb_dialogbox:draw()
+
+ tick_crs(glb_draw_crs)
 end
 
 function _update60()
@@ -1628,7 +1676,11 @@ function _update60()
 
  glb_lasttime=time()
  glb_resource_manager:update()
- tick_crs(crs)
+ tick_crs(glb_crs)
+
+ for _,v in pairs(glb_pwrup_particles) do
+  v:update()
+ end
 
  for _,v in pairs(glb_particles) do
   v:update()

@@ -1,3 +1,6 @@
+glb_draw_crs={}
+glb_crs={}
+
 function tick_crs(crs_)
  for cr in all(crs_) do
   if costatus(cr)!='dead' then
@@ -9,15 +12,9 @@ function tick_crs(crs_)
  end
 end
 
-function add_cr(f)
+function add_cr(f,crs_)
  local cr=cocreate(f)
- add(crs,cr)
- return cr
-end
-
-function add_draw_cr(f)
- local cr=cocreate(f)
- add(draw_crs,cr)
+ add(crs_,cr)
  return cr
 end
 

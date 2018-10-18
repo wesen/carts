@@ -50,6 +50,11 @@ function _draw()
  set_mouse()
  glb_frame+=1
  cls(glb_bg_col)
+
+ for _,v in pairs(glb_pwrup_particles) do
+  v:draw()
+ end
+
  glb_resource_manager:draw()
  spr(1,glb_mouse_x,glb_mouse_y)
 
@@ -58,6 +63,8 @@ function _draw()
  end
 
  glb_dialogbox:draw()
+
+ tick_crs(glb_draw_crs)
 end
 
 function _update60()
@@ -66,7 +73,11 @@ function _update60()
 
  glb_lasttime=time()
  glb_resource_manager:update()
- tick_crs(crs)
+ tick_crs(glb_crs)
+
+ for _,v in pairs(glb_pwrup_particles) do
+  v:update()
+ end
 
  for _,v in pairs(glb_particles) do
   v:update()

@@ -25,6 +25,7 @@ resource_cls=class(function(self,
  self.is_clickable_f=function(self) return true end
  self.tab=tab
  glb_resource_manager.resources[name]=self
+ self.last_explosion_time=0
 
  self.stat_t=0
  self.stat_produced=0
@@ -124,8 +125,16 @@ function resource_cls:on_produced()
   self.count+=1
  end
  self.created=true
+ if self:is_visible() then
+  local x,y
+  x,y=self:get_cur_xy()
+  local explode=(time()-self.last_explosion_time)>1
+  make_pwrup_explosion(x-self.shkx+8,y-self.shky+9,explode)
+  if (explode) self.last_explosion_time=time()
+ end
  if (self.on_produced_cb!=nil) self.on_produced_cb(self)
  self:shake(2)
+
 end
 
 function resource_cls:start_producing()

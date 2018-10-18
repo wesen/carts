@@ -1,4 +1,5 @@
 glb_particles={}
+glb_pwrup_particles={}
 
 cls_particle=class(function(self,pos,lifetime,sprs)
  self.x=pos.x+mrnd(1)
@@ -98,19 +99,53 @@ cls_pwrup_particle=class(function(self,x,y,a,cols)
  self.y=y+self.spd_y*5
  self.t=0
  self.lifetime=0.8
- add(glb_particles,self)
+ add(glb_pwrup_particles,self)
 end)
 
 function cls_pwrup_particle:update()
  self.t+=glb_dt
  self.y+=self.spd_y
  self.x+=self.spd_x
- self.spd_y*=0.9
- self.spd_x*=0.9
- if (self.t>self.lifetime) del(glb_particles,self)
+ self.spd_y*=0.81
+ self.spd_x*=0.81
+ if (self.t>self.lifetime) del(glb_pwrup_particles,self)
 end
 
 function cls_pwrup_particle:draw()
  local col=self.cols[flr(#self.cols*self.t/self.lifetime)+1]
- circ(self.x,self.y,(2-self.t/self.lifetime*2),col)
+ circfill(self.x,self.y,(2-self.t/self.lifetime*2),col)
+end
+
+pwrup_colors={
+ {8,2,1},
+ {7,6,5},
+ {9,8,7,2},
+ {6,6,5,1},
+ {12,13,2,1},
+ {9,8,2,1},
+ {11,3,6,1}
+}
+function make_pwrup_explosion(x,y,explode)
+ local radius=20
+ local off=mrnd(1)
+ local cols=rnd_elt(pwrup_colors)
+ local spd_mod=4+mrnd(0.5)
+ local inc=0.12+mrnd(0.03)
+
+ for i=0,1,inc do
+  local p=cls_pwrup_particle.init(x,y,i+off,cols)
+  p.spd_x*=spd_mod
+  p.spd_y*=spd_mod
+ end
+
+ if explode then
+  local radius=14
+  add_cr(function ()
+   for i=0,1 do
+    local r=outexpo(i,radius,-radius,20)
+    circfill(x,y,r,cols[1])
+    yield()
+   end
+  end, glb_draw_crs)
+ end
 end
