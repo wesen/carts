@@ -131,3 +131,9 @@ glb_hire_workers={
   twitcher_salary
  )
 }
+
+glb_hire_gamer=cls_hire_worker.init(
+ "gamer",cls_gamer,{},spr_gamer,0,
+ gamer_auto_resources,
+ 0
+)

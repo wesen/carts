@@ -64,7 +64,6 @@ res_contract_work.on_produced_cb=function(self)
 end
 
 --
-
 res_pixel=resource_cls.init("pixel",
  "pixels",
   0,1,
@@ -196,8 +195,6 @@ res_release=resource_cls.init(
  "game released",
  tab_game
 )
--- res_release.count=1
--- res_release.created=true
 
 -- release resources
 
@@ -256,3 +253,6 @@ res_gamer=resource_cls.init(
  "gamer recruited",
  tab_release
 )
+res_gamer.on_produced_cb=function(self)
+ glb_hire_gamer:hire()
+end

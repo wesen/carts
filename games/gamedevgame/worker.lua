@@ -169,9 +169,16 @@ cls_twitcher=subclass(cls_worker,function(self,duration)
 end)
 
 spr_gamer=80
+gamer_auto_resources={res_playtest}
 cls_gamer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.auto_resources={}
  self.spr=spr_gamer
  self.tab=tab_release
 end)
+
+function cls_gamer:on_tick()
+ cls_worker.on_tick(self)
+ local money=res_release.count*0.5
+ glb_resource_manager.money+=money
+end

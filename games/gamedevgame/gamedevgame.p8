@@ -997,7 +997,6 @@ res_contract_work.on_produced_cb=function(self)
 end
 
 --
-
 res_pixel=resource_cls.init("pixel",
  "pixels",
   0,1,
@@ -1129,8 +1128,6 @@ res_release=resource_cls.init(
  "game released",
  tab_game
 )
--- res_release.count=1
--- res_release.created=true
 
 -- release resources
 
@@ -1189,6 +1186,9 @@ res_gamer=resource_cls.init(
  "gamer recruited",
  tab_release
 )
+res_gamer.on_produced_cb=function(self)
+ glb_hire_gamer:hire()
+end
 
 cls_worker=class(function(self,duration)
  self.t=0
@@ -1361,12 +1361,19 @@ cls_twitcher=subclass(cls_worker,function(self,duration)
 end)
 
 spr_gamer=80
+gamer_auto_resources={res_playtest}
 cls_gamer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.auto_resources={}
  self.spr=spr_gamer
  self.tab=tab_release
 end)
+
+function cls_gamer:on_tick()
+ cls_worker.on_tick(self)
+ local money=res_release.count*0.5
+ glb_resource_manager.money+=money
+end
 
 cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost,auto_resources,salary)
  self.cls=cls
@@ -1502,6 +1509,12 @@ glb_hire_workers={
  )
 }
 
+glb_hire_gamer=cls_hire_worker.init(
+ "gamer",cls_gamer,{},spr_gamer,0,
+ gamer_auto_resources,
+ 0
+)
+
 
 function _init()
  poke(0x5f2d,1)
@@ -1509,12 +1522,18 @@ function _init()
   res_loc.count=1000
   glb_timescale=1
   glb_resource_manager.money=1000
-  res_level.count=5
+  res_level.count=20
   res_level.created=true
   res_build.created=true
   res_build.count=5
-  res_playtest.count=98
+  res_playtest.count=200
   res_playtest.created=true
+  res_youtube.created=true
+  res_twitch.created=true
+  res_tweet.created=true
+  res_youtube.count=5
+  res_twitch.count=5
+  res_tweet.count=5
  else
   glb_resource_manager.money=0
  end

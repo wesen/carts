@@ -4,12 +4,18 @@ function _init()
   res_loc.count=1000
   glb_timescale=1
   glb_resource_manager.money=1000
-  res_level.count=5
+  res_level.count=20
   res_level.created=true
   res_build.created=true
   res_build.count=5
-  res_playtest.count=98
+  res_playtest.count=200
   res_playtest.created=true
+  res_youtube.created=true
+  res_twitch.created=true
+  res_tweet.created=true
+  res_youtube.count=5
+  res_twitch.count=5
+  res_tweet.count=5
  else
   glb_resource_manager.money=0
  end
