@@ -2,6 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 glb_debug=true
+glb_timescale=1
 
 function class (init)
   local c = {}
@@ -764,6 +765,7 @@ resource_cls=class(function(self,
  self.spr=spr
  self.description=description
  self.creation_text=creation_text
+ self.is_clickable_f=function(self) return true end
  self.tab=tab
  glb_resource_manager.resources[name]=self
 
@@ -791,7 +793,7 @@ function resource_cls:draw()
  end
 
  if (not self:is_visible()) return
- if (not self:are_dependencies_fulfilled() and self.t==0) darken(10)
+ if ((not self.is_clickable_f()) or (not self:are_dependencies_fulfilled() and self.t==0)) darken(10)
  local x,y
  local w=glb_resource_w
  x,y=self:get_cur_xy()
@@ -911,7 +913,7 @@ function resource_cls:are_dependencies_fulfilled()
 end
 
 function resource_cls:is_clickable()
- return self.t==0 and self:are_dependencies_fulfilled()
+ return self.t==0 and self:are_dependencies_fulfilled() and self.is_clickable_f()
 end
 
 function resource_cls:on_click()
@@ -1110,6 +1112,9 @@ res_playtest=resource_cls.init(
  "game tested",
  tab_game
 )
+res_playtest.is_clickable_f=function(self)
+ return res_build.count>0
+end
 
 res_release=resource_cls.init(
  "release",
@@ -1504,6 +1509,14 @@ function _init()
   res_loc.count=1000
   glb_timescale=1
   glb_resource_manager.money=1000
+  res_level.count=5
+  res_level.created=true
+  res_build.created=true
+  res_build.count=5
+  res_playtest.count=98
+  res_playtest.created=true
+ else
+  glb_resource_manager.money=0
  end
 end
 

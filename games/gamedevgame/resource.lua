@@ -22,6 +22,7 @@ resource_cls=class(function(self,
  self.spr=spr
  self.description=description
  self.creation_text=creation_text
+ self.is_clickable_f=function(self) return true end
  self.tab=tab
  glb_resource_manager.resources[name]=self
 
@@ -49,7 +50,7 @@ function resource_cls:draw()
  end
 
  if (not self:is_visible()) return
- if (not self:are_dependencies_fulfilled() and self.t==0) darken(10)
+ if ((not self.is_clickable_f()) or (not self:are_dependencies_fulfilled() and self.t==0)) darken(10)
  local x,y
  local w=glb_resource_w
  x,y=self:get_cur_xy()
@@ -169,7 +170,7 @@ function resource_cls:are_dependencies_fulfilled()
 end
 
 function resource_cls:is_clickable()
- return self.t==0 and self:are_dependencies_fulfilled()
+ return self.t==0 and self:are_dependencies_fulfilled() and self.is_clickable_f()
 end
 
 function resource_cls:on_click()

@@ -179,6 +179,9 @@ res_playtest=resource_cls.init(
  "game tested",
  tab_game
 )
+res_playtest.is_clickable_f=function(self)
+ return res_build.count>0
+end
 
 res_release=resource_cls.init(
  "release",
