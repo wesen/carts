@@ -621,10 +621,10 @@ end)
 glb_dialogbox=cls_dialogbox.init()
 
 function cls_dialogbox:draw()
- local y=75
+ local y=62
  if (not self.visible) return
 
- if (glb_mouse_y>64) y=15
+ if (glb_mouse_y>60) y=15
  local h=14+(#self.text-1)*8
 
  draw_rounded_rect2(15,y+0,98,h,12,1,6)
@@ -1287,49 +1287,52 @@ function cls_worker:on_tick()
 end
 
 spr_coder=64
+coder_auto_resources={res_func,res_csharp_file,res_contract_work}
+coder_salary=0.05
 cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.default_resource=res_loc
- self.auto_resources={res_func,res_csharp_file,res_contract_work}
  self.tab=tab_game
- self.cost=0.05
 end)
 
 spr_gfx_artist=80
+gfx_artist_salary=0.05
+gfx_artist_auto_resources={res_tilemap,res_sprite,res_animation}
 cls_gfx_artist=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.default_resource=res_pixel
- self.auto_resources={res_tilemap,res_sprite,res_animation}
  self.tab=tab_game
- self.cost=0.05
 end)
 
 spr_game_designer=96
+game_designer_auto_resources={res_prop,res_character,res_level}
+game_designer_salary=0.1
 cls_game_designer=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.auto_resources={res_prop,res_character,res_level}
  self.tab=tab_game
- self.cost=0.1
 end)
 
 spr_tweeter=96
+tweeter_salary=0.1
+tweeter_auto_resources={res_tweet}
 cls_tweeter=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.auto_resources={res_tweet}
  self.tab=tab_release
 end)
 
 spr_youtuber=64
+youtuber_salary=0.1
+youtuber_auto_resources={res_youtube}
 cls_youtuber=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.auto_resources={res_youtube}
  self.tab=tab_release
 end)
 
 spr_twitcher=80
+twitcher_salary=0.2
+twitcher_auto_resources={res_twitch}
 cls_twitcher=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
- self.auto_resources={res_twitch}
  self.tab=tab_release
 end)
 
@@ -1341,13 +1344,15 @@ cls_gamer=subclass(cls_worker,function(self,duration)
  self.tab=tab_release
 end)
 
-cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost)
+cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost,auto_resources,salary)
  self.cls=cls
  self.name=name
  self.workers={}
  self.dependencies=dependencies
  self.spr=spr
  self.cost=cost
+ self.salary=salary
+ self.auto_resources=auto_resources
 
  self.button=cls_button.init(0,0,self.name)
  local button=self.button
@@ -1359,6 +1364,10 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost)
  button.is_visible=function() return true end
  button.on_hover=function()
   tab_money.current_hire_worker=self
+  if button.is_active() then
+   glb_dialogbox.visible=true
+   glb_dialogbox.text=self:get_display_text()
+  end
  end
  button.on_click=function()
   if (self:is_hireable()) self:hire()
@@ -1380,11 +1389,17 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost)
  dismiss_button.on_click=function()
   self:dismiss()
  end
+ dismiss_button.on_hover=function()
+  glb_dialogbox.visible=true
+  glb_dialogbox.text={{7,"dismiss "..self.name}}
+ end
 end)
 
 function cls_hire_worker:hire()
  local w=self.cls.init(2+rnd(2))
  glb_resource_manager.money-=self.cost
+ w.auto_resources=self.auto_resources
+ w.cost=self.salary
  add(self.workers,w)
  w.spr=self.spr
 end
@@ -1406,13 +1421,52 @@ function cls_hire_worker:dismiss()
  end
 end
 
+function cls_hire_worker:get_display_text()
+ local result={
+  {7,"hire a "..self.name},
+  {7,"cost: $"..tostr(self.cost)},
+  {7,"salary: $"..tostr(self.salary)},
+  {7,"produces:"}
+ }
+
+ for _,resource in pairs(self.auto_resources) do
+  add(result,{7,"- "..resource.full_name})
+ end
+
+ return result
+end
+
 glb_hire_workers={
- cls_hire_worker.init("coder",cls_coder,{},spr_coder,5),
- cls_hire_worker.init("artist",cls_gfx_artist,{},spr_gfx_artist,20),
- cls_hire_worker.init("game designer",cls_game_designer,{},spr_game_designer,20),
- cls_hire_worker.init("tweeter",cls_tweeter,{release=0},spr_tweeter,10),
- cls_hire_worker.init("youtuber",cls_youtuber,{release=0},spr_youtuber,10),
- cls_hire_worker.init("twitcher",cls_twitcher,{release=0},spr_twitcher,10)
+ cls_hire_worker.init(
+  "coder",cls_coder,{},spr_coder,5,
+  coder_auto_resources,
+  coder_salary
+ ),
+  cls_hire_worker.init(
+  "artist",cls_gfx_artist,{},spr_gfx_artist,20,
+  gfx_artist_auto_resources,
+  gfx_artist_salary
+ ),
+ cls_hire_worker.init(
+  "game designer",cls_game_designer,{},spr_game_designer,20,
+  game_designer_auto_resources,
+  game_designer_salary
+ ),
+ cls_hire_worker.init(
+  "tweeter",cls_tweeter,{build=0},spr_tweeter,10,
+  tweeter_auto_resources,
+  tweeter_salary
+ ),
+ cls_hire_worker.init(
+  "youtuber",cls_youtuber,{build=0},spr_youtuber,10,
+  youtuber_auto_resources,
+  youtuber_salary
+ ),
+ cls_hire_worker.init(
+  "twitcher",cls_twitcher,{build=0},spr_twitcher,10,
+  twitcher_auto_resources,
+  twitcher_salary
+ )
 }
 
 

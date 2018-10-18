@@ -6,10 +6,10 @@ end)
 glb_dialogbox=cls_dialogbox.init()
 
 function cls_dialogbox:draw()
- local y=75
+ local y=62
  if (not self.visible) return
 
- if (glb_mouse_y>64) y=15
+ if (glb_mouse_y>60) y=15
  local h=14+(#self.text-1)*8
 
  draw_rounded_rect2(15,y+0,98,h,12,1,6)
