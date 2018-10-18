@@ -12,17 +12,32 @@ cls_worker=class(function(self,duration)
  self.tab=nil
  self.cost=0
  self.hire_worker=nil
+ self.no_salary_t=0
  add(glb_resource_manager.workers,self)
 end)
 
 function cls_worker:update()
  self.t+=glb_dt
+ if (self.no_salary_t>0) self.no_salary_t+=glb_dt
  if self.t>self.duration then
   self.duration=self.orig_duration
   self.t=0
-  self:on_tick()
-  glb_resource_manager.money-=self.cost
-  if glb_resource_manager.money<0 and maybe(0.06) then
+  if glb_resource_manager.money>=self.cost then
+   self:on_tick()
+   self.no_salary_t=0
+   glb_resource_manager.money-=self.cost
+  else
+   if (self.no_salary_t==0) self.no_salary_t=glb_dt
+
+   printh("no salary "..tostr(self.no_salary_t))
+   if self.no_salary_t>10 and maybe(0.1) then
+    self.hire_worker:dismiss(self)
+    self:show_text("i quit!!",8,7)
+    cls_score_particle.init(mid(24+5,5,80),64+8,
+     "a "..self.hire_worker.name.." left",0,7)
+   else
+    self:show_text("$$$!",8,7)
+   end
   end
  end
 
@@ -86,8 +101,12 @@ function cls_worker:on_tick()
  self.duration=max(self.orig_duration,res.duration)
  if self:is_visible() then
   local text=rnd_elt({"wow","ok","!!!","yeah","boom","kaching","lol","haha"})
-  cls_score_particle.init(self.x-(#text/2),115,text,0,7)
+  self:show_text(text,0,7)
  end
+end
+
+function cls_worker:show_text(text,fg,bg)
+  cls_score_particle.init(self.x-(#text/2),115,text,fg,bg)
 end
 
 spr_coder=64
@@ -97,6 +116,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.default_resource=res_loc
  self.tab=tab_game
+ self.duration/=2
 end)
 
 spr_gfx_artist=80

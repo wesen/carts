@@ -41,6 +41,8 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost,auto_resource
  dismiss_button.is_active=dismiss_button.is_visible
  dismiss_button.should_blink=function() return dismiss_button:is_mouse_over() end
  dismiss_button.on_click=function()
+  cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,
+   "dismissed a "..self.name,0,7)
   self:dismiss()
  end
  dismiss_button.on_hover=function()
@@ -54,7 +56,10 @@ function cls_hire_worker:hire()
  glb_resource_manager.money-=self.cost
  w.auto_resources=self.auto_resources
  w.cost=self.salary
+ w.hire_worker=self
  add(self.workers,w)
+ cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,
+  "hired a "..self.name,0,7)
  w.spr=self.spr
 end
 
@@ -67,9 +72,12 @@ function cls_hire_worker:is_hireable()
  return true
 end
 
-function cls_hire_worker:dismiss()
- if #self.workers>0 then
-  local worker=self.workers[1]
+function cls_hire_worker:dismiss(worker)
+ if #self.workers>0 and worker==nil then
+  worker=self.workers[1]
+ end
+
+ if worker!=nil then
   del(self.workers,worker)
   del(glb_resource_manager.workers,worker)
  end
@@ -97,12 +105,12 @@ glb_hire_workers={
   coder_salary
  ),
   cls_hire_worker.init(
-  "artist",cls_gfx_artist,{},spr_gfx_artist,20,
+  "artist",cls_gfx_artist,{},spr_gfx_artist,10,
   gfx_artist_auto_resources,
   gfx_artist_salary
  ),
  cls_hire_worker.init(
-  "game designer",cls_game_designer,{},spr_game_designer,20,
+  "game designer",cls_game_designer,{},spr_game_designer,10,
   game_designer_auto_resources,
   game_designer_salary
  ),

@@ -140,9 +140,6 @@ function resource_cls:update()
   if self.t>(self.duration/glb_timescale) then
    self:on_produced()
    self.t=0
-   local x,y
-   x=64
-   y=64
    cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,self.creation_text,0,7)
   end
  end

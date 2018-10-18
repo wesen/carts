@@ -875,9 +875,6 @@ function resource_cls:update()
   if self.t>(self.duration/glb_timescale) then
    self:on_produced()
    self.t=0
-   local x,y
-   x=64
-   y=64
    cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,self.creation_text,0,7)
   end
  end
@@ -1214,6 +1211,7 @@ end)
 
 function cls_worker:update()
  self.t+=glb_dt
+ if (self.no_salary_t>0) self.no_salary_t+=glb_dt
  if self.t>self.duration then
   self.duration=self.orig_duration
   self.t=0
@@ -1222,9 +1220,16 @@ function cls_worker:update()
    self.no_salary_t=0
    glb_resource_manager.money-=self.cost
   else
-   self.no_salary_t+=glb_dt
-   if self.no_salary_t>10 and maybe(0.06) then
+   if (self.no_salary_t==0) self.no_salary_t=glb_dt
+
+   printh("no salary "..tostr(self.no_salary_t))
+   if self.no_salary_t>10 and maybe(0.1) then
     self.hire_worker:dismiss(self)
+    self:show_text("i quit!!",8,7)
+    cls_score_particle.init(mid(24+5,5,80),64+8,
+     "a "..self.hire_worker.name.." left",0,7)
+   else
+    self:show_text("$$$!",8,7)
    end
   end
  end
@@ -1289,8 +1294,12 @@ function cls_worker:on_tick()
  self.duration=max(self.orig_duration,res.duration)
  if self:is_visible() then
   local text=rnd_elt({"wow","ok","!!!","yeah","boom","kaching","lol","haha"})
-  cls_score_particle.init(self.x-(#text/2),115,text,0,7)
+  self:show_text(text,0,7)
  end
+end
+
+function cls_worker:show_text(text,fg,bg)
+  cls_score_particle.init(self.x-(#text/2),115,text,fg,bg)
 end
 
 spr_coder=64
@@ -1300,6 +1309,7 @@ cls_coder=subclass(cls_worker,function(self,duration)
  cls_worker._ctr(self,duration)
  self.default_resource=res_loc
  self.tab=tab_game
+ self.duration/=2
 end)
 
 spr_gfx_artist=80
@@ -1394,6 +1404,8 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost,auto_resource
  dismiss_button.is_active=dismiss_button.is_visible
  dismiss_button.should_blink=function() return dismiss_button:is_mouse_over() end
  dismiss_button.on_click=function()
+  cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,
+   "dismissed a "..self.name,0,7)
   self:dismiss()
  end
  dismiss_button.on_hover=function()
@@ -1409,6 +1421,8 @@ function cls_hire_worker:hire()
  w.cost=self.salary
  w.hire_worker=self
  add(self.workers,w)
+ cls_score_particle.init(mid(glb_mouse_x+5,5,80),glb_mouse_y+8,
+  "hired a "..self.name,0,7)
  w.spr=self.spr
 end
 
@@ -1454,12 +1468,12 @@ glb_hire_workers={
   coder_salary
  ),
   cls_hire_worker.init(
-  "artist",cls_gfx_artist,{},spr_gfx_artist,20,
+  "artist",cls_gfx_artist,{},spr_gfx_artist,10,
   gfx_artist_auto_resources,
   gfx_artist_salary
  ),
  cls_hire_worker.init(
-  "game designer",cls_game_designer,{},spr_game_designer,20,
+  "game designer",cls_game_designer,{},spr_game_designer,10,
   game_designer_auto_resources,
   game_designer_salary
  ),
