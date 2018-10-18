@@ -5,6 +5,20 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost)
  self.dependencies=dependencies
  self.spr=spr
  self.cost=cost
+
+ self.button=cls_button.init(0,0,self.name)
+ local button=self.button
+ button.blink_on_hover=true
+ button.w=82
+ button.h=5
+
+ button.is_visible=function() return self:is_hireable() end
+ button.on_hover=function()
+  tab_money.current_hire_worker=self
+ end
+ button.on_click=function()
+  if (self:is_hireable()) self:hire()
+ end
 end)
 
 function cls_hire_worker:hire()
@@ -14,7 +28,7 @@ function cls_hire_worker:hire()
  w.spr=self.spr
 end
 
-function cls_hire_worker:is_visible()
+function cls_hire_worker:is_hireable()
  if (glb_resource_manager.money<self.cost) return false
  for k,v in pairs(self.dependencies) do
   local res=glb_resource_manager.resources[k]

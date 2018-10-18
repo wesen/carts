@@ -7,6 +7,7 @@ cls_button=class(function(self,x,y,text)
  self.is_visible=function() return false end
  self.on_click=function() end
  self.on_hover=function() end
+ self.blink_on_hover=fakse
 end)
 
 function cls_button:is_mouse_over()
@@ -23,22 +24,24 @@ function cls_button:draw()
  local y=self.y
  local w=self.w
  local h=self.h
+ local bg=self.is_visible() and glb_bg_col2 or 13
+ local fg=self.is_visible() and 7 or 6
 
- if self.is_visible() then
-  draw_rounded_rect2(x,y,w,h,glb_bg_col2,glb_bg_col2,7)
-  print(self.text,x+1,y,7)
+ if self:is_visible() and not self.blink_on_hover then
+  draw_rounded_rect2(x,y,w,h,bg,bg,7)
  elseif self:is_mouse_over() then
   if frame(12,2)==0 then
-   draw_rounded_rect2(x-1,y-1,w+2,h+2,13,13,7)
+   draw_rounded_rect2(x-1,y-1,w+2,h+2,bg,bg,7)
   else
-   draw_rounded_rect2(x,y,w,h,13,13,7)
+   draw_rounded_rect2(x,y,w,h,bg,bg,7)
   end
-  self.on_hover()
-  print(self.text,x+1,y,7)
-
-  if (glb_mouse_left_down) self.on_click()
  else
-  draw_rounded_rect2(x,y,w,h,13,13,5)
-  print(self.text,x+1,y,6)
+  draw_rounded_rect2(x,y,w,h,bg,bg,5)
  end
+
+ if self:is_mouse_over() then
+  self.on_hover()
+  if (glb_mouse_left_down) self.on_click()
+ end
+ print(self.text,x+1,y,fg)
 end

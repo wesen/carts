@@ -23,32 +23,12 @@ function cls_money_tab:draw()
  self.current_hire_worker=nil
 
  for i,k in pairs(glb_hire_workers) do
-  local w=82
-  local h=12
-  local is_mouse_over=glb_mouse_x>=x and glb_mouse_x<=x+w and glb_mouse_y>=y and glb_mouse_y<=y+h
   bstr(tostr(#k.workers).."x",x-23,y-1,7,0)
   spr(k.spr,x-12,y-2)
-  if k:is_visible() then
-   if is_mouse_over then
-    self.current_hire_worker=k
-    if frame(12,2)==0 then
-     draw_rounded_rect2(x-1,y-1,w+2,5+2,13,13,7)
-    else
-     draw_rounded_rect2(x,y,w,5,13,13,7)
-    end
-    glb_dialogbox.visible=true
-    glb_dialogbox.text={{7,"hire a "..k.name}}
-    print(k.name,x+1,y,7)
-    if (glb_mouse_left_down) k:hire()
-   else
-    draw_rounded_rect2(x,y,w,5,glb_bg_col2,glb_bg_col2,7)
-    print(k.name,x+1,y,7)
-   end
-  else
-    draw_rounded_rect2(x,y,w,5,13,13,5)
-    print(k.name,x+1,y,6)
-  end
-  y+=h
+  k.button.y=y
+  k.button.x=x
+  k.button:draw()
+  y+=k.button.h+7
  end
 end
 

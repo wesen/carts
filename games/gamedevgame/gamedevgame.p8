@@ -573,6 +573,7 @@ cls_button=class(function(self,x,y,text)
  self.is_visible=function() return false end
  self.on_click=function() end
  self.on_hover=function() end
+ self.blink_on_hover=fakse
 end)
 
 function cls_button:is_mouse_over()
@@ -589,24 +590,26 @@ function cls_button:draw()
  local y=self.y
  local w=self.w
  local h=self.h
+ local bg=self.is_visible() and glb_bg_col2 or 13
+ local fg=self.is_visible() and 7 or 6
 
- if self.is_visible() then
-  draw_rounded_rect2(x,y,w,h,glb_bg_col2,glb_bg_col2,7)
-  print(self.text,x+1,y,7)
+ if self:is_visible() and not self.blink_on_hover then
+  draw_rounded_rect2(x,y,w,h,bg,bg,7)
  elseif self:is_mouse_over() then
   if frame(12,2)==0 then
-   draw_rounded_rect2(x-1,y-1,w+2,h+2,13,13,7)
+   draw_rounded_rect2(x-1,y-1,w+2,h+2,bg,bg,7)
   else
-   draw_rounded_rect2(x,y,w,h,13,13,7)
+   draw_rounded_rect2(x,y,w,h,bg,bg,7)
   end
-  self.on_hover()
-  print(self.text,x+1,y,7)
-
-  if (glb_mouse_left_down) self.on_click()
  else
-  draw_rounded_rect2(x,y,w,h,13,13,5)
-  print(self.text,x+1,y,6)
+  draw_rounded_rect2(x,y,w,h,bg,bg,5)
  end
+
+ if self:is_mouse_over() then
+  self.on_hover()
+  if (glb_mouse_left_down) self.on_click()
+ end
+ print(self.text,x+1,y,fg)
 end
 
 cls_dialogbox=class(function(self)
@@ -665,16 +668,16 @@ end
 
 function resource_manager_cls:update()
  if glb_mouse_left_down then
-  for _,k in pairs(self.resources) do
-   if (k:is_mouse_over() and k:is_visible()) k:on_click()
+  for _,resource in pairs(self.resources) do
+   if (resource:is_mouse_over() and resource:is_visible()) resource:on_click()
   end
  end
 
- for _,k in pairs(self.resources) do
-  k:update()
+ for _,resource in pairs(self.resources) do
+  resource:update()
  end
- for _,k in pairs(self.workers) do
-  k:update()
+ for _,worker in pairs(self.workers) do
+  worker:update()
  end
 end
 
@@ -705,32 +708,12 @@ function cls_money_tab:draw()
  self.current_hire_worker=nil
 
  for i,k in pairs(glb_hire_workers) do
-  local w=82
-  local h=12
-  local is_mouse_over=glb_mouse_x>=x and glb_mouse_x<=x+w and glb_mouse_y>=y and glb_mouse_y<=y+h
   bstr(tostr(#k.workers).."x",x-23,y-1,7,0)
   spr(k.spr,x-12,y-2)
-  if k:is_visible() then
-   if is_mouse_over then
-    self.current_hire_worker=k
-    if frame(12,2)==0 then
-     draw_rounded_rect2(x-1,y-1,w+2,5+2,13,13,7)
-    else
-     draw_rounded_rect2(x,y,w,5,13,13,7)
-    end
-    glb_dialogbox.visible=true
-    glb_dialogbox.text={{7,"hire a "..k.name}}
-    print(k.name,x+1,y,7)
-    if (glb_mouse_left_down) k:hire()
-   else
-    draw_rounded_rect2(x,y,w,5,glb_bg_col2,glb_bg_col2,7)
-    print(k.name,x+1,y,7)
-   end
-  else
-    draw_rounded_rect2(x,y,w,5,13,13,5)
-    print(k.name,x+1,y,6)
-  end
-  y+=h
+  k.button.y=y
+  k.button.x=x
+  k.button:draw()
+  y+=k.button.h+7
  end
 end
 
@@ -861,6 +844,7 @@ function resource_cls:on_produced()
   self.count+=1
   self.created=true
   if (self.on_produced_cb!=nil) self.on_produced_cb(self)
+  self:shake(2)
 end
 
 function resource_cls:start_producing()
@@ -869,7 +853,6 @@ function resource_cls:start_producing()
    res.count-=v
   end
   if (self.on_produce_cb) self.on_produce_cb(self)
-  self:shake(2)
 end
 
 function resource_cls:produce()
@@ -1355,6 +1338,20 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost)
  self.dependencies=dependencies
  self.spr=spr
  self.cost=cost
+
+ self.button=cls_button.init(0,0,self.name)
+ local button=self.button
+ button.blink_on_hover=true
+ button.w=82
+ button.h=5
+
+ button.is_visible=function() return self:is_hireable() end
+ button.on_hover=function()
+  tab_money.current_hire_worker=self
+ end
+ button.on_click=function()
+  if (self:is_hireable()) self:hire()
+ end
 end)
 
 function cls_hire_worker:hire()
@@ -1364,7 +1361,7 @@ function cls_hire_worker:hire()
  w.spr=self.spr
 end
 
-function cls_hire_worker:is_visible()
+function cls_hire_worker:is_hireable()
  if (glb_resource_manager.money<self.cost) return false
  for k,v in pairs(self.dependencies) do
   local res=glb_resource_manager.resources[k]

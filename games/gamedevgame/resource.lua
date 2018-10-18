@@ -118,6 +118,7 @@ function resource_cls:on_produced()
   self.count+=1
   self.created=true
   if (self.on_produced_cb!=nil) self.on_produced_cb(self)
+  self:shake(2)
 end
 
 function resource_cls:start_producing()
@@ -126,7 +127,6 @@ function resource_cls:start_producing()
    res.count-=v
   end
   if (self.on_produce_cb) self.on_produce_cb(self)
-  self:shake(2)
 end
 
 function resource_cls:produce()

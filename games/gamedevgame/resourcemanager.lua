@@ -29,16 +29,16 @@ end
 
 function resource_manager_cls:update()
  if glb_mouse_left_down then
-  for _,k in pairs(self.resources) do
-   if (k:is_mouse_over() and k:is_visible()) k:on_click()
+  for _,resource in pairs(self.resources) do
+   if (resource:is_mouse_over() and resource:is_visible()) resource:on_click()
   end
  end
 
- for _,k in pairs(self.resources) do
-  k:update()
+ for _,resource in pairs(self.resources) do
+  resource:update()
  end
- for _,k in pairs(self.workers) do
-  k:update()
+ for _,worker in pairs(self.workers) do
+  worker:update()
  end
 end
 
