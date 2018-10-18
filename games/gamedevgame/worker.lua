@@ -27,7 +27,6 @@ function cls_worker:update()
   self.t=0
   if glb_resource_manager.money>=self.cost or self.hire_worker.name=="coder" then
    self:on_tick()
-   self.spd_y=-1.5+mrnd(0.75)
    self.no_salary_t=0
    glb_resource_manager.money-=self.cost
   else
@@ -119,6 +118,8 @@ function cls_worker:on_tick()
  if (res==nil) return
 
  res:produce()
+ self.spd_y=-1.5+mrnd(0.75)
+ 
  self.duration=max(self.orig_duration,res.duration)
  if self:is_visible() then
   local text=rnd_elt({"wow","ok","!!!","yeah","boom","kaching","lol","haha"})
