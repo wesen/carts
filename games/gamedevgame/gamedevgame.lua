@@ -13,6 +13,7 @@ glb_timescale=1
 --#include tween
 --#include button
 --#include dialogbox
+--#include mouse
 
 --#include resourcemanager
 --#include tab

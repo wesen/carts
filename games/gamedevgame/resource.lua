@@ -29,6 +29,7 @@ resource_cls=class(function(self,
 
  self.stat_t=0
  self.stat_produced=0
+ self.offset=0
 
  if glb_debug then
   -- self.created=true
@@ -70,7 +71,7 @@ function resource_cls:draw()
   draw_rounded_rect1(x,y,w,w,glb_bg_col2)
  end
 
- spr(self.spr+frame(12,3)*2,x,y,2,2)
+ spr(self.spr+((frame(12,3)+self.offset)%3)*2,x,y,2,2)
  -- sspr(sx*8,sy*8,8,8,x,y,16,16)
 
  if self.t>0 then

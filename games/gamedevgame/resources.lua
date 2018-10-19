@@ -25,7 +25,7 @@ res_func=resource_cls.init(
  {loc=5},
  0.5,
   -- spr
-  4,
+  106,
   -- description
   "write a c# function!",
   "c# function written",
@@ -53,7 +53,7 @@ res_contract_work=resource_cls.init(
  {csharp_file=2},
  2,
  -- spr
- 4,
+ 132,
  -- description
  "do client work (+$10)",
  "",
@@ -84,7 +84,7 @@ res_sprite=resource_cls.init("sprite",
   {pixel=8},
   0.8,
   -- spr
-  74 ,
+  202,
   -- description
   "draw a sprite!",
   "sprite drawn",
@@ -108,7 +108,7 @@ res_prop=resource_cls.init("prop",
  {animation=1,csharp_file=1},
  2,
  -- spr
- 36,
+ 138,
  "make a prop!",
  "prop created",
  tab_game
@@ -125,6 +125,7 @@ res_character=resource_cls.init("character",
  "character created",
  tab_game
 )
+res_character.offset=1
 
 res_tilemap=resource_cls.init("tilemap",
  "tilemaps",
@@ -146,7 +147,7 @@ res_level=resource_cls.init("level",
  {tilemap=1,prop=5,character=2,csharp_file=1},
  5,
  -- spr
- 36,
+ 164,
  "make a level!",
  "level created",
  tab_game
@@ -159,7 +160,7 @@ res_build=resource_cls.init(
  {level=5},
  2,
  -- spr
- 42,
+ 4,
  -- description
  "make a beta build",
  "game built",
@@ -179,6 +180,7 @@ res_playtest=resource_cls.init(
  "game tested",
  tab_game
 )
+res_playtest.offset=1
 res_playtest.is_clickable_f=function(self)
  return res_build.count>0
 end

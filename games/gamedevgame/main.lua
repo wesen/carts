@@ -56,6 +56,7 @@ function _draw()
  end
 
  glb_resource_manager:draw()
+ glb_mouse:draw()
  spr(1,glb_mouse_x,glb_mouse_y)
 
  for _,v in pairs(glb_particles) do
