@@ -10,7 +10,7 @@ res_loc=resource_cls.init(
   -- duration
   0.3,
   -- spr
-  16,
+  4,
   -- description
   "write a line of code!",
   "line of code written",
@@ -25,7 +25,7 @@ res_func=resource_cls.init(
  {loc=5},
  0.5,
   -- spr
-  16,
+  4,
   -- description
   "write a c# function!",
   "c# function written",
@@ -39,7 +39,7 @@ res_csharp_file=resource_cls.init(
  {func=5},
  1,
  -- spr
- 16,
+ 4,
  -- description
  "write a c# file!",
  "c# file written",
@@ -53,7 +53,7 @@ res_contract_work=resource_cls.init(
  {csharp_file=2},
  2,
  -- spr
- 16,
+ 4,
  -- description
  "do client work (+$10)",
  "",
@@ -71,7 +71,7 @@ res_pixel=resource_cls.init("pixel",
   {},
   0.3,
   -- spr
-  48,
+  36,
   -- description
   "draw a pixel!",
   "pixel drawn",
@@ -84,7 +84,7 @@ res_sprite=resource_cls.init("sprite",
   {pixel=8},
   0.8,
   -- spr
-  48,
+  74 ,
   -- description
   "draw a sprite!",
   "sprite drawn",
@@ -96,7 +96,7 @@ res_animation=resource_cls.init("animation",
  2,1,
  {sprite=4},
  1,
- 48,
+ 74,
  "make an animation",
  "animation created",
  tab_game
@@ -108,7 +108,7 @@ res_prop=resource_cls.init("prop",
  {animation=1,csharp_file=1},
  2,
  -- spr
- 16,
+ 36,
  "make a prop!",
  "prop created",
  tab_game
@@ -120,7 +120,7 @@ res_character=resource_cls.init("character",
  {animation=2,csharp_file=1},
  6,
  -- spr
- 16,
+ 74,
  "make a character!",
  "character created",
  tab_game
@@ -132,7 +132,7 @@ res_tilemap=resource_cls.init("tilemap",
  {sprite=4},
  2,
  -- spr
- 16,
+ 36,
  "make a tilemap!",
  "tilemap created",
  tab_game
@@ -146,7 +146,7 @@ res_level=resource_cls.init("level",
  {tilemap=1,prop=5,character=2,csharp_file=1},
  5,
  -- spr
- 16,
+ 36,
  "make a level!",
  "level created",
  tab_game
@@ -159,7 +159,7 @@ res_build=resource_cls.init(
  {level=5},
  2,
  -- spr
- 16,
+ 42,
  -- description
  "make a beta build",
  "game built",
@@ -173,7 +173,7 @@ res_playtest=resource_cls.init(
  {build=0},
  .5,
  -- spr
- 16,
+ 42,
  -- description
  "playtest the beta build",
  "game tested",
@@ -190,7 +190,7 @@ res_release=resource_cls.init(
  {build=5,playtest=100},
  10,
  -- spr
- 16,
+ 42,
  -- description
  "make a release",
  "game released",
@@ -206,7 +206,7 @@ res_tweet=resource_cls.init(
  {build=0},
  0.5,
  -- spr
- 16,
+ 100,
  -- description
  "write a tweet",
  "tweet written",
@@ -220,7 +220,7 @@ res_youtube=resource_cls.init(
  {build=0},
  3,
  -- spr
- 16,
+ 68,
  -- description
  "produce a youtube video",
  "youtube video recorded",
@@ -234,7 +234,7 @@ res_twitch=resource_cls.init(
  {build=0},
  3,
  -- spr
- 16,
+ 10,
  -- description
  "produce a twitch stream",
  "twitch stream recorded",
@@ -248,7 +248,7 @@ res_gamer=resource_cls.init(
  {tweet=5,youtube=5,twitch=5,build=0},
  3,
  -- spr
- 80,
+ 74,
  -- description
  "recruit a gamer",
  "gamer recruited",

@@ -59,7 +59,7 @@ function resource_cls:draw()
  local w=glb_resource_w
  x,y=self:get_cur_xy()
  palt(0,false)
- palt(11,true)
+ palt(15,true)
  if self:is_mouse_over() then
   if frame(12,2)==0 then
    draw_rounded_rect2(x-1,y-1,w+2,w+2,glb_bg_col2,glb_bg_col2,7)
@@ -70,10 +70,9 @@ function resource_cls:draw()
   draw_rounded_rect1(x,y,w,w,glb_bg_col2)
  end
 
- local spage=flr(self.spr/64)
- local sy=flr(self.spr/16)
- local sx=self.spr%16
- sspr(sx*8,sy*8,8,8,x,y,16,16)
+ spr(self.spr+frame(12,3)*2,x,y,2,2)
+ -- sspr(sx*8,sy*8,8,8,x,y,16,16)
+
  if self.t>0 then
   rectfill(x,y+w,x+self.t/self.duration*w,y+w+1,11)
  end
