@@ -42,7 +42,7 @@ function cls_dialogbox:draw()
   x+=w/2-actual_w/2
 
   draw_rounded_rect2(x,y+0,actual_w,actual_h,12,1,6)
-  if (self.buildup==n) self:shake(5)
+  if (self.buildup==n) self:shake(3)
  else
   y+=self.shky
 

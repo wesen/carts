@@ -1,4 +1,4 @@
-glb_debug=true
+glb_debug=false
 glb_timescale=1
 
 --#include oo
@@ -14,6 +14,7 @@ glb_timescale=1
 --#include button
 --#include dialogbox
 --#include mouse
+--#include title
 
 --#include resourcemanager
 --#include tab

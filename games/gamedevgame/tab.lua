@@ -62,7 +62,6 @@ function transition_tab(tab)
   local w=8
   local w2=w*2
   for i=1,w,w/16 do
-   yield()
    i=inoutexpo(i,0,w+1,w)
    for j=0,i do
     palt(0,false)
@@ -74,9 +73,11 @@ function transition_tab(tab)
     end
    end
    palt()
-  end
-   cls(7)
    yield()
+  end
+  cls(7)
+  yield()
+  glb_mode=1
   glb_current_tab=tab
 
  end,glb_draw_crs)

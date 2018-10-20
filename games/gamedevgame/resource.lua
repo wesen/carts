@@ -156,7 +156,7 @@ function resource_cls:update()
   if self.t>(self.duration/glb_timescale) then
    self:on_produced()
    self.t=0
-   glb_dialogbox:shake(4)
+   glb_dialogbox:shake(3)
    -- shake dialog
    -- local text=self.creation_text
    -- cls_score_particle.init(mid(64-(#text/2)*4,5,80),95,text,0,7)

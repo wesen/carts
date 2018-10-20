@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
-glb_debug=true
+glb_debug=false
 glb_timescale=1
 
 function class (init)
@@ -419,6 +419,12 @@ function bstr(s,x,y,c1,c2)
 	print(s,x+1,y+1,c2)
 end
 
+function bstr_center(s,xoff,y,c1,c2)
+ local w=#s*4
+ local x=64-w/2
+ bstr(s,x+xoff,y,c1,c2)
+end
+
 function draw_rounded_rect1(x,y,w,h,col_bg,col_border)
  col_border=col_border or col_bg
  local x2=x+w
@@ -745,7 +751,7 @@ function cls_dialogbox:draw()
   x+=w/2-actual_w/2
 
   draw_rounded_rect2(x,y+0,actual_w,actual_h,12,1,6)
-  if (self.buildup==n) self:shake(5)
+  if (self.buildup==n) self:shake(3)
  else
   y+=self.shky
 
@@ -779,14 +785,14 @@ function sqr(x) return x*x end
 
 function cls_mouse:draw()
  local n=10
- 
+
  update_shake(self)
 
  if self.jiggle then
   self.circle_t=1
   self.circle_x=glb_mouse_x
   self.circle_y=glb_mouse_y
-  shake(self,3)
+  shake(self,2)
   -- cls(7)
   circfill(glb_mouse_x,glb_mouse_y,10,7)
   self.jiggle=false
@@ -831,6 +837,70 @@ end
 
 glb_mouse=cls_mouse.init()
 
+cls_title=class(function(self)
+ self.shkx=0
+ self.shky=0
+end)
+
+glb_title=cls_title.init()
+glb_title_red=cls_title.init()
+glb_title_blue=cls_title.init()
+
+function title_draw_(t,col)
+ if col==nil then
+  pal()
+ else
+  for i=0,15 do
+   pal(i,col)
+  end
+ end
+
+ local x=15
+ local y=40
+
+ palt(15,true)
+ sspr(32+frame(12,3)*16,0,16,16,64-16+t.shkx,2+t.shky,32,32)
+
+ sspr(0,96,50,8,
+     x+t.shkx,y+t.shky,
+     100,20)
+ y+=30
+ bstr_center("pixelgore - 2018",t.shkx,y+t.shky,7,1)
+
+ y+=16
+ local col=10
+ if (frame(8,2)==1) col=11
+ bstr_center("click your way",t.shkx,y+t.shky,col,1)
+ y+=10
+ bstr_center("to indie success!",t.shkx,y+t.shky,col,1)
+
+ y+=20
+ bstr_center("click to start!",t.shkx,y+t.shky,7,12)
+ palt()
+end
+
+function title_draw()
+ title_draw_(glb_title_red,8)
+ title_draw_(glb_title_blue,12)
+ title_draw_(glb_title,nil)
+
+ if (maybe(0.1)) make_pwrup_explosion(rnd(128),rnd(128),true)
+ -- if (maybe(0.05)) shake(glb_title,4)
+ if (maybe(0.02)) shake(glb_title_red,4)
+ if (maybe(0.02)) shake(glb_title_blue,4)
+end
+
+function title_update()
+ update_shake(glb_title)
+ update_shake(glb_title_red)
+ update_shake(glb_title_blue)
+
+ if glb_mouse_left_down then
+  glb_mouse.jiggle=true
+  transition_tab(tab_game)
+ end
+end
+
 
 resource_manager_cls=class(function(self)
  self.workers={}
@@ -857,7 +927,7 @@ function resource_manager_cls:draw()
   k:draw()
  end
  local i=1
- for j=#self.workers,0,-1 do
+ for j=#self.workers,1,-1 do
   local k=self.workers[j]
   k:draw()
   i+=1
@@ -949,7 +1019,6 @@ function transition_tab(tab)
   local w=8
   local w2=w*2
   for i=1,w,w/16 do
-   yield()
    i=inoutexpo(i,0,w+1,w)
    for j=0,i do
     palt(0,false)
@@ -961,9 +1030,11 @@ function transition_tab(tab)
     end
    end
    palt()
-  end
-   cls(7)
    yield()
+  end
+  cls(7)
+  yield()
+  glb_mode=1
   glb_current_tab=tab
 
  end,glb_draw_crs)
@@ -1128,7 +1199,7 @@ function resource_cls:update()
   if self.t>(self.duration/glb_timescale) then
    self:on_produced()
    self.t=0
-   glb_dialogbox:shake(4)
+   glb_dialogbox:shake(3)
    -- shake dialog
    -- local text=self.creation_text
    -- cls_score_particle.init(mid(64-(#text/2)*4,5,80),95,text,0,7)
@@ -1717,7 +1788,7 @@ function cls_hire_worker:hire()
  w.hire_worker=self
  add(self.workers,w)
  add(glb_resource_manager.workers,w)
- glb_dialogbox:shake(5)
+ glb_dialogbox:shake(3)
  w.spr=self.spr
 end
 
@@ -1796,6 +1867,8 @@ glb_hire_gamer=cls_hire_worker.init(
 )
 
 
+glb_mode=0
+
 function _init()
  poke(0x5f2d,1)
  if glb_debug then
@@ -1817,11 +1890,11 @@ function _init()
   res_twitch.count=5
   res_tweet.count=5
 
-   for i=1,80 do
-  for _,v in pairs(glb_hire_workers) do
-    v:hire()
-   end
-  end
+  -- for i=1,80 do
+  --  for _,v in pairs(glb_hire_workers) do
+  --   v:hire()
+  --  end
+  -- end
  else
   glb_resource_manager.money=0
  end
@@ -1853,20 +1926,26 @@ end
 function _draw()
  set_mouse()
  glb_frame+=1
- cls(glb_bg_col)
+ cls(0)
 
  for _,v in pairs(glb_pwrup_particles) do
   v:draw()
  end
 
- glb_resource_manager:draw()
+ if glb_mode==1 then
+  glb_resource_manager:draw()
+ else
+  title_draw()
+ end
  glb_mouse:draw()
 
  for _,v in pairs(glb_particles) do
   v:draw()
  end
 
- glb_dialogbox:draw()
+ if glb_mode==1 then
+  glb_dialogbox:draw()
+ end
 
  tick_crs(glb_draw_crs)
 end
@@ -1876,7 +1955,12 @@ function _update60()
  glb_dt=time()-glb_lasttime
 
  glb_lasttime=time()
- glb_resource_manager:update()
+ if glb_mode==1 then
+  glb_resource_manager:update()
+ else
+  title_update()
+ end
+
  tick_crs(glb_crs)
 
  for _,v in pairs(glb_pwrup_particles) do
@@ -1986,35 +2070,35 @@ f333f0f777f041814000000000000000fff7776ffffb3fb3f77777776fb3fb3fff777776ffffffb3
 00000000000000000000000000000000f6ffffffffffff6ff6ffffffffffff6ff6ffffffffffff6ffffff77fffffffffffffffffffffffffffff7ff7ffffffff
 00000000000000000000000000000000f66666666666666ff66666666666666ff66666666666666ffffffffffffffffffffffffffffffffffffff77fffffffff
 00000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000fbbffbbfbbffbbbffbbffbbfbbffbbbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000bfffbfbfbfbfbfffbfffbfbfbfbfbfffffffffffffffffffffffffffffffffffff8855555555ffffff8855555555ffff
-00000000000000000000000000000000bfffbfbfbfbfbbffbfffbfbfbfbfbbffffffffffffffffffffffffffffffffffff8855555555ffffff8855555555ffff
-00000000000000000000000000000000bfffbfbfbfbfbfffbfffbfbfbfbfbfffffffffffffffffffffffffffffffffffff8855666666ffffff8855666666ffff
-00000000000000000000000000000000fbbfbbffbbbfbbbffbbfbbffbbbfbbbfffffffffffffffffffffffffffffffffff8855666666ffffff8855666666ffff
-00000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5511111177ffffff5511111177ff
-00000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5511111177ffffff5511111177ff
-00000000000000000000000000000000fffffff99999ffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5566116677ff
-00000000000000000000000000000000fffaaaaaaaaaaffffffbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5566116677ff
-00000000000000000000000000000000ff999999999aaffffffbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdddd55555577ff
-00000000000000000000000000000000ff999999999aaffffffbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdddd55555577ff
-00000000000000000000000000000000fff999999999afffffbfffbfbfbfffffffffffffffffffffffffffffffffffffffffffffffffffffffdddd5555ffffff
-00000000000000000000000000000000fff999999999afffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdddd5555ffffff
-00000000000000000000000000000000ffff999999999fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6666ffffff
-00000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6666ffffff
-00000000000000000000000000000000fff7776ffffb3ffffbbffbbfbbffbbbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000ff777776ffbb3fffbfffbfbfbfbfbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000ff777776fbbbbbb3bfffbfbfbfbfbbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000ff777776ffbb3fb3bfffbfbfbfbfbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000fff7776ffffb3fb3fbbfbbffbbbfbbbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000f77777776fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-000000000000000000000000000000007777777776fffffffbb3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-000000000000000000000000000000007777777776ffbbb3ffb3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-000000000000000000000000000000007777777776ffbbb3ffb3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-000000000000000000000000000000007777777776ffbbb3fbbb3fbfbfbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000fffffffffffffbb3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000ffffffffffffbbb3fbbb3fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000fffffffffffbbb3ffffb3fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000fffffffffbbbb3fffbbb3fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000ffffffffbbbb3ffffb3fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-00000000000000000000000000000000ffffffffbbb3fffffbbb3fbfbfbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+7777077707000707770770077707070777707770700070777000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+7007070707707707000717070007070700707170770770700000000000000000ffffffffffffffffffffffffffffffffff8855555555ffffff8855555555ffff
+7007070707070707000717070007070700707170707070700000000000000000ffffffffffffffffffffffffffffffffff8855555555ffffff8855555555ffff
+7000070707000707000717070007070700007170700070700000000000000000ffffffffffffffffffffffffffffffffff8855666666ffffff8855666666ffff
+7077077707000707700717077007070707707770700070770000000000000000ffffffffffffffffffffffffffffffffff8855666666ffffff8855666666ffff
+7007070707000707000717070007070700707070700070700000000000000000ffffffffffffffffffffffffffffffffffff5511111177ffffff5511111177ff
+7777070707000707770770077700700777707070700070777000000000000000ffffffffffffffffffffffffffffffffffff5511111177ffffff5511111177ff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffff5566116677ff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffff5566116677ff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffdddd55555577ff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffdddd55555577ff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffdddd5555ffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffdddd5555ffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff6666ffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff6666ffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff

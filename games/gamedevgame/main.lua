@@ -1,3 +1,5 @@
+glb_mode=0
+
 function _init()
  poke(0x5f2d,1)
  if glb_debug then
@@ -19,11 +21,11 @@ function _init()
   res_twitch.count=5
   res_tweet.count=5
 
-   for i=1,80 do
-  for _,v in pairs(glb_hire_workers) do
-    v:hire()
-   end
-  end
+  -- for i=1,80 do
+  --  for _,v in pairs(glb_hire_workers) do
+  --   v:hire()
+  --  end
+  -- end
  else
   glb_resource_manager.money=0
  end
@@ -55,20 +57,26 @@ end
 function _draw()
  set_mouse()
  glb_frame+=1
- cls(glb_bg_col)
+ cls(0)
 
  for _,v in pairs(glb_pwrup_particles) do
   v:draw()
  end
 
- glb_resource_manager:draw()
+ if glb_mode==1 then
+  glb_resource_manager:draw()
+ else
+  title_draw()
+ end
  glb_mouse:draw()
 
  for _,v in pairs(glb_particles) do
   v:draw()
  end
 
- glb_dialogbox:draw()
+ if glb_mode==1 then
+  glb_dialogbox:draw()
+ end
 
  tick_crs(glb_draw_crs)
 end
@@ -78,7 +86,12 @@ function _update60()
  glb_dt=time()-glb_lasttime
 
  glb_lasttime=time()
- glb_resource_manager:update()
+ if glb_mode==1 then
+  glb_resource_manager:update()
+ else
+  title_update()
+ end
+
  tick_crs(glb_crs)
 
  for _,v in pairs(glb_pwrup_particles) do

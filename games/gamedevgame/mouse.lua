@@ -15,14 +15,14 @@ function sqr(x) return x*x end
 
 function cls_mouse:draw()
  local n=10
- 
+
  update_shake(self)
 
  if self.jiggle then
   self.circle_t=1
   self.circle_x=glb_mouse_x
   self.circle_y=glb_mouse_y
-  shake(self,3)
+  shake(self,2)
   -- cls(7)
   circfill(glb_mouse_x,glb_mouse_y,10,7)
   self.jiggle=false

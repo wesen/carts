@@ -63,7 +63,7 @@ function cls_hire_worker:hire()
  w.hire_worker=self
  add(self.workers,w)
  add(glb_resource_manager.workers,w)
- glb_dialogbox:shake(5)
+ glb_dialogbox:shake(3)
  w.spr=self.spr
 end
 

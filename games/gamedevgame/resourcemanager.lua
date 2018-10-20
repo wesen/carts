@@ -23,7 +23,7 @@ function resource_manager_cls:draw()
   k:draw()
  end
  local i=1
- for j=#self.workers,0,-1 do
+ for j=#self.workers,1,-1 do
   local k=self.workers[j]
   k:draw()
   i+=1

@@ -42,6 +42,12 @@ function bstr(s,x,y,c1,c2)
 	print(s,x+1,y+1,c2)
 end
 
+function bstr_center(s,xoff,y,c1,c2)
+ local w=#s*4
+ local x=64-w/2
+ bstr(s,x+xoff,y,c1,c2)
+end
+
 function draw_rounded_rect1(x,y,w,h,col_bg,col_border)
  col_border=col_border or col_bg
  local x2=x+w
