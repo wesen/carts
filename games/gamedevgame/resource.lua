@@ -198,6 +198,7 @@ end
 
 function resource_cls:on_click()
  if self:is_clickable() then
+  glb_mouse.jiggle=true
   self:start_producing()
   self.t=glb_dt
  end

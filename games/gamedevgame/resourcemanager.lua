@@ -31,7 +31,9 @@ end
 function resource_manager_cls:update()
  if glb_mouse_left_down then
   for _,resource in pairs(self.resources) do
-   if (resource:is_mouse_over() and resource:is_visible()) resource:on_click()
+   if resource:is_mouse_over() and resource:is_visible() then
+    resource:on_click()
+   end
   end
  end
 

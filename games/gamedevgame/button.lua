@@ -41,7 +41,9 @@ function cls_button:draw()
 
   if self:is_mouse_over() then
    self.on_hover()
-   if (glb_mouse_left_down) self.on_click()
+   if glb_mouse_left_down then
+    self.on_click()
+   end
   end
   print(self.text,x+1,y,fg)
  end

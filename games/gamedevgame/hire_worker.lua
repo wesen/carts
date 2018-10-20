@@ -24,7 +24,11 @@ cls_hire_worker=class(function(self,name,cls,dependencies,spr,cost,auto_resource
   end
  end
  button.on_click=function()
-  if (self:is_hireable()) self:hire()
+  if self:is_hireable() then
+   self:hire()
+   glb_mouse.jiggle=true
+   make_pwrup_explosion(glb_mouse_x,glb_mouse_y,true)
+  end
  end
  button.should_blink=function()
   return button.is_active() and button:is_mouse_over()
