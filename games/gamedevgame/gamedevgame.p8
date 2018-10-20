@@ -519,6 +519,7 @@ cls_score_particle=class(function(self,x,y,val,c2,c1)
  self.val=val
  self.t=0
  self.lifetime=1
+ if (#glb_particles>20) return
  add(glb_particles,self)
 end)
 
@@ -584,6 +585,8 @@ pwrup_colors={
  {11,3,6,1}
 }
 function make_pwrup_explosion(x,y,explode)
+ if (#glb_pwrup_particles>80) return
+
  local radius=20
  local off=mrnd(1)
  local cols=rnd_elt(pwrup_colors)
@@ -680,9 +683,9 @@ function cls_button:draw()
  if self:is_visible() then
   if self:should_blink() then
    if frame(12,2)==0 then
-    draw_rounded_rect2(x-1,y-1,w+2,h+2,bg,bg,fg)
+    draw_rounded_rect2(x-1,y-1,w+2,h+2,bg,bg,7)
    else
-    draw_rounded_rect2(x,y,w,h,bg,bg,fg)
+    draw_rounded_rect2(x,y,w,h,bg,bg,7)
    end
   else
    draw_rounded_rect2(x,y,w,h,bg,bg,fg)
@@ -853,8 +856,12 @@ function resource_manager_cls:draw()
  for _,k in pairs(self.resources) do
   k:draw()
  end
- for _,k in pairs(self.workers) do
+ local i=1
+ for j=#self.workers,0,-1 do
+  local k=self.workers[j]
   k:draw()
+  i+=1
+  if (i>30) break
  end
  print("$"..tostr(self.money),104,3)
 end
@@ -1500,7 +1507,9 @@ end
 function cls_worker:draw()
  if self:is_visible() then
   spr(self.spr+frame(8,2),self.x,self.y,1,1,self.dir<0)
-  -- spr(self.spr+frame(8,3),self.x,120,8,8,self.dir>0)
+  return true
+ else
+  return false
  end
 end
 
@@ -1560,7 +1569,7 @@ function cls_worker:on_tick()
 
  res:produce()
  self.spd_y=-1.5+mrnd(0.75)
- 
+
  self.duration=max(self.orig_duration,res.duration)
  if self:is_visible() then
   local text=rnd_elt({"wow","ok","!!!","yeah","boom","kaching","lol","haha"})
@@ -1792,7 +1801,7 @@ function _init()
  if glb_debug then
   res_loc.count=1000
   glb_timescale=1
-  glb_resource_manager.money=1000
+  glb_resource_manager.money=10000
   res_csharp_file.count=1000
   res_csharp_file.created=true
   res_level.count=50
@@ -1807,6 +1816,12 @@ function _init()
   res_youtube.count=5
   res_twitch.count=5
   res_tweet.count=5
+
+   for i=1,80 do
+  for _,v in pairs(glb_hire_workers) do
+    v:hire()
+   end
+  end
  else
   glb_resource_manager.money=0
  end

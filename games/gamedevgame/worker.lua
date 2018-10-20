@@ -59,7 +59,9 @@ end
 function cls_worker:draw()
  if self:is_visible() then
   spr(self.spr+frame(8,2),self.x,self.y,1,1,self.dir<0)
-  -- spr(self.spr+frame(8,3),self.x,120,8,8,self.dir>0)
+  return true
+ else
+  return false
  end
 end
 
@@ -119,7 +121,7 @@ function cls_worker:on_tick()
 
  res:produce()
  self.spd_y=-1.5+mrnd(0.75)
- 
+
  self.duration=max(self.orig_duration,res.duration)
  if self:is_visible() then
   local text=rnd_elt({"wow","ok","!!!","yeah","boom","kaching","lol","haha"})

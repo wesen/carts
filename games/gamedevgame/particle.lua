@@ -61,6 +61,7 @@ cls_score_particle=class(function(self,x,y,val,c2,c1)
  self.val=val
  self.t=0
  self.lifetime=1
+ if (#glb_particles>20) return
  add(glb_particles,self)
 end)
 
@@ -126,6 +127,8 @@ pwrup_colors={
  {11,3,6,1}
 }
 function make_pwrup_explosion(x,y,explode)
+ if (#glb_pwrup_particles>80) return
+
  local radius=20
  local off=mrnd(1)
  local cols=rnd_elt(pwrup_colors)

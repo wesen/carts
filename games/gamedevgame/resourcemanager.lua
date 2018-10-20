@@ -22,8 +22,12 @@ function resource_manager_cls:draw()
  for _,k in pairs(self.resources) do
   k:draw()
  end
- for _,k in pairs(self.workers) do
+ local i=1
+ for j=#self.workers,0,-1 do
+  local k=self.workers[j]
   k:draw()
+  i+=1
+  if (i>30) break
  end
  print("$"..tostr(self.money),104,3)
 end

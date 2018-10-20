@@ -3,7 +3,7 @@ function _init()
  if glb_debug then
   res_loc.count=1000
   glb_timescale=1
-  glb_resource_manager.money=1000
+  glb_resource_manager.money=10000
   res_csharp_file.count=1000
   res_csharp_file.created=true
   res_level.count=50
@@ -18,6 +18,12 @@ function _init()
   res_youtube.count=5
   res_twitch.count=5
   res_tweet.count=5
+
+   for i=1,80 do
+  for _,v in pairs(glb_hire_workers) do
+    v:hire()
+   end
+  end
  else
   glb_resource_manager.money=0
  end

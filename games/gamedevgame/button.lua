@@ -31,9 +31,9 @@ function cls_button:draw()
  if self:is_visible() then
   if self:should_blink() then
    if frame(12,2)==0 then
-    draw_rounded_rect2(x-1,y-1,w+2,h+2,bg,bg,fg)
+    draw_rounded_rect2(x-1,y-1,w+2,h+2,bg,bg,7)
    else
-    draw_rounded_rect2(x,y,w,h,bg,bg,fg)
+    draw_rounded_rect2(x,y,w,h,bg,bg,7)
    end
   else
    draw_rounded_rect2(x,y,w,h,bg,bg,fg)
