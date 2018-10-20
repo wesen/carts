@@ -189,7 +189,7 @@ res_release=resource_cls.init(
  "release",
  "releases",
  4,2,
- {build=5,playtest=100},
+ {build=5,playtest=1000},
  10,
  -- spr
  42,
