@@ -65,3 +65,21 @@ end
 function angle2vec(angle)
  return cos(angle),sin(angle)
 end
+
+function shake(self,p)
+ local a=rnd(1)
+ self.shkx=cos(a)*p
+ self.shky=sin(a)*p
+end
+
+function update_shake(self)
+ if abs(self.shkx)+abs(self.shky)<1 then
+  self.shkx=0
+  self.shky=0
+ end
+ if glb_frame%4==0 then
+  self.shkx*=-0.4-rnd(0.1)
+  self.shky*=-0.4-rnd(0.1)
+ end
+
+end
