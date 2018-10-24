@@ -49,11 +49,11 @@ function cls_mouse:draw()
   -- self.circle_t+=2
   self.circle_t*=1.2
   circ(self.circle_x,self.circle_y,self.circle_t,7)
-  darken((15-self.circle_t)/15*30+10)
+  -- darken((15-self.circle_t)/15*30+10)
   -- pal(7,5)
  end
 
- -- spr(1,glb_mouse_x+self.shkx,glb_mouse_y+self.shky)
+ spr(1,glb_mouse_x,glb_mouse_y)
  -- pal()
 
 
