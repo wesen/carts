@@ -55,6 +55,7 @@ function set_mouse()
 end
 
 function tutorial_draw()
+ title_draw()
  glb_mouse:draw()
 end
 

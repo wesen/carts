@@ -858,7 +858,8 @@ function title_draw_(t,col)
  local y=40
 
  palt(15,true)
- sspr(32+frame(12,3)*16,0,16,16,64-16+t.shkx,2+t.shky,32,32)
+ -- sspr(32+frame(12,3)*16,0,16,16,64-16+t.shkx,2+t.shky,32,32)
+ sspr(32,0,16,16,64-16+t.shkx,2+t.shky,32,32)
 
  sspr(0,96,50,8,
      x+t.shkx,y+t.shky,
@@ -868,7 +869,7 @@ function title_draw_(t,col)
 
  y+=16
  local col=10
- if (frame(8,2)==1) col=11
+ -- if (frame(8,2)==1) col=11
  bstr_center("click your way",t.shkx,y+t.shky,col,1)
  y+=10
  bstr_center("to indie success!",t.shkx,y+t.shky,col,1)
@@ -879,14 +880,14 @@ function title_draw_(t,col)
 end
 
 function title_draw()
- title_draw_(glb_title_red,8)
- title_draw_(glb_title_blue,12)
+ -- title_draw_(glb_title_red,8)
+ -- title_draw_(glb_title_blue,12)
  title_draw_(glb_title,nil)
 
- if (maybe(0.1)) make_pwrup_explosion(rnd(128),rnd(128),true)
+ -- if (maybe(0.1)) make_pwrup_explosion(rnd(128),rnd(128),true)
  -- if (maybe(0.05)) shake(glb_title,4)
- if (maybe(0.02)) shake(glb_title_red,4)
- if (maybe(0.02)) shake(glb_title_blue,4)
+ -- if (maybe(0.02)) shake(glb_title_red,4)
+ -- if (maybe(0.02)) shake(glb_title_blue,4)
 end
 
 function title_update()
@@ -1923,6 +1924,7 @@ function set_mouse()
 end
 
 function tutorial_draw()
+ title_draw()
  glb_mouse:draw()
 end
 
@@ -2080,11 +2082,11 @@ f333f0f777f041814000000000000000fff7776ffffb3fb3f77777776fb3fb3fff777776ffffffb3
 00000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 7777077707000707770770077707070777707770700070777000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-7007070707707707000717070007070700707170770770700000000000000000ffffffffffffffffffffffffffffffffff8855555555ffffff8855555555ffff
-7007070707070707000717070007070700707170707070700000000000000000ffffffffffffffffffffffffffffffffff8855555555ffffff8855555555ffff
-7000070707000707000717070007070700007170700070700000000000000000ffffffffffffffffffffffffffffffffff8855666666ffffff8855666666ffff
-7077077707000707700717077007070707707770700070770000000000000000ffffffffffffffffffffffffffffffffff8855666666ffffff8855666666ffff
-7007070707000707000717070007070700707070700070700000000000000000ffffffffffffffffffffffffffffffffffff5511111177ffffff5511111177ff
+7007070707707707000707070007070700707070770770700000000000000000ffffffffffffffffffffffffffffffffff8855555555ffffff8855555555ffff
+7007070707070707000707070007070700707070707070700000000000000000ffffffffffffffffffffffffffffffffff8855555555ffffff8855555555ffff
+7000070707000707000707070007070700007070700070700000000000000000ffffffffffffffffffffffffffffffffff8855666666ffffff8855666666ffff
+7077077707000707700707077007070707707770700070770000000000000000ffffffffffffffffffffffffffffffffff8855666666ffffff8855666666ffff
+7007070707000707000707070007070700707070700070700000000000000000ffffffffffffffffffffffffffffffffffff5511111177ffffff5511111177ff
 7777070707000707770770077700700777707070700070777000000000000000ffffffffffffffffffffffffffffffffffff5511111177ffffff5511111177ff
 0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffff5566116677ff
 0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffff5566116677ff
