@@ -54,10 +54,19 @@ function set_mouse()
  glb_mouse_y=stat(33)
 end
 
+function tutorial_draw1()
+ glb_mouse:draw()
+end
+
 function _draw()
  set_mouse()
  glb_frame+=1
  cls(0)
+
+ if true then
+  tutorial_draw1()
+  return
+ end
 
  for _,v in pairs(glb_pwrup_particles) do
   v:draw()
