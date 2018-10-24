@@ -858,8 +858,7 @@ function title_draw_(t,col)
  local y=40
 
  palt(15,true)
- -- sspr(32+frame(12,3)*16,0,16,16,64-16+t.shkx,2+t.shky,32,32)
- sspr(32,0,16,16,64-16+t.shkx,2+t.shky,32,32)
+ sspr(32+frame(12,3)*16,0,16,16,64-16+t.shkx,2+t.shky,32,32)
 
  sspr(0,96,50,8,
      x+t.shkx,y+t.shky,
