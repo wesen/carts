@@ -58,13 +58,18 @@ function tutorial_draw1()
  glb_mouse:draw()
 end
 
+function tutorial_draw2()
+ -- only simple mouse sprite
+ spr(1,glb_mouse_x,glb_mouse_y)
+end
+
 function _draw()
  set_mouse()
  glb_frame+=1
  cls(0)
 
  if true then
-  tutorial_draw1()
+  tutorial_draw2()
   return
  end
 
