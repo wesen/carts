@@ -798,22 +798,22 @@ function cls_mouse:draw()
   self.jiggle=false
  end
 
- for i=1,n do
-  local idx=(self.idx+i-1)%n
-  if self.trails[idx]!=nil then
-   local v=self.trails[idx]
-   local x=v[1]
-   local y=v[2]
-   local d=sqr(glb_mouse_x-x)+sqr(glb_mouse_y-y)
-   darken((n-i)*100/n/2)
-   if d>20 then
-    local r=i/(n/3)+1
-    -- circfill(v[1],v[2],r,7)
-    spr(1,v[1],v[2])
-   end
-  end
- end
- pal()
+ -- for i=1,n do
+ --  local idx=(self.idx+i-1)%n
+ --  if self.trails[idx]!=nil then
+ --   local v=self.trails[idx]
+ --   local x=v[1]
+ --   local y=v[2]
+ --   local d=sqr(glb_mouse_x-x)+sqr(glb_mouse_y-y)
+ --   darken((n-i)*100/n/2)
+ --   if d>20 then
+ --    local r=i/(n/3)+1
+ --    -- circfill(v[1],v[2],r,7)
+ --    spr(1,v[1],v[2])
+ --   end
+ --  end
+ -- end
+ -- pal()
 
  if self.circle_t<15 then
   -- self.circle_t+=2
@@ -823,13 +823,13 @@ function cls_mouse:draw()
   -- pal(7,5)
  end
 
- spr(1,glb_mouse_x+self.shkx,glb_mouse_y+self.shky)
- pal()
+ -- spr(1,glb_mouse_x+self.shkx,glb_mouse_y+self.shky)
+ -- pal()
 
 
  -- if self.prev_x!=glb_mouse_x or self.prev_y!=glb_mouse_y then
-  self.trails[self.idx]={glb_mouse_x,glb_mouse_y}
-  self.idx=(self.idx+1)%n
+ self.trails[self.idx]={glb_mouse_x,glb_mouse_y}
+ self.idx=(self.idx+1)%n
  -- end
  self.prev_x=glb_mouse_x
  self.prev_y=glb_mouse_y
@@ -1923,13 +1923,8 @@ function set_mouse()
  glb_mouse_y=stat(33)
 end
 
-function tutorial_draw1()
+function tutorial_draw()
  glb_mouse:draw()
-end
-
-function tutorial_draw2()
- -- only simple mouse sprite
- spr(1,glb_mouse_x,glb_mouse_y)
 end
 
 function _draw()
@@ -1938,7 +1933,7 @@ function _draw()
  cls(0)
 
  if true then
-  tutorial_draw2()
+  tutorial_draw()
   return
  end
 

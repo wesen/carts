@@ -54,13 +54,8 @@ function set_mouse()
  glb_mouse_y=stat(33)
 end
 
-function tutorial_draw1()
+function tutorial_draw()
  glb_mouse:draw()
-end
-
-function tutorial_draw2()
- -- only simple mouse sprite
- spr(1,glb_mouse_x,glb_mouse_y)
 end
 
 function _draw()
@@ -69,7 +64,7 @@ function _draw()
  cls(0)
 
  if true then
-  tutorial_draw2()
+  tutorial_draw()
   return
  end
 
