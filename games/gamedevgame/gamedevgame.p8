@@ -793,27 +793,27 @@ function cls_mouse:draw()
   self.circle_x=glb_mouse_x
   self.circle_y=glb_mouse_y
   shake(self,2)
-  -- cls(7)
+  cls(7)
   circfill(glb_mouse_x,glb_mouse_y,10,7)
   self.jiggle=false
  end
 
- -- for i=1,n do
- --  local idx=(self.idx+i-1)%n
- --  if self.trails[idx]!=nil then
- --   local v=self.trails[idx]
- --   local x=v[1]
- --   local y=v[2]
- --   local d=sqr(glb_mouse_x-x)+sqr(glb_mouse_y-y)
- --   darken((n-i)*100/n/2)
- --   if d>20 then
- --    local r=i/(n/3)+1
- --    -- circfill(v[1],v[2],r,7)
- --    spr(1,v[1],v[2])
- --   end
- --  end
- -- end
- -- pal()
+ for i=1,n do
+  local idx=(self.idx+i-1)%n
+  if self.trails[idx]!=nil then
+   local v=self.trails[idx]
+   local x=v[1]
+   local y=v[2]
+   local d=sqr(glb_mouse_x-x)+sqr(glb_mouse_y-y)
+   darken((n-i)*100/n/2)
+   if d>20 then
+    local r=i/(n/3)+1
+    -- circfill(v[1],v[2],r,7)
+    spr(1,v[1],v[2])
+   end
+  end
+ end
+ pal()
 
  if self.circle_t<15 then
   -- self.circle_t+=2
