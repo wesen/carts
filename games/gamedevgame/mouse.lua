@@ -53,7 +53,7 @@ function cls_mouse:draw()
   -- pal(7,5)
  end
 
- spr(1,glb_mouse_x,glb_mouse_y)
+ spr(1,glb_mouse_x+self.shkx,glb_mouse_y+self.shky)
  pal()
 
 
