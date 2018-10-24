@@ -794,7 +794,7 @@ function cls_mouse:draw()
   self.circle_y=glb_mouse_y
   shake(self,2)
   -- cls(7)
-  -- circfill(glb_mouse_x,glb_mouse_y,10,7)
+  circfill(glb_mouse_x,glb_mouse_y,10,7)
   self.jiggle=false
  end
 
@@ -808,7 +808,6 @@ function cls_mouse:draw()
    darken((n-i)*100/n/2)
    if d>20 then
     local r=i/(n/3)+1
-    -- circfill(v[1],v[2],r,7)
     spr(1,v[1],v[2])
    end
   end
@@ -818,7 +817,7 @@ function cls_mouse:draw()
  if self.circle_t<15 then
   -- self.circle_t+=2
   self.circle_t*=1.2
-  -- circ(self.circle_x,self.circle_y,self.circle_t,7)
+  circ(self.circle_x,self.circle_y,self.circle_t,7)
   darken((15-self.circle_t)/15*30+10)
   -- pal(7,5)
  end
