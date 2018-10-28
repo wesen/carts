@@ -1,0 +1,98 @@
+pico-8 cartridge // http://www.pico-8.com
+version 16
+__lua__
+function class (init)
+  local c = {}
+  c.__index = c
+  c._ctr=init
+  function c.init (...)
+    local self = setmetatable({},c)
+    c._ctr(self,...)
+    return self
+  end
+  return c
+end
+
+function subclass(parent,init)
+ local c=class(init)
+ return setmetatable(c,{__index=parent})
+end
+
+
+cls_player=class(function(self)
+ self.x=64
+ self.y=64
+ self.hp=10
+ self.spd=3
+ self.spr=1
+end)
+
+function cls_player:update()
+ local xdir=0
+ local ydir=0
+ if (btn(0)) xdir-=1
+ if (btn(1)) xdir+=1
+ if (btn(2)) ydir-=1
+ if (btn(3)) ydir+=1
+
+ self.x+=xdir*self.spd
+ self.y+=ydir*self.spd
+end
+
+function cls_player:draw()
+ spr(self.spr,self.x,self.y)
+end
+
+
+--@include projectiles
+
+
+
+glb_dt=0
+glb_lasttime=time()
+glb_frame=0
+
+glb_mouse_x=0
+glb_mouse_y=0
+
+glb_prev_mouse_btn=0
+glb_right_button=false
+
+glb_p1=cls_player.init()
+
+function _init()
+ poke(0x5f2d, 1)
+end
+
+function _update60()
+ local _time=time()
+ glb_dt=_time-glb_lasttime
+ glb_lasttime=_time
+
+ glb_mouse_x=stat(32)
+ glb_mouse_y=stat(33)
+ local _mouse_btn=stat(34)
+ glb_right_button=band(_mouse_btn,1)==1 and not band(glb_prev_mouse_btn,1)==0
+ glb_left_button=band(_mouse_btn,2)==1 and not band(glb_prev_mouse_btn,2)==0
+ glb_prev_mouse_btn=_mouse_btn
+
+ glb_p1:update()
+end
+
+function _draw()
+ cls(1)
+ glb_frame+=1
+
+ glb_p1:draw()
+end
+
+
+__gfx__
+00000000999999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000999999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700999999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000999999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000999999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700999999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000999999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000999999990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
