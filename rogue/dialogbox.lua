@@ -13,12 +13,12 @@ function cls_dialogbox:shake(p)
  shake(self,p)
 end
 
-function add_box(text)
-    local box=cls_dialogbox:init()
-    box.text=text
-    add_cr(function()
-      display_box(box)
-    end,draw_crs)
+function add_box(text,box)
+  box=box or cls_dialogbox:init()
+  box.text=text
+  add_cr(function()
+    display_box(box)
+  end,draw_crs)
 end
 
 function display_box(self)
@@ -48,7 +48,7 @@ function display_box(self)
   self:shake(3)
 
   local t=time()
-  while time()-t<2 and self.visible do
+  while self.visible do
     init()
     update_shake(self)
     y+=self.shky
@@ -56,11 +56,12 @@ function display_box(self)
     draw_rounded_rect2(x,y+0,w,h,0,6,0)
     if #self.text>=1 then
      local txt=self.text[1][2]
-     bstr(txt,64-#txt*2+self.shkx,y+3,1,6)
+     bstr(txt,64-#txt*2+self.shkx,y+3,1,self.text[1][1])
     end
     for i=2,#self.text do
      print(self.text[i][2],x+7,y+i*8-2,self.text[i][1])
     end
+    bstr("❎",x+w-12,y+h-3+sin(time()*2),1,6)
     yield()
   end
 

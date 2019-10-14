@@ -13,11 +13,15 @@ function get_tile_in_direction(obj,dir)
 end
 
 function update_game()
- for i=0,3 do
-  if btnp(i) then
-   add_cmd(i+1)
+  if not glb_dialogbox.visible then
+   for i=0,3 do
+    if btnp(i) then
+     add_cmd(i+1)
+    end
+   end
+ elseif btnp(5) then
+   glb_dialogbox.visible=false
   end
- end
 end
 
 cmds_dir={
@@ -69,7 +73,14 @@ function cr_player_move()
   else
    if tile==5 then
     -- tile
-    add_box({{7,"magic box"},{6,"oh wow"}})
+    sfx(57)
+    add_box({
+      {7,"welcome to porklike"},
+      {6,"climb the tower"},
+      {6,"to obtain the"},
+      {6,"golden kielbasa"},
+    },glb_dialogbox)
+    p.cmds={}
 
     bump()
    elseif tile==6 or tile==7 then
@@ -88,6 +99,7 @@ function cr_player_move()
     mset(tx,ty,3)
     move()
    else
+     sfx(58)
     if bump(2) then
      p.bumped_t=time()
     end
