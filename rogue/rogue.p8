@@ -11,6 +11,8 @@ __lua__
 #include dialogbox.lua
 #include main.lua
 #include mob.lua
+#include game.lua
+#include player.lua
 
 btnx="❎"
 btno="🅾️"

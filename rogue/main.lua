@@ -2,7 +2,7 @@
 function draw_game()
  cls(0)
  map()
-  draw_mobs()
+ draw_mobs()
  tick_crs(draw_crs)
 end
 

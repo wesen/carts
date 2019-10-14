@@ -5,7 +5,7 @@ glb_frame=0
 p={
  x=3,y=5,sprite=240,
  ox=0,oy=0,color=10,
- cmds={},dir=false,bumped_t=time()
+ cmds={},dir=false,bumped_t=0
 }
 
 function _init()
