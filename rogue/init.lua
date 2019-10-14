@@ -11,6 +11,8 @@ p={
 function _init()
  _drw = draw_game
  _upd = update_game
+ add_mob(0,7,6)
+ add_mob(4,7,5)
 end
 
 function _draw()

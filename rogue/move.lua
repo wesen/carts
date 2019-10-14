@@ -8,6 +8,11 @@ end
 function get_tile_in_direction(obj,dir)
  dir=dir or {0,0}
  local ox,oy=obj.x+dir[1],obj.y+dir[2]
+ if (ox<0 or ox>15 or oy<0 or oy>15) return 1,2,ox,oy
+
+ local m=get_mob(ox,oy)
+ if (m!=false) return 512,m,ox,oy
+
  local tile=mget(ox,oy)
  return fget(tile),tile,ox,oy
 end
@@ -31,11 +36,9 @@ cmds_dir={
  {0,1}
 }
 
-function cr_player_move()
- while #p.cmds>0 do
+function cr_execute_top_cmd()
   local dir=cmds_dir[p.cmds[1]]
   local o_x,o_y=dir[1],dir[2]
-  local flag,tile,tx,ty=get_tile_in_direction(p,dir)
 
   local tick_move=function(o_x,o_y,n)
    p.ox+=o_x
@@ -68,7 +71,11 @@ function cr_player_move()
    end
   end
 
-  if band(flag,1)~=1 then
+  local flag,tile,tx,ty=get_tile_in_direction(p,dir)
+  if band(flag,512)==512 then
+    -- mob
+    hit_mob(tile)
+  elseif band(flag,1)~=1 then
    move()
   else
    if tile==5 then
@@ -108,5 +115,10 @@ function cr_player_move()
   del(p.cmds,p.cmds[1])
   p.ox=0
   p.oy=0
+end
+
+function cr_player_move()
+ while #p.cmds>0 do
+   cr_execute_top_cmd()
  end
 end
