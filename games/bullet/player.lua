@@ -2,7 +2,7 @@ cls_player=class(function(self)
  self.x=64
  self.y=64
  self.hp=10
- self.spd=3
+ self.spd=2
  self.spr=1
 end)
 
@@ -19,5 +19,5 @@ function cls_player:update()
 end
 
 function cls_player:draw()
- spr(self.spr,self.x,self.y)
+ spr(self.spr,self.x+4,self.y+4)
 end

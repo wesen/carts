@@ -1,5 +1,8 @@
 mobs={}
 
+mob_atk={1,2}
+mob_hp={2,2}
+
 function add_mob(typ,mx,my)
   add(mobs,{
     x=mx,y=my,
@@ -7,7 +10,10 @@ function add_mob(typ,mx,my)
     ox=0,oy=0,
     dir=false,
     sprite=192+4*typ,
-    color=8,bumped_t=0
+    color=8,
+    bumped_t=0,
+    hp=mob_hp[typ],
+    atk=mob_atk[typ]
   })
 end
 
@@ -21,6 +27,7 @@ function get_mob(x,y)
 end
 
 function hit_mob(attacker,defender)
+ defender.hp-=attacker.atk
 end
 
 function draw_mobs()

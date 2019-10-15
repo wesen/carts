@@ -23,10 +23,15 @@ function _update60()
  glb_mouse_y=stat(33)
  local _mouse_btn=stat(34)
  glb_right_button=band(_mouse_btn,1)==1 and not band(glb_prev_mouse_btn,1)==0
+ glb_right_button_dwn=band(_mouse_btn,1)==1
  glb_left_button=band(_mouse_btn,2)==1 and not band(glb_prev_mouse_btn,2)==0
  glb_prev_mouse_btn=_mouse_btn
 
  glb_p1:update()
+
+ for _,p in pairs(glb_projectiles) do
+  p:update()
+ end
 end
 
 function _draw()
@@ -34,4 +39,8 @@ function _draw()
  glb_frame+=1
 
  glb_p1:draw()
+
+ for _,p in pairs(glb_projectiles) do
+  p:draw()
+ end
 end

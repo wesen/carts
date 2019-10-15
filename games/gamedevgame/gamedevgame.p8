@@ -880,14 +880,14 @@ function title_draw_(t,col)
 end
 
 function title_draw()
- title_draw_(glb_title_red,8)
- title_draw_(glb_title_blue,12)
+ -- title_draw_(glb_title_red,8)
+ -- title_draw_(glb_title_blue,12)
  title_draw_(glb_title,nil)
 
- if (maybe(0.1)) make_pwrup_explosion(rnd(128),rnd(128),true)
+ -- if (maybe(0.1)) make_pwrup_explosion(rnd(128),rnd(128),true)
  -- if (maybe(0.05)) shake(glb_title,4)
- if (maybe(0.02)) shake(glb_title_red,4)
- if (maybe(0.02)) shake(glb_title_blue,4)
+ -- if (maybe(0.02)) shake(glb_title_red,4)
+ -- if (maybe(0.02)) shake(glb_title_blue,4)
 end
 
 function title_update()
