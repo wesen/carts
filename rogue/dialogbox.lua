@@ -12,7 +12,6 @@ function show_box(text)
 end
 
 function display_box(self)
-  printh("display_box "..tostr(self.visible))
   if (self.visible) return
   local x,y,h,w
   self.visible=true

@@ -38,6 +38,7 @@ function cr_game_loop()
   while true do
     if #p.cmds>0 then
       cr_player_move()
+      cr_mob_turn()
     else
       yield()
     end

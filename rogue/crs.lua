@@ -26,24 +26,16 @@ function add_cr(f,_crs)
  return cr
 end
 
+function cr_wait_for_crs(crs)
+  while #crs>0 do
+    tick_crs(crs)
+    yield()
+  end
+end
+
 function cr_wait_for(t)
  while t>0 do
   yield()
   t-=glb_dt
- end
-end
-
-function cr_move_to(obj,target_x,target_y,d,easetype)
- local t=0
- local bx=obj.x
- local cx=target_x-obj.x
- local by=obj.y
- local cy=target_y-obj.y
- while t<d do
-  t+=glb_dt
-  if (t>d) return
-  obj.x=round(easetype(t,bx,cx,d))
-  obj.y=round(easetype(t,by,cy,d))
-  yield()
  end
 end

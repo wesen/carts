@@ -34,7 +34,7 @@ function cr_hit_mob(attacker,defender)
  defender.should_blink=true
  shake(defender,2)
  shake(attacker,2)
- cr_wait_for(0.5)
+ cr_wait_for(.5)
 
  printh("defender.hp "..tostr(defender.hp))
  if defender.hp<=0 then
@@ -62,11 +62,21 @@ function draw_mobs()
   pal()
 end
 
+function cr_mob_turn()
+  local mob_crs={}
+  for mob in all(mobs) do
+    add_cr(mkcr_mob_move(mob,1), mob_crs)
+  end
+  cr_wait_for_crs(mob_crs)
+end
+
 function cb_mob_move(mob,dir,move,bump)
+  printh("cb_mob_move "..tostr(mob))
   local flag,tile,tx,ty=get_tile_in_direction(mob,dir)
-  if band(flag,512)==512 then
+  if band(flag,1024)==1024 then
     -- mob
-    hit_mob(tile,mob)
+    sfx(54)
+    cr_hit_mob(mob,p)
   elseif band(flag,1)~=1 then
     move()
   else

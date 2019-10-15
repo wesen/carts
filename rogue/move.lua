@@ -6,6 +6,8 @@ function get_tile_in_direction(obj,dir)
  local m=get_mob(ox,oy)
  if (m!=false) return 512,m,ox,oy
 
+ if (ox==p.x and oy==p.y) return 1024,p,ox,oy
+
  local tile=mget(ox,oy)
  return fget(tile),tile,ox,oy
 end
