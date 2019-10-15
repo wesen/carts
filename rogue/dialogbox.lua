@@ -18,7 +18,7 @@ function add_box(text,box)
   box.text=text
   add_cr(function()
     display_box(box)
-  end,draw_crs)
+  end,glb_draw_crs)
 end
 
 function display_box(self)

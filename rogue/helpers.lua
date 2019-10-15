@@ -1,3 +1,7 @@
+function ani(_spr,l)
+  return _spr+(glb_frame/8)%l
+end
+
 function inoutquint(t, b, c, d)
  t = t / d * 2
  if (t < 1) return c / 2 * pow(t, 5) + b

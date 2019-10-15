@@ -1,5 +1,5 @@
-dt=0
-lasttime=0
+glb_dt=0
+glb_lasttime=0
 glb_frame=0
 
 p={
@@ -12,8 +12,8 @@ p={
 function _init()
  _drw = draw_game
  _upd = update_game
- add_mob(0,7,6)
- add_mob(1,7,5)
+ add_mob(1,7,6)
+ add_mob(2,7,5)
 end
 
 function _draw()
@@ -21,8 +21,8 @@ function _draw()
 end
 
 function _update60()
- dt=time()-lasttime
- lasttime=time()
+ glb_dt=time()-glb_lasttime
+ glb_lasttime=time()
  glb_frame+=1
  tick_crs()
  _upd()

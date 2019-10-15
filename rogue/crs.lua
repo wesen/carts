@@ -1,5 +1,5 @@
-crs={}
-draw_crs={}
+glb_crs={}
+glb_draw_crs={}
 
 function yield_n(n)
  for i=1,n do
@@ -29,7 +29,7 @@ end
 function cr_wait_for(t)
  while t>0 do
   yield()
-  t-=dt
+  t-=glb_dt
  end
 end
 
@@ -40,7 +40,7 @@ function cr_move_to(obj,target_x,target_y,d,easetype)
  local by=obj.y
  local cy=target_y-obj.y
  while t<d do
-  t+=dt
+  t+=glb_dt
   if (t>d) return
   obj.x=round(easetype(t,bx,cx,d))
   obj.y=round(easetype(t,by,cy,d))

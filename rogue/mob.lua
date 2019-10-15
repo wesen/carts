@@ -9,7 +9,7 @@ function add_mob(typ,mx,my)
     typ=typ,
     ox=0,oy=0,
     dir=false,
-    sprite=192+4*typ,
+    sprite=192+4*(typ-1),
     color=8,
     bumped_t=0,
     hp=mob_hp[typ],
@@ -26,13 +26,31 @@ function get_mob(x,y)
   return false
 end
 
-function hit_mob(attacker,defender)
+function cr_hit_mob(attacker,defender)
  defender.hp-=attacker.atk
+ local x,y=defender.x*8,defender.y*8
+ local p=cls_score_particle.init(x,y,tostr(-attacker.atk),0,7)
+ p.lifetime=0.4
+ defender.should_blink=true
+ cr_wait_for(0.5)
+
+ printh("defender.hp "..tostr(defender.hp))
+ if defender.hp<=0 then
+   make_pwrup_explosion(x+4,y+4,true)
+   sfx(55)
+   del(mobs,defender)
+ end
+
+ defender.should_blink=false
 end
 
 function draw_mobs()
   drw=function(obj)
-    pal(6,obj.color)
+    if obj.should_blink and flr(glb_frame/6)%2==1 then
+      pal(6,1)
+    else
+      pal(6,obj.color)
+    end
     spr(ani(obj.sprite,4),obj.x*8+obj.ox,obj.y*8+obj.oy,1,1,obj.dir)
   end
   palt(0,false)

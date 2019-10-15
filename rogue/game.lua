@@ -1,4 +1,17 @@
-turn_crs={}
+glb_turn_crs={}
+
+function draw_game()
+  cls(0)
+  map()
+  draw_mobs()
+  tick_crs(glb_draw_crs)
+  for _,v in pairs(glb_particles) do
+    v:draw()
+  end
+  for _,v in pairs(glb_pwrup_particles) do
+    v:draw()
+  end
+end
 
 function update_game()
   if not glb_dialogbox.visible then
@@ -11,7 +24,14 @@ function update_game()
     glb_dialogbox.visible=false
   end
 
-  tick_crs(turn_crs)
+  tick_crs(glb_turn_crs)
+
+  for _,v in pairs(glb_particles) do
+    v:update()
+  end
+  for _,v in pairs(glb_pwrup_particles) do
+    v:update()
+  end
 end
 
 function cr_game_loop()
@@ -24,4 +44,4 @@ function cr_game_loop()
   end
 end
 
-add_cr(cr_game_loop,turn_crs)
+add_cr(cr_game_loop,glb_turn_crs)

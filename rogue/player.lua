@@ -2,7 +2,8 @@ function cb_player_move(p,dir,move,bump)
   local flag,tile,tx,ty=get_tile_in_direction(p,dir)
   if band(flag,512)==512 then
     -- mob
-    hit_mob(p,tile)
+    sfx(56)
+    cr_hit_mob(p,tile)
   elseif band(flag,1)~=1 then
     move()
   else
