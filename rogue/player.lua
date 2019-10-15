@@ -10,12 +10,12 @@ function cb_player_move(p,dir,move,bump)
     if tile==5 then
       -- tile
       sfx(57)
-      add_box({
+      show_box({
         {7,"welcome to porklike"},
         {6,"climb the tower"},
         {6,"to obtain the"},
         {6,"golden kielbasa"},
-      },glb_dialogbox)
+      })
       p.cmds={}
 
       bump()

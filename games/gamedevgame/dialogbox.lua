@@ -13,10 +13,8 @@ function cls_dialogbox:shake(p)
  shake(self,p)
 end
 
-
 function cls_dialogbox:draw()
  update_shake(self)
-
 
  if not self.visible then
   self.prev_visible=self.visible

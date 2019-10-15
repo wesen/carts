@@ -32,6 +32,8 @@ function cr_hit_mob(attacker,defender)
  local p=cls_score_particle.init(x,y,tostr(-attacker.atk),0,7)
  p.lifetime=0.4
  defender.should_blink=true
+ shake(defender,2)
+ shake(attacker,2)
  cr_wait_for(0.5)
 
  printh("defender.hp "..tostr(defender.hp))
@@ -46,12 +48,13 @@ end
 
 function draw_mobs()
   drw=function(obj)
+    update_shake(obj)
     if obj.should_blink and flr(glb_frame/6)%2==1 then
       pal(6,1)
     else
       pal(6,obj.color)
     end
-    spr(ani(obj.sprite,4),obj.x*8+obj.ox,obj.y*8+obj.oy,1,1,obj.dir)
+    spr(ani(obj.sprite,4),obj.x*8+obj.ox+obj.shkx,obj.y*8+obj.oy+obj.shky,1,1,obj.dir)
   end
   palt(0,false)
   foreach(mobs,drw)
