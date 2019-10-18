@@ -71,7 +71,6 @@ function cr_mob_turn()
 end
 
 function cb_mob_move(mob,dir,move,bump)
-  printh("cb_mob_move "..tostr(mob))
   local flag,tile,tx,ty=get_tile_in_direction(mob,dir)
   if band(flag,1024)==1024 then
     -- mob

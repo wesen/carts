@@ -11,6 +11,7 @@ function draw_game()
   for _,v in pairs(glb_pwrup_particles) do
     v:draw()
   end
+  los(p,{x=8,y=8})
 end
 
 function update_game()
